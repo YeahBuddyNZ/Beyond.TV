@@ -50,20 +50,47 @@ Free and open source, built in Aotearoa by [Beyond](https://gobeyond.co.nz). One
 
 ## Install
 
-About ten minutes. You need a Google TV or Android TV (Android 8 or newer, so Sony's 2015 Bravias too) and a computer on the same Wi-Fi.
+About five minutes, for a Google TV or Android TV (Android 8 or newer, so Sony's 2015 Bravias too). Nothing is rooted or uninstalled.
 
-### The easy way: an AI assistant
+**First, on the TV:** Settings → System → About, press *Build* (or *Android TV OS build*) seven times, then Settings → System → Developer options → turn on **USB debugging**. Beyond™ TV needs it to switch the home screen, and the computer installers use it too.
 
-1. **On the TV**, turn on developer mode: Settings → System → About → press *Android TV OS build* 7 times. Then Settings → System → Developer options → turn on **USB debugging**. Write down the TV's IP address (Settings → Network & Internet).
-2. **On your computer**, open an AI coding assistant ([Claude Code](https://claude.com/claude-code), Codex or Antigravity) and say:
-   > Install Beyond™ TV (github.com/YeahBuddyNZ/Beyond.TV) on my TV at 192.168.1.50. I live in Auckland.
+### On the TV, no computer
 
-   It downloads the code, installs the tools it needs, builds the app and puts it on your TV, and asks before anything important. Swap in your TV's IP and your city.
-3. **On the TV**, open *Beyond™ TV* → *Home Screen* → *Beyond™ TV*, and accept the debugging prompt (tick *Always allow*).
+1. Install **Downloader** (by AFTVnews) from the Play Store on the TV.
+2. Open it, type **`yeahbuddynz.github.io/Beyond.TV/tv`** and press *Go*.
+3. Press **Download Beyond™ TV**, then *Install* and *Open*. If the TV asks, allow Downloader to install apps.
 
-### The manual way
+### From a computer, one line
 
-1. **On the TV**, do step 1 above.
+On the same Wi-Fi as the TV. It downloads Google's adb if you don't have it (into a folder of its own), finds your TV, installs Beyond™ TV, opens it and tells you what to press.
+
+- **Mac or Linux**, in Terminal:
+  ```bash
+  curl -fsSL https://raw.githubusercontent.com/YeahBuddyNZ/Beyond.TV/main/install.sh | bash
+  ```
+- **Windows**, in PowerShell:
+  ```powershell
+  irm https://raw.githubusercontent.com/YeahBuddyNZ/Beyond.TV/main/install.ps1 | iex
+  ```
+
+The TV asks *Allow USB debugging?*: tick *Always allow* and press OK.
+
+### Then, on the TV
+
+Open *Beyond™ TV* → *Home Screen* → *Beyond™ TV*, and allow debugging once more. Your city, the shelf and the profiles are in its settings. From then on it keeps itself up to date: when there's a new version the TV asks, and one OK installs it.
+
+These installs are the ready-made build: Auckland until you pick your city on the TV, and no trending picks (those need your own [TMDB key](#the-tmdb-key), so build it yourself below).
+
+### With an AI assistant
+
+Open [Claude Code](https://claude.com/claude-code), Codex or Antigravity and say:
+> Install Beyond™ TV (github.com/YeahBuddyNZ/Beyond.TV) on my TV at 192.168.1.50. I live in Auckland.
+
+It builds your own copy with your city and your TMDB key, puts it on your TV, and asks before anything important.
+
+### Build it yourself
+
+1. **On the TV**, turn on USB debugging (above).
 2. **Tools:** a JDK (17+), the Android SDK command-line tools (build-tools 34, platform android-34) and adb. On a Mac:
    ```bash
    brew install --cask temurin android-commandlinetools android-platform-tools

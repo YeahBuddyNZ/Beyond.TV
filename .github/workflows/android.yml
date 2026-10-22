@@ -5,7 +5,8 @@
 #
 # On main, with the key set, every build is also published as a release tagged android-<versionCode> (never marked
 # "latest", which TizenBrew reads for the Samsung .wgt). TVs running Beyond TV find it within a day and ask once:
-# Android's own install prompt, one OK press (Updater.java).
+# Android's own install prompt, one OK press (Updater.java). The same APK also goes to the "tv" release, one fixed
+# address for new installs: install.sh, install.ps1 and the TV download page (docs/tv) all fetch it from there.
 name: Android APK
 
 on:
@@ -53,7 +54,7 @@ jobs:
           path: BeyondTV.apk
           retention-days: 30
       - name: Release for the TVs
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && env.SIGNED == 'yes'
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && env.SIGNED == 'yes'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -61,3 +62,8 @@ jobs:
             --target "$GITHUB_SHA" --latest=false \
             --title "Beyond TV for Android $BTV_VERSION_NAME" \
             --notes "Installed by Beyond TV itself: the TV shows Android's install prompt on the home screen, and one OK press updates it."
+          # Pre-release, so TizenBrew (the latest release) and Updater (android-<code> tags) both pass it by.
+          gh release view tv >/dev/null 2>&1 || gh release create tv --target "$GITHUB_SHA" --prerelease --latest=false \
+            --title "Beyond TV for Android: install" \
+            --notes "The newest Beyond TV for Android, always at this address, for new installs. Updates after that come by themselves: the TV asks, and one OK press installs them."
+          gh release upload tv BeyondTV.apk --clobber
