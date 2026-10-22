@@ -119,6 +119,7 @@ final class Family {
         lastPeople = "";
         board = null;
         jobs = java.util.Collections.emptyMap();
+        likes = java.util.Collections.emptyMap();
     }
 
     // MARK: - Talking to Beyond Family
@@ -283,6 +284,14 @@ final class Family {
     /** Earn your screen: each kid's jobs still to do today (only when the household turned it on), by person id. In
      *  memory only, from every sync. */
     private static volatile java.util.Map<String, List<String>> jobs = java.util.Collections.emptyMap();
+    /** What each kid is into (person id → like ids): what a grown-up set, then their own loves. For KidPicks. */
+    private static volatile java.util.Map<String, List<String>> likes = java.util.Collections.emptyMap();
+
+    /** What this person is into, or an empty list. */
+    static List<String> likes(String personId) {
+        List<String> l = personId == null ? null : likes.get(personId);
+        return l == null ? java.util.Collections.<String>emptyList() : l;
+    }
 
     static List<String> jobs(String personId) {
         List<String> left = jobs.get(personId);
@@ -300,6 +309,7 @@ final class Family {
         final JSONArray visitors = visitorsIn == null ? new JSONArray() : visitorsIn;
         board = home == null ? null : home.optJSONObject("board");
         jobs = jobsOf(home == null ? null : home.optJSONArray("people"));
+        likes = likesOf(home == null ? null : home.optJSONArray("people"));
         try {
             JSONObject s = state(c);
             JSONObject was = s.optJSONObject("home");
@@ -339,6 +349,24 @@ final class Family {
             People.save(app, list);
             changed();
         });
+    }
+
+    private static java.util.Map<String, List<String>> likesOf(JSONArray people) {
+        java.util.Map<String, List<String>> out = new java.util.HashMap<>();
+        for (int i = 0; people != null && i < people.length(); i++) {
+            JSONObject p = people.optJSONObject(i);
+            if (p == null) continue;
+            JSONObject look = p.optJSONObject("profile");
+            List<String> list = new ArrayList<>();
+            for (JSONArray a : new JSONArray[] {p.optJSONArray("likes"), look == null ? null : look.optJSONArray("loves")}) {
+                for (int j = 0; a != null && j < a.length(); j++) {
+                    String id = a.optString(j);
+                    if (!id.isEmpty() && !list.contains(id)) list.add(id);
+                }
+            }
+            if (!list.isEmpty()) out.put("bf-" + p.optString("id"), list);
+        }
+        return out;
     }
 
     private static java.util.Map<String, List<String>> jobsOf(JSONArray people) {
