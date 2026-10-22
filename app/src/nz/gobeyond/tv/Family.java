@@ -438,8 +438,15 @@ final class Family {
                     }
                 });
                 break;
+            case "question":
+            case "question-answered":
+            case "question-reveal":
+            case "question-end":
+                final JSONObject q = cmd;
+                MAIN.post(() -> DinnerActivity.command(app, q));
+                break;
             default:
-                // Watching together, reactions and the dinner question are on LG and Samsung so far.
+                // Watching together and reactions are on LG and Samsung so far.
                 break;
         }
     }

@@ -266,9 +266,10 @@ HDMI (Chromecast with Google TV, Google TV Streamer, onn 4K, NVIDIA Shield). Set
   household. Linked, `FamilyService` (a foreground service, so it keeps listening while another app has the screen)
   turns the household's people into `People` (ids `bf-<member id>`) and runs commands: `key` and `launch` go through
   the TV's own ADB (never asking for the key from there), falling back to our own screens; `say` is a card over the
-  home screen or a toast over other apps; `profile` switches who's watching. Together, reactions, bedtime, the dinner
-  question, picks for kids, earn your screen and the noticeboard are still LG and Samsung only: port them from
-  `web/` into the same `Family.run`.
+  home screen or a toast over other apps; `profile` switches who's watching; `bedtime` opens `BedtimeActivity`; the
+  `question*` commands drive `DinnerActivity`; the noticeboard (`Family.board`) and earn your screen
+  (`Family.jobs`, `JobsActivity`) read the sync. Together, reactions and picks for kids are still LG and Samsung
+  only: port them from `web/` into the same `Family.run`.
   Your face on any TV: each person's look (`profile` in `/tv/sync`: emoji, colour, world, loves, shelf by app name
   `t:netflix`) lives in Beyond Family. On the web a change marks the person `pending` and `Family.pushProfile` sends it
   (`POST /tv/people/:member`); until Beyond Family has it, the TV's copy wins. `visitors` in `/tv/sync` are people

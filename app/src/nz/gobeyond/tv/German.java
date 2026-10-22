@@ -217,6 +217,11 @@ final class German {
             case "Just one to go! Tick it off in Beyond Family and the TV opens by itself.": return "Nur noch eine! Hak sie in Beyond Family ab, dann geht der Fernseher von selbst auf.";
             case "On it": return "Mach ich";
             case "All done! Screens are open.": return "Alles erledigt! Der Bildschirm ist frei.";
+            case "Dinner question": return "Frage zum Abendessen";
+            case "Dinner question: ": return "Frage zum Abendessen: ";
+            case "Answer in Beyond Family on your phone. The answers come up together.": return "Antwortet in Beyond Family auf dem Handy. Die Antworten erscheinen zusammen.";
+            case " answered the dinner question": return " hat die Frage beantwortet";
+            case "Close": return "Schließen";
             case "Install the new version": return "Neue Version installieren";
             case "Check for updates": return "Nach Updates suchen";
             case "Install updates by themselves": return "Updates selbst installieren";

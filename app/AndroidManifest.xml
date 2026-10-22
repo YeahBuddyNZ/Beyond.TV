@@ -182,6 +182,16 @@
             android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|density|fontScale|locale|layoutDirection"
             android:theme="@style/BeyondTV.Home" />
 
+        <!-- The dinner question: everyone answers on their phones, then the answers come up together. -->
+        <activity
+            android:name=".DinnerActivity"
+            android:process=":home"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:screenOrientation="landscape"
+            android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|density|fontScale|locale|layoutDirection"
+            android:theme="@style/BeyondTV.Home" />
+
         <!-- Who's watching? Family first, then each person; also where people and the grown-up PIN are set. -->
         <activity
             android:name=".WhoActivity"
