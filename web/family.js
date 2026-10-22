@@ -219,6 +219,7 @@ var Family = (function () {
     if (c.kind === 'together-end') { togetherEnd(c.session); return; }
     if (c.kind === 'react') { react(c.emoji, c.from, c.colour); return; }
     if (c.kind === 'bedtime') { hide(); Bedtime.start(c.minutes); return; }
+    if (c.kind && c.kind.indexOf('question') === 0) { dinner(c); return; }
     if (hide()) { if (c.kind === 'key') return; }  // the first press puts a message away, like it would on the remote
     if (c.kind === 'key') {
       if (c.key === 'home') { UI.closeAll(); BeyondTV.home(); return; }
@@ -385,6 +386,74 @@ var Family = (function () {
     floating++;
     setTimeout(function () { UI.setClass(r, 'up', true); }, wait);
     setTimeout(function () { floating--; if (r.parentNode) r.parentNode.removeChild(r); }, wait + 4300);
+  }
+
+  // MARK: - The dinner question
+
+  // One question on the TV; everyone answers on their phones. Until a grown-up reveals them the TV only learns who
+  // has answered, so the faces fill in as people answer, then the answers come up together.
+  var ask = null, askApi = null;
+
+  function dinner(c) {
+    if (c.kind === 'question') {
+      ask = {id: c.question, text: c.text, from: c.from, answered: [], answers: null};
+    } else if (!ask || ask.id !== c.question) {
+      return;
+    } else if (c.kind === 'question-end') {
+      ask = null;
+      if (askApi) askApi.close();
+      return;
+    } else if (c.kind === 'question-answered') {
+      for (var i = 0; i < ask.answered.length; i++) if (ask.answered[i].name === c.name) return;
+      ask.answered.push({name: c.name, colour: c.colour});
+      if (!askApi) { UI.toast(c.name + tr(' respondeu à pergunta do jantar', ' answered the dinner question', ' respondió la pregunta de la cena')); return; }
+    } else if (c.kind === 'question-reveal') {
+      if (c.more && ask.answers) {
+        // One person changed or added their answer after the reveal.
+        var a = c.answers[0], found = false;
+        for (var j = 0; j < ask.answers.length; j++) if (ask.answers[j].name === a.name) { ask.answers[j] = a; found = true; }
+        if (!found) ask.answers.push(a);
+      } else {
+        ask.answers = c.answers || [];
+      }
+    }
+    if (askApi) askApi.rebuild();
+    else showDinner();
+  }
+
+  function showDinner() {
+    hide();
+    askApi = UI.open({
+      cls: 'bt-dinner',
+      build: function (layer, a) {
+        if (!ask) return;
+        var box = UI.el('div', 'bt-box', layer);
+        UI.heading(box, tr('Pergunta do jantar', 'Dinner question', 'Pregunta de la cena'));
+        UI.el('div', 'question', box, ask.text);
+        if (ask.answers) {
+          var grid = UI.el('div', 'answers', box);
+          for (var i = 0; i < ask.answers.length; i++) {
+            var card = UI.el('div', 'answer', grid);
+            card.style.borderColor = ask.answers[i].colour || '#2F7D6D';
+            UI.el('b', '', card, ask.answers[i].name);
+            UI.el('span', '', card, ask.answers[i].answer);
+            (function (n, d) { setTimeout(function () { UI.setClass(n, 'in', true); }, 250 + d * 450); })(card, i);
+          }
+        } else {
+          UI.el('div', 'bt-sub', box, tr('Responda no Beyond Family, no seu celular. As respostas aparecem juntas.',
+            'Answer in Beyond Family on your phone. The answers come up together.',
+            'Responde en Beyond Family en tu teléfono. Las respuestas salen juntas.'));
+          var faces = UI.el('div', 'faces', box);
+          for (var f = 0; f < ask.answered.length; f++) {
+            var face = UI.el('div', 'face', faces);
+            UI.avatar(ask.answered[f], face, 110);
+            UI.el('div', 'name', face, ask.answered[f].name);
+          }
+        }
+        a.add(UI.el('div', 'hold', layer), null, {first: true});
+      },
+      closed: function () { askApi = null; }
+    });
   }
 
   // MARK: - Green time, after the fine day nudge
