@@ -221,6 +221,8 @@
     if (!kid) list.push({icon: 'hdmi', label: tr('Entradas HDMI', 'HDMI Inputs', 'Entradas HDMI'), run: function () {
       st.zone = Z.SHELF; openDrawer(); st.drawer = 1 < drawerInputs ? 1 : 0; updateFocus();
     }});
+    // Bedtime breathing, in the evening: a night light that breathes, then fades to dark.
+    if (Data.isNight(Date.now())) list.push({icon: 'bedtime', label: tr('Respirar para dormir', 'Bedtime breathing', 'Respirar para dormir'), run: function () { Bedtime.start(15); }});
     list.push({icon: 'settings', label: tr('Ajustes', 'Settings', 'Ajustes'), run: function () { openSettings(); }});
     if (kid) list.push({icon: 'sparkles', label: tr('Do seu jeito', 'Make it yours', 'A tu manera'), run: makeItYours});
     if (Profiles.count() > 1 || window.Family) list.push({person: Profiles.current(), label: tr('Trocar perfil', 'Switch profile', 'Cambiar perfil'),
@@ -672,6 +674,7 @@
 
   function launcher(id, name) {
     return function () {
+      if (jobsFirst()) return;
       // Plex opens Beyond TV's own Plex screen: Continue Watching, the libraries and the player, right here.
       if (/plex/i.test(name || '') || /plex|cdp-30/i.test(id || '')) { Plex.open(); Family.now('Plex'); return; }
       TV.launch(id, null, function (ok) {
@@ -847,6 +850,7 @@
     el('div', 'time', clock);
     el('div', 'date', clock);
     el('div', 'title', clock);
+    var notice = el('div', 'board', s);
     var front = a;
     function next() {
       if (!saverOn) return;
@@ -864,6 +868,7 @@
         }, 60);
       }
       tickSaverClock(clock);
+      paintBoard(notice);
       saverTimer = setTimeout(next, 12000);
     }
     setClass(s, 'on', true);
@@ -878,6 +883,56 @@
     } catch (e) {
       clock.children[1].textContent = d.toDateString();
     }
+  }
+
+  var lastBoard = '';
+
+  /**
+   * The house noticeboard beside the clock: today's family calendar, birthdays, tea and recent notes, when the
+   * household switched it on in Beyond Family. Built again only when it changed, so it doesn't flicker every photo.
+   */
+  function paintBoard(box) {
+    var b = window.Family && Family.board ? Family.board() : null;
+    var empty = !b || !((b.events && b.events.length) || (b.birthdays && b.birthdays.length) || b.tea || (b.notes && b.notes.length));
+    var sig = empty ? '' : JSON.stringify(b) + I18N.locale();
+    setClass(box, 'on', !empty);
+    if (sig === lastBoard && box.firstChild) return;
+    lastBoard = sig;
+    box.innerHTML = '';
+    if (empty) return;
+    el('div', 'head', box, tr('Hoje', 'Today', 'Hoy'));
+    for (var i = 0; i < (b.birthdays || []).length; i++) {
+      el('div', 'bday', box, '🎂 ' + tr('Feliz aniversário, ', 'Happy birthday, ', '¡Feliz cumpleaños, ') + b.birthdays[i] + '!');
+    }
+    var events = b.events || [];
+    for (var e = 0; e < events.length; e++) {
+      var ev = events[e];
+      var row = el('div', 'row', box);
+      el('span', 'when', row, ev.time ? Data.time(clockAt(ev.time)) : tr('O dia todo', 'All day', 'Todo el día'));
+      var dot = el('i', 'dot', row);
+      dot.style.background = ev.colour || 'rgba(255, 255, 255, 0.5)';
+      var what = el('span', 'what', row, ev.title);
+      var more = [ev.who, ev.where].filter(function (x) { return x; }).join(' · ');
+      if (more) el('span', 'more', what, '  ' + more);
+    }
+    if (b.tea) {
+      var tea = el('div', 'tea', box);
+      el('b', '', tea, tr('Jantar', 'Tea', 'Cena') + ' ');
+      tea.appendChild(document.createTextNode(b.tea));
+    }
+    var notes = b.notes || [];
+    for (var n = 0; n < notes.length; n++) {
+      var note = el('div', 'note', box);
+      el('b', '', note, notes[n].from + ' ');
+      note.appendChild(document.createTextNode(notes[n].text));
+    }
+  }
+
+  /** "15:30" today, as a time the clock words can say in the TV's own style. */
+  function clockAt(hm) {
+    var d = new Date();
+    d.setHours(+hm.slice(0, 2), +hm.slice(3, 5), 0, 0);
+    return d.getTime();
   }
 
   var saverAt = 0, ASK_AGAIN_AFTER = 20 * 60000;
@@ -901,6 +956,7 @@
   function key(k) {
     if (poke()) return true;   // the first press only wakes the screen
     if (Family.hide()) return true;   // or puts a family message away
+    if (Family.togetherKey(k)) return true;   // OK on a watch-together countdown opens the app
     if (UI.active()) {
       if (k >= 37 && k <= 40 || k === TV.keys.ok || k === TV.keys.back || k === 27 || k === 8 || k >= 48 && k <= 57 || k >= 65 && k <= 90 || k === 32) {
         UI.key(k);
@@ -937,6 +993,7 @@
   /** Talk to Beyond: say what would make it better; if Beyond answers, it shows here (Checkin.hear). */
   function talkToBeyond() {
     UI.open({cls: 'bt-talk', build: function (layer, api) {
+      layer = UI.el('div', 'bt-box', layer);
       UI.heading(layer, tr('Fale com a Beyond', 'Talk to Beyond', 'Habla con Beyond'),
         tr('O que deixaria o Beyond™ TV melhor? A gente lê tudo.', 'What would make Beyond™ TV better? We read every one.',
           '¿Qué haría mejor Beyond™ TV? Leemos todo.'));
@@ -954,6 +1011,36 @@
           });
         }});
     }});
+  }
+
+  // MARK: - Earn your screen
+
+  /** A kid with jobs still to do today (Beyond Family's Earn your screen): show what's left, open nothing. */
+  function jobsFirst() {
+    var me = Profiles.current();
+    if (!me.kid || !me.jobs || !me.jobs.length) return false;
+    UI.open({cls: 'bt-jobs', build: function (layer, api) {
+      var left = Profiles.current().jobs || [];
+      layer = UI.el('div', 'bt-box', layer);
+      UI.heading(layer, tr('Primeiro as tarefas', 'Jobs first, then screens', 'Primero las tareas'),
+        left.length === 1 ? tr('Só falta uma! Marque no Beyond Family e a TV abre sozinha.', "Just one to go! Tick it off in Beyond Family and the TV opens by itself.", '¡Solo falta una! Márcala en Beyond Family y el TV se abre solo.')
+          : tr('Faltam ', '', 'Faltan ') + left.length + tr('. Marque no Beyond Family e a TV abre sozinha.', ' to go. Tick them off in Beyond Family and the TV opens by itself.', '. Márcalas en Beyond Family y el TV se abre solo.'));
+      var list = UI.el('div', 'bt-jobs-list', layer);
+      for (var i = 0; i < left.length; i++) UI.el('div', 'bt-job', list, left[i]);
+      api.add(UI.button(UI.el('div', 'bt-jobs-foot', layer), tr('Combinado', 'On it', 'Vale'), 'check', 'primary'), function () { api.close(); });
+    }});
+    return true;
+  }
+
+  var hadJobs = false;
+
+  /** The last job ticked: say so, and put the list away if it's open. */
+  function jobsChanged() {
+    var me = Profiles.current(), now = !!(me.kid && me.jobs && me.jobs.length);
+    var top = UI.top();
+    if (top && document.querySelector('.layer.bt-jobs')) { if (now) top.rebuild(); else top.close(); }
+    if (hadJobs && !now) toast(tr('Tudo feito! As telas estão abertas.', 'All done! Screens are open.', '¡Todo listo! Las pantallas están abiertas.'));
+    hadJobs = now;
   }
 
   /** Someone else is watching now: their shelf, their picks, their name. */
@@ -1045,7 +1132,7 @@
   function hearBeyond() { Checkin.hear(function (text) { toast('Beyond: ' + text); }); }
   hearBeyond();
   setInterval(hearBeyond, 10 * 60 * 1000 + 5000);
-  Profiles.onChange(function () { renderTop(); paintWorld(); updateFocus(); });
+  Profiles.onChange(function () { renderTop(); paintWorld(); updateFocus(); jobsChanged(); });
   setInterval(function () {
     renderClock();
     checkNight();
