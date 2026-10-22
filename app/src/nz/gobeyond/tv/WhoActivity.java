@@ -69,6 +69,8 @@ public class WhoActivity extends Activity {
         column = new LinearLayout(this);
         column.setOrientation(LinearLayout.VERTICAL);
         column.setGravity(Gravity.CENTER_HORIZONTAL);
+        column.setClipChildren(false);
+        root.setClipChildren(false);
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(-1, -2, Gravity.CENTER);
         lp.topMargin = Math.round(80 * k);
         root.addView(column, lp);
@@ -116,10 +118,15 @@ public class WhoActivity extends Activity {
     }
 
     private Face face(LinearLayout row, People.Person p, String under, View.OnClickListener run) {
-        Face f = new Face(this, p, under, k);
+        return face(row, p, under, run, 1f);
+    }
+
+    /** big: 1 for a full row, more when there are only a few faces and the screen has room for them. */
+    private Face face(LinearLayout row, People.Person p, String under, View.OnClickListener run, float big) {
+        Face f = new Face(this, p, under, k * big);
         f.setOnClickListener(run);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(Math.round(240 * k), Math.round(330 * k));
-        lp.leftMargin = lp.rightMargin = Math.round(16 * k);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(Math.round(260 * k * big), Math.round(380 * k * big));
+        lp.leftMargin = lp.rightMargin = Math.round(20 * k * big);
         row.addView(f, lp);
         return f;
     }
@@ -131,12 +138,20 @@ public class WhoActivity extends Activity {
         LinearLayout row = faces(c);
         People.Person now = People.current(this);
         Face first = null;
-        for (People.Person p : People.choices(this)) {
-            Face f = face(row, p, p.together() ? Ui.tr("Todos juntos", "Everyone together") : null, v -> choose(p));
+        java.util.List<People.Person> choices = People.choices(this);
+        // A few faces get the room a few faces deserve; a full house keeps them at the size that fits a row.
+        float big = choices.size() <= 2 ? 1.35f : choices.size() <= 4 ? 1.15f : 1f;
+        for (People.Person p : choices) {
+            Face f = face(row, p, p.together() ? Ui.tr("Todos juntos", "Everyone together") : null, v -> choose(p), big);
             if (p.id.equals(now.id)) first = f;
         }
         LinearLayout foot = row(c, 40);
         add(foot, Ui.tr("Gerenciar pessoas", "Manage people"), false, v -> guard(this::manage));
+        if (!Family.linked(this)) {
+            // On its own, a TV only knows "Me". Linked, it shows everyone in the family, in their own faces.
+            add(foot, Ui.tr("Trazer a família do Beyond Family", "Bring in your family from Beyond Family"), false,
+                    v -> guard(() -> LinkActivity.open(this)));
+        }
         if (first != null) first.requestFocus();
     }
 
@@ -400,7 +415,8 @@ public class WhoActivity extends Activity {
         }
 
         @Override protected void onDraw(Canvas c) {
-            float cx = getWidth() / 2f, r = 100 * k, cy = 20 * k + r;
+            // Room above the ring, so lifted and grown on focus it never meets the edge of the view.
+            float cx = getWidth() / 2f, r = 100 * k, cy = 46 * k + r;
             if (isFocused()) {
                 paint.setColor(0xFFFFFFFF);
                 c.drawCircle(cx, cy, r + 10 * k, paint);

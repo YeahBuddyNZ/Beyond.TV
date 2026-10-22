@@ -115,6 +115,7 @@ final class Spanish {
             case "For the family": return "Para la familia";
             case "For ": return "Para ";
             case "Manage people": return "Administrar personas";
+            case "Bring in your family from Beyond Family": return "Traer a tu familia desde Beyond Family";
             case "Grown-up PIN": return "PIN de adulto";
             case "People": return "Personas";
             case "Pick someone to change, or add someone.": return "Elige a alguien para cambiar, o añade a alguien.";

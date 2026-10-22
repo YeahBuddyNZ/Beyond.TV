@@ -122,6 +122,7 @@ final class Russian {
             case "For the family": return "Для всей семьи";
             case "For ": return "Для ";
             case "Manage people": return "Управлять профилями";
+            case "Bring in your family from Beyond Family": return "Добавить семью из Beyond Family";
             case "Grown-up PIN": return "PIN взрослого";
             case "People": return "Люди";
             case "Pick someone to change, or add someone.": return "Выберите, кого изменить, или добавьте кого-нибудь.";

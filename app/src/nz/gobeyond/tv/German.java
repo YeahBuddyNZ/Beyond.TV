@@ -123,6 +123,7 @@ final class German {
             case "For the family": return "Für die Familie";
             case "For ": return "Für ";
             case "Manage people": return "Personen verwalten";
+            case "Bring in your family from Beyond Family": return "Familie aus Beyond Family holen";
             case "Grown-up PIN": return "Erwachsenen-PIN";
             case "People": return "Personen";
             case "Pick someone to change, or add someone.": return "Wähle jemanden zum Ändern oder füge jemanden hinzu.";
