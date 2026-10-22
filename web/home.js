@@ -672,6 +672,7 @@
 
   function launcher(id, name) {
     return function () {
+      if (jobsFirst()) return;
       // Plex opens Beyond TV's own Plex screen: Continue Watching, the libraries and the player, right here.
       if (/plex/i.test(name || '') || /plex|cdp-30/i.test(id || '')) { Plex.open(); Family.now('Plex'); return; }
       TV.launch(id, null, function (ok) {
@@ -938,6 +939,7 @@
   /** Talk to Beyond: say what would make it better; if Beyond answers, it shows here (Checkin.hear). */
   function talkToBeyond() {
     UI.open({cls: 'bt-talk', build: function (layer, api) {
+      layer = UI.el('div', 'bt-box', layer);
       UI.heading(layer, tr('Fale com a Beyond', 'Talk to Beyond', 'Habla con Beyond'),
         tr('O que deixaria o Beyond™ TV melhor? A gente lê tudo.', 'What would make Beyond™ TV better? We read every one.',
           '¿Qué haría mejor Beyond™ TV? Leemos todo.'));
@@ -955,6 +957,36 @@
           });
         }});
     }});
+  }
+
+  // MARK: - Earn your screen
+
+  /** A kid with jobs still to do today (Beyond Family's Earn your screen): show what's left, open nothing. */
+  function jobsFirst() {
+    var me = Profiles.current();
+    if (!me.kid || !me.jobs || !me.jobs.length) return false;
+    UI.open({cls: 'bt-jobs', build: function (layer, api) {
+      var left = Profiles.current().jobs || [];
+      layer = UI.el('div', 'bt-box', layer);
+      UI.heading(layer, tr('Primeiro as tarefas', 'Jobs first, then screens', 'Primero las tareas'),
+        left.length === 1 ? tr('Só falta uma! Marque no Beyond Family e a TV abre sozinha.', "Just one to go! Tick it off in Beyond Family and the TV opens by itself.", '¡Solo falta una! Márcala en Beyond Family y el TV se abre solo.')
+          : tr('Faltam ', '', 'Faltan ') + left.length + tr('. Marque no Beyond Family e a TV abre sozinha.', ' to go. Tick them off in Beyond Family and the TV opens by itself.', '. Márcalas en Beyond Family y el TV se abre solo.'));
+      var list = UI.el('div', 'bt-jobs-list', layer);
+      for (var i = 0; i < left.length; i++) UI.el('div', 'bt-job', list, left[i]);
+      api.add(UI.button(UI.el('div', 'bt-jobs-foot', layer), tr('Combinado', 'On it', 'Vale'), 'check', 'primary'), function () { api.close(); });
+    }});
+    return true;
+  }
+
+  var hadJobs = false;
+
+  /** The last job ticked: say so, and put the list away if it's open. */
+  function jobsChanged() {
+    var me = Profiles.current(), now = !!(me.kid && me.jobs && me.jobs.length);
+    var top = UI.top();
+    if (top && document.querySelector('.layer.bt-jobs')) { if (now) top.rebuild(); else top.close(); }
+    if (hadJobs && !now) toast(tr('Tudo feito! As telas estão abertas.', 'All done! Screens are open.', '¡Todo listo! Las pantallas están abiertas.'));
+    hadJobs = now;
   }
 
   /** Someone else is watching now: their shelf, their picks, their name. */
@@ -1046,7 +1078,7 @@
   function hearBeyond() { Checkin.hear(function (text) { toast('Beyond: ' + text); }); }
   hearBeyond();
   setInterval(hearBeyond, 10 * 60 * 1000 + 5000);
-  Profiles.onChange(function () { renderTop(); paintWorld(); updateFocus(); });
+  Profiles.onChange(function () { renderTop(); paintWorld(); updateFocus(); jobsChanged(); });
   setInterval(function () {
     renderClock();
     checkNight();

@@ -66,7 +66,8 @@ var Family = (function () {
     if (sig === lastPeople || !home.people || !home.people.length) return;
     lastPeople = sig;
     Profiles.replace(home.people.map(function (p) {
-      return {id: 'bf-' + p.id, name: p.name, colour: p.colour || '#2F7D6D', kid: !!p.kid, family: p.id};
+      // jobs: Earn your screen, a kid's jobs still to do today (only there when the household turned it on).
+      return {id: 'bf-' + p.id, name: p.name, colour: p.colour || '#2F7D6D', kid: !!p.kid, family: p.id, jobs: p.jobs};
     }));
   }
 

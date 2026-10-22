@@ -569,4 +569,20 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 @-webkit-keyframes btv-breathe { 0%, 100% { -webkit-transform: scale(0.9); } 40% { -webkit-transform: scale(1.05); } }
 @keyframes btv-breathe { 0%, 100% { transform: scale(0.9); } 40% { transform: scale(1.05); } }
 @media (prefers-reduced-motion: reduce) { .round .dots i { -webkit-animation: none; animation: none; } }
-.bt-talk .bt-keyboard { margin-top: 40px; }
+.bt-talk { background: rgba(13, 12, 24, 0.94); }
+.bt-talk .bt-box { position: absolute; left: 0; right: 0; top: 120px; text-align: center; }
+.bt-talk .bt-keyboard { margin: 40px auto 0; }
+
+/* Earn your screen: the jobs still to do before a kid's apps open. */
+.bt-jobs { background: rgba(13, 12, 24, 0.94); }
+.bt-jobs .bt-box { position: absolute; left: 0; right: 0; top: 140px; text-align: center; }
+.bt-jobs-list { margin: 44px auto 0; width: 900px; text-align: left; }
+.bt-job {
+  margin-top: 16px; padding: 24px 32px 24px 84px; border-radius: 28px; position: relative;
+  background: rgba(247, 246, 242, 0.08); font-size: 36px; font-weight: 600; color: #F7F6F2;
+}
+.bt-job::before {
+  content: ''; position: absolute; left: 30px; top: 50%; width: 28px; height: 28px; margin-top: -17px;
+  border-radius: 17px; border: 3px solid #9E7BFF;
+}
+.bt-jobs-foot { margin-top: 44px; text-align: center; }
