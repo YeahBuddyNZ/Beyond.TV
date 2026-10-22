@@ -6,7 +6,14 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.graphics.drawable.GradientDrawable;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.KeyEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 /**
@@ -14,8 +21,9 @@ import android.widget.TextView;
  * the safety net in the main process keeps working. On the 3rd crash within 5 min, the Watchdog gives the home screen
  * back to the TV's original one.
  */
-public class HomeActivity extends Activity {
+public class HomeActivity extends Activity implements Family.Screen {
     private HomeView home;
+    private View message;   // Beyond Family's message over the home screen, while it shows
     private static final long ASK_AGAIN_AFTER = 4 * 3600_000L;
     private int prefsVersion = Prefs.version;   // settings changed while we were away: start over
 
@@ -56,6 +64,15 @@ public class HomeActivity extends Activity {
             Updater.offer(this);
             Checkin.opened(this);
             Checkin.maybeSend(this);
+            FamilyService.start(this);
+            Family.screen = this;
+            // Beyond Family changed who's here, or who's watching: draw again, as coming back from Settings does.
+            Family.onChange = () -> {
+                if (prefsVersion != Prefs.version) {
+                    prefsVersion = Prefs.version;
+                    recreate();
+                }
+            };
             // Who's watching? When there's more than one person: the first time, and again after a long break.
             if (People.count(this) > 1 && System.currentTimeMillis() - People.chosenAt(this) > ASK_AGAIN_AFTER) {
                 People.asked(this);
@@ -65,6 +82,9 @@ public class HomeActivity extends Activity {
     }
 
     @Override protected void onPause() {
+        if (Family.screen == this) Family.screen = null;
+        Family.onChange = null;
+        hideMessage();
         Updater.homeShowing(this, false);
         if (home != null) home.pause();
         super.onPause();
@@ -87,9 +107,71 @@ public class HomeActivity extends Activity {
     }
 
     @Override public boolean dispatchKeyEvent(KeyEvent event) {
+        // The first press puts a message away, as on LG and Samsung.
+        if (message != null) {
+            if (event.getAction() == KeyEvent.ACTION_DOWN) hideMessage();
+            return true;
+        }
         if (RemoteKeys.onKey(this, event)) return true;
         if (home != null && home.onKey(event)) return true;
         return super.dispatchKeyEvent(event);
     }
 
+    // MARK: - A message from Beyond Family
+
+    private final Handler handler = new Handler(Looper.getMainLooper());
+
+    /** A card over the home screen: the icon in the message's colour, the words, who it's from. 15 seconds, or a key. */
+    @Override public boolean say(String text, int colour, String icon, String from) {
+        if (home == null || isFinishing()) return false;
+        hideMessage();
+        float k = getResources().getDisplayMetrics().widthPixels / 1920f;
+        LinearLayout card = new LinearLayout(this);
+        card.setGravity(Gravity.CENTER_VERTICAL);
+        card.setPadding(Math.round(30 * k), Math.round(26 * k), Math.round(48 * k), Math.round(26 * k));
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor(0xF2161618);
+        bg.setCornerRadius(36 * k);
+        bg.setStroke(Math.round(4 * k), colour);
+        card.setBackground(bg);
+        card.setElevation(24 * k);
+        TextView badge = FeedbackActivity.text(this, icon, Ui.regular, 52 * k, 0xFFFFFFFF);
+        GradientDrawable dot = new GradientDrawable();
+        dot.setShape(GradientDrawable.OVAL);
+        dot.setColor(colour);
+        badge.setBackground(dot);
+        card.addView(badge, new LinearLayout.LayoutParams(Math.round(104 * k), Math.round(104 * k)));
+        LinearLayout words = new LinearLayout(this);
+        words.setOrientation(LinearLayout.VERTICAL);
+        words.setPadding(Math.round(30 * k), 0, 0, 0);
+        TextView t = FeedbackActivity.text(this, text, Ui.semibold, 44 * k, 0xFFFFFFFF);
+        t.setGravity(Gravity.START);
+        t.setMaxWidth(Math.round(1100 * k));
+        words.addView(t);
+        TextView f = FeedbackActivity.text(this, (from == null || from.isEmpty() ? "" : Ui.tr("De ", "From ") + from + " · ")
+                + Ui.tr("agora", "just now"), Ui.regular, 26 * k, 0x99FFFFFF);
+        f.setGravity(Gravity.START);
+        words.addView(f);
+        card.addView(words);
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.TOP | Gravity.CENTER_HORIZONTAL);
+        lp.topMargin = Math.round(70 * k);
+        addContentView(card, lp);
+        card.setAlpha(0f);
+        card.setTranslationY(-40 * k);
+        card.animate().alpha(1f).translationY(0).setDuration(320).start();
+        message = card;
+        handler.postDelayed(this::hideMessage, 15_000);
+        return true;
+    }
+
+    private void hideMessage() {
+        handler.removeCallbacksAndMessages(null);
+        final View card = message;
+        message = null;
+        if (card == null) return;
+        card.animate().alpha(0f).setDuration(300).withEndAction(() -> {
+            if (card.getParent() instanceof ViewGroup) ((ViewGroup) card.getParent()).removeView(card);
+        }).start();
+    }
 }

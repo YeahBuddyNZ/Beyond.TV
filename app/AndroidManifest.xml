@@ -9,6 +9,9 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <!-- Updates: Android still shows its own install prompt, and the TV asks once to allow Beyond TV to install apps. -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <!-- Beyond Family (once the TV is linked): waits for the phone remote and the family's messages while another
+         app has the screen. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <!-- Android 11+: without this list the app can't "see" the other apps (getLeanbackLaunchIntentForPackage
          returns null). The shelf and streaming apps, the live TV apps and, through the <intent>, every TV app
@@ -168,6 +171,23 @@
             android:screenOrientation="landscape"
             android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|density|fontScale|locale|layoutDirection"
             android:theme="@style/BeyondTV.Home" />
+
+        <!-- Beyond Family: link this TV with a code, or unlink it (Settings > Beyond Family). -->
+        <activity
+            android:name=".LinkActivity"
+            android:process=":home"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:screenOrientation="landscape"
+            android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|density|fontScale|locale|layoutDirection"
+            android:theme="@style/BeyondTV.Home" />
+
+        <!-- Beyond Family: the long wait for the phone remote and messages, only while the TV is linked. In :home,
+             with the people it fills in. -->
+        <service
+            android:name=".FamilyService"
+            android:process=":home"
+            android:exported="false" />
 
         <!-- The installer's answer to an update (Updater): shows Android's own install prompt. -->
         <receiver

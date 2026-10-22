@@ -490,6 +490,22 @@ final class HomeApps {
         return out;
     }
 
+    /**
+     * The installed app for one of Beyond TV's app ids ("netflix", "neon", "tvnz"), the ids Beyond Family's remote and
+     * the LG and Samsung app use: SHELF's key first, then a TV app whose name or package starts with it. Null if none.
+     */
+    static String packageFor(Context c, String id) {
+        if (id == null || id.isEmpty()) return null;
+        PackageManager pm = c.getPackageManager();
+        for (String[] d : SHELF) if (d[0].equals(id) && launchIntent(pm, d[2]) != null) return d[2];
+        String want = id.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]", "");
+        for (String[] app : launchable(c)) {
+            String name = app[1] == null ? "" : app[1].toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]", "");
+            if (!want.isEmpty() && (name.startsWith(want) || app[0].toLowerCase(Locale.ROOT).contains("." + want))) return app[0];
+        }
+        return null;
+    }
+
     static Intent launchIntent(PackageManager pm, String pkg) {
         Intent intent = pm.getLeanbackLaunchIntentForPackage(pkg);
         return intent != null ? intent : pm.getLaunchIntentForPackage(pkg);
