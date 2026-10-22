@@ -110,7 +110,8 @@ final class Prefs {
     static boolean weather() { return sp().getBoolean("weather", true); }
     static void setWeather(boolean on) { put("weather", on); }
 
-    static boolean quotes() { return sp().getBoolean("quotes", Config.SHOW_CRYPTO); }
+    /** Crypto exists only in a build made with show_crypto=true; everywhere else it is gone, not just switched off. */
+    static boolean quotes() { return Config.SHOW_CRYPTO && sp().getBoolean("quotes", true); }
     static void setQuotes(boolean on) { put("quotes", on); }
 
     /** Te reo word of the day (Kupu), in the quotes row. On unless they turn it off. */

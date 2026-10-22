@@ -545,8 +545,6 @@
         step: function (d) { cycle('theme', ['auto', 'light', 'dark'], theme, d); checkNight(); }},
       {label: tr('Widget do clima', 'Weather widget', 'Widget del clima'), toggle: Prefs.weather(),
         step: function () { Prefs.set('weather', !Prefs.weather()); renderPanels(); }},
-      {label: tr('Widget de cotações', 'Quotes widget', 'Widget de cotizaciones'), toggle: Prefs.quotes(),
-        step: function () { Prefs.set('quotes', !Prefs.quotes()); Data.settingsChanged(); }},
       {label: tr('Palavra do dia em te reo Māori', 'Te reo word of the day', 'Palabra del día en te reo maorí'), toggle: Prefs.kupu(),
         step: function () { Prefs.set('kupu', !Prefs.kupu()); renderQuotes(); }},
       {label: tr('Protetor de tela', 'Screensaver', 'Salvapantallas'),
@@ -555,6 +553,10 @@
         step: function (d) { cycle('screensaver', ['auto', 'art', 'photos'], Prefs.screensaver(), d); }}
     ];
     var names = ['Bitcoin', 'Ethereum', 'Solana', tr('Dólar', 'Dollar', 'Dólar')];
+    if (CONFIG.showCrypto === true) {
+      rows.push({label: tr('Widget de cotações', 'Quotes widget', 'Widget de cotizaciones'), toggle: Prefs.quotes(),
+        step: function () { Prefs.set('quotes', !Prefs.quotes()); Data.settingsChanged(); }});
+    }
     // The coins only while the quotes widget is on: off, they would be a list of switches that do nothing.
     var count = !Prefs.quotes() ? 0 : Data.currency === 'BRL' ? 4 : 3;
     for (var i = 0; i < count; i++) {
