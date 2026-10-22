@@ -3113,6 +3113,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         Context ctx = getContext();
         boolean linked = Family.linked(ctx), kid = watcher != null && watcher.kid;
         List<String[]> rows = new ArrayList<>();
+        JSONObject board = linked ? Family.board() : null;
+        if (board != null) boardRows(board, rows);
         HomeData.Weather wx = data.weather;
         if (Prefs.weather() && !Double.isNaN(wx.temp)) {
             String more = Ui.en ? "High " + HomeData.degrees(wx.max) + ", low " + HomeData.degrees(wx.min)
@@ -3158,6 +3160,44 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         tonightRect.set(L_TONIGHT_X * k, L_TABBAR_TOP * k, (L_TONIGHT_X + L_TONIGHT_W) * k, (L_TABBAR_TOP + h) * k);
         statusDirty = heroDirty = true;
         wake();
+    }
+
+    /** What's on at home today from Beyond Family's noticeboard: birthdays, tea, the calendar, notes. As on the web. */
+    private static void boardRows(JSONObject b, List<String[]> rows) {
+        JSONArray birthdays = b.optJSONArray("birthdays");
+        for (int i = 0; birthdays != null && i < birthdays.length(); i++) {
+            rows.add(new String[] {"🎂", Ui.tr("Feliz aniversário, ", "Happy birthday, ", "¡Feliz cumpleaños, ") + birthdays.optString(i) + "!", "", ""});
+        }
+        String tea = b.optString("tea");
+        if (!tea.isEmpty()) rows.add(new String[] {"🍲", tea, Ui.tr("Jantar", "Tea tonight", "Cena"), ""});
+        JSONArray events = b.optJSONArray("events");
+        for (int i = 0; events != null && i < events.length(); i++) {
+            JSONObject e = events.optJSONObject(i);
+            if (e == null || e.optString("title").isEmpty()) continue;
+            StringBuilder more = new StringBuilder(e.optString("time").length() >= 5 ? clockText(e.optString("time"))
+                    : Ui.tr("O dia todo", "All day", "Todo el día"));
+            for (String part : new String[] {e.optString("who"), e.optString("where")}) if (!part.isEmpty()) more.append(" · ").append(part);
+            rows.add(new String[] {"📅", e.optString("title"), more.toString(), ""});
+        }
+        JSONArray notes = b.optJSONArray("notes");
+        for (int i = 0; notes != null && i < notes.length(); i++) {
+            JSONObject n = notes.optJSONObject(i);
+            if (n != null && !n.optString("text").isEmpty()) rows.add(new String[] {"💬", n.optString("text"), n.optString("from"), ""});
+        }
+    }
+
+    /** "18:30" from the calendar, told the way the rest of the home screen tells the time. */
+    private static String clockText(String hm) {
+        try {
+            java.util.Calendar at = java.util.Calendar.getInstance();
+            at.set(java.util.Calendar.HOUR_OF_DAY, Integer.parseInt(hm.substring(0, 2)));
+            at.set(java.util.Calendar.MINUTE, Integer.parseInt(hm.substring(3, 5)));
+            at.set(java.util.Calendar.SECOND, 0);
+            at.set(java.util.Calendar.MILLISECOND, 0);
+            return Ui.time(at.getTimeInMillis());
+        } catch (Exception e) {
+            return hm;
+        }
     }
 
     private void drawTonight(Canvas c) {

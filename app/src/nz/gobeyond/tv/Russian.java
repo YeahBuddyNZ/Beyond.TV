@@ -204,6 +204,9 @@ final class Russian {
             case "A remote on your phone, and messages on the TV": return "Пульт в телефоне и сообщения на телевизоре";
             case "High ": return "Макс. ";
             case "Low ": return "Мин. ";
+            case "Happy birthday, ": return "С днём рождения, ";
+            case "Tea tonight": return "Ужин сегодня";
+            case "All day": return "Весь день";
             case "Install the new version": return "Установить новую версию";
             case "Check for updates": return "Проверить обновления";
             case "Install updates by themselves": return "Устанавливать обновления самостоятельно";
