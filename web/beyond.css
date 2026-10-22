@@ -203,3 +203,111 @@
 }
 .bt-padkey.blank { background: none; }
 .bt-padkey.focus { background: #F7F6F2; color: #22221F; -webkit-transform: scale(1.1); transform: scale(1.1); }
+
+/* MARK: - Linking a service (Plex, Beyond Family): a big code to type on a phone */
+
+.bt-linkbox { position: absolute; left: 0; right: 0; top: 150px; text-align: center; }
+.bt-linkbox .bt-heading { margin: 26px 0 40px; font-size: 60px; }
+.bt-url { margin: 8px 0 22px; font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 54px; font-weight: 700; color: #E5A00D; }
+.bt-code {
+  display: inline-block;
+  margin: 18px 0 30px;
+  padding: 18px 48px;
+  border-radius: 28px;
+  background: rgba(247, 246, 242, 0.08);
+  box-shadow: inset 0 0 0 2px rgba(247, 246, 242, 0.16);
+  font-family: 'Sora', 'Inter', Arial, sans-serif;
+  font-size: 110px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-indent: 0.22em;
+}
+.bt-note { margin-bottom: 40px; font-size: 24px; color: rgba(247, 246, 242, 0.5); }
+.px-logo { display: inline-block; font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 44px; font-weight: 800; color: #121210; background: #E5A00D; padding: 4px 26px 8px; border-radius: 16px; }
+
+/* MARK: - Plex */
+
+.px-screen { background: #0E0E0C; }
+.px-screen::before { display: none; }
+.px-bg { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; background-size: cover; background-position: center top; opacity: 0.55; -webkit-transition: background-color 0.6s; transition: background-color 0.6s; }
+.px-shade {
+  position: absolute; left: 0; top: 0; width: 1920px; height: 1080px;
+  background: -webkit-linear-gradient(left, rgba(14, 14, 12, 0.96) 0%, rgba(14, 14, 12, 0.7) 45%, rgba(14, 14, 12, 0.2) 100%);
+  background: linear-gradient(90deg, rgba(14, 14, 12, 0.96) 0%, rgba(14, 14, 12, 0.7) 45%, rgba(14, 14, 12, 0.2) 100%);
+}
+.px-shade::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 620px;
+  background: -webkit-linear-gradient(top, rgba(14, 14, 12, 0), #0E0E0C 55%);
+  background: linear-gradient(rgba(14, 14, 12, 0), #0E0E0C 55%);
+}
+.px-head { position: absolute; left: 80px; top: 56px; white-space: nowrap; }
+.px-head .dots { vertical-align: 4px; margin-right: 18px; }
+.px-title { font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 40px; font-weight: 700; }
+.px-server { margin-left: 22px; font-size: 26px; color: rgba(247, 246, 242, 0.55); }
+.px-hero { position: absolute; left: 80px; top: 150px; width: 1000px; height: 300px; }
+.px-hero-title { font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 72px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.05; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.px-hero-meta { margin-top: 14px; font-size: 28px; font-weight: 600; color: #E5A00D; }
+.px-hero-sum { margin-top: 14px; font-size: 26px; line-height: 1.45; color: rgba(247, 246, 242, 0.72); max-height: 114px; overflow: hidden; }
+.px-rows {
+  position: absolute; left: 0; top: 480px; width: 1920px;
+  -webkit-transition: -webkit-transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1);
+  transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+.px-row { position: absolute; left: 0; width: 1920px; }
+.px-rowtitle { position: absolute; left: 80px; top: 0; font-size: 28px; font-weight: 600; color: rgba(247, 246, 242, 0.75); }
+.px-track {
+  position: absolute; left: 80px; top: 52px;
+  -webkit-transition: -webkit-transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1);
+  transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+.px-loading { position: absolute; left: 80px; top: 60px; font-size: 30px; color: rgba(247, 246, 242, 0.55); }
+.px-card { position: absolute; top: 0; width: 212px; -webkit-transition: -webkit-transform 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.2); transition: transform 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.2); }
+.px-card.wide { width: 428px; }
+.px-art {
+  position: relative; width: 212px; height: 318px; border-radius: 16px; overflow: hidden;
+  background-color: #22221F; background-size: cover; background-position: center;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.4);
+}
+.px-card.wide .px-art { width: 428px; height: 240px; }
+.px-art-title { position: absolute; left: 18px; right: 18px; bottom: 18px; font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 28px; font-weight: 700; line-height: 1.15; }
+.px-progress { position: absolute; left: 14px; right: 14px; bottom: 12px; height: 6px; border-radius: 3px; background: rgba(247, 246, 242, 0.25); }
+.px-progress i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; background: #E5A00D; }
+.px-watched { position: absolute; right: 12px; top: 12px; width: 36px; height: 36px; border-radius: 18px; background: #2F7D6D; text-align: center; line-height: 36px; font-size: 20px; font-weight: 700; }
+.px-name { margin-top: 14px; font-size: 24px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: rgba(247, 246, 242, 0.8); opacity: 0; -webkit-transition: opacity 0.2s; transition: opacity 0.2s; }
+.px-meta { margin-top: 4px; font-size: 21px; color: rgba(247, 246, 242, 0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0; -webkit-transition: opacity 0.2s; transition: opacity 0.2s; }
+.px-card.focus { -webkit-transform: scale(1.08); transform: scale(1.08); z-index: 2; }
+.px-card.focus .px-art { box-shadow: 0 0 0 4px #F7F6F2, 0 22px 44px rgba(0, 0, 0, 0.6); }
+.px-card.focus .px-name, .px-card.focus .px-meta { opacity: 1; }
+
+/* A show's episodes */
+.px-episodes .px-eplist { position: absolute; left: 80px; top: 170px; width: 1760px; -webkit-transition: -webkit-transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1); transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1); }
+.px-ep { position: absolute; left: 0; width: 1760px; height: 136px; border-radius: 20px; -webkit-transition: background-color 0.2s; transition: background-color 0.2s; }
+.px-ep .px-card { left: 12px !important; top: 12px; width: 200px; }
+.px-ep .px-card.wide .px-art { width: 200px; height: 112px; border-radius: 12px; }
+.px-ep .px-art-title { font-size: 16px; left: 10px; bottom: 10px; }
+.px-ep .px-progress { left: 10px; right: 10px; bottom: 8px; height: 4px; }
+.px-ep .has-progress .px-art-title { bottom: 20px; }
+.px-ep .px-name, .px-ep .px-meta { display: none; }
+.px-ep-title { position: absolute; left: 240px; top: 26px; font-size: 30px; font-weight: 600; white-space: nowrap; }
+.px-ep-sum { position: absolute; left: 240px; right: 30px; top: 74px; font-size: 22px; color: rgba(247, 246, 242, 0.55); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.px-ep.focus { background: rgba(247, 246, 242, 0.1); }
+.px-ep.focus .px-card { -webkit-transform: none; transform: none; }
+
+/* The player */
+.px-player { background: #000; }
+.px-player::before { display: none; }
+.px-video { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; background: #000; }
+.px-hud {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 300px; padding: 0 90px;
+  background: -webkit-linear-gradient(top, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.8));
+  background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.8));
+  opacity: 0; -webkit-transition: opacity 0.4s; transition: opacity 0.4s;
+}
+.px-hud.on { opacity: 1; }
+.px-hud-title { position: absolute; left: 90px; bottom: 150px; font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 44px; font-weight: 700; }
+.px-hud-sub { position: absolute; left: 90px; bottom: 112px; font-size: 26px; color: rgba(247, 246, 242, 0.7); }
+.px-hud-bar { position: absolute; left: 90px; right: 300px; bottom: 70px; height: 8px; border-radius: 4px; background: rgba(247, 246, 242, 0.25); }
+.px-hud-bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; background: #E5A00D; }
+.px-hud-time { position: absolute; right: 90px; bottom: 58px; font-size: 26px; font-weight: 600; font-feature-settings: 'tnum'; }
+.px-row { -webkit-transition: opacity 0.3s; transition: opacity 0.3s; }
+.px-row.gone { opacity: 0; }

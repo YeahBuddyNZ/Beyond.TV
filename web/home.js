@@ -526,6 +526,17 @@
           step: function () { if (Prefs.quotes()) { Prefs.setCoin(i, !Prefs.coin(i)); Data.settingsChanged(); } }});
       })(i);
     }
+    if (!Plex.linked()) rows.push({label: tr('Ligar o Plex', 'Link Plex', 'Enlazar Plex'), value: '›', step: function (d) { if (d >= 0) Plex.link(function () { renderSettings(); }); }});
+    else {
+      rows.push({label: tr('Usuário Plex de ', 'Plex user for ', 'Usuario Plex de ') + Profiles.current().name + ' · ' + ((Profiles.own('plexUser') || {}).name || tr('dono', 'owner', 'dueño')),
+        value: '›', step: function (d) { if (d >= 0) Plex.chooseUser(); }});
+      rows.push({label: tr('Desligar o Plex', 'Unlink Plex', 'Desenlazar Plex') + ' · ' + Plex.serverName(), value: '›', step: function (d) {
+        if (d < 0) return;
+        Plex.unlink();
+        toast(tr('Plex desligado desta TV.', 'Plex unlinked from this TV.', 'Plex desenlazado de esta TV.'));
+        renderSettings();
+      }});
+    }
     rows.push({label: tr('Perfis', 'Profiles', 'Perfiles'), value: '›', step: function (d) { if (d >= 0) { closeSheets(); Profiles.manage(function () { profileChosen(); }); } }});
     rows.push({label: tr('PIN de adulto', 'Grown-up PIN', 'PIN de adulto'), value: '›', step: function (d) { if (d >= 0) Profiles.setPin(); }});
     rows.push({label: tr('Prateleira de ', 'Shelf for ', 'Estante de ') + Profiles.current().name, value: '›', step: function (d) { if (d >= 0) openShelfEdit(); }});
@@ -646,6 +657,8 @@
 
   function launcher(id, name) {
     return function () {
+      // Plex opens Beyond TV's own Plex screen: Continue Watching, the libraries and the player, right here.
+      if (/plex/i.test(name || '') || /plex|cdp-30/i.test(id || '')) { Plex.open(); return; }
       TV.launch(id, null, function (ok) {
         if (!ok) toast(tr('Não deu para abrir ', "Couldn't open ", 'No se pudo abrir ') + (name || id));
       });
