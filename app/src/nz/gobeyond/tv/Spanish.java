@@ -9,6 +9,9 @@ final class Spanish {
             case "Live TV": return "TV en vivo";
             case "All Apps": return "Todas las apps";
             case "Settings": return "Ajustes";
+            case "Sleep Timer": return "Temporizador";
+            case "Sleep timer off.": return "Temporizador apagado.";
+            case "The TV turns off in a minute. Sleep Timer in the menu stops it.": return "La TV se apaga en un minuto. Temporizador en el menú lo detiene.";
             case "Home Settings": return "Ajustes de inicio";
             case "TV Settings": return "Ajustes del TV";
             case "HDMI Inputs": return "Entradas HDMI";

@@ -9,6 +9,10 @@ final class German {
             case "Live TV": return "Live-TV";
             case "All Apps": return "Alle Apps";
             case "Settings": return "Einstellungen";
+            case "Sleep Timer": return "Ausschalt-Timer";
+            case "Sleep timer off.": return "Ausschalt-Timer aus.";
+            case "The TV turns off in ": return "Der Fernseher geht aus in ";
+            case "The TV turns off in a minute. Sleep Timer in the menu stops it.": return "Der Fernseher geht in einer Minute aus. Ausschalt-Timer im Menü hält ihn an.";
             case "Home Settings": return "Start-Einstellungen";
             case "TV Settings": return "TV-Einstellungen";
             case "HDMI Inputs": return "HDMI-Eingänge";

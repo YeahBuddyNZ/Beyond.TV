@@ -2278,6 +2278,11 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             FeedbackActivity.open(activity);
             return;
         }
+        if (it.kind == HomeApps.SLEEP) {
+            Context ctx = getContext();
+            showToast(Sleep.set(ctx, Sleep.next(ctx)));
+            return;
+        }
         if (it.kind == HomeApps.PEOPLE) {
             WhoActivity.open(activity, null);
             return;
