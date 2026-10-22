@@ -292,12 +292,13 @@ final class Shaders {
         }
     }
 
-    // Sky phases through the day.
-    private static final int[] NIGHT = {0x070B1E, 0x16225A, 0x4B2F8F};
-    private static final int[] DAWN = {0x24183F, 0xE89A55, 0xF6D59A};
-    private static final int[] DAY = {0x1E57C8, 0x4FB9EC, 0x9EE2EE};
-    private static final int[] SUNSET = {0x2E1650, 0xE2546C, 0xF39A4F};
-    private static final int[] DUSK = {0x10173A, 0x36348A, 0x8A4BB0};
+    // Sky phases through the day, all in Beyond's violets: ink #0D0C18, plum #2C2458, violet #6E3DDB, lilac #9E7BFF.
+    // Dawn and sunset only warm the highlight a touch (coral, from the mark), so it is still purple at a glance.
+    private static final int[] NIGHT = {0x0D0C18, 0x2C2458, 0x6E3DDB};
+    private static final int[] DAWN = {0x1A1433, 0x5A36B8, 0xC79BE8};
+    private static final int[] DAY = {0x2C2458, 0x6E3DDB, 0x9E7BFF};
+    private static final int[] SUNSET = {0x1E1440, 0x6135D6, 0xD8789A};
+    private static final int[] DUSK = {0x120F26, 0x3A2C7A, 0x7B4FE0};
 
     /**
      * Palette for the sun's current position at your location. Uses the sunrise and sunset times from the last weather

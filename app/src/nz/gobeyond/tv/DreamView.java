@@ -144,6 +144,7 @@ final class DreamView extends View implements Choreographer.FrameCallback, HomeD
         recs = Recs.get(c);
         Shaders.dream(scene.palette);
         scene.setMotion(0.4f, 0.32f);
+        scene.setBreath(Breath.period(1, true));
         scene.applyPalette();
         content.setUseCompositingLayer(true, null);
         try {

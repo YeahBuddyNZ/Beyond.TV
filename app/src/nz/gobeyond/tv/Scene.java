@@ -4,7 +4,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.RuntimeShader;
@@ -15,8 +14,9 @@ import android.graphics.Shader;
  * and only redrawn when it moves (advance, up to ~30 times per second); in the frames between steps the GPU just
  * reuses the layer. The glass reads the frosted aurora computed in Frost or, with a recommendation's image as the
  * background, its blurred version (setFrost).
- * If AGSL fails (it shouldn't on Android 13+), it falls back to a gradient and plain translucent glass: the home screen
- * is never left blank.
+ * If AGSL fails (it shouldn't on Android 13+), it falls back to Glow, the same violet lights without shaders, and plain
+ * translucent glass: the screen is never left blank or still.
+ * Both breathe (Breath): the aurora dims a little on the out-breath, Glow's lights swell on the in-breath.
  */
 final class Scene {
     final Shaders.Palette palette = new Shaders.Palette();
@@ -27,7 +27,9 @@ final class Scene {
     private final Paint liquidPaint = new Paint();
     private final Paint flatFill = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint flatRim = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final Paint fallback = new Paint();
+    private final Glow fallback = new Glow();
+    private final Breath.Clock clock = new Breath.Clock();
+    private float breathPeriod = 10, breath;
     private final Recording auroraNode = Recording.create("aurora");
     // The layer is drawn at a quarter size and scaled up: filtered, its soft shapes stay soft instead of stepping.
     private final Paint layerPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
@@ -68,6 +70,7 @@ final class Scene {
         h = Math.max(1, height);
         lw = Math.max(1, Math.round(w / 4f));
         lh = Math.max(1, Math.round(h / 4f));
+        fallback.setSize(w, h);
         auroraNode.setPosition(0, 0, lw, lh);
         if (aurora != null) {
             aurora.setFloatUniform("res", w, h);
@@ -85,17 +88,26 @@ final class Scene {
         push();
     }
 
+    /** Seconds per breath (Breath.period). */
+    void setBreath(float period) {
+        breathPeriod = period;
+    }
+
+    /** How full the breath is right now (0 to 1), as of the last advance. */
+    float breath() {
+        return breath;
+    }
+
     /** Call after changing `palette`. Bright palettes are dimmed a little so white text stays readable. */
     void applyPalette() {
         push();
-        fallback.setShader(new LinearGradient(0, 0, 0, h, palette.color(1), palette.color(0), Shader.TileMode.CLAMP));
     }
 
     private void push() {
         dim = Math.min(0.6f, baseDim + Math.max(0, Math.min(0.22f, (palette.brightest() - 0.45f) * 0.5f)));
         if (aurora == null) return;
         aurora.setFloatUniform("speed", speed);
-        aurora.setFloatUniform("dim", dim);
+        aurora.setFloatUniform("dim", breathingDim());
         palette.apply(aurora);
         advance(time);
     }
@@ -103,8 +115,10 @@ final class Scene {
     /** Moves the aurora to `seconds`: redraws the layer on the next draw, recomputes the glass's frosted aurora now. */
     void advance(float seconds) {
         time = seconds;
+        breath = clock.at(seconds, breathPeriod);
         if (aurora == null) return;
         aurora.setFloatUniform("t", seconds);
+        aurora.setFloatUniform("dim", breathingDim());
         if (withGlass && (!imageFrost || !imageGlass)) {
             BitmapShader s = frost.render(seconds, speed, dim, palette.c, (float) w / h);
             if (!imageFrost) glass.setInputShader("frost", s);
@@ -116,6 +130,11 @@ final class Scene {
             }
         }
         auroraDirty = true;
+    }
+
+    /** Out-breath: up to 0.12 darker, so the whole sky seems to settle and lift again. */
+    private float breathingDim() {
+        return Math.min(0.7f, dim + 0.12f * (1 - breath));
     }
 
     /** The liquid glass now shows this photo (Backdrop.GW × GH, slightly blurred). */
@@ -222,8 +241,7 @@ final class Scene {
 
     void drawBackground(Canvas c) {
         if (aurora == null) {
-            if (fallback.getShader() == null) applyPalette();
-            c.drawRect(0, 0, w, h, fallback);
+            fallback.draw(c, time, breath, 1, 1);
             return;
         }
         if (auroraDirty) {

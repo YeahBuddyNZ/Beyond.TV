@@ -28,17 +28,21 @@ import java.security.MessageDigest;
 import java.util.Arrays;
 
 /**
- * Keeps Beyond TV up to date with one OK press. Once a day the main process asks GitHub for the newest
- * "android-<versionCode>" release, downloads its BeyondTV.apk and keeps it only if it is this app, newer, and signed
- * with the same key as the installed copy. The next time the home screen opens, Android's own install prompt is shown.
- * Nothing installs without that press, and Android checks the signature again itself.
+ * Keeps Beyond TV up to date. Every few hours the main process asks GitHub for the newest "android-<versionCode>"
+ * release, downloads its BeyondTV.apk and keeps it only if it is this app, newer, and signed with the same key as the
+ * installed copy. Then, by default, the next time the home screen opens, Android's own install prompt is shown: one OK
+ * press. With "Install updates by themselves" on (Settings > Updates, off unless the person turns it on), it installs
+ * through the TV's own ADB instead, only with a key the TV already allowed, and only while nobody is looking at the
+ * home screen. Android checks the signature again itself either way.
  */
 final class Updater {
     private Updater() {}
 
     static final String RELEASES = "https://api.github.com/repos/YeahBuddyNZ/Beyond.TV/releases?per_page=20";
     static final String ACTION_RESULT = "nz.gobeyond.tv.UPDATE_RESULT";
-    private static final long DAY = 24L * 60 * 60 * 1000;
+    /** How often to look: new versions reach TVs within a few hours. */
+    private static final long EVERY = 6L * 60 * 60 * 1000;
+    private static final long WAIT_FOR_QUIET = 30L * 60 * 1000;
     /** Asked once, then left alone for this long: "not now" is an answer. */
     private static final long ASK_AGAIN = 12L * 60 * 60 * 1000;
     private static final long MAX_BYTES = 80L * 1024 * 1024;
@@ -47,19 +51,103 @@ final class Updater {
     private static File apk(Context c) { return new File(dir(c), "BeyondTV.apk"); }
     private static File stamp(Context c, String name) { return new File(dir(c), name); }
 
-    /** From the home screen: schedules the daily look when the last one was over a day ago. */
+    /** From the home screen: schedules a look when the last one was a while ago, and says when an update went in. */
     static void maybeCheck(Context c) {
-        if (System.currentTimeMillis() - stamp(c, "checked").lastModified() > DAY) {
+        if (System.currentTimeMillis() - stamp(c, "checked").lastModified() > EVERY) {
             ModeJob.schedule(c, ModeJob.UPDATE, "", 30_000);
         }
+        long expected = readLong(stamp(c, "installing"));
+        if (expected > 0) {
+            try {
+                PackageInfo me = c.getPackageManager().getPackageInfo(c.getPackageName(), 0);
+                if (versionCode(me) >= expected) {
+                    stamp(c, "installing").delete();
+                    HomeMode.notice(c, Ui.tr("Beyond™ TV foi atualizado para a versão ", "Beyond™ TV updated itself to version ")
+                            + me.versionName + ".");
+                }
+            } catch (PackageManager.NameNotFoundException ignored) {
+            }
+        }
+    }
+
+    /** Settings > Updates > Check now: looks straight away. */
+    static void checkSoon(Context c) {
+        try {
+            if (!dir(c).isDirectory()) dir(c).mkdirs();
+            touch(stamp(c, "asked-check"));
+        } catch (IOException ignored) {
+        }
+        ModeJob.schedule(c, ModeJob.UPDATE, "", 0);
+    }
+
+    // MARK: - Install by themselves (a file, so every process sees the same answer)
+
+    static boolean auto(Context c) { return stamp(c, "auto").exists(); }
+
+    static void setAuto(Context c, boolean on) {
+        File f = stamp(c, "auto");
+        try {
+            if (!on) { f.delete(); return; }
+            if (!dir(c).isDirectory()) dir(c).mkdirs();
+            touch(f);
+        } catch (IOException e) {
+            AppLog.w("update: " + e.getMessage());
+        }
+        if (on && apk(c).isFile()) ModeJob.schedule(c, ModeJob.UPDATE, "", 5_000);
+    }
+
+    /** The home screen is on screen (so an update by itself waits rather than blink it away). */
+    static void homeShowing(Context c, boolean showing) {
+        File f = stamp(c, "home-front");
+        try {
+            if (showing) { if (!dir(c).isDirectory()) dir(c).mkdirs(); touch(f); } else f.delete();
+        } catch (IOException ignored) {
+        }
+    }
+
+    /** For Settings > Updates: one line on where things stand. */
+    static String status(Context c) {
+        long checked = stamp(c, "checked").lastModified(), asked = stamp(c, "asked-check").lastModified();
+        if (apk(c).isFile()) {
+            String name = readText(stamp(c, "ready-name"));
+            return Ui.tr("Versão ", "Version ") + (name.isEmpty() ? "" : name + " ") + Ui.tr("pronta: OK instala", "ready: OK installs it");
+        }
+        if (asked > checked && System.currentTimeMillis() - asked < 2 * 60_000) return Ui.tr("Procurando…", "Checking…");
+        String error = readText(stamp(c, "error"));
+        // The reason goes to the check-in, not on screen: "HTTP 403" means nothing to anybody on the couch.
+        if (!error.isEmpty() && stamp(c, "error").lastModified() >= checked - 1000)
+            return Ui.tr("Não deu para ver agora; tenta de novo sozinho", "Couldn't check just now. It tries again by itself");
+        if (checked == 0) return Ui.tr("Ainda não procurou", "Not checked yet");
+        return Ui.tr("Em dia, visto ", "Up to date, checked ") + ago(checked);
+    }
+
+    private static String ago(long at) {
+        long minutes = Math.max(0, (System.currentTimeMillis() - at) / 60_000);
+        if (minutes < 1) return Ui.tr("agora", "now");
+        if (minutes < 60) return Ui.tr("há " + minutes + " min", minutes + " min ago");
+        if (minutes < 48 * 60) return Ui.tr("há " + (minutes / 60) + " h", (minutes / 60) + " h ago");
+        return Ui.tr("há " + (minutes / 1440) + " dias", (minutes / 1440) + " days ago");
     }
 
     /** In a background job (main process). */
     static void checkNow(Context c) throws Exception {
+        try {
+            look(c);
+            stamp(c, "error").delete();
+        } catch (Exception e) {
+            writeText(stamp(c, "error"), e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage());
+            throw e;
+        }
+    }
+
+    private static void look(Context c) throws Exception {
         File d = dir(c);
         if (!d.isDirectory() && !d.mkdirs()) throw new IOException("no update folder");
         touch(stamp(c, "checked"));
+        File shared = shared(c);
+        if (shared != null) shared.delete();   // a copy left from installing by itself
         long installed = versionCode(c.getPackageManager().getPackageInfo(c.getPackageName(), 0));
+        if (apk(c).isFile() && readLong(stamp(c, "ready")) <= installed) apk(c).delete();   // installed meanwhile
 
         JSONArray releases = new JSONArray(get(RELEASES));
         long best = 0;
@@ -86,7 +174,10 @@ final class Updater {
             AppLog.w("update: up to date (" + installed + ")");
             return;
         }
-        if (apk(c).isFile() && best == readLong(stamp(c, "ready"))) return;   // already downloaded
+        if (apk(c).isFile() && best == readLong(stamp(c, "ready"))) {   // already downloaded
+            if (auto(c)) installByItself(c);
+            return;
+        }
 
         File part = new File(d, "download.part");
         download(url, part);
@@ -103,8 +194,56 @@ final class Updater {
         apk(c).delete();
         if (!part.renameTo(apk(c))) throw new IOException("could not keep the download");
         writeLong(stamp(c, "ready"), best);
+        PackageInfo next = c.getPackageManager().getPackageArchiveInfo(apk(c).getPath(), 0);
+        writeText(stamp(c, "ready-name"), next == null || next.versionName == null ? "" : next.versionName);
         stamp(c, "asked").delete();
         AppLog.w("update: " + best + " is ready to install");
+        if (auto(c)) installByItself(c);
+    }
+
+    /**
+     * Installs the ready update through the TV's own ADB, without a prompt. Only with a key the TV already allowed
+     * (Adb.connect with 0 never asks), and not while the home screen is in front of somebody: then it tries again later.
+     * If it can't, the update waits for the usual prompt instead. Our own process ends when the new version goes in.
+     */
+    private static void installByItself(Context c) {
+        File file = apk(c);
+        if (!file.isFile()) return;
+        android.os.PowerManager power = c.getSystemService(android.os.PowerManager.class);
+        boolean screenOn = power == null || power.isInteractive();
+        if (screenOn && stamp(c, "home-front").exists()
+                && System.currentTimeMillis() - stamp(c, "home-front").lastModified() < 6 * 60 * 60 * 1000L) {
+            AppLog.w("update: the home screen is showing, installing later");
+            ModeJob.schedule(c, ModeJob.UPDATE, "", WAIT_FOR_QUIET);
+            return;
+        }
+        File copy = shared(c);
+        if (copy == null) return;
+        try {
+            long ready = readLong(stamp(c, "ready"));
+            try (InputStream in = new FileInputStream(file); OutputStream out = new FileOutputStream(copy)) {
+                copy(in, out, MAX_BYTES);
+            }
+            // The shell can read our folder on shared storage, never our private one. Fixed path, no spaces.
+            writeLong(stamp(c, "installing"), ready);
+            try (Adb adb = Adb.connect(c, 0, null)) {
+                String out = adb.shell("pm install -r " + copy.getAbsolutePath()).trim();
+                if (!out.contains("Success")) throw new IOException(out.isEmpty() ? "no answer" : out);
+            }
+            file.delete();
+        } catch (Exception e) {
+            stamp(c, "installing").delete();
+            copy.delete();
+            AppLog.w("update: couldn't install by itself (" + e.getMessage() + "), the TV will ask instead");
+            Checkin.error(c, "update", "install by itself: " + e.getMessage());
+        }
+    }
+
+    /** Where the shell can read the update: our folder on shared storage (no permission needed for it). */
+    private static File shared(Context c) {
+        File d = c.getExternalFilesDir(null);
+        if (d == null || (!d.isDirectory() && !d.mkdirs())) return null;
+        return new File(d, "BeyondTV-update.apk");
     }
 
     /** Why this file must not be offered, or null when it is this app, newer, and signed with our key. */
@@ -127,13 +266,19 @@ final class Updater {
 
     /**
      * On the home screen: when an update is ready and we haven't just asked, hands it to Android's installer, which
-     * shows its own "Do you want to install an update?" prompt. Off the UI thread.
+     * shows its own "Do you want to install an update?" prompt. Off the UI thread. now: asked for in Settings.
      */
     static void offer(final Activity a) {
+        offer(a, false);
+    }
+
+    static boolean ready(Context c) { return apk(c).isFile(); }
+
+    static void offer(final Activity a, boolean now) {
         final Context c = a.getApplicationContext();
         final File file = apk(c);
         if (!file.isFile()) return;
-        if (System.currentTimeMillis() - stamp(c, "asked").lastModified() < ASK_AGAIN) return;
+        if (!now && System.currentTimeMillis() - stamp(c, "asked").lastModified() < ASK_AGAIN) return;
         new Thread(() -> {
             try {
                 long installed = versionCode(c.getPackageManager().getPackageInfo(c.getPackageName(), 0));
@@ -262,6 +407,24 @@ final class Updater {
             return Long.parseLong(out.toString("UTF-8").trim());
         } catch (Exception e) {
             return -1;
+        }
+    }
+
+    private static String readText(File f) {
+        if (!f.isFile()) return "";
+        try (InputStream in = new FileInputStream(f)) {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            copy(in, out, 400);
+            return out.toString("UTF-8").trim();
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    private static void writeText(File f, String v) {
+        try (OutputStream out = new FileOutputStream(f)) {
+            out.write(v.getBytes(StandardCharsets.UTF_8));
+        } catch (IOException ignored) {
         }
     }
 

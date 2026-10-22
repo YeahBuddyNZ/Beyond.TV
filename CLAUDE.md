@@ -142,10 +142,12 @@ with the person's Samsung certificate. Sign every release with the same author c
 update signed by another. `python3 webos/build.py --generic` makes the LG `.ipk` that goes along.
 
 Android updates itself (`Updater.java`): on main, with the `ANDROID_KEYSTORE` secret set, CI publishes each build as a
-release tagged `android-<versionCode>` (100 + the run number, never marked latest). Once a day the TV downloads the
+release tagged `android-<versionCode>` (100 + the run number, never marked latest). Every 6 hours the TV downloads the
 newest, keeps it only if it is this app, newer and signed with the same key, and on the home screen hands it to
-Android's installer, which asks for one OK press. The TV asks once to allow Beyond TV to install apps. Never make it
-silent: the prompt is the person's say.
+Android's installer, which asks for one OK press. The TV asks once to allow Beyond TV to install apps. Settings >
+Updates checks now and shows what is ready. *Install updates by themselves* is off unless the person turns it on: then
+the app installs through the TV's own ADB (`pm install`, only once its key is allowed, never asking from there), waits
+until nobody is on the home screen, and says so afterwards. Never turn it on for them: the choice is the person's say.
 
 ## Adapting it to another TV
 
