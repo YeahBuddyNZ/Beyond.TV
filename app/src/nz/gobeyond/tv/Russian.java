@@ -212,6 +212,10 @@ final class Russian {
             case "Breathe out": return "Выдох";
             case "The moon button, up the top": return "Кнопка с луной, наверху";
             case "Time for bed": return "Пора спать";
+            case "Jobs first, then screens": return "Сначала дела, потом экран";
+            case "Just one to go! Tick it off in Beyond Family and the TV opens by itself.": return "Осталось одно! Отметьте в Beyond Family, и телевизор откроется сам.";
+            case "On it": return "Уже делаю";
+            case "All done! Screens are open.": return "Всё сделано! Экран открыт.";
             case "Install the new version": return "Установить новую версию";
             case "Check for updates": return "Проверить обновления";
             case "Install updates by themselves": return "Устанавливать обновления самостоятельно";
@@ -333,6 +337,7 @@ final class Russian {
                     return "Вкл. · Рекомендаций из приложений телевизора: " + n + "; 3 новых каждый час.";
                 }
                 if (english.endsWith(" hours ago")) return english.substring(0, english.length() - 10) + " ч назад";
+                if (english.endsWith(" to go. Tick them off in Beyond Family and the TV opens by itself.")) return english.substring(0, english.length() - 66) + " осталось. Отметьте в Beyond Family, и телевизор откроется сам.";
                 if (english.endsWith(" min ago")) return english.substring(0, english.length() - 8) + " мин назад";
                 if (english.endsWith(" h ago")) return english.substring(0, english.length() - 6) + " ч назад";
                 if (english.endsWith(" days ago")) {

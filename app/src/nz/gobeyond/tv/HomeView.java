@@ -2425,6 +2425,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             retarget(false);
             return;
         }
+        // Earn your screen: a kid with jobs left sees them instead.
+        if ((it.kind == HomeApps.APP || it.kind == HomeApps.LIVE_TV) && JobsActivity.first(activity)) return;
         boolean opened = HomeApps.open(activity, it, this, Math.round(r.left), Math.round(r.top),
                 Math.round(r.width()), Math.round(r.height()));
         if (!opened) {
@@ -3122,6 +3124,12 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
     private void updateTonight() {
         if (lHead == null) return;
         Context ctx = getContext();
+        // Earn your screen: the last job ticked off in Beyond Family.
+        boolean jobsLeft = watcher != null && watcher.kid && !Family.jobs(watcher.id).isEmpty();
+        String who = watcher == null ? "" : watcher.id;
+        if (hadJobs && !jobsLeft && who.equals(jobsWho)) showToast(Ui.tr("Tudo feito! As telas estão abertas.", "All done! Screens are open.", "¡Todo listo! Las pantallas están abiertas."));
+        hadJobs = jobsLeft;
+        jobsWho = who;
         boolean linked = Family.linked(ctx), kid = watcher != null && watcher.kid;
         List<String[]> rows = new ArrayList<>();
         JSONObject board = linked ? Family.board() : null;
@@ -3214,6 +3222,9 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             return hm;
         }
     }
+
+    private boolean hadJobs;
+    private String jobsWho = "";
 
     private void drawTonight(Canvas c) {
         if (!tonightOn) return;
