@@ -4,12 +4,14 @@
 
 # Beyond™ TV
 
+## Free your world.
+
 **One calm home screen for the whole whānau, on Google TV, LG and Samsung TVs.**
 
 Your streaming apps on one shelf, what's worth watching tonight, and no ads.<br>
 Free and open source, built in Aotearoa by [Beyond](https://gobeyond.co.nz). One button to undo.
 
-[Install](#install) · [LG TVs](#lg-tvs-webos) · [Samsung TVs](#samsung-tvs-tizen) · [Any TV](#any-tv) · [Make it yours](#make-it-yours) · [Roadmap](#roadmap)
+[Install](#install) · [LG TVs](#lg-tvs-webos) · [Samsung TVs](#samsung-tvs-tizen) · [Any TV](#any-tv) · [Change the code](#change-the-code) · [Roadmap](#roadmap)
 
 <img src="docs/assets/banner.png" width="640" alt="The Beyond™ TV logo: Beyond's four coloured dots beside the words Beyond™ TV">
 
@@ -30,7 +32,7 @@ Free and open source, built in Aotearoa by [Beyond](https://gobeyond.co.nz). One
 
 ## What you get
 
-- **Kids make it theirs.** On their own profile, with the remote, no grown-up needed: a buddy, a colour, a world that fills their home screen, and the things they love drifting through it.
+- **Make it yours.** Kids make it theirs on their own profile, with the remote, no grown-up needed: a buddy, a colour, a world that fills their home screen, and the things they love drifting through it.
 - **No ads.** No sponsored rows, banners or autoplaying promos.
 - **Your apps, front and centre.** Netflix, Neon, TVNZ+, Disney+, ThreeNow, Plex and the rest on one shelf, in the order you pick on the TV.
 - **Trending, not sponsored.** Fresh picks every hour from what's trending and the latest releases, only from apps you already have.
@@ -183,7 +185,7 @@ Beyond™ TV runs on Google TV and Android TV: TCL, Sony, Hisense, Philips, Xiao
 | Apps on the shelf | `SHELF` in [`HomeApps.java`](app/src/nz/gobeyond/tv/HomeApps.java) |
 | Your brand's live TV app | `LIVE_TV_APPS` in the same file |
 
-## Make it yours
+## Change the code
 
 It's your code, and Claude Code finds its way around it. Try:
 
