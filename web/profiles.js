@@ -303,11 +303,22 @@ var Profiles = (function () {
       for (var i = 0; i < list.length; i++) keep[list[i].id] = list[i];
       list = people.map(function (p) {
         var old = keep[p.id];
-        if (old) { p.shelf = old.shelf; p.plexUser = old.plexUser; p.emoji = p.emoji || old.emoji; }
+        if (old) {
+          p.shelf = old.shelf; p.plexUser = old.plexUser; p.emoji = p.emoji || old.emoji;
+          // What a kid picked in Make it yours stays theirs, even over the household's colour.
+          if (old.look) { p.look = true; p.emoji = old.emoji; p.colour = old.colour; p.world = old.world; p.loves = old.loves; }
+          p.offered = old.offered;
+        }
         return p;
       });
       if (!find(who)) who = list[0].id;
       save(WHO, who);
+      changed();
+    },
+    /** Make it yours (myworld.js): how the watcher's profile looks. Never the name, shelf, PIN or kid flag. */
+    setLook: function (look) {
+      var p = current();
+      p.emoji = look.emoji; p.colour = look.colour; p.world = look.world; p.loves = look.loves; p.look = true;
       changed();
     },
     /** Switches to someone from Beyond Family's remote. The app already checked who may (a kid only to themselves). */

@@ -20,13 +20,17 @@ Free and open source, built in Aotearoa by [Beyond](https://gobeyond.co.nz). One
 <table>
 <tr><td><img src="docs/screenshots/whos-watching.jpg" alt="Who's watching: Mum, Dad, and two kids' profiles with a unicorn and a dinosaur"></td>
 <td><img src="docs/screenshots/home-night.jpg" alt="The home screen at night: a big clock and the streaming apps on one shelf"></td></tr>
-<tr><td><img src="docs/screenshots/kids-home.jpg" alt="A kid's home screen with only the apps picked for them"></td>
+<tr><td><img src="docs/screenshots/kids-home.jpg" alt="A kid's home screen in the world they chose, with only their apps"></td>
 <td><img src="docs/screenshots/plex.jpg" alt="Plex built in: Continue Watching with progress bars, and Recently Added"></td></tr>
-<tr><td colspan="2" align="center"><img src="docs/screenshots/message-from-the-app.jpg" width="640" alt="A message from the Beyond Family app on the TV: 5 minutes to dinner, from Kyle"></td></tr>
+<tr><td><img src="docs/screenshots/make-it-yours-buddy.jpg" alt="Make it yours, step 1: a kid picks a buddy to be them on the TV"></td>
+<td><img src="docs/screenshots/make-it-yours-world.jpg" alt="Make it yours, step 3: choose your world, from Under the sea to Dino volcano"></td></tr>
+<tr><td><img src="docs/screenshots/make-it-yours-party.jpg" alt="The party at the end: This TV is yours now, with dinosaurs and stars flying out"></td>
+<td><img src="docs/screenshots/message-from-the-app.jpg" alt="A message from the Beyond Family app on the TV: 5 minutes to dinner"></td></tr>
 </table>
 
 ## What you get
 
+- **Kids make it theirs.** On their own profile, with the remote, no grown-up needed: a buddy, a colour, a world that fills their home screen, and the things they love drifting through it.
 - **No ads.** No sponsored rows, banners or autoplaying promos.
 - **Your apps, front and centre.** Netflix, Neon, TVNZ+, Disney+, ThreeNow, Plex and the rest on one shelf, in the order you pick on the TV.
 - **Trending, not sponsored.** Fresh picks every hour from what's trending and the latest releases, only from apps you already have.

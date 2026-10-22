@@ -220,6 +220,7 @@
       st.zone = Z.SHELF; openDrawer(); st.drawer = 1 < drawerInputs ? 1 : 0; updateFocus();
     }});
     list.push({icon: 'settings', label: tr('Ajustes', 'Settings', 'Ajustes'), run: function () { openSettings(); }});
+    if (kid) list.push({icon: 'sparkles', label: tr('Do seu jeito', 'Make it yours', 'A tu manera'), run: makeItYours});
     if (Profiles.count() > 1 || window.Family) list.push({person: Profiles.current(), label: tr('Trocar perfil', 'Switch profile', 'Cambiar perfil'),
       run: function () { Profiles.pick(false, profileChosen); }});
     return list;
@@ -804,8 +805,17 @@
 
   // MARK: - Night, clock, screensaver
 
+  var inWorld = false;
+
+  /** A kid's world (Make it yours) keeps the light words on, day and night. */
   function checkNight() {
-    setClass(body, 'night', Data.isNight(Date.now()));
+    setClass(body, 'night', inWorld || Data.isNight(Date.now()));
+  }
+
+  function paintWorld() {
+    inWorld = MyWorld.home($('sky'), Profiles.current());
+    setClass(body, 'in-world', inWorld);
+    checkNight();
   }
 
   var saverOn = false, idleAt = Date.now(), saverIndex = 0, saverTimer = 0, SAVER_AFTER = 5 * 60000;
@@ -913,7 +923,15 @@
   // MARK: - Start
 
   /** Someone else is watching now: their shelf, their picks, their name. */
+  function makeItYours() {
+    Profiles.setOwn('offered', true);
+    MyWorld.open(function () { profileChosen(); });
+  }
+
   function profileChosen() {
+    // A kid who hasn't made it theirs yet is asked once, the first time they pick their face.
+    var me = Profiles.current();
+    if (me.kid && !me.look && !me.offered) setTimeout(makeItYours, 450);
     pickShelf();
     cards = [];
     st.zone = Z.SHELF;
@@ -929,7 +947,7 @@
     renderShelf();
     renderDrawer();
     renderClock();
-    checkNight();
+    paintWorld();
     if (st.zone === Z.SETTINGS) renderSettings();
     updateFocus();
   }
@@ -988,7 +1006,7 @@
     Data.refresh();
     if (Profiles.count() > 1) Profiles.pick(false, profileChosen);
   });
-  Profiles.onChange(function () { renderTop(); updateFocus(); });
+  Profiles.onChange(function () { renderTop(); paintWorld(); updateFocus(); });
   setInterval(function () {
     renderClock();
     checkNight();
