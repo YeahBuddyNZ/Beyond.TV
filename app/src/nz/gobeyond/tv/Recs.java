@@ -55,6 +55,8 @@ final class Recs {
         String tile;            // pinned from Beyond Family: "app", "show", "jobs" or "camera"
         String camera;          // a camera tile's picture address, on the home network
         org.json.JSONArray kids; // the jobs tile: [{name, colour, jobs: [{title, done}]}]
+        String room;            // Your home: the Beyond Home room this card opens (tile "house"; null to connect the box)
+        boolean[] ons;          // Your home: each thing in the room, on or off
     }
 
     interface Listener { void onRecs(); }

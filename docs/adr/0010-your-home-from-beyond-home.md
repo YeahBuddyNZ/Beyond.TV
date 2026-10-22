@@ -14,4 +14,4 @@ Kyle asked for a Home button that makes the TV the everything hub. Beyond TV own
 
 Pairing by code is the same as Beyond Family's TVs. The TV keeps its secret; the box keeps only a hash of it, and taking the TV off in the app stops it at once. Everything stays on the home network: the box answers only private addresses.
 
-Google TV gets the same tab next, with plain http on its own socket like the cameras, so cleartext stays off for everything else.
+Google TV has the same tab (the first three rooms, the screens it has), and also finds the box by Home Assistant's own announcement on the network. It speaks plain http over its own socket (`LocalHttp`, shared with the cameras), home network only, so cleartext stays off for everything else.

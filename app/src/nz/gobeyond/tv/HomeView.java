@@ -389,6 +389,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             updatePalette();
             checkNight(true);
             updatePicks();      // three new ones every hour
+            HomeHub.start(getContext());   // a Beyond Home box switched on later is found (it asks at most every ten minutes)
             handler.postDelayed(this, 15_000);
         }
     };
@@ -457,6 +458,9 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         if (tvInputs != null) tvInputs.registerCallback(inputCallback, handler);
         handler.postDelayed(tick, 15_000);
         handler.post(camTick);
+        HomeHub.onChange = () -> { if (running) { updateCards(); cardWords(); invalidateAll(); } };
+        HomeHub.start(getContext());
+        HomeHub.pace(false);
         checkNotices();
         reload();
         updatePalette();
@@ -480,6 +484,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         Choreographer.getInstance().removeFrameCallback(this);
         handler.removeCallbacks(tick);
         handler.removeCallbacks(camTick);
+        HomeHub.stop();
+        HomeHub.onChange = null;
         handler.removeCallbacks(reloadSoon);
         data.removeListener(this);
         recs.removeListener(this);
@@ -549,6 +555,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         switch (kind) {
             case "watching": return Ui.tr("Continuar assistindo", "Keep watching", "Seguir viendo");
             case "pinned": return Ui.tr("Fixados", "Pinned", "Fijados");
+            case "home": return Ui.tr("Sua casa", "Your home", "Tu casa");
             case "movie": return tabs()[1];
             case "tv": return tabs()[2];
             default: return tabs()[0];
@@ -566,6 +573,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         JSONArray pinned = Family.widgets();
         if (pinned != null && pinned.length() > 0) out.add("pinned");
         if (!Watched.list(getContext(), 1).isEmpty()) out.add("watching");
+        // Your home: the rooms from the family's Beyond Home box, once there is one on this network. Not for kids.
+        if (!"none".equals(HomeHub.status()) && !People.kid(getContext())) out.add("home");
         if (picksOn()) {
             out.add("all");
             out.add("movie");
@@ -2411,6 +2420,10 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             r = topRects[topIndex];
         } else if (zone == Z_CARDS) {
             Recs.Pick p = cardIndex < cards.size() ? cards.get(cardIndex) : null;
+            if (p != null && "house".equals(p.tile)) {
+                RoomActivity.open(activity, p.room);
+                return;
+            }
             if (p != null && p.camera != null) {
                 CameraActivity.open(activity, p.title, p.camera);
                 return;
@@ -2934,7 +2947,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         }
         String kind = tab < kinds.size() ? kinds.get(tab) : null;
         List<Recs.Pick> list = kind == null ? new ArrayList<>()
-                : "pinned".equals(kind) ? pinnedCards() : "watching".equals(kind) ? watchingCards() : picksFor("all".equals(kind) ? null : kind);
+                : "pinned".equals(kind) ? pinnedCards() : "home".equals(kind) ? homeCards() : "watching".equals(kind) ? watchingCards() : picksFor("all".equals(kind) ? null : kind);
         if (!samePicks(list, cards)) {
             cards = list;
             cardIndex = Math.min(cardIndex, Math.max(0, list.size() - 1));
@@ -3007,6 +3020,68 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         }
         Cameras.keep(cams, camWidth());
         return out;
+    }
+
+    /**
+     * Your home: a screen for each room of the Beyond Home box (the first three, the screens there are), or one to
+     * connect the box. Same as homeCards() in web/home.js.
+     */
+    private List<Recs.Pick> homeCards() {
+        List<Recs.Pick> out = new ArrayList<>();
+        if (!"paired".equals(HomeHub.status())) {
+            Recs.Pick p = new Recs.Pick();
+            p.kind = "pin";
+            p.tile = "house";
+            p.title = Ui.tr("Conectar o Beyond Home", "Connect Beyond Home", "Conectar Beyond Home");
+            p.meta = "waiting".equals(HomeHub.status()) ? Ui.tr("Código ", "Code ", "Código ") + HomeHub.code()
+                    : Ui.tr("Achamos o seu na rede", "We found yours on the network", "Encontramos el tuyo en la red");
+            p.id = ("pair|" + p.meta).hashCode();
+            out.add(p);
+            return out;
+        }
+        JSONArray rooms = HomeHub.rooms();
+        for (int i = 0; i < rooms.length() && out.size() < 3; i++) {
+            JSONObject r = rooms.optJSONObject(i);
+            if (r == null) continue;
+            Recs.Pick p = new Recs.Pick();
+            p.kind = "pin";
+            p.tile = "house";
+            p.room = r.optString("id");
+            p.title = r.optString("name");
+            p.meta = r.optString("line");
+            JSONArray things = r.optJSONArray("things");
+            List<Boolean> ons = new ArrayList<>();
+            for (int j = 0; things != null && j < things.length() && ons.size() < 10; j++) {
+                JSONObject t = things.optJSONObject(j);
+                if (t != null && !t.optBoolean("away")) ons.add(t.optBoolean("on"));
+            }
+            p.ons = new boolean[ons.size()];
+            for (int j = 0; j < p.ons.length; j++) p.ons[j] = ons.get(j);
+            p.id = r.toString().hashCode();
+            out.add(p);
+        }
+        return out;
+    }
+
+    /** A room: a little house, and a dot for each thing, lit when it's on. Nothing allocated. */
+    private void drawHouse(Canvas c, Recs.Pick p, RectF cell, float r0) {
+        fill.setColor(0xFF2C2458);
+        c.drawRoundRect(cell, r0, r0, fill);
+        Symbols.draw(getContext(), c, p.room == null ? "sync" : "home", cell.centerX(), cell.centerY() - 14 * k, 64 * k, PAPER);
+        if (p.ons == null) return;
+        float gap = 24 * k, x = cell.centerX() - (p.ons.length - 1) * gap / 2, y = cell.bottom - 26 * k;
+        for (boolean on : p.ons) {
+            if (on) {
+                fill.setColor(0xFFE8A33D);
+                c.drawCircle(x, y, 7 * k, fill);
+            } else {
+                fill.setColor(0x80FFFFFF);
+                c.drawCircle(x, y, 7 * k, fill);
+                fill.setColor(0xFF2C2458);
+                c.drawCircle(x, y, 5 * k, fill);
+            }
+            x += gap;
+        }
     }
 
     /** The app on this TV with this shelf name ("t:netflix"), the same name Beyond Family keeps. */
@@ -3131,6 +3206,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
     private void selectTab(int index) {
         if (index == tab) return;
         tab = index;
+        HomeHub.pace(index < kinds.size() && "home".equals(kinds.get(index)));
         updateCards();
         heroDirty = true;
     }
@@ -3274,6 +3350,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             c.drawCircle(cell.left + 18 * k, cell.top + 18 * k, 6 * k, fill);
         } else if ("jobs".equals(p.tile)) {
             drawJobsTile(c, i, cell, r0);
+        } else if ("house".equals(p.tile)) {
+            drawHouse(c, p, cell, r0);
         } else if (b != null && b.screen != null) {
             roundImage(c, b.screen, cell, r0);
         } else if (app != null && (app.logo != null || app.tile != null)) {
@@ -3300,7 +3378,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             c.drawRoundRect(tmp, ch / 2, ch / 2, fill);
             c.drawText(cardWhen[i], tmp.left + 14 * k, tmp.centerY() + Ui.halfCap(lWhen), lWhen);
         }
-        if (f > 0.01f && p.camera == null && !"jobs".equals(p.tile)) {
+        if (f > 0.01f && p.camera == null && !"jobs".equals(p.tile) && !"house".equals(p.tile)) {
             float pr = 29 * k, px = cell.right - 16 * k - pr, py = cell.bottom - 16 * k - pr;
             fill.setColor(Ui.alpha(0xFFFFFFFF, f));
             c.drawCircle(px, py, pr, fill);
