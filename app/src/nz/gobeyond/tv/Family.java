@@ -118,6 +118,7 @@ final class Family {
         }
         lastPeople = "";
         board = null;
+        jobs = java.util.Collections.emptyMap();
     }
 
     // MARK: - Talking to Beyond Family
@@ -279,6 +280,15 @@ final class Family {
 
     static JSONObject board() { return board; }
 
+    /** Earn your screen: each kid's jobs still to do today (only when the household turned it on), by person id. In
+     *  memory only, from every sync. */
+    private static volatile java.util.Map<String, List<String>> jobs = java.util.Collections.emptyMap();
+
+    static List<String> jobs(String personId) {
+        List<String> left = jobs.get(personId);
+        return left == null ? java.util.Collections.<String>emptyList() : left;
+    }
+
     static void apply(Context c, JSONObject home) { apply(c, home, null); }
 
     /**
@@ -289,6 +299,7 @@ final class Family {
     static void apply(Context c, JSONObject home, JSONArray visitorsIn) {
         final JSONArray visitors = visitorsIn == null ? new JSONArray() : visitorsIn;
         board = home == null ? null : home.optJSONObject("board");
+        jobs = jobsOf(home == null ? null : home.optJSONArray("people"));
         try {
             JSONObject s = state(c);
             JSONObject was = s.optJSONObject("home");
@@ -328,6 +339,19 @@ final class Family {
             People.save(app, list);
             changed();
         });
+    }
+
+    private static java.util.Map<String, List<String>> jobsOf(JSONArray people) {
+        java.util.Map<String, List<String>> out = new java.util.HashMap<>();
+        for (int i = 0; people != null && i < people.length(); i++) {
+            JSONObject p = people.optJSONObject(i);
+            JSONArray left = p == null ? null : p.optJSONArray("jobs");
+            if (left == null || left.length() == 0) continue;
+            List<String> list = new ArrayList<>();
+            for (int j = 0; j < left.length(); j++) if (!left.optString(j).isEmpty()) list.add(left.optString(j));
+            if (!list.isEmpty()) out.put("bf-" + p.optString("id"), list);
+        }
+        return out;
     }
 
     /** One of Beyond Family's people, with their face and colour on Beyond TV when they've chosen them. */
