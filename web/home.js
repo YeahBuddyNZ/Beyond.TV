@@ -955,6 +955,7 @@
   /** One key, from the remote in the hand or the one on a phone (Beyond Family). True if it was used. */
   function key(k) {
     if (poke()) return true;   // the first press only wakes the screen
+    if (!UI.active() && Outside.back()) return true;   // back from outside on a fine day: welcome them
     if (Family.hide()) return true;   // or puts a family message away
     if (Family.togetherKey(k)) return true;   // OK on a watch-together countdown opens the app
     if (UI.active()) {
@@ -1117,6 +1118,8 @@
     idleAt = Date.now();
     Family.now();
     loadApps(function () { renderShelf(); renderDrawer(); updateFocus(); Data.refresh(); });
+    // Back from a show: on a fine day, suggest going outside (once a day). Or welcome back those who did.
+    setTimeout(function () { if (!document.hidden && !Outside.back()) Outside.maybeNudge(); }, 4000);
   });
 
   I18N.set(Prefs.language());

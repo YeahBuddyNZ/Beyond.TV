@@ -387,6 +387,14 @@ var Family = (function () {
     setTimeout(function () { floating--; if (r.parentNode) r.parentNode.removeChild(r); }, wait + 4300);
   }
 
+  // MARK: - Green time, after the fine day nudge
+
+  /** Counts time outside as green time for these Beyond Family members (ids from the household's people). */
+  function green(ids, minutes, done) {
+    if (!linked()) { done({status: 0}); return; }
+    call('POST', '/tv/green', {memberIds: ids.slice(0, 12), minutes: Math.max(10, Math.min(360, minutes))}, function (err) { done(err); });
+  }
+
   // MARK: - What's on, for the remote
 
   function now(app, title) {
@@ -406,6 +414,7 @@ var Family = (function () {
     say: say,
     hide: hide,
     togetherKey: togetherKey,
+    green: green,
     board: function () { return linked() ? board : null; },
     now: now
   };
