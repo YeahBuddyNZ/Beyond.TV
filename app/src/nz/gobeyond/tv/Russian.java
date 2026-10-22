@@ -207,6 +207,11 @@ final class Russian {
             case "Happy birthday, ": return "С днём рождения, ";
             case "Tea tonight": return "Ужин сегодня";
             case "All day": return "Весь день";
+            case "Bedtime breathing": return "Дыхание перед сном";
+            case "Breathe in": return "Вдох";
+            case "Breathe out": return "Выдох";
+            case "The moon button, up the top": return "Кнопка с луной, наверху";
+            case "Time for bed": return "Пора спать";
             case "Install the new version": return "Установить новую версию";
             case "Check for updates": return "Проверить обновления";
             case "Install updates by themselves": return "Устанавливать обновления самостоятельно";

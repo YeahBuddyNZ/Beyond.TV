@@ -208,6 +208,11 @@ final class German {
             case "Happy birthday, ": return "Alles Gute zum Geburtstag, ";
             case "Tea tonight": return "Heute zum Abendessen";
             case "All day": return "Ganztägig";
+            case "Bedtime breathing": return "Atmen vor dem Schlafen";
+            case "Breathe in": return "Einatmen";
+            case "Breathe out": return "Ausatmen";
+            case "The moon button, up the top": return "Der Mond-Knopf, ganz oben";
+            case "Time for bed": return "Zeit fürs Bett";
             case "Install the new version": return "Neue Version installieren";
             case "Check for updates": return "Nach Updates suchen";
             case "Install updates by themselves": return "Updates selbst installieren";

@@ -513,6 +513,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         personInk.setColor(0xFFFFFFFF);
         personInk.setTextAlign(Paint.Align.CENTER);
         boolean kid = watcher.kid;   // kids get fewer: no feedback, no HDMI inputs
+        // Bedtime breathing, at night: a night light that breathes, then fades to dark.
+        if (nightTarget) lightButtons.add(HomeApps.action(HomeApps.BEDTIME, "bedtime", Ui.tr("Respirar para dormir", "Bedtime breathing", "Respirar para dormir"), "bedtime"));
         // Talk to Beyond: the four dots, breathing. Feedback, spoken or typed (FeedbackActivity).
         if (!kid) lightButtons.add(HomeApps.action(HomeApps.FEEDBACK, "feedback", Ui.tr("Fale com a Beyond", "Talk to Beyond"), "dots"));
         lightButtons.add(HomeApps.action(HomeApps.LIVE_TV, "live", Ui.tr("TV aberta", "Live TV"), "live_tv"));
@@ -968,6 +970,11 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         boolean want = data.isNight(System.currentTimeMillis());
         if (want == nightTarget) return;
         nightTarget = want;
+        // The moon button comes at night and goes in the morning.
+        makeLightButtons();
+        layoutLight();
+        int top = tabCount() + lightButtons.size();
+        if (zone == Z_TOP && topIndex >= top) topIndex = Math.max(0, top - 1);
         if (animate && running) {
             nightFrom = night;
             nightAt = SystemClock.uptimeMillis();
@@ -2398,6 +2405,10 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             WhoActivity.open(activity, null);
             return;
         }
+        if (it.kind == HomeApps.BEDTIME) {
+            BedtimeActivity.open(activity, 15);
+            return;
+        }
         if ((it.kind == HomeApps.SETTINGS || it.kind == HomeApps.ANDROID_SETTINGS) && People.kid(activity) && People.hasPin(activity)) {
             // A kids' profile: the grown-up PIN first.
             WhoActivity.open(activity, it.kind == HomeApps.SETTINGS ? WhoActivity.THEN_SETTINGS : WhoActivity.THEN_TV_SETTINGS);
@@ -3120,6 +3131,10 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             String more = Ui.en ? "High " + HomeData.degrees(wx.max) + ", low " + HomeData.degrees(wx.min)
                     : Ui.tr("Máx. ", "High ", "Máx. ") + HomeData.degrees(wx.max) + "  " + Ui.tr("Mín. ", "Low ", "Mín. ") + HomeData.degrees(wx.min);
             rows.add(new String[] {"", HomeData.degrees(wx.temp) + ", " + condition(wx), more, Symbols.weather(wx.code, wx.isDay)});
+        }
+        if (nightTarget) {
+            rows.add(new String[] {"🌙", Ui.tr("Respirar para dormir", "Bedtime breathing", "Respirar para dormir"),
+                    Ui.tr("No botão da lua, lá em cima", "The moon button, up the top", "En el botón de la luna, arriba"), ""});
         }
         if (!linked && !kid) {
             rows.add(new String[] {"✨", Ui.tr("Conecte o Beyond Family", "Link Beyond Family", "Conecta Beyond Family"),
