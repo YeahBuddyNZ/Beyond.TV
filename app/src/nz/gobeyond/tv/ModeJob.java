@@ -33,6 +33,7 @@ public class ModeJob extends JobService {
                 }
             } catch (Throwable t) {
                 AppLog.w("job " + action + " failed: " + t);
+                Checkin.error(app, "job " + action, t.toString());
             }
             jobFinished(params, false);
         }, "beyond-tv-" + action).start();

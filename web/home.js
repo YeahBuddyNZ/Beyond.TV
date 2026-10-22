@@ -527,6 +527,14 @@
           step: function () { if (Prefs.quotes()) { Prefs.setCoin(i, !Prefs.coin(i)); Data.settingsChanged(); } }});
       })(i);
     }
+    rows.push({label: tr('Ajudar a corrigir problemas', 'Help fix problems', 'Ayudar a corregir problemas'), toggle: Checkin.on(),
+      step: function () {
+        Checkin.set(!Checkin.on());
+        toast(Checkin.on() ? tr('Uma vez por dia: cidade, modelo da TV e erros. Nunca o que você assiste.',
+          "Once a day: your city, the TV's model and its errors. Never what you watch.",
+          'Una vez al día: tu ciudad, el modelo de la TV y sus errores. Nunca lo que ves.')
+          : tr('Desligado. A Beyond esquece esta TV.', 'Off. Beyond forgets this TV.', 'Desactivado. Beyond olvida esta TV.'));
+      }});
     rows.push({label: Family.linked() ? 'Beyond Family · ' + Family.homeName() : tr('Ligar ao Beyond Family', 'Link Beyond Family', 'Vincular Beyond Family'),
       value: '›', step: function (d) { if (d >= 0) { if (Family.linked()) Family.manage(); else Family.link(function () { renderSettings(); }); } }});
     if (!Plex.linked()) rows.push({label: tr('Ligar o Plex', 'Link Plex', 'Enlazar Plex'), value: '›', step: function (d) { if (d >= 0) Plex.link(function () { renderSettings(); }); }});
@@ -1006,6 +1014,7 @@
     Data.refresh();
     if (Profiles.count() > 1) Profiles.pick(false, profileChosen);
   });
+  Checkin.start();
   Profiles.onChange(function () { renderTop(); paintWorld(); updateFocus(); });
   setInterval(function () {
     renderClock();

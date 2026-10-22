@@ -112,6 +112,8 @@ final class German {
             case "No city with that name.": return "Keine Stadt mit diesem Namen.";
             case "Couldn't search now: ": return "Suche gerade nicht möglich: ";
             case "Quotes widget": return "Kurs-Widget";
+            case "Help fix problems": return "Bei Problemen helfen";
+            case "Once a day: your city, the TV's model and its errors. Never what you watch.": return "Einmal am Tag: deine Stadt, das TV-Modell und seine Fehler. Nie, was du schaust.";
             case "On": return "An";
             case "Off": return "Aus";
             case "Shelf": return "Leiste";

@@ -760,6 +760,7 @@ final class HomeMode {
         save(c, s);
         if (error != null) {
             AppLog.w(error);
+            Checkin.error(c, "switch", error);
             notice(c, error);
         }
     }

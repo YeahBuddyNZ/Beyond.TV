@@ -267,8 +267,25 @@ var TV = (function () {
 
   // MARK: - The TV, whichever it is
 
+  /** The TV's make, model and software version, for the daily check-in: {brand, model, os}, never anything else. */
+  function info(done) {
+    var ua = navigator.userAgent || '';
+    if (samsung) {
+      var model = '';
+      try { model = window.tizen.systeminfo.getCapability('http://tizen.org/system/model_name') || ''; } catch (e) {}
+      var t = /Tizen ?([0-9.]+)/.exec(ua);
+      done({brand: 'Samsung', model: model, os: t ? t[1] : ''});
+      return;
+    }
+    if (!webos) { done({brand: '', model: '', os: ''}); return; }
+    luna('luna://com.webos.service.tv.systemproperty/getSystemInfo', {keys: ['modelName', 'sdkVersion']}, function (res) {
+      done({brand: 'LG', model: (res && res.modelName) || '', os: (res && res.sdkVersion) || ''});
+    });
+  }
+
   return {
     name: webos ? 'webos' : samsung ? 'tizen' : 'browser',
+    info: info,
 
     /** Installed apps, as the TV's launcher lists them: [{id, title, icon, color}]. */
     apps: function (done) {
