@@ -275,7 +275,7 @@ var Plex = (function () {
   }
 
   function demoFor(path) {
-    var kids = window.Profiles && Profiles.kid();
+    var kids = window.Profiles && Profiles.gentle();
     var all = DEMO_ITEMS.filter(function (x) { return !kids || x.ratingKey === 'd1' || x.ratingKey === 'd7' || x.ratingKey === 'd9'; });
     if (path.indexOf('onDeck') >= 0) return all.filter(function (x) { return x.viewOffset; });
     if (path.indexOf('recentlyAdded') >= 0) return all.slice().reverse();
@@ -403,7 +403,7 @@ var Plex = (function () {
       }
     });
     var api = UI.top();
-    var kids = window.Profiles && Profiles.kid();
+    var kids = window.Profiles && Profiles.gentle();
     server('/library/onDeck', function (deck) {
       server('/library/recentlyAdded', function (recent) {
         server('/library/sections', function (sections) {

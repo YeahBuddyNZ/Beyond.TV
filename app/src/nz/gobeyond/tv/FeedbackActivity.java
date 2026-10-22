@@ -58,9 +58,9 @@ public class FeedbackActivity extends Activity {
         lp.topMargin = Math.round(120 * k);
         root.addView(column, lp);
 
-        TextView title = text(Ui.tr("Fale com a Beyond", "Talk to Beyond"), Ui.displaySemibold, 56 * k, 0xFFFFFFFF);
+        TextView title = text(this, Ui.tr("Fale com a Beyond", "Talk to Beyond"), Ui.displaySemibold, 56 * k, 0xFFFFFFFF);
         column.addView(title);
-        prompt = text(Ui.tr("O que deixaria o Beyond™ TV melhor? Fale ou escreva. A gente lê tudo.",
+        prompt = text(this, Ui.tr("O que deixaria o Beyond™ TV melhor? Fale ou escreva. A gente lê tudo.",
                 "What would make Beyond™ TV better? Say it, or type it. We read every one."), Ui.regular, 30 * k, 0xCCFFFFFF);
         prompt.setPadding(0, Math.round(18 * k), 0, Math.round(36 * k));
         column.addView(prompt);
@@ -88,9 +88,9 @@ public class FeedbackActivity extends Activity {
         LinearLayout buttons = new LinearLayout(this);
         buttons.setGravity(Gravity.CENTER);
         buttons.setPadding(0, Math.round(40 * k), 0, 0);
-        speak = button(Ui.tr("Falar", "Speak"), k, true);
-        again = button(Ui.tr("Falar de novo", "Say it again"), k, false);
-        send = button(Ui.tr("Enviar para a Beyond", "Send to Beyond"), k, true);
+        speak = button(this, Ui.tr("Falar", "Speak"), k, true);
+        again = button(this, Ui.tr("Falar de novo", "Say it again"), k, false);
+        send = button(this, Ui.tr("Enviar para a Beyond", "Send to Beyond"), k, true);
         speak.setOnClickListener(v -> listen());
         again.setOnClickListener(v -> listen());
         send.setOnClickListener(v -> send());
@@ -177,8 +177,8 @@ public class FeedbackActivity extends Activity {
 
     // MARK: - Pieces
 
-    private TextView text(String s, android.graphics.Typeface face, float px, int color) {
-        TextView t = new TextView(this);
+    static TextView text(Context c, String s, android.graphics.Typeface face, float px, int color) {
+        TextView t = new TextView(c);
         t.setText(s);
         t.setTypeface(face);
         t.setTextSize(TypedValue.COMPLEX_UNIT_PX, px);
@@ -188,8 +188,8 @@ public class FeedbackActivity extends Activity {
     }
 
     /** A pill: violet (or glass) at rest, white with violet words when focused, like the rest of the TV. */
-    private Button button(String label, float k, boolean primary) {
-        Button b = new Button(this);
+    static Button button(Context c, String label, float k, boolean primary) {
+        Button b = new Button(c);
         b.setText(label);
         b.setAllCaps(false);
         b.setTypeface(Ui.semibold);
@@ -205,7 +205,7 @@ public class FeedbackActivity extends Activity {
         return b;
     }
 
-    private static android.graphics.drawable.Drawable pill(int fill, int stroke, float radius, float width, int focusStroke) {
+    static android.graphics.drawable.Drawable pill(int fill, int stroke, float radius, float width, int focusStroke) {
         GradientDrawable d = new GradientDrawable();
         d.setColor(fill);
         d.setCornerRadius(radius);
@@ -222,7 +222,7 @@ public class FeedbackActivity extends Activity {
     }
 
     /** The breathing violet sky and the four dots, above the words. */
-    private static final class Backdrop extends View {
+    static final class Backdrop extends View {
         private final Glow glow = new Glow();
         private final Breath.Clock clock = new Breath.Clock();
         private final Paint mark = new Paint(Paint.ANTI_ALIAS_FLAG);

@@ -5,11 +5,13 @@
  *  - Profiles live on the TV (localStorage). Paired with Beyond Family (family.js), they come from the household's
  *    members instead: same names, same colours, kids already marked.
  *  - "Who's watching?" opens when the home screen starts and after a long idle, when there's more than one profile.
+ *  - Family comes first: everyone watching together. Family-friendly picks, its own shelf, and the grown-up
+ *    buttons stay (somebody grown up is usually on the couch too), but a kid needs the PIN to switch to it.
  */
 var Profiles = (function () {
   'use strict';
 
-  var KEY = 'btv.profiles', WHO = 'btv.who', PIN = 'btv.pin';
+  var KEY = 'btv.profiles', WHO = 'btv.who', PIN = 'btv.pin', TOGETHER = 'btv.together';
 
   /** Beyond's people colours (the same family as Beyond Family's member swatches). */
   var COLOURS = ['#2F7D6D', '#D85A30', '#378ADD', '#E8A33D', '#7A4FD0', '#D6589A', '#2A9DA8', '#55534B'];
@@ -36,12 +38,14 @@ var Profiles = (function () {
     list = TV.browser ? DEMO.slice() : [{id: 'p1', name: tr('Eu', 'Me', 'Yo'), colour: '#2F7D6D'}];
     save(KEY, list);
   }
+  /** Family: not a person, so it never joins the list, Beyond Family's members or the editor. Only its shelf is kept. */
+  var FAMILY = {id: 'together', together: true, colour: '#6E3DDB', shelf: load(TOGETHER, {}).shelf};
   var who = load(WHO, list[0].id);
   var listeners = [];
 
-  function changed() { save(KEY, list); for (var i = 0; i < listeners.length; i++) listeners[i](); }
+  function changed() { save(KEY, list); save(TOGETHER, {shelf: FAMILY.shelf}); for (var i = 0; i < listeners.length; i++) listeners[i](); }
 
-  function find(id) { for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i]; return null; }
+  function find(id) { if (id === FAMILY.id) { FAMILY.name = tr('Família', 'Family', 'Familia'); return FAMILY; } for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i]; return null; }
   function current() { return find(who) || list[0]; }
   function nextId() { var n = 1; while (find('p' + n)) n++; return 'p' + n; }
 
@@ -123,7 +127,7 @@ var Profiles = (function () {
         UI.dots(hello);
         UI.el('span', '', hello, manage ? tr('Perfis', 'Profiles', 'Perfiles') : tr('Quem está assistindo?', "Who's watching?", '¿Quién está viendo?'));
         var row = UI.el('div', 'bt-faces', layer);
-        var all = list.slice();
+        var all = manage || list.length < 2 ? list.slice() : [find(FAMILY.id)].concat(list);
         var n = all.length + (manage ? 1 : 0), size = n > 5 ? 170 : 200, gap = n > 5 ? 52 : 70;
         var width = n * size + (n - 1) * gap, left = (1920 - width) / 2;
         for (var i = 0; i < all.length; i++) {
@@ -133,6 +137,7 @@ var Profiles = (function () {
             f.style.width = size + 'px';
             UI.avatar(p, f, size);
             UI.el('div', 'name', f, p.name);
+            if (p.together) UI.el('div', 'edit', f, tr('Todos juntos', 'Everyone together', 'Todos juntos'));
             if (manage) UI.el('div', 'edit', f, tr('Editar', 'Edit', 'Editar'));
             api.add(f, function () {
               if (manage) { edit(p, function () { api.rebuild(); }); return; }
@@ -288,6 +293,9 @@ var Profiles = (function () {
     count: function () { return list.length; },
     current: current,
     kid: function () { return !!current().kid; },
+    /** Family-friendly picks only: a kid watching, or the whole family together. */
+    gentle: function () { return !!(current().kid || current().together); },
+    together: function () { return !!current().together; },
     kidApp: function (app) { return KID_APPS.test(app.title || '') || KID_APPS.test(app.id || ''); },
     pick: pick,
     manage: function (done) { guard(tr('Gerenciar perfis', 'Manage profiles', 'Administrar perfiles'), function () { pick(true, done); }); },

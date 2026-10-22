@@ -145,11 +145,15 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
     private int tab, topIndex, cardIndex;
     private int widgetIndex;    // with TalkBack on, the drawer's weather (0) or quotes (1) card can take the focus
     private List<Recs.Pick> cards = new ArrayList<>();
-    private final Spring[] topFocus = new Spring[7];
-    private final RectF[] topRects = new RectF[7];
+    private final Spring[] topFocus = new Spring[8];
+    private final RectF[] topRects = new RectF[8];
     private final Spring[] cardFocus = new Spring[3];
     private final RectF[] cardRects = new RectF[3];
     private final List<HomeApps.Item> lightButtons = new ArrayList<>();
+    /** Who's watching, read once (a change to the people recreates the home screen), and the title it gives. */
+    private People.Person watcher;
+    private String helloLine = "", watcherInitial = "";
+    private final Paint personInk = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Paint lTitle, lTab, lTabOn, lCardTitle, lCardMeta, lQuote, lTip, lDate, lClock, lWeather, lClockQuote;
 
     // Shelf
@@ -473,11 +477,21 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
     /** The three corner buttons, with their names in the current language. */
     private void makeLightButtons() {
         lightButtons.clear();
+        watcher = People.current(getContext());
+        helloLine = watcher.together() ? Ui.tr("Para a família", "For the family")
+                : People.count(getContext()) > 1 ? Ui.tr("Para ", "For ") + watcher.name : Ui.tr("Para você", "For You");
+        watcherInitial = watcher.initial();
+        personInk.setTypeface(Ui.semibold);
+        personInk.setColor(0xFFFFFFFF);
+        personInk.setTextAlign(Paint.Align.CENTER);
+        boolean kid = watcher.kid;   // kids get fewer: no feedback, no HDMI inputs
         // Talk to Beyond: the four dots, breathing. Feedback, spoken or typed (FeedbackActivity).
-        lightButtons.add(HomeApps.action(HomeApps.FEEDBACK, "feedback", Ui.tr("Fale com a Beyond", "Talk to Beyond"), "dots"));
+        if (!kid) lightButtons.add(HomeApps.action(HomeApps.FEEDBACK, "feedback", Ui.tr("Fale com a Beyond", "Talk to Beyond"), "dots"));
         lightButtons.add(HomeApps.action(HomeApps.LIVE_TV, "live", Ui.tr("TV aberta", "Live TV"), "live_tv"));
-        lightButtons.add(HomeApps.action(HomeApps.INPUTS, "inputs", Ui.tr("Entradas HDMI", "HDMI Inputs"), "hdmi"));
+        if (!kid) lightButtons.add(HomeApps.action(HomeApps.INPUTS, "inputs", Ui.tr("Entradas HDMI", "HDMI Inputs"), "hdmi"));
         lightButtons.add(HomeApps.action(HomeApps.SETTINGS, "settings", Ui.tr("Configurações", "Settings"), "settings"));
+        // Who's watching: their face (Family wears the four dots). Opens the picker (WhoActivity).
+        lightButtons.add(HomeApps.action(HomeApps.PEOPLE, "people", Ui.tr("Quem está assistindo?", "Who's watching?"), "person"));
     }
 
     private static String[] tabs() {
@@ -1416,7 +1430,12 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
 
     private static List<HomeApps.Item> drawerList(Context c) {
         List<HomeApps.Item> list = HomeApps.allInputs(c);
-        list.addAll(HomeApps.drawerShortcuts());
+        if (People.kid(c)) {   // kids get Live TV, not the HDMI inputs or the TV's settings
+            List<HomeApps.Item> kept = new ArrayList<>();
+            for (HomeApps.Item it : list) if (it.kind == HomeApps.LIVE_TV) kept.add(it);
+            list = kept;
+        }
+        for (HomeApps.Item it : HomeApps.drawerShortcuts()) if (!People.kid(c) || it.kind != HomeApps.ANDROID_SETTINGS) list.add(it);
         return list;
     }
 
@@ -2203,6 +2222,15 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             FeedbackActivity.open(activity);
             return;
         }
+        if (it.kind == HomeApps.PEOPLE) {
+            WhoActivity.open(activity, null);
+            return;
+        }
+        if ((it.kind == HomeApps.SETTINGS || it.kind == HomeApps.ANDROID_SETTINGS) && People.kid(activity) && People.hasPin(activity)) {
+            // A kids' profile: the grown-up PIN first.
+            WhoActivity.open(activity, it.kind == HomeApps.SETTINGS ? WhoActivity.THEN_SETTINGS : WhoActivity.THEN_TV_SETTINGS);
+            return;
+        }
         if (it.kind == HomeApps.INPUTS) {
             openDrawer();
             for (int i = 0; i < drawerItems.size(); i++) {
@@ -2223,6 +2251,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
 
     private boolean canReorder() {
         if (sheetOpen || zone != Z_SHELF || shelfIndex >= shelf.size() || shelf.size() < 2) return false;
+        if (People.kid(getContext())) return false;   // the kids' shelf is picked for them
         HomeApps.Item it = shelf.get(shelfIndex);
         return it.kind == HomeApps.APP && it.pkg != null;
     }
@@ -2700,7 +2729,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             if (HomeData.coinCount() > 0) drawQuotes(c);
             return;
         }
-        String hello = Ui.tr("Para você", "For You");
+        String hello = helloLine;
         c.drawText(hello, MARGIN * k - Ui.leftBearing(lTitle, hello), L_TITLE_BASE * k, lTitle);
         // Text tabs (the selected one in bold, in the main text color); with focus on the tabs, the selected one gets
         // the white pill with a shadow and grows a little (the tvOS focus).
@@ -2850,6 +2879,17 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             }
             if ("dots".equals(lightButtons.get(i).symbol)) {
                 Breath.mark(c, markPaint, cell.centerX(), cell.centerY(), 30 * k * s, -1, 10, 1);
+            } else if ("person".equals(lightButtons.get(i).symbol)) {
+                // Their face: a disc in their colour with their initial; Family wears the four dots.
+                fill.setShader(null);
+                fill.setColor(watcher.colour);
+                c.drawCircle(cell.centerX(), cell.centerY(), rad - 6 * k, fill);
+                if (watcher.together()) {
+                    Breath.mark(c, markPaint, cell.centerX(), cell.centerY(), 28 * k * s, -1, 10, 1);
+                } else {
+                    personInk.setTextSize(30 * k * s);
+                    c.drawText(watcherInitial, cell.centerX(), cell.centerY() - (personInk.ascent() + personInk.descent()) / 2, personInk);
+                }
             } else {
                 Symbols.draw(getContext(), c, lightButtons.get(i).symbol, cell.centerX(), cell.centerY(), 27 * k * s,
                         blend(tone(L_INK, 0xEBFFFFFF), L_INK, f));

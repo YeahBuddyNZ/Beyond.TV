@@ -47,6 +47,13 @@ var UI = (function () {
     a.style.width = a.style.height = size + 'px';
     a.style.borderRadius = (size / 2) + 'px';
     a.style.background = person.colour || '#2F7D6D';
+    if (person.together) {
+      // Family: everyone together, so it wears Beyond's four dots rather than anyone's initial.
+      var d = dots(a);
+      d.className = 'dots together';
+      d.style.webkitTransform = d.style.transform = 'translate(-50%, -50%) scale(' + (size * 0.36 / 30).toFixed(2) + ')';
+      return a;
+    }
     var t = el('span', 'initial', a, person.emoji || (person.name || '?').charAt(0).toUpperCase());
     t.style.fontSize = Math.round(size * (person.emoji ? 0.46 : 0.42)) + 'px';
     t.style.lineHeight = size + 'px';

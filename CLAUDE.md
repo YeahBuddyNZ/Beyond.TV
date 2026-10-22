@@ -198,6 +198,10 @@ HDMI (Chromecast with Google TV, Google TV Streamer, onn 4K, NVIDIA Shield). Set
   size, so both draw pixel for pixel.
 - `HomeMode` runs every switch as a background job (`ModeJob`) in the main process; the UI is in the `:home`
   process. `Watchdog` goes back to the stock home screen after 3 crashes in 5 minutes.
+- Who's watching (`People`, `WhoActivity`, both in `:home`): Family first, then each person, kept in the "people"
+  preferences. A kids' profile gets the kids' apps on the shelf, family-friendly picks (`Recs.Pick.gentle`), no HDMI
+  inputs or TV settings, and the grown-up PIN in front of Settings and of switching up. A change bumps `Prefs.version`,
+  so the home screen recreates. Same rules as `web/profiles.js`; keep them in step.
 - On-screen text: `Ui.tr("pt", "en")`, with the Spanish, German and Russian in `Spanish.java`, `German.java` and
   `Russian.java` (keyed by the English); text built at runtime uses `Ui.tr(pt, en, es)`, and its German and Russian
   come from those files too (patterns for the parts built at runtime). Add them all. Comments in English, short, only where the why
@@ -239,6 +243,8 @@ HDMI (Chromecast with Google TV, Google TV Streamer, onn 4K, NVIDIA Shield). Set
   `web/home.js` follows `HomeView`'s layout and behavior, so a design change on
   Android belongs there too. Text: `tr(pt, en, es)`, with the German and Russian in `web/strings.js` (keyed by the English). Built without a city (`--generic`), `web/zones.js`
   (`tools/make_zones.py`, from the tz database) turns the TV's time zone into the city, the currency and the region.
+  `web/profiles.js` is Who's watching: Family comes first (`together`, never in the list or Beyond Family's members),
+  with family-friendly picks (`Profiles.gentle()`) and its own shelf; a kid needs the PIN to switch to it.
   `web/myworld.js` is Make it yours: a kid restyles their own profile (buddy, colour, world, loves) with no PIN;
   it never touches the name, shelf, PIN or kid flag, and a Beyond Family refresh keeps what they picked.
   `tools/webapp.py` is what both builds share. Preview: `python3 webos/build.py --preview` (or `tizen/build.py`), then

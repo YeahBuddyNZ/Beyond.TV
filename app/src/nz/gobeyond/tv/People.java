@@ -1,0 +1,152 @@
+package nz.gobeyond.tv;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.regex.Pattern;
+
+/**
+ * Who's watching: the people on this TV, the same idea as the LG and Samsung app's profiles (web/profiles.js).
+ *  - Family comes first: everyone together. Family-friendly picks only, and the grown-up buttons stay.
+ *  - A kids' profile (★) gets the kids' apps on its shelf, family-friendly picks, no HDMI inputs, and needs the
+ *    grown-up PIN for Settings, for managing people and for switching to Family or a grown-up.
+ *  - Kept in the :home process's own preferences. A change bumps Prefs.version, so the home screen draws again.
+ */
+final class People {
+    private People() {}
+
+    static final String FAMILY = "together";
+    /** Beyond's people colours (the same as Beyond Family's member swatches and the web app's). */
+    static final int[] COLOURS = {0xFF2F7D6D, 0xFFD85A30, 0xFF378ADD, 0xFFE8A33D, 0xFF7A4FD0, 0xFFD6589A, 0xFF2A9DA8, 0xFF55534B};
+    /** Apps a kids' profile keeps on its shelf, by package. */
+    private static final Pattern KID_APPS = Pattern.compile("youtube\\.tvkids|disney|netflix|plex|abc.*kids|tvnz|nick|cartoon|pbskids|kidoodle|sesame",
+            Pattern.CASE_INSENSITIVE);
+
+    static final class Person {
+        String id, name;
+        int colour;
+        boolean kid;
+
+        boolean together() { return FAMILY.equals(id); }
+
+        String initial() { return name == null || name.isEmpty() ? "?" : name.substring(0, 1).toUpperCase(Locale.ROOT); }
+    }
+
+    private static SharedPreferences sp(Context c) {
+        return c.getApplicationContext().getSharedPreferences("people", Context.MODE_PRIVATE);
+    }
+
+    /** Everyone on this TV, in order. Never empty: a new TV starts with one grown-up, "Me". */
+    static List<Person> list(Context c) {
+        List<Person> out = new ArrayList<>();
+        try {
+            JSONArray a = new JSONArray(sp(c).getString("list", "[]"));
+            for (int i = 0; i < a.length(); i++) {
+                JSONObject o = a.getJSONObject(i);
+                Person p = new Person();
+                p.id = o.getString("id");
+                p.name = o.optString("name");
+                p.colour = o.optInt("colour", COLOURS[i % COLOURS.length]);
+                p.kid = o.optBoolean("kid");
+                out.add(p);
+            }
+        } catch (Exception ignored) {
+        }
+        if (out.isEmpty()) {
+            Person me = new Person();
+            me.id = "p1";
+            me.name = Ui.tr("Eu", "Me");
+            me.colour = COLOURS[0];
+            out.add(me);
+        }
+        return out;
+    }
+
+    static void save(Context c, List<Person> people) {
+        try {
+            JSONArray a = new JSONArray();
+            for (Person p : people) a.put(new JSONObject().put("id", p.id).put("name", p.name).put("colour", p.colour).put("kid", p.kid));
+            SharedPreferences.Editor e = sp(c).edit().putString("list", a.toString());
+            String who = sp(c).getString("who", "");
+            if (!FAMILY.equals(who) && find(people, who) == null) e.putString("who", people.get(0).id);
+            e.apply();
+        } catch (Exception ignored) {
+        }
+        Prefs.version++;
+    }
+
+    static Person family() {
+        Person f = new Person();
+        f.id = FAMILY;
+        f.name = Ui.tr("Família", "Family");
+        f.colour = Glow.VIOLET;
+        return f;
+    }
+
+    /** Family, then each person: what "Who's watching?" offers (Family only once there's more than one person). */
+    static List<Person> choices(Context c) {
+        List<Person> people = list(c);
+        if (people.size() > 1) people.add(0, family());
+        return people;
+    }
+
+    static Person find(List<Person> people, String id) {
+        for (Person p : people) if (p.id.equals(id)) return p;
+        return null;
+    }
+
+    static Person current(Context c) {
+        List<Person> people = list(c);
+        String who = sp(c).getString("who", "");
+        if (FAMILY.equals(who) && people.size() > 1) return family();
+        Person p = find(people, who);
+        return p != null ? p : people.get(0);
+    }
+
+    static void use(Context c, String id) {
+        sp(c).edit().putString("who", id).putLong("chosenAt", System.currentTimeMillis()).apply();
+        Prefs.version++;
+    }
+
+    /** They were asked and kept whoever it was. */
+    static void asked(Context c) { sp(c).edit().putLong("chosenAt", System.currentTimeMillis()).apply(); }
+
+    static int count(Context c) { return list(c).size(); }
+
+    static boolean kid(Context c) { return current(c).kid; }
+
+    static boolean together(Context c) { return current(c).together(); }
+
+    /** Family-friendly picks only: a kid watching, or the whole family together. */
+    static boolean gentle(Context c) {
+        Person p = current(c);
+        return p.kid || p.together();
+    }
+
+    /** When somebody last picked who's watching (0 = never), so the home screen can ask again after a long break. */
+    static long chosenAt(Context c) { return sp(c).getLong("chosenAt", 0); }
+
+    static String newId(List<Person> people) {
+        int n = 1;
+        while (find(people, "p" + n) != null) n++;
+        return "p" + n;
+    }
+
+    // MARK: - The grown-up PIN
+
+    static String pin(Context c) { return sp(c).getString("pin", ""); }
+
+    static boolean hasPin(Context c) { return !pin(c).isEmpty(); }
+
+    static void setPin(Context c, String pin) { sp(c).edit().putString("pin", pin == null ? "" : pin).apply(); }
+
+    // MARK: - The kids' shelf
+
+    static boolean kidApp(String pkg) { return pkg != null && KID_APPS.matcher(pkg).find(); }
+}

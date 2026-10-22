@@ -16,6 +16,7 @@ import android.widget.TextView;
  */
 public class HomeActivity extends Activity {
     private HomeView home;
+    private static final long ASK_AGAIN_AFTER = 4 * 3600_000L;
     private int prefsVersion = Prefs.version;   // settings changed while we were away: start over
 
     @Override protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +56,11 @@ public class HomeActivity extends Activity {
             Updater.offer(this);
             Checkin.opened(this);
             Checkin.maybeSend(this);
+            // Who's watching? When there's more than one person: the first time, and again after a long break.
+            if (People.count(this) > 1 && System.currentTimeMillis() - People.chosenAt(this) > ASK_AGAIN_AFTER) {
+                People.asked(this);
+                WhoActivity.open(this, null);
+            }
         }
     }
 
