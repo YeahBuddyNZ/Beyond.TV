@@ -20,6 +20,11 @@ final class Russian {
             case "Sleep timer off.": return "Таймер сна выключен.";
             case "The TV turns off in ": return "Телевизор выключится через ";
             case "The TV turns off in a minute. Sleep Timer in the menu stops it.": return "Телевизор выключится через минуту. Таймер сна в меню остановит его.";
+            case "Art": return "Искусство";
+            case "Film photos": return "Кадры из фильмов";
+            case "Automatic (art)": return "Автоматически (искусство)";
+            case "Automatic (photos)": return "Автоматически (кадры)";
+            case "ART": return "ИСКУССТВО";
             case "Home Settings": return "Главный экран";
             case "TV Settings": return "Настройки ТВ";
             case "HDMI Inputs": return "Входы HDMI";
