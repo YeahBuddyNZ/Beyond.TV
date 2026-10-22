@@ -230,7 +230,8 @@
 
   function renderTop() {
     var me = Profiles.current();
-    $('title').textContent = Profiles.count() > 1 ? tr('Para ', 'For ', 'Para ') + me.name : tr('Para você', 'For You', 'Para ti');
+    $('title').textContent = me.together ? tr('Para a família', 'For the family', 'Para la familia')
+      : Profiles.count() > 1 ? tr('Para ', 'For ', 'Para ') + me.name : tr('Para você', 'For You', 'Para ti');
     var tabs = $('tabs');
     tabs.innerHTML = '';
     var names = [tr('Explorar', 'Explore', 'Explorar'), tr('Filmes', 'Movies', 'Películas'), tr('Séries', 'Shows', 'Series')];

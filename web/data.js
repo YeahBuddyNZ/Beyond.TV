@@ -294,7 +294,7 @@ var Data = (function () {
 
   /** This hour's 3 picks: movies ("movie"), shows ("tv") or both (null). */
   function now(kind) {
-    var list = [], kids = window.Profiles && Profiles.kid();
+    var list = [], kids = window.Profiles && Profiles.gentle();
     if (!KEY) return list;
     for (var i = 0; i < picks.length; i++) {
       var p = picks[i];
