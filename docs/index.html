@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beyond TV</title>
+<meta name="description" content="Beyond TV: one calm home screen for the whole whānau. Your streaming apps, your Plex and your family, on one TV, with no ads.">
+<link rel="icon" href="assets/favicon-64.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta property="og:title" content="Beyond TV">
+<meta property="og:description" content="One calm home screen for the whole whānau. No ads.">
+<meta property="og:image" content="assets/banner.png">
+<style>
+  @font-face { font-family: 'Sora'; src: url('assets/fonts/SoraVariable.ttf') format('truetype'); font-weight: 100 800; }
+  @font-face { font-family: 'Inter'; src: url('assets/fonts/InterVariable.ttf') format('truetype'); font-weight: 100 900; }
+  :root { --paper: #f7f6f2; --ink: #22221f; --soft: #55534b; --line: #e8e6df; --moss: #2f7d6d; --ember: #e8a33d; --card: #fff; }
+  @media (prefers-color-scheme: dark) {
+    :root { --paper: #121210; --ink: #f7f6f2; --soft: #b9b6ab; --line: #2e2e2a; --card: #1c1c19; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 18px/1.6 'Inter', system-ui, sans-serif; }
+  main { max-width: 1040px; margin: 0 auto; padding: 0 16px 80px; }
+  header { display: flex; align-items: center; gap: 12px; padding: 28px 0; font: 700 22px 'Sora', sans-serif; }
+  .dots { display: grid; grid-template-columns: 12px 12px; gap: 4px; }
+  .dots i { width: 12px; height: 12px; border-radius: 50%; }
+  .dots i:nth-child(1) { background: #2f7d6d; } .dots i:nth-child(2) { background: #e8a33d; }
+  .dots i:nth-child(3) { background: #d85a30; } .dots i:nth-child(4) { background: #378add; }
+  h1 { font: 700 clamp(40px, 7vw, 76px)/1.05 'Sora', sans-serif; letter-spacing: -0.02em; margin: 40px 0 20px; }
+  h2 { font: 700 28px/1.2 'Sora', sans-serif; margin: 64px 0 16px; }
+  .lede { font-size: 22px; color: var(--soft); max-width: 680px; }
+  .hero img { width: 100%; border-radius: 24px; margin-top: 32px; display: block; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 22px; }
+  .card b { display: block; font-family: 'Sora', sans-serif; margin-bottom: 6px; }
+  .card p { margin: 0; color: var(--soft); font-size: 16px; }
+  .soon { font-size: 13px; font-weight: 600; color: var(--moss); text-transform: uppercase; letter-spacing: 0.06em; }
+  a { color: var(--moss); }
+  footer { margin-top: 80px; color: var(--soft); font-size: 15px; border-top: 1px solid var(--line); padding-top: 24px; }
+</style>
+</head>
+<body>
+<main>
+  <header><span class="dots"><i></i><i></i><i></i><i></i></span>Beyond TV</header>
+
+  <section class="hero">
+    <h1>One calm home screen for the whole whānau.</h1>
+    <p class="lede">Beyond TV swaps your TV's ad-filled home screen for a quiet one: your streaming apps on one shelf,
+      what's worth watching tonight, and nothing trying to sell you anything. Free, and built in Aotearoa by
+      <a href="https://gobeyond.co.nz">Beyond</a>.</p>
+    <img src="assets/banner.png" alt="The Beyond TV logo: Beyond's four coloured dots beside the words Beyond TV">
+  </section>
+
+  <h2>What it does now</h2>
+  <div class="grid">
+    <div class="card"><b>No ads, no clutter</b><p>A clean home screen in place of the sponsored rows, with a one-tap way back to the original.</p></div>
+    <div class="card"><b>Your apps, one shelf</b><p>Netflix, Neon, TVNZ+, Disney+, ThreeNow, Plex and the rest, in the order you like.</p></div>
+    <div class="card"><b>What's on tonight</b><p>Trending films and shows, picked only from the services you already have.</p></div>
+    <div class="card"><b>Every big TV brand</b><p>Google TV and Android TV, LG and Samsung, all with the same home screen.</p></div>
+  </div>
+
+  <h2>On the way</h2>
+  <div class="grid">
+    <div class="card"><span class="soon">Next</span><b>Who's watching?</b><p>A profile for everyone, with kids' profiles that only show what's right for them.</p></div>
+    <div class="card"><span class="soon">Next</span><b>Plex, built in</b><p>Continue Watching and Recently Added from your own Plex server, right on the home screen.</p></div>
+    <div class="card"><span class="soon">Next</span><b>All your services as one</b><p>One "What's on" across every service you pay for, opening straight into the right app.</p></div>
+    <div class="card"><span class="soon">Next</span><b>Beyond Family</b><p>Your household's profiles, a phone remote, voice search for kids, and the family house game on the big screen.</p></div>
+  </div>
+
+  <footer>
+    Beyond TV is free and open source (GPL-3.0) at <a href="https://github.com/YeahBuddyNZ/Beyond.TV">github.com/YeahBuddyNZ/Beyond.TV</a>.
+    It began as a fork of <a href="https://github.com/simbasjungles/free-my-tv">Free My TV</a> (MIT), with thanks to its contributors.
+  </footer>
+</main>
+</body>
+</html>

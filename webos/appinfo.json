@@ -1,0 +1,15 @@
+{
+  "id": "nz.gobeyond.tv",
+  "version": "1.1.0",
+  "vendor": "Beyond TV",
+  "type": "web",
+  "main": "index.html",
+  "title": "Beyond TV",
+  "icon": "icon.png",
+  "largeIcon": "largeIcon.png",
+  "iconColor": "#FF7A9E",
+  "resolution": "1920x1080",
+  "handlesRelaunch": true,
+  "disableBackHistoryAPI": true,
+  "requiredPermissions": ["applications", "applications.launcher"]
+}
