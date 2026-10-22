@@ -42,6 +42,8 @@ final class HomeMode {
 
     /** Classic Android TV's home screen; its recommendations service crashes on the screensaver while it's off (#11). */
     static final String TV_LAUNCHER = "com.google.android.tvlauncher";
+    /** The first Android TV home screen (Android 5 to 8), still on TVs like Sony's 2015 Bravias. */
+    static final String LEANBACK_LAUNCHER = "com.google.android.leanbacklauncher";
     static final String TV_RECOMMENDATIONS = "com.google.android.tvrecommendations";
     /** Google TV's home screen: the fallback when the TV's own one wasn't recorded. */
     static final String GOOGLE_HOME = "com.google.android.apps.tv.launcherx/.home.HomeActivity";
@@ -514,9 +516,21 @@ final class HomeMode {
     /** The home screen in use now ("package/activity"): the HOME role holder, among the TV's home screens. */
     private static String currentHome(Adb adb) throws IOException {
         String holder = homeHolder(adb);
-        if (holder.isEmpty() || holder.contains(PKG)) return null;
+        if (holder.contains(PKG)) return null;
         String list = adb.shell("cmd package query-activities --brief --user 0 -a android.intent.action.MAIN"
                 + " -c android.intent.category.HOME");
+        // Android 8 has no HOME role, and once Beyond TV is installed the Home button asks which one, so nobody holds
+        // it. Then the TV's own is the one that isn't ours: the classic Android TV launcher first (Sony's 2015 Bravias).
+        if (holder.isEmpty()) {
+            String other = null;
+            for (String line : list.split("\n")) {
+                line = line.trim();
+                if (!line.contains("/") || line.startsWith(PKG + "/") || line.startsWith("android/")) continue;
+                if (line.startsWith(LEANBACK_LAUNCHER + "/") || line.startsWith(TV_LAUNCHER + "/")) return line;
+                if (other == null && !line.startsWith("com.android.tv.settings/")) other = line;
+            }
+            return other;
+        }
         for (String line : list.split("\n")) {
             line = line.trim();
             if (line.startsWith(holder + "/")) return line;

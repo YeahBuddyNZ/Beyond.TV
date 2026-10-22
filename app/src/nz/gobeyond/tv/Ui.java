@@ -61,7 +61,9 @@ final class Ui {
             } catch (RuntimeException ignored) {
             }
         }
-        return Typeface.create(Typeface.DEFAULT, weight, false);
+        // Weights by number arrived in Android 9; Android 8 TVs (Sony's 2015 Bravias among them) get bold or not.
+        if (Build.VERSION.SDK_INT >= 28) return Typeface.create(Typeface.DEFAULT, weight, false);
+        return Typeface.create(Typeface.DEFAULT, weight >= 600 ? Typeface.BOLD : Typeface.NORMAL);
     }
 
     /** Sora, Beyond's display face, for titles; Inter's display cut if the file is missing. */
