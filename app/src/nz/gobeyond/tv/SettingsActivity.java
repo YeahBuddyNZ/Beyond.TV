@@ -57,6 +57,7 @@ public class SettingsActivity extends Activity {
 
     @Override protected void onResume() {
         super.onResume();
+        Watchdog.settingsInFront = true;
         view.resume();
         Checkin.maybeSend(this);
         // From ADB: am start -n nz.gobeyond.tv/.SettingsActivity --ez screensaver true (straight to the preview).
@@ -75,6 +76,7 @@ public class SettingsActivity extends Activity {
     @Override protected void onPause() {
         closePreview();     // before pausing the view: closing the preview resumes it (view.resume)
         view.pause();
+        Watchdog.settingsInFront = false;
         super.onPause();
     }
 
@@ -125,7 +127,9 @@ public class SettingsActivity extends Activity {
         private final SettingsActivity activity;
         private final Scene scene = new Scene();
         private final Handler handler = new Handler(Looper.getMainLooper());
-        private final Spring[] pop = new Spring[12];
+        // One per row the longest screen can show (Home Settings grows with each feature, and an index past the end
+        // crashed it, #36): rows beyond this simply don't pop.
+        private final Spring[] pop = new Spring[24];
         private final List<String> appPkgs = new ArrayList<>(), appLabels = new ArrayList<>();
         // The list picker (the app of a remote button): what it shows, which one is in use, where we are.
         private final List<String> pickLabels = new ArrayList<>();
@@ -263,8 +267,8 @@ public class SettingsActivity extends Activity {
                 top = LIST_TOP + 20 + row * (CHOICE_H + ROW_GAP);
                 height = CHOICE_H;
             } else {
-                top = LIST_TOP + 20 + row * (LIST_ROW_H + LIST_ROW_GAP);
-                height = LIST_ROW_H;
+                top = LIST_TOP + 20 + row * listPitch();
+                height = listPitch() - LIST_ROW_GAP;
             }
             focusBox.set(LIST_X * k, top * k, LIST_R * k, (top + height) * k);
             return focusBox;
@@ -480,7 +484,7 @@ public class SettingsActivity extends Activity {
 
         /** List row: no background; focused, white with a shadow (the Apple TV focus). Returns how focused it is. */
         private float drawRowBackground(Canvas c, int i) {
-            float f = Ui.clamp(pop[i].value);
+            float f = i < pop.length ? Ui.clamp(pop[i].value) : i == focus ? 1 : 0;
             if (f > 0.01f) {
                 float s = 1 + 0.02f * f;
                 float cx = rowRect.centerX(), cy = rowRect.centerY();
@@ -683,10 +687,13 @@ public class SettingsActivity extends Activity {
             l.add(Ui.tr("Palavra do dia em te reo Māori", "Te reo word of the day"));
             l.add(Ui.tr("Protetor de tela", "Screensaver"));
             l.add(Ui.tr("Ajudar a corrigir problemas", "Help fix problems"));
-            l.add("Bitcoin");
-            l.add("Ethereum");
-            l.add("Solana");
-            if (dollar()) l.add(Ui.tr("Dólar", "Dollar"));
+            // The coins only while the quotes widget is on: off, they would be a list of switches that do nothing.
+            if (Prefs.quotes()) {
+                l.add("Bitcoin");
+                l.add("Ethereum");
+                l.add("Solana");
+                if (dollar()) l.add(Ui.tr("Dólar", "Dollar"));
+            }
             return l.toArray(new String[0]);
         }
 
@@ -980,6 +987,14 @@ public class SettingsActivity extends Activity {
                     LIST_X * k + 30 * k, hy, hint);
         }
 
+        /** Row pitch of Home Settings and Remote Buttons: the usual one, closer together when the list is long, so
+         *  every row and the hint under it stay on screen (a 1080 high screen, the hint's two lines under the rows). */
+        private float listPitch() {
+            int n = rowCount();
+            float room = 1040 - (LIST_TOP + 20) - 36 - 38;
+            return n <= 0 ? LIST_ROW_H + LIST_ROW_GAP : Math.min(LIST_ROW_H + LIST_ROW_GAP, room / n);
+        }
+
         private void drawList(Canvas c) {
             boolean keys = screen == REMOTE_KEYS;
             String[] labels = keys ? keyLabels() : settingLabels();
@@ -987,9 +1002,10 @@ public class SettingsActivity extends Activity {
             Paint heading = Ui.text(Ui.displaySemibold, 34 * k, 0xFFFFFFFF);
             c.drawText(keys ? Ui.tr("Botões do Controle", "Remote Buttons") : Ui.tr("Ajustes do Início", "Home Settings"),
                     LIST_X * k + 30 * k, (LIST_TOP - 24) * k, heading);
+            float pitch = listPitch();
             for (int i = 0; i < labels.length; i++) {
-                float y = (LIST_TOP + 20 + i * (LIST_ROW_H + LIST_ROW_GAP)) * k;
-                rowRect.set(LIST_X * k, y, LIST_R * k, y + LIST_ROW_H * k);
+                float y = (LIST_TOP + 20 + i * pitch) * k;
+                rowRect.set(LIST_X * k, y, LIST_R * k, y + (pitch - LIST_ROW_GAP) * k);
                 float f = drawRowBackground(c, i);
                 rowLabel.setColor(blend(0xF2FFFFFF, INK, f));
                 boolean locked = !keys && i >= COIN_ROWS && !Prefs.quotes();
@@ -1000,7 +1016,7 @@ public class SettingsActivity extends Activity {
                 c.drawText(values[i], rowRect.right - 30 * k, base, rowValue);
             }
             Paint hint = Ui.text(Ui.regular, 23 * k, 0x8CFFFFFF);
-            float hy = (LIST_TOP + 20 + labels.length * (LIST_ROW_H + LIST_ROW_GAP) + 36) * k;
+            float hy = (LIST_TOP + 20 + labels.length * pitch + 36) * k;
             c.drawText(Ui.tr("OK ou as setas mudam o valor.", "OK or the arrows change the value."), LIST_X * k + 30 * k, hy, hint);
             if (keys) {
                 c.drawText(RemoteKeys.VESTEL ? Ui.tr("YouTube, Prime Video e Google Play: a própria TV controla esses botões.",

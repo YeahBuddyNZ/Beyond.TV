@@ -208,7 +208,7 @@ var Profiles = (function () {
           api.add(m, function () { guard(tr('Gerenciar perfis', 'Manage profiles', 'Administrar perfiles'), function () { pick(true, function () { UI.top() && UI.top().rebuild(); }); }); });
           if (window.Family && Family.visit) {
             // Your own face and apps from Beyond Family, on this TV or anybody's.
-            var s = UI.button(foot, tr('Entrar com o Beyond Family', 'Sign in with Beyond Family', 'Entrar con Beyond Family'), 'star');
+            var s = UI.button(foot, tr('Entrar com o Beyond Family', 'Sign in with Beyond Family', 'Entrar con Beyond Family'), 'sparkles');
             api.add(s, function () { Family.visit(function (p) { if (p) choose(p, api, done); }); });
           }
         }
@@ -291,7 +291,7 @@ var Profiles = (function () {
           p.kid = !p.kid; kidLabel(); repaint(); likesBtn.style.display = p.kid ? '' : 'none';
         });
         // What a kid is into, set by a grown-up (this is already behind the PIN): it picks the shows on their cards.
-        var likesBtn = UI.button(actions, tr('Do que gosta', "What they're into", 'Lo que le gusta'), 'star');
+        var likesBtn = UI.button(actions, tr('Do que gosta', "What they're into", 'Lo que le gusta'), 'sparkles');
         likesBtn.style.display = p.kid ? '' : 'none';
         api.add(likesBtn, function () {
           if (!p.kid) return;

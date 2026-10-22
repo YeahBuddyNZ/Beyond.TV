@@ -21,6 +21,9 @@ final class Watchdog {
     private static final long WINDOW = 5 * 60_000L;
     private static final int LIMIT = 3;
     private static boolean installed;
+    /** Settings is in front: a crash there says nothing about the home screen, so it never sends the TV back to its
+     *  original one (a Home Settings crash did, #36). */
+    static volatile boolean settingsInFront;
 
     static synchronized void install(Context c) {
         if (installed) return;
@@ -33,7 +36,7 @@ final class Watchdog {
             } catch (Throwable ignored) {
             }
             try {
-                if (record(app, System.currentTimeMillis()) >= LIMIT) HomeMode.requestRevertHome(app);
+                if (!settingsInFront && record(app, System.currentTimeMillis()) >= LIMIT) HomeMode.requestRevertHome(app);
             } catch (Throwable ignored) {
             }
             if (previous != null) previous.uncaughtException(thread, error);
