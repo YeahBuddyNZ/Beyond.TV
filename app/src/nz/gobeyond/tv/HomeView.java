@@ -873,7 +873,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
 
     /** No photo: the glass reads the background's own gray (not Scene's default aurora, which isn't on screen). */
     private void neutralGlass() {
-        int color = blend(0xFFEFEBF8, 0xFF1E1A3A, night);     // Glow's paper and plum, as the glass would see them
+        int color = blend(0xFFEBE3FA, 0xFF1E1A3A, night);     // Glow's lilac and plum, as the glass would see them
         java.util.Arrays.fill(neutralFrostPx, color);
         java.util.Arrays.fill(neutralGlassPx, color);
         scene.setFrost(neutralFrostPx);
