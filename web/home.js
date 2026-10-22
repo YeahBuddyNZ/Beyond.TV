@@ -228,12 +228,15 @@
     // Pinned: the tiles the household chose in Beyond Family, first because somebody picked them on purpose.
     if (window.Family && Family.widgets().length) k.push('pinned');
     if (Watched.list(1).length) k.push('watching');
+    // Your home: the rooms from the family's Beyond Home box, once there is one on this network. Not for kids.
+    if (window.HomeHub && HomeHub.status() !== 'none' && !Profiles.kid()) k.push('home');
     if (Data.hasKey() || Profiles.kid()) k.push('all', 'movie', 'tv');
     return k;
   }
 
   function tabName(kind) {
     if (kind === 'pinned') return tr('Fixados', 'Pinned', 'Fijados');
+    if (kind === 'home') return tr('Sua casa', 'Your home', 'Tu casa');
     return kind === 'watching' ? tr('Continuar assistindo', 'Keep watching', 'Seguir viendo')
       : kind === 'movie' ? tr('Filmes', 'Movies', 'Películas') : kind === 'tv' ? tr('Séries', 'Shows', 'Series')
       : tr('Explorar', 'Explore', 'Explorar');
@@ -310,7 +313,8 @@
   function renderCards() {
     // Keep watching, or the picks: a kid watching gets good shows matched to what they're into, or a card asking.
     var kind = kinds[st.tab], pickKind = kind === 'all' ? null : kind;
-    var list = kind === 'pinned' ? pinnedCards() : kind === 'watching' ? watchingCards() : kind ? KidPicks.cards(pickKind) || Data.picks(pickKind) : [];
+    if (window.HomeHub) HomeHub.pace(kind === 'home');
+    var list = kind === 'pinned' ? pinnedCards() : kind === 'home' ? homeCards() : kind === 'watching' ? watchingCards() : kind ? KidPicks.cards(pickKind) || Data.picks(pickKind) : [];
     var holder = $('cards');
     setClass(body, 'no-picks', !list.length);
     var same = list.length === cards.length;
@@ -320,14 +324,15 @@
     holder.innerHTML = '';
     // Three little TV screens on stands, like the Beyond mark; six smaller ones for the pinned tiles.
     // Five or six tiles go smaller, to stay clear of Tonight at home.
-    var most = kind === 'pinned' ? 6 : 3, small = kind === 'pinned' && list.length > 4;
+    var grid = kind === 'pinned' || kind === 'home', most = grid ? 6 : 3, small = grid && list.length > 4;
     camImgs = [];
     for (var c = 0; c < list.length && c < most; c++) {
-      var p = list[c], card = el('div', 'card screen' + (p.tile ? ' pin' : '') + (small ? ' small' : ''), holder);
-      card.style.left = (80 + c * (small ? 200 : p.tile ? 290 : 400)) + 'px';
+      var p = list[c], card = el('div', 'card screen' + (p.tile || p.house ? ' pin' : '') + (small ? ' small' : ''), holder);
+      card.style.left = (80 + c * (small ? 200 : p.tile || p.house ? 290 : 400)) + 'px';
       var img = el('div', 'img', card);
       el('div', 'stand', card);
       if (p.tile) drawTile(p, img);
+      else if (p.house) drawHouse(p, img);
       else if (p.kid || p.ask) {
         setClass(card, 'kidpick', true);
         img.style.background = 'linear-gradient(135deg, ' + p.colour + ', #2C2458)';
@@ -445,6 +450,111 @@
         for (var j = 0; j < kids[k].jobs.length; j++) UI.el('div', 'bt-job' + (kids[k].jobs[j].done ? ' done' : ''), list, kids[k].jobs[j].title);
       }
     }});
+  }
+
+  // MARK: - Your home (Beyond Home)
+
+  /** The rooms as cards, or one card to connect the box. */
+  function homeCards() {
+    var status = HomeHub.status();
+    if (status === 'paired') return HomeHub.rooms().map(function (r) {
+      return {id: 'home:' + r.id + ':' + r.line, house: true, room: r, title: r.name, meta: r.line};
+    });
+    return [{id: 'home:pair:' + HomeHub.code(), house: true, title: tr('Conectar o Beyond Home', 'Connect Beyond Home', 'Conectar Beyond Home'),
+      meta: status === 'waiting' ? tr('Código ', 'Code ', 'Código ') + HomeHub.code() : tr('Achamos o seu na rede', 'We found yours on the network', 'Encontramos el tuyo en la red')}];
+  }
+
+  /** A room's card: a little house, and a dot for each thing that's on. */
+  function drawHouse(p, img) {
+    setClass(img, 'house', true);
+    sym(p.room ? 'home' : 'sync', img, 64);
+    if (!p.room) return;
+    var on = el('div', 'ons', img), things = p.room.things || [];
+    for (var i = 0; i < things.length && i < 10; i++) if (!things[i].away) el('em', things[i].on ? 'on' : '', on);
+  }
+
+  // Built when asked, so they're in the language picked (tr reads it each time).
+  function momentWords(id) {
+    return id === 'movie' ? [tr('Noite de filme', 'Movie night', 'Noche de cine'), tr('TV e som ligados, luzes baixas', 'TV and sound on, lights down', 'TV y sonido encendidos, luces bajas')]
+      : id === 'morning' ? [tr('Manhã', 'Morning', 'Mañana'), tr('Luzes acesas', 'Lights up', 'Luces encendidas')]
+      : id === 'bedtime' ? [tr('Hora de dormir', 'Bedtime', 'Hora de dormir'), tr('Telas e luzes apagadas', 'Screens and lights off', 'Pantallas y luces apagadas')]
+      : id === 'off' ? [tr('Desligar tudo', 'Everything off', 'Apagar todo'), tr('O cômodo todo desligado', 'The whole room off', 'Toda la habitación apagada')] : null;
+  }
+
+  /** A room: its Moments, the one remote and each thing on or off. */
+  function openRoom(id) {
+    UI.open({cls: 'bt-room', build: function (layer, api) {
+      var r = HomeHub.room(id);
+      if (!r) { setTimeout(api.close, 0); return; }
+      layer = UI.el('div', 'bt-box', layer);
+      UI.heading(layer, r.name, r.line);
+      function ask(what, extra) {
+        var q = {room: r.id, do: what};
+        for (var k in extra) q[k] = extra[k];
+        HomeHub.act(q, function (ok, why) {
+          if (!ok) toast(why || tr('Não deu agora. Tente de novo.', "That didn't work. Try again.", 'No funcionó. Inténtalo de nuevo.'));
+        });
+      }
+      var first = true;
+      if (r.moments.length) {
+        var moments = UI.el('div', 'bt-room-row', layer);
+        for (var m = 0; m < r.moments.length; m++) (function (mo) {
+          var words = momentWords(mo.id) || [mo.name, mo.lead];
+          var b = UI.button(moments, words[0], mo.id === 'bedtime' ? 'bedtime' : mo.id === 'movie' ? 'live_tv' : 'sparkles', mo.id === 'movie' ? 'primary' : '');
+          api.add(b, function () { ask('moment', {moment: mo.id}); toast(words[0] + ': ' + words[1]); }, {first: first});
+          first = false;
+        })(r.moments[m]);
+      }
+      if (r.remote) {
+        var rem = r.remote, remote = UI.el('div', 'bt-room-row', layer);
+        UI.el('div', 'bt-room-label', remote, rem.name + (rem.on ? (rem.volume !== null && rem.volume !== undefined ? ' · ' + rem.volume : '') + (rem.muted ? ' · ' + tr('mudo', 'muted', 'silencio') : '') : ' · ' + tr('desligado', 'off', 'apagado')));
+        api.add(UI.button(remote, tr('Mais baixo', 'Quieter', 'Más bajo'), 'speaker'), function () { ask('volume_down'); }, {first: first});
+        api.add(UI.button(remote, tr('Mais alto', 'Louder', 'Más alto'), 'speaker'), function () { ask('volume_up'); });
+        api.add(UI.button(remote, rem.muted ? tr('Com som', 'Unmute', 'Con sonido') : tr('Mudo', 'Mute', 'Silencio')), function () { ask('mute'); });
+        api.add(UI.button(remote, rem.on ? tr('Desligar', 'Turn off', 'Apagar') : tr('Ligar', 'Turn on', 'Encender')), function () { ask('power'); });
+        first = false;
+      }
+      var things = r.things.filter(function (t) { return !t.away; });
+      if (things.length) {
+        var list = UI.el('div', 'bt-room-things', layer);
+        for (var i = 0; i < things.length && i < 12; i++) (function (t) {
+          var b = UI.el('div', 'bt-thing' + (t.on ? ' on' : ''), list);
+          UI.el('i', '', b);
+          UI.el('b', '', b, t.name);
+          UI.el('span', '', b, t.on ? tr('Ligado', 'On', 'Encendido') : tr('Desligado', 'Off', 'Apagado'));
+          api.add(b, function () { ask('toggle', {thing: t.id}); }, {first: first});
+          first = false;
+        })(things[i]);
+      }
+      if (first) UI.el('div', 'bt-sub', layer, tr('Nada para controlar neste cômodo ainda.', 'Nothing to work in this room yet.', 'Nada que controlar en esta habitación aún.'));
+    }});
+  }
+
+  /** Connect the box: a code to type in the Beyond Home app, until it's typed. */
+  function openPairing() {
+    function draw(layer) {
+      layer = UI.el('div', 'bt-box', layer);
+      UI.heading(layer, tr('Conectar o Beyond Home', 'Connect Beyond Home', 'Conectar Beyond Home'),
+        tr('No app Beyond Home, vá em Ajustes, TVs, e digite este código.', 'In the Beyond Home app, go to Settings, TVs, and type this code.', 'En la app Beyond Home, ve a Ajustes, TVs, y escribe este código.'));
+      UI.el('div', 'bt-code', layer, HomeHub.code() || '······');
+    }
+    var api = UI.open({cls: 'bt-pair-home', build: function (layer) { draw(layer); }, closed: function () { HomeHub.pace(kinds[st.tab] === 'home'); }});
+    HomeHub.pace(true);
+    if (HomeHub.status() === 'found') HomeHub.pair(function (ok) {
+      if (!ok) { api.close(); toast(tr('O Beyond Home não respondeu. Tente de novo.', "Beyond Home didn't answer. Try again.", 'Beyond Home no respondió. Inténtalo de nuevo.')); return; }
+      api.rebuild();
+      HomeHub.refresh();
+    });
+  }
+
+  /** The box said something new: the tab, the cards, an open room or the pairing code. */
+  function homeChanged() {
+    if (tabKinds().join() !== kinds.join()) renderTop();
+    if (kinds[st.tab] === 'home') renderCards();
+    var top = UI.top();
+    if (!top) return;
+    if (document.querySelector('.layer.bt-room')) top.rebuild();
+    else if (document.querySelector('.layer.bt-pair-home')) { if (HomeHub.status() === 'paired') top.close(); else top.rebuild(); }
   }
 
   function appById(id) {
@@ -963,6 +1073,7 @@
         return;
       case Z.CARDS:
         var p = cards[st.card];
+        if (p && p.house) { if (p.room) openRoom(p.room.id); else openPairing(); return; }
         if (p && p.tile) {
           var on = p.app ? appById(p.app) : null;
           if (p.tile.kind === 'camera') openCamera(p.tile);
@@ -1463,6 +1574,7 @@
     if (Profiles.count() > 1) Profiles.pick(false, profileChosen);
   });
   Checkin.start();
+  if (window.HomeHub) HomeHub.start(homeChanged);
   // Beyond's answers to this TV's feedback, if it ever gave any: when the home screen opens, then now and then.
   function hearBeyond() { Checkin.hear(function (text) { toast('Beyond: ' + text); }); }
   hearBeyond();

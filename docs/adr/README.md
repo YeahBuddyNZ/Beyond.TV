@@ -17,3 +17,4 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0007](0007-keep-watching-stays-on-the-tv.md) | Keep watching stays on the TV |
 | [0008](0008-one-switch-for-te-reo.md) | One switch for te reo |
 | [0009](0009-pinned-tiles-and-cameras.md) | Pinned tiles, and cameras that stay at home |
+| [0010](0010-your-home-from-beyond-home.md) | Your home, from the Beyond Home box |

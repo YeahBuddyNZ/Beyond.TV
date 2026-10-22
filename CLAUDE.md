@@ -253,6 +253,11 @@ HDMI (Chromecast with Google TV, Google TV Streamer, onn 4K, NVIDIA Shield). Set
   with family-friendly picks (`Profiles.gentle()`) and its own shelf; a kid needs the PIN to switch to it.
   `web/bedtime.js` is Bedtime breathing: a night light that slows from six breaths a minute and fades to dark (moon button at night, or a `bedtime` command from Beyond Family).
   `web/kidpicks.js` is Picks for kids: for a kid watching, the cards are a hand-picked list of each service's own shows matched to `likes` (a grown-up's, from Beyond Family or the profile editor behind the PIN) and `loves` (the kid's own), or one "What do you like to watch?" card; now and then, back from an app, it suggests one. No TMDB needed. Its like ids match Beyond Family's `TV_LIKES`. `KidPicks.java` holds the same lists for Google TV (likes from `Family.likes`): change one, change both.
+  `web/homehub.js` is Your home: it finds the family's Beyond Home box (`/tv/hi` on port 8098: the address it found
+  last, `homeassistant.local`, `homeassistant`, or `homeHub` in the config), pairs by a code typed in the Beyond Home
+  app (Settings, TVs), then reads `/tv/snapshot` (every 4 seconds while the tab shows, every minute otherwise) and asks
+  `/tv/act` for named things only (`{room, do: moment|volume_up|volume_down|mute|power|toggle}`). The box builds every
+  call (YeahBuddyNZ/Beyond-Home, `server/tvs.mjs`). No box, no tab; kids never get it. ADR 0010.
   `web/pets.js` asks a kid who just picked their face whether the household's pets got fed (`pets` in `/tv/sync`, each with `due` worked out by Beyond Family); "Yes" posts `/tv/pets/fed` with the kid's member id, "Not yet" asks again after 30 minutes.
   `web/outside.js` is the fine day nudge: once a day on a mild, dry day, coming back from an app suggests going outside, and the next key press 10+ minutes later offers to count it as green time (`POST /tv/green`).
   The dinner question lives in `web/family.js` (`dinner`): `question` opens it, `question-answered` fills in faces (never the words), `question-reveal` shows the answers, `question-end` closes it.

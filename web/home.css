@@ -882,6 +882,41 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 }
 .card.pin .img.cam.nocam .live { background: #55534B; box-shadow: none; }
 
+/* Your home: a room is a little house with a dot for each thing, lit when it's on. */
+.card.pin .img.house { background: #2C2458; }
+.card.pin .img.house .play { display: none; }
+.card.pin .img.house .sym { position: absolute; left: 50%; top: 34px; margin-left: -32px; background: #F7F6F2; }
+.card.pin .img.house .ons { position: absolute; left: 0; right: 0; bottom: 18px; text-align: center; }
+.card.pin .img.house .ons em {
+  display: inline-block; width: 12px; height: 12px; margin: 0 4px; border-radius: 6px;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.5);
+}
+.card.pin .img.house .ons em.on { background: #E8A33D; box-shadow: 0 0 8px 1px rgba(232, 163, 61, 0.6); }
+
+/* A room: its Moments, the one remote, then each thing on or off. */
+.bt-room, .bt-pair-home { background: rgba(13, 12, 24, 0.94); }
+.bt-room .bt-box { position: absolute; left: 120px; right: 120px; top: 160px; text-align: center; }
+.bt-pair-home .bt-box { position: absolute; left: 0; right: 0; top: 220px; text-align: center; }
+.bt-pair-home .bt-sub { max-width: 1100px; margin: 18px auto 40px; }
+.bt-room-row { margin-top: 40px; }
+.bt-room-row .bt-button { margin: 0 10px; }
+.bt-room-label { margin-bottom: 18px; font-size: 28px; font-weight: 600; color: rgba(247, 246, 242, 0.7); }
+.bt-room-things { margin: 44px auto 0; width: 1500px; text-align: left; }
+.bt-thing {
+  display: inline-block; position: relative; width: 470px; margin: 0 10px 16px; padding: 20px 26px 20px 70px;
+  border-radius: 26px; background: rgba(247, 246, 242, 0.08); color: #F7F6F2;
+  -webkit-box-sizing: border-box; box-sizing: border-box; vertical-align: top;
+}
+.bt-thing i {
+  position: absolute; left: 26px; top: 50%; width: 22px; height: 22px; margin-top: -11px; border-radius: 11px;
+  box-shadow: inset 0 0 0 3px rgba(247, 246, 242, 0.5);
+}
+.bt-thing.on i { background: #E8A33D; box-shadow: 0 0 10px 2px rgba(232, 163, 61, 0.55); }
+.bt-thing b { display: block; font-size: 30px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bt-thing span { display: block; margin-top: 4px; font-size: 22px; color: rgba(247, 246, 242, 0.6); }
+.bt-thing.focus { background: #F7F6F2; color: #22221F; }
+.bt-thing.focus span { color: #55534B; }
+
 /* A camera full screen. */
 .bt-layer.bt-camera { background: #000; }
 .bt-camera .pic { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; background-size: contain; background-repeat: no-repeat; background-position: center; }
