@@ -5,15 +5,10 @@ import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Looper;
 
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -24,7 +19,7 @@ import java.util.concurrent.Executors;
 /**
  * Camera tiles pinned in Beyond Family: a still picture from a camera on the home network, fetched here and never
  * through Beyond Family. Beyond Family only takes addresses on the home network with no password in them; this checks
- * again that the address really is on the home network before asking. Plain http is spoken over a socket of our own,
+ * again that the address really is on the home network before asking. Plain http goes over LocalHttp's own socket,
  * because the app turns cleartext off for everything else; https goes through the usual connection. Same as camera()
  * in web/home.js.
  */
@@ -33,7 +28,6 @@ final class Cameras {
 
     private static final ExecutorService IO = Executors.newSingleThreadExecutor();
     private static final Handler MAIN = new Handler(Looper.getMainLooper());
-    private static final int MAX_BYTES = 4 * 1024 * 1024;
     /** Latest picture by size and address ("360|http://..."), and those being fetched now. Main thread only. */
     private static final Map<String, Bitmap> shots = new HashMap<>();
     private static final Set<String> busy = new HashSet<>();
@@ -80,7 +74,7 @@ final class Cameras {
     private static byte[] fetch(String address) throws Exception {
         URL u = new URL(address);
         InetAddress host = InetAddress.getByName(u.getHost());
-        if (!host.isSiteLocalAddress() && !host.isLinkLocalAddress()) throw new SecurityException("not on the home network");
+        if (!LocalHttp.home(host)) throw new SecurityException("not on the home network");
         if (u.getUserInfo() != null) throw new SecurityException("no passwords");
         if ("https".equals(u.getProtocol())) {
             HttpURLConnection c = (HttpURLConnection) u.openConnection();
@@ -94,37 +88,13 @@ final class Cameras {
             }
         }
         if (!"http".equals(u.getProtocol())) throw new SecurityException("http or https only");
-        int port = u.getPort() < 0 ? 80 : u.getPort();
-        String path = u.getFile().isEmpty() ? "/" : u.getFile();
-        try (Socket s = new Socket()) {
-            s.connect(new InetSocketAddress(host, port), 4000);
-            s.setSoTimeout(6000);
-            OutputStream out = s.getOutputStream();
-            out.write(("GET " + path + " HTTP/1.0\r\nHost: " + u.getHost() + (u.getPort() < 0 ? "" : ":" + port)
-                    + "\r\nUser-Agent: BeyondTV\r\nConnection: close\r\n\r\n").getBytes(StandardCharsets.US_ASCII));
-            out.flush();
-            byte[] all = read(s.getInputStream());
-            int head = -1;
-            for (int i = 0; i + 3 < all.length; i++) {
-                if (all[i] == '\r' && all[i + 1] == '\n' && all[i + 2] == '\r' && all[i + 3] == '\n') { head = i; break; }
-            }
-            if (head < 0) throw new Exception("no answer");
-            String status = new String(all, 0, Math.min(head, 64), StandardCharsets.US_ASCII);
-            if (!status.matches("HTTP/1\\.[01] 200[\\s\\S]*")) throw new Exception(status);
-            byte[] body = new byte[all.length - head - 4];
-            System.arraycopy(all, head + 4, body, 0, body.length);
-            return body;
-        }
+        LocalHttp.Answer a = LocalHttp.request("GET", address, null, null, 6000);
+        if (a.status != 200) throw new Exception("camera said " + a.status);
+        return a.body;
     }
 
     private static byte[] read(InputStream in) throws Exception {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        byte[] buf = new byte[16384];
-        for (int n; (n = in.read(buf)) > 0; ) {
-            out.write(buf, 0, n);
-            if (out.size() > MAX_BYTES) throw new Exception("too big");
-        }
-        return out.toByteArray();
+        return LocalHttp.read(in);
     }
 
     /** Decoded small enough for where it's drawn: a camera's full picture on a 1 GB TV would cost too much. */
