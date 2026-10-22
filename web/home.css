@@ -635,3 +635,10 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   -webkit-transition: opacity 0.8s; transition: opacity 0.8s;
 }
 .bt-bed .hold { position: absolute; left: 0; top: 0; width: 1px; height: 1px; }
+
+/* MARK: - The fine day nudge */
+.bt-outside .bt-box { position: absolute; left: 0; right: 0; top: 250px; text-align: center; }
+.bt-outside .sun { font-size: 120px; line-height: 1; margin-bottom: 30px; color: #F2C27A; }
+.bt-outside .bt-heading { display: inline-block; }
+.bt-outside .bt-sub { max-width: 1000px; margin: 18px auto 0; }
+.bt-outside .bt-buttons { margin-top: 60px; text-align: center; }
