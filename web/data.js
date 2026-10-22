@@ -22,13 +22,13 @@ var Place = (function () {
   }
 
   var tz = zone(TV.zone()), set = CONFIG.latitude !== '' && CONFIG.latitude !== undefined;
-  var country = (CONFIG.tmdbRegion || (tz ? tz.country : '') || 'US').toUpperCase();
+  var country = (CONFIG.tmdbRegion || (tz ? tz.country : '') || 'NZ').toUpperCase();
   return {
-    lat: set ? CONFIG.latitude : tz ? tz.lat : '40.7128',
-    lon: set ? CONFIG.longitude : tz ? tz.lon : '-74.0060',
+    lat: set ? CONFIG.latitude : tz ? tz.lat : '-36.8485',
+    lon: set ? CONFIG.longitude : tz ? tz.lon : '174.7633',
     city: CONFIG.city || (!set && tz ? tz.name : ''),
     country: country,
-    currency: (CONFIG.currency || (country === 'BR' ? 'BRL' : EURO.test(country) ? 'EUR' : 'USD')).toUpperCase(),
+    currency: (CONFIG.currency || (country === 'BR' ? 'BRL' : country === 'NZ' ? 'NZD' : country === 'AU' ? 'AUD' : EURO.test(country) ? 'EUR' : 'USD')).toUpperCase(),
     /** Fahrenheit for TVs in the US (by their time zone, or their language when it doesn't tell). */
     fahrenheit: tz ? tz.country === 'US' : /-US$/i.test(navigator.language || '')
   };
@@ -36,7 +36,7 @@ var Place = (function () {
 
 var Prefs = (function () {
   'use strict';
-  var KEY = 'fmtv.prefs';
+  var KEY = 'btv.prefs';
   var v = {};
   try { v = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) {}
   function save() { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch (e) {} }
@@ -62,8 +62,8 @@ var Prefs = (function () {
 var Data = (function () {
   'use strict';
 
-  function store(key, value) { try { localStorage.setItem('fmtv.' + key, JSON.stringify(value)); } catch (e) {} }
-  function stored(key) { try { return JSON.parse(localStorage.getItem('fmtv.' + key)); } catch (e) { return null; } }
+  function store(key, value) { try { localStorage.setItem('btv.' + key, JSON.stringify(value)); } catch (e) {} }
+  function stored(key) { try { return JSON.parse(localStorage.getItem('btv.' + key)); } catch (e) { return null; } }
 
   /** GET a JSON document; done(error, json). */
   function get(url, headers, done) {
@@ -531,7 +531,7 @@ var Data = (function () {
     },
 
     compact: function (v) {
-      if (isNaN(v)) return '—';
+      if (isNaN(v)) return '–';
       if (v >= 10000) return fmt(v / 1000, 1) + 'k';
       if (v >= 1000) return fmt(v / 1000, 2) + 'k';
       if (v >= 100) return fmt(v, 0);
@@ -539,12 +539,12 @@ var Data = (function () {
     },
     money: function (v) {
       var s = SYMBOLS[CURRENCY] || CURRENCY + ' ';
-      if (isNaN(v)) return s + '—';
+      if (isNaN(v)) return s + '–';
       return s + (v >= 1000 ? fmt(v, 0) : fmt(v, 2));
     },
     change: function (v) { return isNaN(v) ? '' : (v >= 0 ? '+' : '−') + fmt(Math.abs(v), 1) + '%'; },
     degrees: function (v) {
-      if (v === undefined || v === null || isNaN(v)) return '—';
+      if (v === undefined || v === null || isNaN(v)) return '–';
       var unit = Prefs.temperature();
       var f = unit === 'F' || (unit === 'auto' && Place.fahrenheit);
       return Math.round(f ? v * 9 / 5 + 32 : v) + '°';

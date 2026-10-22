@@ -36,7 +36,7 @@ var TV = (function () {
   // webOS 6 gives Developer Mode apps only the "public" group, which leaves out listLaunchPoints. There the list comes
   // from the TV's remote control API on 127.0.0.1:3000 (the one LG's phone app uses), which takes file:// pages.
   // The TV asks once to allow it; the key it gives back is kept.
-  var SSAP_KEY = 'fmtv.ssapKey', SSAP_REFUSED = 'fmtv.ssapRefused';
+  var SSAP_KEY = 'btv.ssapKey', SSAP_REFUSED = 'btv.ssapRefused';
 
   /** One call to the remote control API; done(result) with null on failure. */
   function ssap(uri, done) {
@@ -130,11 +130,11 @@ var TV = (function () {
   var SAMSUNG_VIEWER = 'org.tizen.tv-viewer';
 
   var SAMPLE = [
-    ['netflix', 'Netflix', '#E50914'], ['youtube.leanback.v4', 'YouTube', '#FF0033'], ['amazon', 'Prime Video', '#1A98FF'],
-    ['com.disney.disneyplus-prod', 'Disney+', '#1838C8'], ['com.hbo.hbomax', 'Max', '#6C3BE0'],
-    ['com.apple.appletv', 'Apple TV', '#B8BCC6'], ['globoplaywebos', 'Globoplay', '#FF5A1F'], ['spotify-beehive', 'Spotify', '#1DB954'],
-    ['cdp-30', 'Plex', '#E5A00D'], ['com.crunchyroll.webapp', 'Crunchyroll', '#F47521'], ['com.webos.app.browser', 'Web Browser', '#3A7BD5'],
-    ['com.palm.app.settings', 'Settings', '#8E8E93']
+    ['netflix', 'Netflix', '#E50914'], ['youtube.leanback.v4', 'YouTube', '#FF0033'], ['neon', 'Neon', '#FF2E93'],
+    ['tvnz', 'TVNZ+', '#5B2BD6'], ['com.disney.disneyplus-prod', 'Disney+', '#1838C8'], ['amazon', 'Prime Video', '#1A98FF'],
+    ['threenow', 'ThreeNow', '#F2C200'], ['cdp-30', 'Plex', '#E5A00D'], ['com.apple.appletv', 'Apple TV', '#B8BCC6'],
+    ['skygo', 'Sky Go', '#0A62C9'], ['spotify-beehive', 'Spotify', '#1DB954'], ['com.crunchyroll.webapp', 'Crunchyroll', '#F47521'],
+    ['com.webos.app.browser', 'Web Browser', '#3A7BD5'], ['com.palm.app.settings', 'Settings', '#8E8E93']
   ];
 
   // Newer webOS (11 tested) denies listLaunchPoints to Developer Mode apps, but still answers getAppLoadStatus for
@@ -163,7 +163,7 @@ var TV = (function () {
     });
   }
 
-  var self = 'io.freemytv';
+  var self = 'nz.gobeyond.tv';
   if (webos && window.PalmSystem && window.PalmSystem.identifier) self = window.PalmSystem.identifier.split(' ')[0];
   if (samsung) {
     try { self = window.tizen.application.getCurrentApplication().appInfo.id; } catch (e) {}

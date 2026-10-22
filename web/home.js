@@ -28,6 +28,13 @@
     return s;
   }
 
+  /** Beyond's mark: the four brand dots. */
+  function dots(parent) {
+    var d = el('span', 'dots', parent);
+    el('i', 'a', d); el('i', 'b', d); el('i', 'c', d); el('i', 'd', d);
+    return d;
+  }
+
   function coin(i, parent) {
     var c = window.COINS && window.COINS[i];
     if (!c) return;
@@ -64,8 +71,14 @@
   var SHELF = [
     ['netflix', /^netflix$/, /netflix/i, ['#0A0A0A', '#000000']],
     ['youtube', /youtube/, /^youtube$/i, ['#1C1C1E', '#09090A']],
-    ['prime', /^amazon$/, /prime video|amazon/i, ['#2AA8FF', '#0A68D4']],
+    // New Zealand's own, matched by name (their app ids differ by TV maker)
+    ['neon', /neon/, /^neon$/i, ['#2B1036', '#12061A']],
+    ['tvnz', /tvnz/, /tvnz/i, ['#3A1C8C', '#1A0B47']],
     ['disney', /disney/, /disney/i, ['#173584', '#08143F']],
+    ['prime', /^amazon$/, /prime video|amazon/i, ['#2AA8FF', '#0A68D4']],
+    ['threenow', /threenow/, /threenow/i, ['#1C1C1E', '#000000']],
+    ['skygo', /skygo|sky\.go/, /sky go|skygo/i, ['#0A62C9', '#05306B']],
+    ['plex', /plex/, /^plex$/i, ['#282A2D', '#111214']],
     ['max', /hbo|wbd/, /^(hbo )?max$|hbo max/i, ['#5C30E8', '#221684']],
     ['appletv', /appletv|apple\.tv/, /apple tv/i, ['#1C1C1E', '#000000']],
     ['hulu', /^hulu/, /hulu/i, ['#1CE783', '#0B8F4E']],
@@ -506,7 +519,7 @@
     var box = $('settings').firstChild;
     box.innerHTML = '';
     var title = el('div', 'title', box);
-    sym('settings', title);
+    dots(title).style.marginRight = '18px';
     title.appendChild(document.createTextNode(tr('Ajustes do Início', 'Home Settings', 'Ajustes de inicio')));
     var list = el('div', 'list', box), holder = el('div', 'rows', list);
     rowsNow = settingRows();
@@ -759,6 +772,9 @@
     s.innerHTML = '';
     var a = el('div', 'photo', s), b = el('div', 'photo', s);
     el('div', 'shade', s);
+    var brand = el('div', 'brand lockup', s);
+    dots(brand);
+    brand.appendChild(document.createTextNode('Beyond TV'));
     var clock = el('div', 'clock', s);
     el('div', 'time', clock);
     el('div', 'date', clock);
@@ -900,5 +916,5 @@
   }, 30000);
 
   // For the browser preview and tests.
-  window.FreeMyTV = {state: st, move: move, activate: activate, back: back, showSaver: showSaver, hideSaver: hideSaver, toast: toast};
+  window.BeyondTV = {state: st, move: move, activate: activate, back: back, showSaver: showSaver, hideSaver: hideSaver, toast: toast};
 })();

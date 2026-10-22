@@ -1,10 +1,10 @@
 {
-  "id": "io.freemytv",
+  "id": "nz.gobeyond.tv",
   "version": "1.1.0",
-  "vendor": "Free My TV",
+  "vendor": "Beyond TV",
   "type": "web",
   "main": "index.html",
-  "title": "Free My TV",
+  "title": "Beyond TV",
   "icon": "icon.png",
   "largeIcon": "largeIcon.png",
   "iconColor": "#FF7A9E",

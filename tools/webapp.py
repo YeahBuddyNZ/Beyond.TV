@@ -12,7 +12,7 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 GENERIC = {'tmdbKey': '', 'tmdbRegion': '', 'latitude': '', 'longitude': '', 'city': '', 'language': 'auto',
-           'currency': '', 'temperature': 'auto', 'showCrypto': True, 'hideAnimation': False}
+           'currency': '', 'temperature': 'auto', 'showCrypto': False, 'hideAnimation': False}
 
 
 def config_from_args(args):
@@ -46,14 +46,14 @@ def read_config(path):
 
     return {
         'tmdbKey': values.get('tmdb_key', ''),
-        'tmdbRegion': values.get('tmdb_region', 'US') or 'US',
-        'latitude': number('latitude', '40.7128'),
-        'longitude': number('longitude', '-74.0060'),
+        'tmdbRegion': values.get('tmdb_region', 'NZ') or 'NZ',
+        'latitude': number('latitude', '-36.8485'),
+        'longitude': number('longitude', '174.7633'),
         'city': values.get('city', ''),
         'language': values.get('language', 'auto') or 'auto',
-        'currency': values.get('currency', 'USD') or 'USD',
+        'currency': values.get('currency', 'NZD') or 'NZD',
         'temperature': values.get('temperature', 'auto') or 'auto',
-        'showCrypto': values.get('show_crypto', 'true').lower() != 'false',
+        'showCrypto': values.get('show_crypto', 'false').lower() == 'true',
         'hideAnimation': values.get('hide_animation', 'false').lower() == 'true',
     }
 
@@ -88,7 +88,7 @@ def files(config, made_by):
         if name.endswith('.png') or name.startswith('LICENSE'):
             with open(os.path.join(symbols, name), 'rb') as f:
                 out['symbols/' + name] = f.read()
-    for name in ('InterVariable.ttf', 'OFL.txt'):
+    for name in ('InterVariable.ttf', 'OFL.txt', 'SoraVariable.ttf', 'LICENSE-Sora-OFL.txt'):
         with open(os.path.join(ROOT, 'app', 'assets', 'fonts', name), 'rb') as f:
             out['fonts/' + name] = f.read()
     return out

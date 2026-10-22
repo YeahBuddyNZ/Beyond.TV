@@ -1,13 +1,28 @@
-# Free My TV: notes for Claude
+# Beyond TV: notes for Claude
 
 A home screen for Google TV and Android TV that replaces the stock one, plus a settings app that switches between
-Free My TV and the TV's original home screen. A plain Android app in Java, built without Gradle by `build.sh`.
+Beyond TV and the TV's original home screen. A plain Android app in Java, built without Gradle by `build.sh`.
 LG TVs (webOS) and Samsung TVs (Tizen) get the same home screen as a web app: `web/`, packed by `webos/` and `tizen/`
 (see below).
-The website (freemytv.io) is in `docs/`: static HTML, CSS and JS, no build step. A push to `main` that changes it
-publishes it to GitHub Pages (`.github/workflows/pages.yml`). `docs/index.html` (English) and `docs/pt/index.html`
-(Brazilian Portuguese) are the same page in two languages, so change both; visitors from Brazil land on the
-Portuguese one by themselves, and the PT/EN switch in the menu is remembered.
+The website is in `docs/`: one static page (`docs/index.html`), no build step. A push to `main` that changes it
+publishes it to GitHub Pages (`.github/workflows/pages.yml`).
+
+## Beyond TV: what's ours
+
+Beyond TV is Beyond's (gobeyond.co.nz) free TV home screen, part of the Beyond Tools showcase. It is a fork of
+Free My TV (MIT, history kept; licence in `LICENSE-free-my-tv.txt`); the project as a whole is GPL-3.0.
+
+- **Writing:** New Zealand English in all copy, comments and commit messages. No em dashes anywhere. Dates DD/MM/YYYY.
+- **Brand:** the same family as Beyond Family (YeahBuddyNZ/Beyond-Family). Paper `#F7F6F2`, ink `#22221F`, ink-soft
+  `#55534B`, moss `#2F7D6D` (focus and the one primary action), ember `#E8A33D` (earned things only). The mark is
+  Beyond's four dots (moss, ember, coral `#D85A30`, blue `#378ADD`) on an ink screen with a stand; `tools/make_art.py`
+  draws every icon and banner from it. Sora (`app/assets/fonts/SoraVariable.ttf`) for display type, Inter for text.
+- **Defaults are New Zealand:** region NZ, Auckland, NZD, Celsius, crypto off. NZ services (Neon, TVNZ+, ThreeNow,
+  Sky Go) sit on the web shelf, matched by name.
+- **Roadmap** (README): profiles, Plex, one "What's on" across services, then Beyond Family (pairing, a phone remote
+  in the Beyond Family app, kids' voice search, the house game on the TV). New features are built in `web/` first,
+  where they can be previewed in a browser.
+- Beyond Family deploys to production on every push to its `main`: only ever open PRs there.
 
 The person you're helping may not be technical. Keep it short and friendly, say what you're about to do on their TV
 before you do it, and let them do the taps on the TV.
@@ -28,9 +43,9 @@ before you do it, and let them do the taps on the TV.
    it. If they paste it in the chat anyway, put it only in `config.properties`.
    Without a key everything works except the picks and the screensaver photos.
    The same goes for the optional `watchmode_key` (free, watchmode.com; makes picks open the title's page): theirs, secret, only in `config.properties`.
-5. **Build:** `./build.sh` → `FreeMyTV.apk`. Keep `freemytv.keystore`: updates must be signed with the same key.
+5. **Build:** `./build.sh` → `BeyondTV.apk`. Keep `beyondtv.keystore`: updates must be signed with the same key.
 6. **Install:** `adb connect <IP>:5555`. The TV asks *Allow USB debugging?*: tell them to accept and tick *Always
-   allow*. Then `adb install -r FreeMyTV.apk`. On TCL, also `adb shell "appops set io.freemytv AUTO_START allow || appops set io.freemytv APP_AUTO_START allow"`
+   allow*. Then `adb install -r BeyondTV.apk`. On TCL, also `adb shell "appops set nz.gobeyond.tv AUTO_START allow || appops set nz.gobeyond.tv APP_AUTO_START allow"`
    (some firmware calls the operation `APP_AUTO_START`; this tries both):
    TCL's `TclAppBoot` blocks background jobs by default, so the switch (and the watchdog) never run. The log shows
    `forbid bind service ... ModeJob`. Some TCL firmware has neither (a 2024 MediaTek Google TV, Android 14, has no
@@ -42,20 +57,20 @@ before you do it, and let them do the taps on the TV.
 7. **Tell them what the switch does** before they make it: the home screen and screensaver change, a short list of
    promo apps is turned off (never uninstalled), and *Original* brings it all back. On TCL, the remote's Netflix,
    YouTube and Prime buttons keep working through a small accessibility service that only reads those buttons
-   (*Free My TV* → *Remote Buttons* picks what each opens); *Original* turns it off.
-8. **They switch on the TV:** *Free My TV* → *Home Screen* → *Free My TV*. The app uses the TV's own ADB on
+   (*Beyond TV* → *Remote Buttons* picks what each opens); *Original* turns it off.
+8. **They switch on the TV:** *Beyond TV* → *Home Screen* → *Beyond TV*. The app uses the TV's own ADB on
    127.0.0.1 with its own key, so the TV asks once more to allow debugging. Don't switch modes from the computer.
    If the TV's Wi-Fi was saved during its first setup, the switch stops before changing anything and asks them to
    forget the network and connect again in Settings (Network & Internet); then the switch goes through. Saved
    networks out of range don't show in Settings: find the ones with `cname=com.google.android.tungsten.setupwraith`
    in `adb shell dumpsys wifi` (each block starts with its `ID:`), and with their OK remove them with
    `adb shell cmd wifi forget-network <id>`.
-9. **Check:** `adb logcat -s FreeMyTV` shows what the switch did.
+9. **Check:** `adb logcat -s BeyondTV` shows what the switch did.
 
 ## Installing it on an LG TV (webOS)
 
 On LG it's an app, installed through LG's Developer Mode, and it changes nothing else on the TV: LG's home screen
-stays, and Free My TV opens with a long press of a number key.
+stays, and Beyond TV opens with a long press of a number key.
 
 1. **Ask** for the TV's IP address and their city, if they didn't say. Tools: Python 3 and OpenSSH (`ssh`,
    `ssh-keygen`), already on macOS, Linux and Windows 10+.
@@ -64,14 +79,14 @@ stays, and Free My TV opens with a long press of a number key.
    passphrase.
 3. **Settings:** the same `config.properties` as on Android (the first `python3 webos/build.py` creates it). The
    TMDB key rules above apply.
-4. **Build:** `python3 webos/build.py` must end with `Built FreeMyTV-webos.ipk`.
+4. **Build:** `python3 webos/build.py` must end with `Built BeyondTV-webos.ipk`.
 5. **Install:** the first time needs the TV's passphrase, typed by them: ask them to run
    `python3 webos/install.py <IP>` in their own terminal (yours can't answer its prompt, and the passphrase doesn't go
-   in the chat). It keeps the unlocked key in `~/.ssh/freemytv_webos_<IP>`, so later updates run from your terminal
+   in the chat). It keeps the unlocked key in `~/.ssh/beyondtv_webos_<IP>`, so later updates run from your terminal
    with the same command.
-6. **Tell them:** while Free My TV is open, holding a number key pins it to that key. Developer Mode lasts about 40
+6. **Tell them:** while Beyond TV is open, holding a number key pins it to that key. Developer Mode lasts about 40
    days; *EXTEND* in that app renews it (if it runs out, the TV removes developer apps, and installing again brings it
-   back). `--uninstall` removes Free My TV.
+   back). `--uninstall` removes Beyond TV.
 
 ## Installing it on a Samsung TV (Tizen)
 
@@ -79,7 +94,7 @@ On Samsung it's an app too (2017 and newer, Tizen 3+), installed through Samsung
 screen stays. Two ways:
 
 - **The release, no tools:** TizenBrew Installer (github.com/reisxd/TizenBrewInstaller) installs the latest GitHub
-  release when they type `simbasjungles/free-my-tv`, and on 2023+ TVs signs it with their Samsung account. That build
+  release when they type `YeahBuddyNZ/Beyond.TV`, and on 2023+ TVs signs it with their Samsung account. That build
   has no TMDB key (no picks) and takes the city from the TV's time zone. Walk them through the README's steps.
 - **Their own build** (their city, their TMDB key), below.
 
@@ -101,22 +116,22 @@ screen stays. Two ways:
    and `tizen cli-config "profiles.path=<home>/tizen-studio-data/profile/profiles.xml"`; on macOS the passwords go to
    the login Keychain). Certificate passwords are theirs: they type them in their own terminal, never in the chat.
 5. **Settings:** the same `config.properties`; the TMDB key rules above apply.
-6. **Build and sign:** `python3 tizen/build.py --sign <profile>` must end with `Built FreeMyTV-tizen.wgt (...,
+6. **Build and sign:** `python3 tizen/build.py --sign <profile>` must end with `Built BeyondTV-tizen.wgt (...,
    signed with "<profile>")`.
 7. **Install:** `python3 tizen/install.py <IP>`: it pushes the app over SDB (port 26101), installs it with the TV's
    `0 vd_appinstall` and opens it with `0 was_execute` (tested on a 2017 Tizen 3.0 TV); `--uninstall` removes it.
-   With Samsung's tools instead: `sdb connect <IP>`, `tizen install -n FreeMyTV-tizen.wgt -t <serial from sdb
-   devices>` and `tizen run -p FreeMyTVio.FreeMyTV -t <serial>`. Updates need the same certificate: the TV refuses
+   With Samsung's tools instead: `sdb connect <IP>`, `tizen install -n BeyondTV-tizen.wgt -t <serial from sdb
+   devices>` and `tizen run -p BeyondTVnz.BeyondTV -t <serial>`. Updates need the same certificate: the TV refuses
    one signed by another (uninstall first). A retail TV's sdbd only takes files (`filesync_support:push`): nothing
-   can be pulled from it. To look inside the running app, `0 debug FreeMyTVio.FreeMyTV 300` over SDB opens it with
+   can be pulled from it. To look inside the running app, `0 debug BeyondTVnz.BeyondTV 300` over SDB opens it with
    a Web Inspector port (Runtime.evaluate works on Tizen 3; screenshots don't).
 8. **Tell them:** *Autorun Last App* in the TV's settings (under Start Screen Options; where it is changes by year)
-   makes the TV turn on into Free My TV.
+   makes the TV turn on into Beyond TV.
 
 ## Releases
 
 TizenBrew Installer takes the first `.wgt` of the latest GitHub release, so every release carries
-`FreeMyTV-tizen.wgt`: built with `--generic` (no config.properties: no key, the city from the time zone) and signed
+`BeyondTV-tizen.wgt`: built with `--generic` (no config.properties: no key, the city from the time zone) and signed
 with a Tizen certificate (`--sign`), which 2017-2022 TVs install as it is; on 2023+ TVs the installer signs it again
 with the person's Samsung certificate. Sign every release with the same author certificate: older TVs refuse an
 update signed by another. `python3 webos/build.py --generic` makes the LG `.ipk` that goes along.
@@ -139,13 +154,13 @@ Then, in the code:
 - `HomeMode.PROTECTED`: add the brand's system pieces: picture, sound, inputs and HDMI-CEC, the tuner and live TV,
   remote and Bluetooth pairing, setup, updates, system UI. When in doubt, protect it.
 - `HomeApps.SHELF`, `LIVE_TV_APPS` and `HIDDEN`: the shelf apps, the brand's live TV app, apps to hide from All Apps.
-- Build, install, have them switch on the TV, read `adb logcat -s FreeMyTV`, then have them switch back to
+- Build, install, have them switch on the TV, read `adb logcat -s BeyondTV`, then have them switch back to
   *Original* once and confirm everything returned.
 
 LG and Samsung: the web app above. Other TVs that don't run Google TV or Android TV: the way is a Google TV streamer on
-HDMI (Chromecast with Google TV, Google TV Streamer, onn 4K, NVIDIA Shield). Set Free My TV up on the streamer.
+HDMI (Chromecast with Google TV, Google TV Streamer, onn 4K, NVIDIA Shield). Set Beyond TV up on the streamer.
 
-**Uninstalled while in Free My TV mode?** The apps it turned off stay off. Bring them back with
+**Uninstalled while in Beyond TV mode?** The apps it turned off stay off. Bring them back with
 `adb shell pm enable <package>` (the `DEBLOAT` list and the stock home screen), then
 `adb shell cmd package set-home-activity <stock home activity>` and
 `adb shell settings put secure screensaver_components <stock screensaver>`.
@@ -173,10 +188,10 @@ HDMI (Chromecast with Google TV, Google TV Streamer, onn 4K, NVIDIA Shield). Set
   `Russian.java` (keyed by the English); text built at runtime uses `Ui.tr(pt, en, es)`, and its German and Russian
   come from those files too (patterns for the parts built at runtime). Add them all. Comments in English, short, only where the why
   isn't obvious.
-- Settings come from `config.properties` through the generated `out/gen/io/freemytv/Config.java` (never edit that).
+- Settings come from `config.properties` through the generated `out/gen/nz/gobeyond/tv/Config.java` (never edit that).
   What the person changes on the TV (`Prefs`: Home Settings, Shelf, Remote Buttons) wins over those first values.
 - The remote's app buttons (`RemoteKeys`, `RemoteKeyService`) use each brand's key codes: they run only on TCL,
-  Vestel, KTC (NextStar) and Sony TVs and Formovie projectors, the service is on only in Free My TV mode, and *Original* takes it out of the enabled accessibility
+  Vestel, KTC (NextStar) and Sony TVs and Formovie projectors, the service is on only in Beyond TV mode, and *Original* takes it out of the enabled accessibility
   services. The system waits for the service on every key, so it lives alone in the `:keys` process: what it reads is
   in `remote-keys.txt` (`Prefs.keyApp`), never in SharedPreferences, and `onKeyEvent` does no heavy work.
   Vestel (F&U and other store brands; MediaTek, Android TV 14 tested) maps its Netflix button to `KEYCODE_STEM_1`, a
@@ -190,7 +205,7 @@ HDMI (Chromecast with Google TV, Google TV Streamer, onn 4K, NVIDIA Shield). Set
   the key to the TV. Sony ships its own Apple TV build, `com.apple.atve.sony.appletv`.
   Xiaomi projectors made by Formovie (Fengmi; L1, MediaTek, Google TV 14 tested) send the same `KEYCODE_STEM_1` for
   Netflix (`RemoteKeys.STEM_NETFLIX`); their YouTube button goes to MediaTek's `GlobalKeyReceiver` and stays with the system.
-- After any change, `./build.sh` must end with `Built FreeMyTV.apk`.
+- After any change, `./build.sh` must end with `Built BeyondTV.apk`.
 - LG and Samsung (`web/`): plain ES5 JavaScript and CSS without variables, grid or backdrop-filter, since older TVs
   (webOS 3 and 4, Tizen 3) run a Chromium from 2015 to 2017; only transform and opacity animate. `web/tv.js` is the
   TV's side: on LG, Luna (`listLaunchPoints`, `launch`, the inputs; where webOS 6 and newer deny `listLaunchPoints`

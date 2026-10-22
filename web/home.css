@@ -10,6 +10,13 @@
   src: url('fonts/InterVariable.ttf') format('truetype');
   font-weight: 100 900;
 }
+/* Sora: Beyond's display face, for titles and the clock. */
+@font-face {
+  font-family: 'Sora';
+  src: url('fonts/SoraVariable.ttf') format('truetype');
+  font-weight: 100 800;
+}
+.display { font-family: 'Sora', 'Inter', 'LG Smart UI', 'Helvetica Neue', Arial, sans-serif; }
 
 html, body {
   margin: 0;
@@ -17,12 +24,12 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #F5F5F7;
+  background: #F7F6F2;
 }
 
 body {
   font-family: 'Inter', 'LG Smart UI', 'Helvetica Neue', Arial, sans-serif;
-  color: #1D1D1F;
+  color: #22221F;
   -webkit-font-smoothing: antialiased;
   cursor: default;
 }
@@ -53,17 +60,17 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 
 /* MARK: - Background: the first pick's photo, very blurred and almost white (almost black at night). */
 
-#sky { background: #EBEBEF; }
+#sky { background: #EDEBE4; }
 #sky .grad { position: absolute; left: 0; top: 0; width: 100%; height: 100%; -webkit-transition: opacity 2s; transition: opacity 2s; }
-#sky .day { background: -webkit-linear-gradient(top, #F5F5F7, #E2E2E7); background: linear-gradient(#F5F5F7, #E2E2E7); }
-#sky .night { background: -webkit-linear-gradient(top, #1C1C1E, #0B0B0D); background: linear-gradient(#1C1C1E, #0B0B0D); opacity: 0; }
+#sky .day { background: -webkit-linear-gradient(top, #F7F6F2, #EDEBE4); background: linear-gradient(#F7F6F2, #EDEBE4); }
+#sky .night { background: -webkit-linear-gradient(top, #22221F, #121210); background: linear-gradient(#22221F, #121210); opacity: 0; }
 #sky canvas { position: absolute; left: -4%; top: -4%; width: 108%; height: 108%; opacity: 0; -webkit-transition: opacity 0.8s; transition: opacity 0.8s; }
 #sky canvas.on { opacity: 1; }
-#sky .veil { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: rgba(245, 245, 247, 0.74); -webkit-transition: background-color 2s; transition: background-color 2s; }
+#sky .veil { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: rgba(247, 246, 242, 0.74); -webkit-transition: background-color 2s; transition: background-color 2s; }
 #sky .lift { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: #FFF; opacity: 0; -webkit-transition: opacity 0.45s, background-color 2s; transition: opacity 0.45s, background-color 2s; }
 .night #sky .day { opacity: 0; }
 .night #sky .night { opacity: 1; }
-.night #sky .veil { background: rgba(11, 11, 13, 0.78); }
+.night #sky .veil { background: rgba(18, 18, 16, 0.78); }
 .night #sky .lift { background: #000; }
 .drawer-open #sky .lift { opacity: 0.32; }
 .night.drawer-open #sky .lift { opacity: 0.42; }
@@ -98,7 +105,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   letter-spacing: 0.004em;
   line-height: 1;
   white-space: nowrap;
-  color: #1D1D1F;
+  color: #22221F;
   -webkit-transition: color 2s;
   transition: color 2s;
 }
@@ -114,21 +121,21 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   font-size: 30px;
   font-weight: 500;
   line-height: 68px;
-  color: #6E6E73;
+  color: #55534B;
   -webkit-transition: -webkit-transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2), background-color 0.25s, box-shadow 0.3s, color 0.25s;
   transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2), background-color 0.25s, box-shadow 0.3s, color 0.25s;
 }
-.tab.on { font-weight: 600; color: #1D1D1F; }
+.tab.on { font-weight: 600; color: #22221F; }
 .tab.focus {
   background: #FFF;
-  color: #1D1D1F;
+  color: #22221F;
   -webkit-transform: scale(1.05);
   transform: scale(1.05);
   box-shadow: 0 8px 26px rgba(0, 0, 0, 0.22);
 }
-.night #title, .night .tab.on { color: #F5F5F7; }
-.night .tab { color: rgba(245, 245, 247, 0.62); }
-.night .tab.focus { color: #1D1D1F; box-shadow: 0 8px 26px rgba(0, 0, 0, 0.4); }
+.night #title, .night .tab.on { color: #F7F6F2; }
+.night .tab { color: rgba(247, 246, 242, 0.62); }
+.night .tab.focus { color: #22221F; box-shadow: 0 8px 26px rgba(0, 0, 0, 0.4); }
 
 /* Crypto quotes at the right end of the tab row: a quiet detail. */
 #quotes {
@@ -138,17 +145,17 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   height: 28px;
   font-size: 21px;
   line-height: 28px;
-  color: #8E8E93;
+  color: #8A877D;
   white-space: nowrap;
   -webkit-transition: opacity 0.25s;
   transition: opacity 0.25s;
   font-feature-settings: 'tnum';
 }
 #quotes .q { display: inline-block; margin-left: 24px; }
-#quotes svg { width: 15px; height: 15px; vertical-align: -1px; margin-right: 6px; fill: rgba(142, 142, 147, 0.7); }
+#quotes svg { width: 15px; height: 15px; vertical-align: -1px; margin-right: 6px; fill: rgba(138, 135, 125, 0.7); }
 #quotes.hide { opacity: 0; }
-.night #quotes { color: rgba(245, 245, 247, 0.62); }
-.night #quotes svg { fill: rgba(245, 245, 247, 0.55); }
+.night #quotes { color: rgba(247, 246, 242, 0.62); }
+.night #quotes svg { fill: rgba(247, 246, 242, 0.55); }
 
 /* Live TV, HDMI Inputs and Settings: glass circles; the focused one turns white, with its name below. */
 .round {
@@ -160,7 +167,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   background: -webkit-linear-gradient(top, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.5));
   background: linear-gradient(rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.5));
   box-shadow: 0 6px 26px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
-  color: #1D1D1F;
+  color: #22221F;
   -webkit-transition: -webkit-transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2), box-shadow 0.3s, background-color 0.25s;
   transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2), box-shadow 0.3s, background-color 0.25s;
 }
@@ -183,13 +190,13 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .round.last .tip { left: auto; right: -10px; margin-left: 0; text-align: right; }
 .round.focus .tip { opacity: 1; }
 .night .round {
-  background: -webkit-linear-gradient(top, rgba(40, 40, 44, 0.8), rgba(17, 17, 19, 0.62));
-  background: linear-gradient(rgba(40, 40, 44, 0.8), rgba(17, 17, 19, 0.62));
+  background: -webkit-linear-gradient(top, rgba(44, 44, 40, 0.8), rgba(20, 20, 18, 0.62));
+  background: linear-gradient(rgba(44, 44, 40, 0.8), rgba(20, 20, 18, 0.62));
   box-shadow: 0 6px 26px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
   color: rgba(255, 255, 255, 0.92);
 }
-.night .round.focus { background: #FFF; color: #1D1D1F; }
-.night .round.focus .tip { color: #F5F5F7; }
+.night .round.focus { background: #FFF; color: #22221F; }
+.night .round.focus .tip { color: #F7F6F2; }
 
 /* MARK: - Picks: a wide card and two tall ones; focused, a card grows 5%, rises and its edge lights up. */
 
@@ -208,7 +215,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   height: 100%;
   border-radius: 18px;
   overflow: hidden;
-  background-color: #DADADF;
+  background-color: #E4E1D8;
   background-size: cover;
   background-position: center;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.14);
@@ -244,7 +251,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   font-size: 31px;
   font-weight: 600;
   letter-spacing: 0.012em;
-  color: #1D1D1F;
+  color: #22221F;
   -webkit-transition: color 2s;
   transition: color 2s;
 }
@@ -258,11 +265,11 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   white-space: nowrap;
   font-size: 25px;
   font-weight: 500;
-  color: #6E6E73;
+  color: #55534B;
 }
-.night .card .img { background-color: #2C2C2E; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.32); }
-.night .card .name { color: #F5F5F7; }
-.night .card .meta { color: rgba(245, 245, 247, 0.62); }
+.night .card .img { background-color: #2E2E2A; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.32); }
+.night .card .name { color: #F7F6F2; }
+.night .card .meta { color: rgba(247, 246, 242, 0.62); }
 
 /* Without a TMDB key (or picks yet): the date and the time instead of the cards. */
 #clock {
@@ -273,13 +280,13 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   font-weight: 200;
   letter-spacing: -0.01em;
   line-height: 1;
-  color: #1D1D1F;
+  color: #22221F;
   display: none;
 }
-#clock .date { display: block; font-size: 40px; font-weight: 500; letter-spacing: 0; margin-top: 18px; color: #6E6E73; }
+#clock .date { display: block; font-size: 40px; font-weight: 500; letter-spacing: 0; margin-top: 18px; color: #55534B; }
 .no-picks #clock { display: block; }
-.night #clock { color: #F5F5F7; }
-.night #clock .date { color: rgba(245, 245, 247, 0.62); }
+.night #clock { color: #F7F6F2; }
+.night #clock .date { color: rgba(247, 246, 242, 0.62); }
 
 /* MARK: - Shelf: the glass bar with the apps, each in its brand color; focused, a tile grows 20% and rises. */
 
@@ -293,8 +300,8 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12), inset 0 1.5px 0 rgba(255, 255, 255, 0.95), inset 0 0 0 1px rgba(255, 255, 255, 0.55);
 }
 .night #platter {
-  background: -webkit-linear-gradient(top, rgba(34, 34, 38, 0.72), rgba(17, 17, 19, 0.6));
-  background: linear-gradient(rgba(34, 34, 38, 0.72), rgba(17, 17, 19, 0.6));
+  background: -webkit-linear-gradient(top, rgba(38, 38, 34, 0.72), rgba(20, 20, 18, 0.6));
+  background: linear-gradient(rgba(38, 38, 34, 0.72), rgba(20, 20, 18, 0.6));
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.32), inset 0 1.5px 0 rgba(255, 255, 255, 0.14), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
@@ -346,7 +353,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 
 /* MARK: - Drawer: inputs and shortcuts, weather, prices */
 
-.row-title { position: absolute; top: 494px; font-size: 25px; font-weight: 600; color: #6E6E73; white-space: nowrap; }
+.row-title { position: absolute; top: 494px; font-size: 25px; font-weight: 600; color: #55534B; white-space: nowrap; }
 .night .row-title { color: rgba(255, 255, 255, 0.7); }
 
 .glass {
@@ -355,8 +362,8 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1), inset 0 1.5px 0 rgba(255, 255, 255, 0.95), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
 }
 .night .glass {
-  background: -webkit-linear-gradient(top, rgba(38, 38, 42, 0.78), rgba(17, 17, 19, 0.64));
-  background: linear-gradient(rgba(38, 38, 42, 0.78), rgba(17, 17, 19, 0.64));
+  background: -webkit-linear-gradient(top, rgba(42, 42, 38, 0.78), rgba(20, 20, 18, 0.64));
+  background: linear-gradient(rgba(42, 42, 38, 0.78), rgba(20, 20, 18, 0.64));
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), inset 0 1.5px 0 rgba(255, 255, 255, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.07);
 }
 
@@ -366,22 +373,22 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   height: 126px;
   border-radius: 20px;
   text-align: center;
-  color: #1D1D1F;
+  color: #22221F;
   -webkit-transition: -webkit-transform 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.2), box-shadow 0.28s, background-color 0.2s;
   transition: transform 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.2), box-shadow 0.28s, background-color 0.2s;
 }
 .key .sym { position: absolute; left: 50%; top: 33px; width: 34px; height: 34px; margin-left: -17px; }
 .key .label { position: absolute; left: 8px; right: 8px; top: 82px; font-size: 23px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.key.off { color: #8E8E93; }
-.key.focus { background: #F5F5F7; color: #1C1C1E; -webkit-transform: scale(1.07); transform: scale(1.07); box-shadow: 0 16px 34px rgba(0, 0, 0, 0.42); z-index: 2; }
+.key.off { color: #8A877D; }
+.key.focus { background: #F7F6F2; color: #22221F; -webkit-transform: scale(1.07); transform: scale(1.07); box-shadow: 0 16px 34px rgba(0, 0, 0, 0.42); z-index: 2; }
 .night .key { color: rgba(255, 255, 255, 0.95); }
 .night .key.off { color: rgba(255, 255, 255, 0.42); }
-.night .key.focus { color: #1C1C1E; }
+.night .key.focus { color: #22221F; }
 
-.panel { position: absolute; top: 708px; height: 300px; border-radius: 30px; overflow: hidden; color: #1D1D1F; }
-.night .panel { color: #F5F5F7; }
-.panel .head { position: absolute; left: 34px; top: 30px; font-size: 25px; font-weight: 600; color: #6E6E73; white-space: nowrap; }
-.panel .side { position: absolute; right: 34px; top: 33px; font-size: 21px; font-weight: 500; color: #8E8E93; white-space: nowrap; }
+.panel { position: absolute; top: 708px; height: 300px; border-radius: 30px; overflow: hidden; color: #22221F; }
+.night .panel { color: #F7F6F2; }
+.panel .head { position: absolute; left: 34px; top: 30px; font-size: 25px; font-weight: 600; color: #55534B; white-space: nowrap; }
+.panel .side { position: absolute; right: 34px; top: 33px; font-size: 21px; font-weight: 500; color: #8A877D; white-space: nowrap; }
 .night .panel .head { color: rgba(255, 255, 255, 0.7); }
 .night .panel .side { color: rgba(255, 255, 255, 0.6); }
 
@@ -389,21 +396,21 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 #weather .now .sym { width: 56px; height: 56px; vertical-align: 12px; margin-right: 18px; }
 #weather .now .temp { font-size: 100px; font-weight: 300; line-height: 100px; font-feature-settings: 'tnum'; }
 #weather .cond { position: absolute; left: 34px; top: 192px; font-size: 29px; font-weight: 500; white-space: nowrap; }
-#weather .range { position: absolute; left: 34px; top: 236px; font-size: 23px; font-weight: 500; color: #6E6E73; white-space: nowrap; font-feature-settings: 'tnum'; }
+#weather .range { position: absolute; left: 34px; top: 236px; font-size: 23px; font-weight: 500; color: #55534B; white-space: nowrap; font-feature-settings: 'tnum'; }
 #weather .split { position: absolute; left: 391px; top: 34px; bottom: 34px; width: 2px; background: rgba(0, 0, 0, 0.1); }
 #weather .hours { position: absolute; left: 422px; right: 30px; top: 74px; height: 140px; }
 #weather .hour { position: absolute; top: 0; text-align: center; font-feature-settings: 'tnum'; }
-#weather .hour .t { font-size: 22px; font-weight: 500; color: #6E6E73; }
+#weather .hour .t { font-size: 22px; font-weight: 500; color: #55534B; }
 #weather .hour .sym { display: block; width: 30px; height: 30px; margin: 22px auto 18px; }
 #weather .hour .d { font-size: 26px; font-weight: 500; }
-#weather .sun { position: absolute; left: 422px; top: 236px; font-size: 23px; font-weight: 500; color: #6E6E73; white-space: nowrap; }
+#weather .sun { position: absolute; left: 422px; top: 236px; font-size: 23px; font-weight: 500; color: #55534B; white-space: nowrap; }
 #weather .sun .sym { width: 22px; height: 22px; vertical-align: -3px; margin-right: 10px; }
 #weather .sun span { margin-right: 36px; }
 .night #weather .range, .night #weather .hour .t, .night #weather .sun { color: rgba(255, 255, 255, 0.68); }
 .night #weather .split { background: rgba(255, 255, 255, 0.14); }
 
 #prices .coin { position: absolute; left: 34px; right: 34px; height: 40px; font-size: 29px; font-weight: 500; white-space: nowrap; }
-#prices .coin svg { position: absolute; left: 2px; top: 6px; width: 26px; height: 26px; fill: #6E6E73; }
+#prices .coin svg { position: absolute; left: 2px; top: 6px; width: 26px; height: 26px; fill: #55534B; }
 #prices .coin .n { position: absolute; left: 50px; top: 0; }
 #prices .coin .p { position: absolute; right: 128px; top: 1px; font-size: 26px; font-feature-settings: 'tnum'; }
 #prices .coin .c { position: absolute; right: 0; top: 2px; width: 108px; height: 34px; line-height: 34px; border-radius: 17px; text-align: center; font-size: 21px; font-weight: 600; font-feature-settings: 'tnum'; }
@@ -456,8 +463,8 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   border-radius: 40px;
   padding: 30px 30px 26px;
   box-sizing: border-box;
-  background: -webkit-linear-gradient(top, rgba(34, 36, 44, 0.96), rgba(18, 20, 26, 0.97));
-  background: linear-gradient(rgba(34, 36, 44, 0.96), rgba(18, 20, 26, 0.97));
+  background: -webkit-linear-gradient(top, rgba(40, 40, 36, 0.96), rgba(22, 22, 20, 0.97));
+  background: linear-gradient(rgba(40, 40, 36, 0.96), rgba(22, 22, 20, 0.97));
   box-shadow: 0 40px 90px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 .box .title { font-size: 38px; font-weight: 700; padding: 6px 18px 18px; letter-spacing: -0.01em; }
@@ -470,9 +477,9 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .box .row .value .chev { color: rgba(255, 255, 255, 0.35); margin: 0 10px; }
 .box .row.dim { color: rgba(255, 255, 255, 0.4); }
 .box .hint { padding: 14px 18px 0; font-size: 22px; font-weight: 500; color: rgba(255, 255, 255, 0.5); }
-.toggle { position: absolute; right: 24px; top: 13px; width: 78px; height: 44px; border-radius: 22px; background: #3A3D45; -webkit-transition: background-color 0.2s; transition: background-color 0.2s; }
+.toggle { position: absolute; right: 24px; top: 13px; width: 78px; height: 44px; border-radius: 22px; background: #4A4A44; -webkit-transition: background-color 0.2s; transition: background-color 0.2s; }
 .toggle::after { content: ''; position: absolute; left: 4px; top: 4px; width: 36px; height: 36px; border-radius: 18px; background: #FFF; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35); -webkit-transition: -webkit-transform 0.2s; transition: transform 0.2s; }
-.toggle.on { background: #3FD69B; }
+.toggle.on { background: #3A9A86; }
 .toggle.on::after { -webkit-transform: translateX(34px); transform: translateX(34px); }
 
 /* MARK: - Screensaver: the picks' photos, slowly moving, and a clock */
@@ -513,7 +520,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   font-weight: 500;
   line-height: 1.3;
   color: rgba(255, 255, 255, 0.95);
-  background: rgba(17, 17, 19, 0.86);
+  background: rgba(20, 20, 18, 0.86);
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.14);
   opacity: 0;
   -webkit-transition: opacity 0.3s, -webkit-transform 0.3s;
@@ -524,3 +531,30 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 
 /* The Magic Remote's pointer: no text selection, no outlines. */
 * { -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+
+/* MARK: - Beyond: Sora for the big type, and focus is the brand's moss green, as in Beyond Family. */
+
+#title, #clock, .sheet h2, .box .title, #saver .clock .time, #weather .now .temp {
+  font-family: 'Sora', 'Inter', 'LG Smart UI', 'Helvetica Neue', Arial, sans-serif;
+}
+#title { font-weight: 700; letter-spacing: -0.01em; }
+#clock { font-weight: 200; letter-spacing: -0.03em; }
+.tab.focus, .round.focus { color: #2F7D6D; }
+.night .tab.focus, .night .round.focus { color: #2F7D6D; }
+.tile.focus { box-shadow: 0 18px 40px rgba(0, 0, 0, 0.34), 0 0 0 4px #F7F6F2, 0 0 0 8px #2F7D6D; }
+.night .tile.focus { box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6), 0 0 0 4px #121210, 0 0 0 8px #3A9A86; }
+.card .img::after { box-shadow: inset 0 0 0 4px #2F7D6D; }
+.night .card .img::after { box-shadow: inset 0 0 0 4px #3A9A86; }
+.cell.focus .face { box-shadow: 0 16px 34px rgba(0, 0, 0, 0.55), inset 0 0 0 4px #3A9A86; }
+
+/* The four dots: Beyond's mark, beside the name on the screensaver and in the settings. */
+.dots { display: inline-block; position: relative; width: 30px; height: 30px; vertical-align: -4px; }
+.dots i { position: absolute; width: 13px; height: 13px; border-radius: 7px; }
+.dots i.a { left: 0; top: 0; background: #2F7D6D; }
+.dots i.b { right: 0; top: 0; background: #E8A33D; }
+.dots i.c { left: 0; bottom: 0; background: #D85A30; }
+.dots i.d { right: 0; bottom: 0; background: #378ADD; }
+.lockup { font-family: 'Sora', 'Inter', Arial, sans-serif; font-weight: 700; white-space: nowrap; }
+.lockup .dots { margin-right: 14px; }
+#saver .brand { position: absolute; left: 84px; top: 70px; font-size: 34px; color: rgba(247, 246, 242, 0.92); }
+.key.focus { box-shadow: 0 16px 34px rgba(0, 0, 0, 0.42), 0 0 0 4px #2F7D6D; }
