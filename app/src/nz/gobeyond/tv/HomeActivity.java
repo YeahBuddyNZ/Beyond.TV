@@ -52,6 +52,8 @@ public class HomeActivity extends Activity {
             home.resume();
             Updater.maybeCheck(this);
             Updater.offer(this);
+            Checkin.opened(this);
+            Checkin.maybeSend(this);
         }
     }
 

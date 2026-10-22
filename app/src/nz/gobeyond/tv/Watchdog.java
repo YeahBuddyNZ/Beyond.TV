@@ -29,6 +29,10 @@ final class Watchdog {
         final Thread.UncaughtExceptionHandler previous = Thread.getDefaultUncaughtExceptionHandler();
         Thread.setDefaultUncaughtExceptionHandler((thread, error) -> {
             try {
+                Checkin.crashed(app, error);
+            } catch (Throwable ignored) {
+            }
+            try {
                 if (record(app, System.currentTimeMillis()) >= LIMIT) HomeMode.requestRevertHome(app);
             } catch (Throwable ignored) {
             }

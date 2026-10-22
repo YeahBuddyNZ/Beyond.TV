@@ -252,7 +252,9 @@ The website is in [`docs/`](docs): plain HTML and CSS on GitHub Pages.
 
 ## Privacy
 
-No accounts, no analytics, no tracking. The app talks to TMDB, Open-Meteo (with the coordinates you set, or your time zone's main city), and Binance only when `show_crypto=true`, and Watchmode only when you set a `watchmode_key`. Your settings stay on your computer and your TV.
+No accounts, no ads, no tracking. The app talks to TMDB, Open-Meteo (with the coordinates you set, or your time zone's main city), Binance only when `show_crypto=true`, Watchmode only when you set a `watchmode_key`, and Beyond Family only when you link the TV to it. Your settings stay on your computer and your TV.
+
+**The daily check-in.** So we can fix a problem on one make of TV before anybody has to ask, once a day the TV tells Beyond (beyondfamily.app) a made-up id, its city rounded to about 10km, its make, model and Android or TV software version, the Beyond TV version, which home screen is on, how many times the home screen opened and crashed, and its last 20 error messages. Never what anybody watches, never an IP address kept, never a name or a household. **Home Settings → Help fix problems** turns it off, and turning it off asks Beyond to delete everything it had for that TV. The code is [`Checkin.java`](app/src/nz/gobeyond/tv/Checkin.java) and [`web/checkin.js`](web/checkin.js).
 
 ## Credits
 

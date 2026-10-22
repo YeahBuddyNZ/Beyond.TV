@@ -217,6 +217,11 @@ HDMI (Chromecast with Google TV, Google TV Streamer, onn 4K, NVIDIA Shield). Set
   the key to the TV. Sony ships its own Apple TV build, `com.apple.atve.sony.appletv`.
   Xiaomi projectors made by Formovie (Fengmi; L1, MediaTek, Google TV 14 tested) send the same `KEYCODE_STEM_1` for
   Netflix (`RemoteKeys.STEM_NETFLIX`); their YouTube button goes to MediaTek's `GlobalKeyReceiver` and stays with the system.
+- The daily check-in (`Checkin.java`, `web/checkin.js`) posts to Beyond Family's `/api/tv/checkin`: a made-up id, the
+  city to 0.1 degrees, make, model, versions, mode, open and crash counts, the last 20 errors. Never what anybody
+  watches. Home Settings > Help fix problems turns it off and posts `/tv/checkin/forget`. Anything new it sends goes
+  in the README's Privacy section and on the website in the same change. `Checkin.error(c, where, text)` is how a
+  failure worth knowing about gets reported.
 - After any change, `./build.sh` must end with `Built BeyondTV.apk`.
 - LG and Samsung (`web/`): plain ES5 JavaScript and CSS without variables, grid or backdrop-filter, since older TVs
   (webOS 3 and 4, Tizen 3) run a Chromium from 2015 to 2017; only transform and opacity animate. `web/tv.js` is the
