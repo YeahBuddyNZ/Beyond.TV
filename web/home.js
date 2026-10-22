@@ -90,6 +90,13 @@
   ];
   var MAX_SHELF = 8;
 
+  /**
+   * An app on a shelf by its name ("t:netflix"), the same on every make of TV, so a shelf kept in Beyond Family finds
+   * the same apps on the next TV. Shelves saved before this hold app ids, which still match.
+   */
+  function shelfName(app) { return 't:' + String(app.title || '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40); }
+  function onShelf(app, entry) { return app.id === entry || shelfName(app) === entry; }
+
   function shelfKey(app) {
     for (var i = 0; i < SHELF.length; i++) if (SHELF[i][1].test(app.id) || SHELF[i][2].test(app.title)) return SHELF[i];
     return null;
@@ -130,7 +137,7 @@
     var chosen = Prefs.shelf(), out = [];
     if (chosen) {
       for (var i = 0; i < chosen.length && out.length < MAX_SHELF; i++) {
-        for (var j = 0; j < apps.length; j++) if (apps[j].id === chosen[i]) out.push(apps[j]);
+        for (var j = 0; j < apps.length; j++) if (onShelf(apps[j], chosen[i]) && out.indexOf(apps[j]) < 0) { out.push(apps[j]); break; }
       }
     } else {
       for (var s = 0; s < SHELF.length && out.length < MAX_SHELF; s++) {
@@ -675,7 +682,10 @@
       ids.splice(at, 1);
       ids.splice(to, 0, app.id);
     }
-    Prefs.set('shelf', ids);
+    Prefs.set('shelf', ids.map(function (id) {
+      for (var j = 0; j < apps.length; j++) if (apps[j].id === id) return shelfName(apps[j]);
+      return id;
+    }));
     pickShelf();
     renderShelf();
     var again = editList();

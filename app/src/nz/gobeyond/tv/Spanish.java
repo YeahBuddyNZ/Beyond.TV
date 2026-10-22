@@ -114,6 +114,11 @@ final class Spanish {
             case "Family": return "Familia";
             case "For the family": return "Para la familia";
             case "For ": return "Para ";
+            case "Sign in with Beyond Family": return "Entrar con Beyond Family";
+            case "Sign in with your Beyond Family": return "Entra con tu Beyond Family";
+            case "Sign out of this TV": return "Cerrar sesión en este TV";
+            case "On your phone, open Beyond Family › Family › TVs › On somebody else's TV, and type": return "En tu teléfono, abre Beyond Family › Familia › TVs › En el TV de otra persona, y escribe";
+            case "Your family is on this TV already. This is for somebody from another home.": return "Tu familia ya está en este TV. Esto es para alguien de otra casa.";
             case "Manage people": return "Administrar personas";
             case "Bring in your family from Beyond Family": return "Traer a tu familia desde Beyond Family";
             case "Grown-up PIN": return "PIN de adulto";

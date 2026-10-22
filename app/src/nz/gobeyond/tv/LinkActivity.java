@@ -20,6 +20,9 @@ import org.json.JSONObject;
  * Settings › Beyond Family. Not linked: a six-letter code, big, for a grown-up to type into Beyond Family on their
  * phone; it checks every few seconds and closes itself once the family says yes. Linked: which household, and a way to
  * unlink. Already behind the grown-up PIN for a kid, because Settings is.
+ *
+ * With VISIT (Who's watching › Sign in with Beyond Family): a code for somebody to sign in here from their own Beyond
+ * Family, on this TV or anybody's, so their face comes across. Closes itself once they're here, watching.
  */
 public class LinkActivity extends Activity {
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -28,9 +31,15 @@ public class LinkActivity extends Activity {
     private TextView code, note;
     private float k;
     private volatile boolean open;
+    private static final String VISIT = "visit";
+    private final java.util.Set<String> before = new java.util.HashSet<>();
 
     static void open(Context c) {
         c.startActivity(new Intent(c, LinkActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+    }
+
+    static void visit(Context c) {
+        c.startActivity(new Intent(c, LinkActivity.class).putExtra(VISIT, true).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
 
     @Override protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +55,9 @@ public class LinkActivity extends Activity {
     @Override protected void onResume() {
         super.onResume();
         open = true;
-        if (Family.linked(this)) manage(); else link();
+        if (getIntent().getBooleanExtra(VISIT, false)) visit();
+        else if (Family.linked(this)) manage();
+        else link();
     }
 
     @Override protected void onPause() {
@@ -160,6 +171,83 @@ public class LinkActivity extends Activity {
                     finish();
                 });
             }, "beyond-family-check").start();
+        }, delay);
+    }
+
+    // MARK: - Signing in as a visitor
+
+    private void visit() {
+        before.clear();
+        for (People.Person p : People.list(this)) before.add(p.id);
+        LinearLayout c = page(Ui.tr("Entre com o seu Beyond Family", "Sign in with your Beyond Family"),
+                Ui.tr("No celular, abra Beyond Family › Família › TVs › Na TV de outra pessoa, e digite",
+                        "On your phone, open Beyond Family › Family › TVs › On somebody else's TV, and type"));
+        code = FeedbackActivity.text(this, "", Ui.displaySemibold, 150 * k, 0xFFFFFFFF);
+        code.setLetterSpacing(0.12f);
+        code.setPadding(0, Math.round(40 * k), 0, Math.round(10 * k));
+        c.addView(code);
+        note = FeedbackActivity.text(this, "", Ui.regular, 26 * k, 0x99FFFFFF);
+        c.addView(note);
+        if (Family.linked(this)) {
+            TextView t = FeedbackActivity.text(this, Ui.tr("A sua família já está nesta TV. Isto é para quem é de outra casa.",
+                    "Your family is on this TV already. This is for somebody from another home."), Ui.regular, 26 * k, 0x99FFFFFF);
+            t.setPadding(0, Math.round(10 * k), 0, 0);
+            c.addView(t);
+        }
+        button(buttons(c), Ui.tr("Cancelar", "Cancel"), false, v -> finish()).requestFocus();
+        visitCode();
+    }
+
+    private void visitCode() {
+        code.setText("");
+        note.setText(Ui.tr("Falando com o Beyond Family…", "Talking to Beyond Family…"));
+        final Context app = getApplicationContext();
+        new Thread(() -> {
+            try {
+                JSONObject res = Family.visitCode(app);
+                handler.post(() -> {
+                    if (!open) return;
+                    String c = res.optString("code");
+                    code.setText(c.length() == 6 ? c.substring(0, 3) + " " + c.substring(3) : c);
+                    note.setText(Ui.tr("O código vale por ", "The code lasts ") + res.optInt("minutes", 10) + " min.");
+                    arrived(3000);
+                });
+            } catch (Exception e) {
+                handler.post(() -> {
+                    if (!open) return;
+                    note.setText(Ui.tr("Não deu para falar com o Beyond Family. Veja a internet da TV e tente de novo.",
+                            "Couldn't reach Beyond Family. Check the TV's internet and try again."));
+                    handler.postDelayed(this::visitCode, 10_000);
+                });
+            }
+        }, "beyond-family-visit").start();
+    }
+
+    /** Looks for somebody new among the TV's people: the one who just signed in. */
+    private void arrived(long delay) {
+        handler.postDelayed(() -> {
+            if (!open) return;
+            final Context app = getApplicationContext();
+            new Thread(() -> {
+                try {
+                    Family.check(app);
+                } catch (Exception ignored) {
+                }
+                // apply() hands the people to the main thread; look after it has.
+                handler.postDelayed(() -> {
+                    if (!open) return;
+                    People.Person fresh = null;
+                    for (People.Person p : People.list(app)) if (p.visitor && !before.contains(p.id)) fresh = p;
+                    if (fresh == null) {
+                        arrived(3000);
+                        return;
+                    }
+                    FamilyService.start(app);
+                    People.use(app, fresh.id);
+                    Toast.makeText(app, "Kia ora, " + fresh.name, Toast.LENGTH_LONG).show();
+                    finish();
+                }, 300);
+            }, "beyond-family-visit-check").start();
         }, delay);
     }
 

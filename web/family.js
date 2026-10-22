@@ -42,6 +42,8 @@ var Family = (function () {
   }
 
   function linked() { return !!(state.id && state.home); }
+  /** Linked, or somebody from Beyond Family is signed in here: either way the TV keeps listening. */
+  function listening() { return !!(state.id && (state.home || state.visiting)); }
 
   /** Back to a TV that knows nobody: the secret is useless now anyway. */
   function forget(why) {
@@ -60,20 +62,141 @@ var Family = (function () {
   // The house noticeboard (only when the household turned it on): today, for the screensaver. Kept in memory only.
   var board = null;
 
-  /** Beyond Family's people become the TV's profiles. Only when they changed, so nobody's screen jumps. */
-  function apply(home) {
-    if (!home) return;
-    var sig = JSON.stringify(home.people || []);
-    state.home = {name: home.name};
+  /** One of Beyond Family's people, as a profile here. */
+  function person(p, visitor) {
+    // jobs: Earn your screen, a kid's jobs still to do today (only there when the household turned it on).
+    // likes: what a grown-up said a kid is into, which picks their shows (kidpicks.js).
+    // profile: their face, colour, world, loves and shelf, kept with them in Beyond Family.
+    return {id: 'bf-' + p.id, name: p.name, colour: p.colour || '#2F7D6D', kid: !!p.kid, family: p.id, jobs: p.jobs,
+      likes: p.likes, profile: p.profile, visitor: visitor || undefined};
+  }
+
+  /**
+   * Beyond Family's people become the TV's profiles: the household's when linked, and anybody signed in here from
+   * another home. Only when they changed, so nobody's screen jumps.
+   */
+  function apply(home, visitors) {
+    visitors = visitors || [];
+    if (home) {
+      state.home = {name: home.name};
+      board = home.board || null;
+    }
+    var had = !!state.visiting;
+    state.visiting = visitors.length > 0;
     save();
-    board = home.board || null;
-    if (sig === lastPeople || !home.people || !home.people.length) return;
-    lastPeople = sig;
-    Profiles.replace(home.people.map(function (p) {
-      // jobs: Earn your screen, a kid's jobs still to do today (only there when the household turned it on).
-      // likes: what a grown-up said a kid is into, which picks their shows (kidpicks.js).
-      return {id: 'bf-' + p.id, name: p.name, colour: p.colour || '#2F7D6D', kid: !!p.kid, family: p.id, jobs: p.jobs, likes: p.likes};
-    }));
+    var sig = JSON.stringify([home ? home.people : null, visitors]);
+    if (sig === lastPeople) return;
+    var guests = visitors.map(function (p) { return person(p, true); });
+    if (home) {
+      if (!home.people || !home.people.length) return;
+      lastPeople = sig;
+      Profiles.replace(home.people.map(function (p) { return person(p); }).concat(guests));
+    } else {
+      if (!guests.length && !had) return;
+      lastPeople = sig;
+      Profiles.visitors(guests);
+    }
+    var unsent = Profiles.unsent();
+    for (var i = 0; i < unsent.length; i++) pushProfile(unsent[i]);
+  }
+
+  // MARK: - Your face and settings, everywhere
+
+  /** Somebody changed their look or shelf here: Beyond Family keeps it, and their other TVs get it. */
+  function pushProfile(p) {
+    if (!state.id || !p.family) return;
+    var stamp = p.pending;
+    call('POST', '/tv/people/' + p.family, Profiles.look(p), function (err) {
+      if (!err) Profiles.saved(p.id, stamp);
+      // Offline or refused: it stays marked, and goes again with the next change from Beyond Family.
+    });
+  }
+
+  /** Signs a visitor out of this TV. */
+  function signOut(p) {
+    if (!p || !p.family) return;
+    call('POST', '/tv/visit/bye', {member: p.family}, function () {});
+  }
+
+  /**
+   * Sign in with Beyond Family, on this TV or anybody's: a code to type into Beyond Family on your phone (TV page,
+   * On somebody else's TV). On a linked TV the family's own people are already here, so it says so too.
+   */
+  function visit(done) {
+    var api = null, codeNode = null, noteNode = null, timer = 0, closed = false, before = {};
+    var known = Profiles.list();
+    for (var i = 0; i < known.length; i++) before[known[i].id] = true;
+
+    function note(text) { if (noteNode) noteNode.textContent = text; }
+    function failed() {
+      note(tr('Não deu para falar com o Beyond Family. Veja a internet da TV e tente de novo.',
+        "Couldn't reach Beyond Family. Check the TV's internet and try again.",
+        'No se pudo conectar con Beyond Family. Revisa el internet del TV e inténtalo de nuevo.'));
+    }
+    function code() {
+      call('POST', '/tv/visit/code', {}, function (err, res) {
+        if (closed) return;
+        if (err && err.status === 401) { state = {}; save(); hello(); return; }
+        if (err) { failed(); return; }
+        codeNode.textContent = spaced(res.code);
+        UI.setClass(codeNode, 'waiting', false);
+        note(tr('O código vale por ', 'The code lasts ', 'El código dura ') + (res.minutes || 10) + ' min.');
+        timer = setTimeout(check, 3000);
+      });
+    }
+    function hello() {
+      var name = TV.samsung ? 'Samsung TV' : TV.webos ? 'LG TV' : 'TV';
+      call('POST', '/tv/hello', {name: name}, function (err, res) {
+        if (closed) return;
+        if (err) { failed(); return; }
+        state = {id: res.id, secret: res.secret};
+        save();
+        code();
+      });
+    }
+    function check() {
+      if (closed) return;
+      call('GET', '/tv/sync?wait=0', undefined, function (err, res) {
+        if (closed) return;
+        if (err) { timer = setTimeout(check, 5000); return; }
+        apply(res.paired ? res.home : null, res.visitors);
+        var now = Profiles.list(), fresh = null;
+        for (var i = 0; i < now.length; i++) if (now[i].visitor && !before[now[i].id]) fresh = now[i];
+        if (!fresh) { timer = setTimeout(check, 3000); return; }
+        closed = true;
+        api.close();
+        UI.toast(tr('Olá, ', 'Kia ora, ', 'Hola, ') + fresh.name);
+        start();
+        if (done) done(fresh);
+      });
+    }
+
+    UI.open({
+      cls: 'bt-link bt-family-link',
+      build: function (layer, a) {
+        api = a;
+        var box = UI.el('div', 'bt-linkbox', layer);
+        var mark = UI.el('div', 'bt-family-mark', box);
+        UI.dots(mark);
+        UI.el('span', '', mark, 'Beyond Family');
+        UI.el('div', 'bt-heading', box, tr('Entre com o seu Beyond Family', 'Sign in with your Beyond Family', 'Entra con tu Beyond Family'));
+        UI.el('div', 'bt-sub', box, tr('No celular, abra Beyond Family › Família › TVs › Na TV de outra pessoa, e digite',
+          "On your phone, open Beyond Family › Family › TVs › On somebody else's TV, and type",
+          'En tu teléfono, abre Beyond Family › Familia › TVs › En el TV de otra persona, y escribe'));
+        codeNode = UI.el('div', 'bt-code waiting', box);
+        noteNode = UI.el('div', 'bt-note', box);
+        if (linked()) {
+          UI.el('div', 'bt-note', box, tr('A sua família já está nesta TV. Isto é para quem é de outra casa.',
+            'Your family is on this TV already. This is for somebody from another home.',
+            'Tu familia ya está en este TV. Esto es para alguien de otra casa.'));
+        }
+        var row = UI.el('div', 'bt-buttons', box);
+        a.add(UI.button(row, tr('Cancelar', 'Cancel', 'Cancelar')), function () { a.close(); }, {first: true});
+        note(tr('Falando com o Beyond Family…', 'Talking to Beyond Family…', 'Hablando con Beyond Family…'));
+        if (state.id) code(); else hello();
+      },
+      closed: function () { closed = true; clearTimeout(timer); }
+    });
   }
 
   // MARK: - Linking
@@ -117,7 +240,7 @@ var Family = (function () {
         if (err && err.status === 401) { state = {}; save(); hello(); return; }
         if (err) { timer = setTimeout(check, 5000); return; }
         if (!res.paired) { if (res.expired) hello(); else timer = setTimeout(check, 3000); return; }
-        apply(res.home);
+        apply(res.home, res.visitors);
         closed = true;
         api.close();
         UI.toast(tr('Ligada a ', 'Linked to ', 'Vinculado a ') + (res.home ? res.home.name : 'Beyond Family'));
@@ -180,7 +303,7 @@ var Family = (function () {
   var clockOffset = 0;   // Beyond Family's clock minus this TV's, so two homes count down to the same moment
 
   function start() {
-    if (running || !state.id) return;
+    if (running || !listening()) return;
     running = true;
     clearTimeout(loopTimer);
     loop();
@@ -200,12 +323,19 @@ var Family = (function () {
         return;
       }
       backoff = 0;
-      if (res.paired === false) { running = false; forget(); return; }
+      if (res.paired === false) {
+        // Unlinked in the app: forget the household. A TV that was never linked keeps listening for its visitors.
+        if (state.home) { running = false; forget(); return; }
+        apply(null, res.visitors);
+        if (!state.visiting) { running = false; return; }
+        loopTimer = setTimeout(loop, 250);
+        return;
+      }
       if (res.serverTime) {
         var t = Date.parse(res.serverTime);
         if (!isNaN(t)) clockOffset = t - Date.now();
       }
-      apply(res.home);
+      apply(res.home, res.visitors);
       var list = res.commands || [];
       for (var i = 0; i < list.length; i++) run(list[i]);
       loopTimer = setTimeout(loop, 250);
@@ -474,7 +604,7 @@ var Family = (function () {
     call('POST', '/tv/now', app ? {app: String(app).slice(0, 40), title: title ? String(title).slice(0, 120) : undefined, who: who ? who.name : undefined} : {}, function () {});
   }
 
-  if (linked()) start();
+  if (listening()) start();
 
   return {
     linked: linked,
@@ -486,6 +616,9 @@ var Family = (function () {
     togetherKey: togetherKey,
     green: green,
     board: function () { return linked() ? board : null; },
+    visit: visit,
+    signOut: signOut,
+    pushProfile: pushProfile,
     now: now
   };
 })();

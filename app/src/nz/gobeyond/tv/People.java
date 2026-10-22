@@ -16,6 +16,8 @@ import java.util.regex.Pattern;
  *  - Family comes first: everyone together. Family-friendly picks only, and the grown-up buttons stay.
  *  - A kids' profile (★) gets the kids' apps on its shelf, family-friendly picks, no HDMI inputs, and needs the
  *    grown-up PIN for Settings, for managing people and for switching to Family or a grown-up.
+ *  - From Beyond Family, each person's face (an emoji) and colour come with them, and somebody from another home can
+ *    sign in as a visitor (Family.java).
  *  - Kept in the :home process's own preferences. A change bumps Prefs.version, so the home screen draws again.
  */
 final class People {
@@ -30,12 +32,22 @@ final class People {
 
     static final class Person {
         String id, name;
+        /** Their face from Beyond Family (an emoji), drawn instead of the initial. Empty: the initial. */
+        String emoji = "";
         int colour;
         boolean kid;
+        /** Signed in here from another home through Beyond Family. */
+        boolean visitor;
 
         boolean together() { return FAMILY.equals(id); }
 
-        String initial() { return name == null || name.isEmpty() ? "?" : name.substring(0, 1).toUpperCase(Locale.ROOT); }
+        /** The Beyond Family member id, for people who came from Beyond Family. */
+        String member() { return id != null && id.startsWith("bf-") ? id.substring(3) : null; }
+
+        String initial() {
+            if (emoji != null && !emoji.isEmpty()) return emoji;
+            return name == null || name.isEmpty() ? "?" : name.substring(0, 1).toUpperCase(Locale.ROOT);
+        }
     }
 
     private static SharedPreferences sp(Context c) {
@@ -54,6 +66,8 @@ final class People {
                 p.name = o.optString("name");
                 p.colour = o.optInt("colour", COLOURS[i % COLOURS.length]);
                 p.kid = o.optBoolean("kid");
+                p.emoji = o.optString("emoji");
+                p.visitor = o.optBoolean("visitor");
                 out.add(p);
             }
         } catch (Exception ignored) {
@@ -71,7 +85,12 @@ final class People {
     static void save(Context c, List<Person> people) {
         try {
             JSONArray a = new JSONArray();
-            for (Person p : people) a.put(new JSONObject().put("id", p.id).put("name", p.name).put("colour", p.colour).put("kid", p.kid));
+            for (Person p : people) {
+                JSONObject o = new JSONObject().put("id", p.id).put("name", p.name).put("colour", p.colour).put("kid", p.kid);
+                if (p.emoji != null && !p.emoji.isEmpty()) o.put("emoji", p.emoji);
+                if (p.visitor) o.put("visitor", true);
+                a.put(o);
+            }
             SharedPreferences.Editor e = sp(c).edit().putString("list", a.toString());
             String who = sp(c).getString("who", "");
             if (!FAMILY.equals(who) && find(people, who) == null) e.putString("who", people.get(0).id);
@@ -87,7 +106,8 @@ final class People {
         if (now.size() != people.size()) return false;
         for (int i = 0; i < now.size(); i++) {
             Person a = now.get(i), b = people.get(i);
-            if (!a.id.equals(b.id) || !a.name.equals(b.name) || a.colour != b.colour || a.kid != b.kid) return false;
+            if (!a.id.equals(b.id) || !a.name.equals(b.name) || a.colour != b.colour || a.kid != b.kid
+                    || !String.valueOf(a.emoji).equals(String.valueOf(b.emoji)) || a.visitor != b.visitor) return false;
         }
         return true;
     }

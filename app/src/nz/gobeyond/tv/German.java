@@ -122,6 +122,11 @@ final class German {
             case "Family": return "Familie";
             case "For the family": return "Für die Familie";
             case "For ": return "Für ";
+            case "Sign in with Beyond Family": return "Mit Beyond Family anmelden";
+            case "Sign in with your Beyond Family": return "Melde dich mit deinem Beyond Family an";
+            case "Sign out of this TV": return "Von diesem Fernseher abmelden";
+            case "On your phone, open Beyond Family › Family › TVs › On somebody else's TV, and type": return "Öffne auf dem Handy Beyond Family › Familie › Fernseher › Auf einem anderen Fernseher und tippe";
+            case "Your family is on this TV already. This is for somebody from another home.": return "Deine Familie ist schon auf diesem Fernseher. Das hier ist für jemanden aus einem anderen Zuhause.";
             case "Manage people": return "Personen verwalten";
             case "Bring in your family from Beyond Family": return "Familie aus Beyond Family holen";
             case "Grown-up PIN": return "Erwachsenen-PIN";

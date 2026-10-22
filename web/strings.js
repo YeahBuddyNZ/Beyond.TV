@@ -149,7 +149,12 @@ var I18N = (function () {
     "What they're into": "Was sie mögen",
     "Their picks on the home screen come from this.": "Danach richten sich ihre Tipps auf dem Startbildschirm.",
     "Pick as many as you like. I'll find good things to watch.": "Wähl so viel du willst. Ich finde gute Sachen zum Schauen.",
-    "What are you into, ": "Was magst du, "
+    "What are you into, ": "Was magst du, ",
+    "Sign in with Beyond Family": "Mit Beyond Family anmelden",
+    "Sign in with your Beyond Family": "Melde dich mit deinem Beyond Family an",
+    "Sign out of this TV": "Von diesem Fernseher abmelden",
+    "On your phone, open Beyond Family › Family › TVs › On somebody else's TV, and type": "Öffne auf dem Handy Beyond Family › Familie › Fernseher › Auf einem anderen Fernseher und tippe",
+    "Your family is on this TV already. This is for somebody from another home.": "Deine Familie ist schon auf diesem Fernseher. Das hier ist für jemanden aus einem anderen Zuhause."
   };
 
   /** German by the English; text built at runtime by its English pattern. */
@@ -318,7 +323,12 @@ var I18N = (function () {
     "What they're into": "Что им нравится",
     "Their picks on the home screen come from this.": "По этому подбираются их советы на главном экране.",
     "Pick as many as you like. I'll find good things to watch.": "Выбирай сколько хочешь. Я найду, что хорошего посмотреть.",
-    "What are you into, ": "Что тебе нравится, "
+    "What are you into, ": "Что тебе нравится, ",
+    "Sign in with Beyond Family": "Войти через Beyond Family",
+    "Sign in with your Beyond Family": "Войдите через свой Beyond Family",
+    "Sign out of this TV": "Выйти на этом телевизоре",
+    "On your phone, open Beyond Family › Family › TVs › On somebody else's TV, and type": "На телефоне откройте Beyond Family › Семья › Телевизоры › На чужом телевизоре и введите",
+    "Your family is on this TV already. This is for somebody from another home.": "Ваша семья уже на этом телевизоре. Это для гостей из другого дома."
   };
 
   function russianText(en) {
