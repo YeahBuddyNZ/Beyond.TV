@@ -112,6 +112,9 @@ final class Russian {
             case "Couldn't search now: ": return "Не удалось выполнить поиск: ";
             case "Quotes widget": return "Виджет котировок";
             case "Help fix problems": return "Помогать исправлять ошибки";
+            case "Couldn't check just now. It tries again by itself": return "Сейчас не удалось проверить. Попробует снова само";
+            case "Taking a short break. They'll be back by themselves.": return "Небольшой перерыв. Скоро вернутся сами.";
+            case "Updates come straight from Beyond, and only the real Beyond™ TV ever installs.": return "Обновления приходят прямо от Beyond, и устанавливается только настоящий Beyond™ TV.";
             case "Updates": return "Обновления";
             case "Updates, ": return "Обновления, ";
             case "New version": return "Новая версия";

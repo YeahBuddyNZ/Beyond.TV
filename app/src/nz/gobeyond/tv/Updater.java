@@ -114,7 +114,9 @@ final class Updater {
         }
         if (asked > checked && System.currentTimeMillis() - asked < 2 * 60_000) return Ui.tr("Procurando…", "Checking…");
         String error = readText(stamp(c, "error"));
-        if (!error.isEmpty() && stamp(c, "error").lastModified() >= checked - 1000) return Ui.tr("Não deu para ver: ", "Couldn't check: ") + error;
+        // The reason goes to the check-in, not on screen: "HTTP 403" means nothing to anybody on the couch.
+        if (!error.isEmpty() && stamp(c, "error").lastModified() >= checked - 1000)
+            return Ui.tr("Não deu para ver agora; tenta de novo sozinho", "Couldn't check just now. It tries again by itself");
         if (checked == 0) return Ui.tr("Ainda não procurou", "Not checked yet");
         return Ui.tr("Em dia, visto ", "Up to date, checked ") + ago(checked);
     }

@@ -105,6 +105,9 @@ final class Spanish {
             case "Couldn't search now: ": return "No se pudo buscar ahora: ";
             case "Quotes widget": return "Widget de cotizaciones";
             case "Help fix problems": return "Ayudar a corregir problemas";
+            case "Couldn't check just now. It tries again by itself": return "No se pudo buscar ahora. Lo vuelve a intentar solo";
+            case "Taking a short break. They'll be back by themselves.": return "Una pequeña pausa. Vuelven solas.";
+            case "Updates come straight from Beyond, and only the real Beyond™ TV ever installs.": return "Las actualizaciones vienen directo de Beyond, y solo se instala el Beyond™ TV de verdad.";
             case "Updates": return "Actualizaciones";
             case "Updates, ": return "Actualizaciones, ";
             case "New version": return "Nueva versión";

@@ -147,7 +147,7 @@ public class SettingsActivity extends Activity {
         private long startedAt, lastNanos, pendingAt, lastSky;
         private int w, h;
         private float k = 1;
-        private Paint title, subtitle, version, rowLabel, rowValue, rowSub, header, cellLabel, cellValue, warn, spinner, white, shadow;
+        private Paint title, subtitle, version, rowLabel, rowValue, rowSub, header, cellLabel, cellValue, warn, spinner, white, shadow, mark;
         private TextPaint notice;
 
         private final Runnable poll = new Runnable() {
@@ -288,7 +288,7 @@ public class SettingsActivity extends Activity {
             if (!running) return;
             boolean moving = busy();
             for (Spring s : pop) moving |= !s.settled();
-            if (moving || SystemClock.uptimeMillis() - lastSky >= 100) invalidate();
+            if (moving || SystemClock.uptimeMillis() - lastSky >= 66) invalidate();
             Choreographer.getInstance().postFrameCallback(this);
         }
 
@@ -320,6 +320,7 @@ public class SettingsActivity extends Activity {
             spinner.setStrokeWidth(3.5f * k);
             white = new Paint(Paint.ANTI_ALIAS_FLAG);
             white.setColor(0xFFF5F5F7);
+            mark = new Paint(Paint.ANTI_ALIAS_FLAG);
             shadow = new Paint(Paint.ANTI_ALIAS_FLAG);
             shadow.setMaskFilter(new BlurMaskFilter(22 * k, BlurMaskFilter.Blur.NORMAL));
         }
@@ -361,7 +362,7 @@ public class SettingsActivity extends Activity {
             }
             long up = SystemClock.uptimeMillis();
             float seconds = (up - startedAt) / 1000f;
-            if (up - lastSky >= 100) {
+            if (up - lastSky >= 66) {    // about 15 a second: plenty for something that breathes
                 lastSky = up;
                 scene.advance(seconds);
             }
@@ -369,7 +370,7 @@ public class SettingsActivity extends Activity {
 
             // On the left: big symbol, title, description.
             float cx = 500 * k;
-            Symbols.draw(getContext(), c, "sparkles", cx, 400 * k, 150 * k, 0xEBFFFFFF);
+            Breath.mark(c, mark, cx, 400 * k, 132 * k, seconds, Breath.period(0, false), 1);
             c.drawText("Beyond™ TV", cx, 612 * k, title);
             c.drawText(Ui.tr("Início e tela de descanso da TV", "Your TV's home screen and screensaver"), cx, 660 * k, subtitle);
             c.drawText(versionName(getContext()), cx, 704 * k, version);
@@ -439,8 +440,9 @@ public class SettingsActivity extends Activity {
                 c.restore();
                 y += errorLayout.getLineBaseline(errorLayout.getLineCount() - 1) - errorLayout.getLineBaseline(0) + 46 * k;
             }
-            y = drawRecs(c, y + 26 * k);
-            drawNotices(c, y + 40 * k);
+            // Without picks (no key in this build) the section isn't there at all, rather than explaining why.
+            if (hasKey) y = drawRecs(c, y + 26 * k) + 40 * k; else y += 26 * k;
+            drawNotices(c, y);
         }
 
         /** Home screen picks: status, and the credit TMDB asks for. */
@@ -450,8 +452,7 @@ public class SettingsActivity extends Activity {
             String line;
             String error = recs.optString("error");
             int count = recs.optInt("count");
-            if (!hasKey) line = Ui.tr("Sem chave do TMDB: veja o README (config.properties).", "No TMDB key: see the README (config.properties).");
-            else if (!error.isEmpty()) line = Ui.tr("Erro: ", "Error: ") + error + ".";
+            if (!error.isEmpty()) line = Ui.tr("Fazendo uma pausa; voltam sozinhas.", "Taking a short break. They'll be back by themselves.");
             else if (count > 0) line = Ui.tr("Ligadas · " + count + " títulos nos apps da TV, 3 novos a cada hora.",
                     "On · " + count + " titles from the TV's apps, 3 new ones every hour.");
             else line = Ui.tr("Buscando os títulos…", "Fetching titles…");
@@ -475,7 +476,8 @@ public class SettingsActivity extends Activity {
                 tmp.set(cx - rowRect.width() * s / 2, cy - rowRect.height() * s / 2, cx + rowRect.width() * s / 2, cy + rowRect.height() * s / 2);
                 float r = 18 * k * s;
                 tmp.offset(0, 10 * k * f);
-                shadow.setColor(Ui.alpha(0xFF000000, 0.4f * f));
+                // A lilac glow under the focused row, breathing with the background.
+                shadow.setColor(Ui.alpha(Glow.LILAC, (0.32f + 0.26f * scene.breath()) * f));
                 c.drawRoundRect(tmp, r, r, shadow);
                 tmp.offset(0, -10 * k * f);
                 white.setAlpha(Math.round(255 * f));
@@ -556,8 +558,8 @@ public class SettingsActivity extends Activity {
                 c.drawText(rows[i][2], rowRect.right - 30 * k, rowRect.centerY() + Ui.halfCap(rowValue), rowValue);
             }
             Paint hint = Ui.text(Ui.regular, 23 * k, 0x8CFFFFFF);
-            c.drawText(Ui.tr("Novas versões chegam de github.com/YeahBuddyNZ/Beyond.TV, assinadas com a mesma chave.",
-                    "New versions come from github.com/YeahBuddyNZ/Beyond.TV, signed with the same key."), LIST_X * k + 30 * k,
+            c.drawText(Ui.tr("As atualizações vêm direto da Beyond, e só o Beyond™ TV verdadeiro é instalado.",
+                    "Updates come straight from Beyond, and only the real Beyond™ TV ever installs."), LIST_X * k + 30 * k,
                     (LIST_TOP + 20 + 2 * (CHOICE_H + ROW_GAP) + 40) * k, hint);
         }
 

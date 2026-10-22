@@ -133,7 +133,13 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
     private final int[] glassNight = new int[Backdrop.GW * Backdrop.GH], frostNight = new int[Backdrop.FW * Backdrop.FH];
     private final int[] neutralGlassPx = new int[Backdrop.GW * Backdrop.GH], neutralFrostPx = new int[Backdrop.FW * Backdrop.FH];
     private boolean nightPair;          // the glass holds both photos (day and night), blended by `night`
-    private Shader nightGradient;
+    // Without a photo: Beyond's violet background, breathing (Glow, Breath). Redrawn ~15 times a second (10 on the
+    // older GPUs), only the sky layer, and only while nothing else needs the frames.
+    private final Glow glow = new Glow();
+    private final Breath.Clock breathClock = new Breath.Clock();
+    private final Paint veilPaint = new Paint(), markPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private static final long BREATH_FRAME = Ui.LEGACY ? 100 : 66;
+    private long bornAt, lastBreath;
 
     // At the top: tabs (0 to 2) and icon-only buttons (3 to 5); the three cards
     private int tab, topIndex, cardIndex;
@@ -145,7 +151,6 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
     private final RectF[] cardRects = new RectF[3];
     private final List<HomeApps.Item> lightButtons = new ArrayList<>();
     private Paint lTitle, lTab, lTabOn, lCardTitle, lCardMeta, lQuote, lTip, lDate, lClock, lWeather, lClockQuote;
-    private Shader lightGradient;
 
     // Shelf
     private List<HomeApps.Item> shelf = new ArrayList<>();
@@ -542,6 +547,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         k = w / 1920f;
         screen.set(0, 0, w, h);
         scene.setSize(w, h);
+        glow.setSize(w, h);
         makePaints();
         gridLabels = null;
         clockMinute = -1;
@@ -582,7 +588,6 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         lClock.setLetterSpacing(-0.01f);
         lWeather = Ui.text(Ui.medium, 34 * k, L_DIM);
         lClockQuote = Ui.numbers(Ui.medium, 28 * k, L_DIM);
-        lightGradient = null;
         buttonPaint = Ui.text(Ui.semibold, 29 * k, INK);
         capsuleText = Ui.numbers(Ui.medium, 29 * k, 0xF2FFFFFF);
         tipPaint = Ui.text(Ui.semibold, 25 * k, 0xF2FFFFFF);
@@ -678,8 +683,14 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
                 || sheetMoving || toastFading || heroFading || bgFading || nightMoving || sheetOpen || sheet.value > 0.001f
                 || drawerOpen || drawer.value > 0.001f || toast != null || !toasts.isEmpty();
         idle = !busy;
+        // Breathing: the sky alone, a few times a second, while nothing else is moving.
+        boolean breathing = bgTo == null && bgFadeAt == 0;
+        if (breathing && !busy && up - lastBreath >= BREATH_FRAME - 8) {
+            lastBreath = up;
+            sky.invalidate();
+        }
         if (busy) Choreographer.getInstance().postFrameCallback(this);
-        else Choreographer.getInstance().postFrameCallbackDelayed(this, 1000);
+        else Choreographer.getInstance().postFrameCallbackDelayed(this, breathing ? BREATH_FRAME : 1000);
     }
 
     private void wake() {
@@ -846,7 +857,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
 
     /** No photo: the glass reads the background's own gray (not Scene's default aurora, which isn't on screen). */
     private void neutralGlass() {
-        int color = blend(0xFFEDEBE4, 0xFF171714, night);
+        int color = blend(0xFFEFEBF8, 0xFF1E1A3A, night);     // Glow's paper and plum, as the glass would see them
         java.util.Arrays.fill(neutralFrostPx, color);
         java.util.Arrays.fill(neutralGlassPx, color);
         scene.setFrost(neutralFrostPx);
@@ -1877,13 +1888,14 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         float age = (SystemClock.uptimeMillis() - toastAt) / 1000f;
         float a = Math.min(Ui.clamp(age / 0.3f), Ui.clamp((TOAST_MS / 1000f - age) / 0.4f));
         if (a <= 0) return;
-        float padX = 28 * k, padY = 18 * k, icon = 26 * k, iconW = Symbols.width(getContext(), "bell", icon);
+        float padX = 28 * k, padY = 18 * k, icon = 30 * k, iconW = icon;
         float tw = toast.getWidth() + iconW + 16 * k, th = toast.getHeight();
         float toastTop = 64 * k - (1 - a) * 16 * k;
         tmp.set((w - tw) / 2f - padX, toastTop, (w + tw) / 2f + padX, toastTop + th + 2 * padY);
         int save = c.saveLayerAlpha(tmp.left - 4, tmp.top - 4, tmp.right + 4, tmp.bottom + 4, Math.round(255 * a));
-        scene.glass(c, tmp, Math.min(tmp.height() / 2, 32 * k), SMOKE, 0.55f, 0, 0, 0.02f, 1);
-        Symbols.draw(getContext(), c, "bell", tmp.left + padX + iconW / 2, tmp.centerY(), icon, 0xEBFFFFFF);
+        // Beyond's own voice: plum glass and the four dots, so a notice reads as the TV talking, not an error.
+        scene.glass(c, tmp, Math.min(tmp.height() / 2, 32 * k), Glow.PLUM, 0.62f, 0, 0, 0.02f, 1);
+        Breath.mark(c, markPaint, tmp.left + padX + iconW / 2, tmp.centerY(), icon, -1, 10, 1);
         c.translate(tmp.left + padX + iconW + 16 * k, tmp.top + padY);
         toast.draw(c);
         c.restoreToCount(save);
@@ -2651,22 +2663,14 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         // Drawer open: the background lightens (by day) or darkens (at night), as a filter on the drawing itself.
         android.graphics.ColorFilter v = veil(tone(0.32f, 0.42f) * Ui.clamp(drawer.value), blend(0xFFFFFFFF, 0xFF000000, night));
         if (bgTo == null || (fading && bgFrom == null)) {
-            if (lightGradient == null) lightGradient = new LinearGradient(0, 0, 0, h, 0xFFF5F5F7, 0xFFE2E2E7, Shader.TileMode.CLAMP);
-            if (nightGradient == null) nightGradient = new LinearGradient(0, 0, 0, h, 0xFF1C1C1E, 0xFF0B0B0D, Shader.TileMode.CLAMP);
-            fill.setColorFilter(v);
-            fill.setColor(0xFF000000);
-            if (night < 0.999f) {
-                fill.setShader(lightGradient);
-                c.drawRect(screen, fill);
+            if (bornAt == 0) bornAt = up;
+            float seconds = (up - bornAt) / 1000f;
+            glow.draw(c, seconds, breathClock.at(seconds, Breath.period(night, false)), night, 1);
+            float veilAmount = tone(0.32f, 0.42f) * Ui.clamp(drawer.value);
+            if (veilAmount > 0.002f) {
+                veilPaint.setColor(Ui.alpha(blend(0xFFFFFFFF, 0xFF000000, night), veilAmount));
+                c.drawRect(screen, veilPaint);
             }
-            if (night > 0.001f) {
-                fill.setShader(nightGradient);
-                fill.setAlpha(Math.round(255 * night));
-                c.drawRect(screen, fill);
-                fill.setAlpha(255);
-            }
-            fill.setShader(null);
-            fill.setColorFilter(null);
         }
         imagePaint.setColorFilter(v);
         if (fading && bgFrom != null) drawLightImage(c, bgFrom, bgTo == null ? 1 - e : 1);
