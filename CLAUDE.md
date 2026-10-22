@@ -285,6 +285,7 @@ HDMI (Chromecast with Google TV, Google TV Streamer, onn 4K, NVIDIA Shield). Set
 
 ## Always
 
+- A decision that changes what happens on somebody's TV gets an ADR in `docs/adr/` in the same PR (index in its README). Never rewrite an accepted one; write a new one that replaces it.
 - Every feature someone can see goes on the website (`docs/index.html`: *What it does now*, or *On the way* while it
   is coming) and in the README's roadmap, in the same PR (Kyle's rule). Homes are free, always; business screens are
   the paid product.

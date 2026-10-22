@@ -174,6 +174,11 @@ final class Russian {
             case "Updates": return "Обновления";
             case "Updates, ": return "Обновления, ";
             case "New version": return "Новая версия";
+            case "Ready, but the TV needs your OK once: press OK to allow it": return "Готово, но телевизору нужно ваше разрешение один раз: нажмите OK";
+            case "A new version is ready": return "Новая версия готова";
+            case "To keep itself up to date, Beyond TV needs the TV's OK to install its own updates. On the next screen, switch Beyond TV on, then press Back.": return "Чтобы обновляться, Beyond TV нужно разрешение телевизора на установку своих обновлений. На следующем экране включите Beyond TV и нажмите «Назад».";
+            case "Show me": return "Показать";
+            case "Not now": return "Не сейчас";
             case "Install the new version": return "Установить новую версию";
             case "Check for updates": return "Проверить обновления";
             case "Install updates by themselves": return "Устанавливать обновления самостоятельно";

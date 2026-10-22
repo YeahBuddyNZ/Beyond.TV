@@ -1,0 +1,15 @@
+# Decisions (ADRs)
+
+Each file is one decision: what we chose, why, and what it rules out. Short, plain words.
+
+- A decision that changes how Beyond TV behaves on somebody's TV gets an ADR in the same pull request.
+- Never rewrite an accepted one. If it changes, write a new one that says which it replaces.
+- Name: `NNNN-what-it-is.md`, numbered in order.
+
+| # | Decision |
+|---|----------|
+| [0001](0001-write-decisions-down.md) | Write decisions down |
+| [0002](0002-updates-never-end-at-a-dead-end.md) | Updates never end at a dead end |
+| [0003](0003-the-way-back-always-works.md) | The way back always works |
+| [0004](0004-installing-by-itself-is-their-choice.md) | Installing by itself is their choice |
+| [0005](0005-never-turn-off-an-app-that-saved-wifi.md) | Never turn off an app that saved Wi-Fi |
