@@ -50,6 +50,7 @@ public class HomeActivity extends Activity {
         }
         if (home != null) {
             home.resume();
+            Updater.homeShowing(this, true);
             Updater.maybeCheck(this);
             Updater.offer(this);
             Checkin.opened(this);
@@ -58,6 +59,7 @@ public class HomeActivity extends Activity {
     }
 
     @Override protected void onPause() {
+        Updater.homeShowing(this, false);
         if (home != null) home.pause();
         super.onPause();
     }
