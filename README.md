@@ -50,7 +50,7 @@ Free and open source, built in Aotearoa by [Beyond](https://gobeyond.co.nz). One
 5. Picks for kids: interests set by a grown-up, gentle suggestions of something better to watch, and a parent code for the grown-up settings.
 6. Two homes, one show: co-parents' TVs play the same thing at the same time, with reactions from phones.
 7. Earn your screen (Beyond Family jobs unlock the kids' apps), the house noticeboard when nobody's watching, a bedtime breathing night light, a fine day nudge that counts as green time, a dinner question answered from phones, and a te reo word of the day.
-8. Beyond™ TV for business: shop-window screens changed from the web, as a subscription. Free for homes, always.
+8. Beyond™ TV for business (testing now): shop-window screens changed from the web, as a subscription. Open `/screen` on the TV, type its code into Beyond™ Spaces, and it plays your pictures, videos and web pages. Free for homes, always.
 
 Ideas welcome: press the four dots (*Talk to Beyond*) on the TV.
 
