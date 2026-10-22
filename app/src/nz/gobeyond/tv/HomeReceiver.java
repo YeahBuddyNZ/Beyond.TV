@@ -11,9 +11,11 @@ public class HomeReceiver extends BroadcastReceiver {
         if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
             HomeMode.bootCheck(context);
             Updater.maybeCheck(context);
+            FamilyService.start(context);   // linked to Beyond Family: the phone remote works from the start
         } else if (Intent.ACTION_MY_PACKAGE_REPLACED.equals(action)) {
             HomeMode.verify(context);   // app updated: complete Beyond TV mode if something is missing
             HomeMode.ensureRemoteService(context, 3_000);
+            FamilyService.start(context);
         }
     }
 }

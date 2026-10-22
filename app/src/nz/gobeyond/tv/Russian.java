@@ -243,6 +243,22 @@ final class Russian {
                 return "Сети Wi-Fi сохранены приложением первоначальной настройки телевизора. Его отключение удалит эти сети. "
                         + "В разделе «Настройки → Сеть и Интернет» забудьте сеть и подключитесь заново, затем повторите попытку. "
                         + "Недоступные сети там не отображаются: Claude Code может удалить их с компьютера.";
+            case "Link this TV to your family": return "Подключите этот телевизор к семье";
+            case "On your phone, open Beyond Family › Family › TVs › Add a TV, and type": return "На телефоне откройте Beyond Family › Семья › Телевизоры › Добавить телевизор и введите";
+            case "Talking to Beyond Family…": return "Связываемся с Beyond Family…";
+            case "The code lasts ": return "Код действует ";
+            case "Couldn't reach Beyond Family. Check the TV's internet and try again.": return "Не удалось связаться с Beyond Family. Проверьте интернет на телевизоре и попробуйте снова.";
+            case "Linked to ": return "Подключён к ";
+            case "This TV shows your family's people, follows the remote on your phone and shows the family's messages.": return "Этот телевизор показывает вашу семью, слушается пульта на телефоне и показывает сообщения семьи.";
+            case "Unlink this TV": return "Отключить этот телевизор";
+            case "Unlinked from Beyond Family": return "Отключён от Beyond Family";
+            case "Beyond Family unlinked this TV": return "Beyond Family отключила этот телевизор";
+            case "Link": return "Подключить";
+            case "From ": return "От ";
+            case "just now": return "только что";
+            case "Now watching: ": return "Сейчас смотрит: ";
+            case "That app isn't on this TV": return "Этого приложения нет на телевизоре";
+            case "Listening for the family's remote and messages": return "Ждёт пульт и сообщения семьи";
             default:
                 // Notices are saved in the language in use when they were generated.
                 String[] prefixes = {"Couldn't check Beyond™ TV: ", "Couldn't turn on Beyond™ TV: ",

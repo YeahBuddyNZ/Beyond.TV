@@ -116,7 +116,7 @@ public class SettingsActivity extends Activity {
     static final class SettingsView extends View implements Choreographer.FrameCallback {
         private static final int MAIN = 0, HOME_CHOICE = 1, HOME_SETTINGS = 2, REMOTE_KEYS = 3, PICKER = 4, SHELF_EDIT = 5, UPDATES = 6;
         /** The main list: Home Screen, Screensaver, Home Settings, Shelf, Remote Buttons, Updates, TV Settings. */
-        private static final int MAIN_ROWS = 7, UPDATES_ROW = 5;
+        private static final int MAIN_ROWS = 8, UPDATES_ROW = 5, FAMILY_ROW = 6;
         private static final float LIST_ROW_H = 62, LIST_ROW_GAP = 5;
         private static final int PICK_VISIBLE = 9;
         private static final float LIST_X = 1000, LIST_R = 1824, LIST_TOP = 186, ROW_H = 74, ROW_GAP = 8, CHOICE_H = 104;
@@ -214,7 +214,9 @@ public class SettingsActivity extends Activity {
                     }
                     String[] names = {Ui.tr("Tela de Descanso, ver agora", "Screensaver, preview"), Ui.tr("Ajustes do Início", "Home Settings"),
                             Ui.tr("Prateleira", "Shelf"), Ui.tr("Botões do Controle", "Remote Buttons"),
-                            Ui.tr("Atualizações, ", "Updates, ") + Updater.status(getContext()), Ui.tr("Ajustes da TV", "TV Settings")};
+                            Ui.tr("Atualizações, ", "Updates, ") + Updater.status(getContext()),
+                            "Beyond Family, " + (Family.linked(getContext()) ? Family.homeName(getContext()) : Ui.tr("Ligar", "Link")),
+                            Ui.tr("Ajustes da TV", "TV Settings")};
                     return row - 1 < names.length ? names[row - 1] : "";
                 }
                 case HOME_CHOICE: {
@@ -384,9 +386,11 @@ public class SettingsActivity extends Activity {
             String mode = freeActive() ? "Beyond™ TV" : Ui.tr("Original", "Original");
             String[] labels = {Ui.tr("Início", "Home Screen"), Ui.tr("Tela de Descanso", "Screensaver"),
                     Ui.tr("Ajustes do Início", "Home Settings"), Ui.tr("Prateleira", "Shelf"),
-                    Ui.tr("Botões do Controle", "Remote Buttons"), Ui.tr("Atualizações", "Updates"), Ui.tr("Ajustes da TV", "TV Settings")};
+                    Ui.tr("Botões do Controle", "Remote Buttons"), Ui.tr("Atualizações", "Updates"), "Beyond Family",
+                    Ui.tr("Ajustes da TV", "TV Settings")};
             String[] values = {working ? "" : mode, Ui.tr("Ver agora", "Preview"), "", "", "",
-                    Updater.ready(getContext()) ? Ui.tr("Nova versão", "New version") : "", ""};
+                    Updater.ready(getContext()) ? Ui.tr("Nova versão", "New version") : "",
+                    Family.linked(getContext()) ? Family.homeName(getContext()) : Ui.tr("Ligar", "Link"), ""};
             for (int i = 0; i < MAIN_ROWS; i++) {
                 float y = (LIST_TOP + i * (ROW_H + ROW_GAP)) * k;
                 rowRect.set(LIST_X * k, y, LIST_R * k, y + ROW_H * k);
@@ -401,6 +405,13 @@ public class SettingsActivity extends Activity {
                     float cw = Symbols.width(getContext(), "chevron_right", 22 * k);
                     rowValue.setColor(blend(0xFF9E7BFF, 0xFF6135D6, f));
                     c.drawText(values[i], right - cw - 18 * k, base, rowValue);
+                    Symbols.draw(getContext(), c, "chevron_right", right - cw / 2, rowRect.centerY(), 22 * k, blend(0x66FFFFFF, 0x991C1C1E, f));
+                } else if (i == FAMILY_ROW) {
+                    // Which household, or an invitation to link: the value before the chevron.
+                    float cw = Symbols.width(getContext(), "chevron_right", 22 * k);
+                    rowValue.setColor(blend(0x8CFFFFFF, 0x8C1C1C1E, f));
+                    String shown = TextUtils.ellipsize(values[i], new TextPaint(rowValue), 420 * k, TextUtils.TruncateAt.END).toString();
+                    c.drawText(shown, right - cw - 18 * k, base, rowValue);
                     Symbols.draw(getContext(), c, "chevron_right", right - cw / 2, rowRect.centerY(), 22 * k, blend(0x66FFFFFF, 0x991C1C1E, f));
                 } else if (i >= 2) {
                     float cw = Symbols.width(getContext(), "chevron_right", 22 * k);
@@ -1063,6 +1074,9 @@ public class SettingsActivity extends Activity {
             } else if (focus == UPDATES_ROW) {
                 screen = UPDATES;
                 focus = 0;
+            } else if (focus == FAMILY_ROW) {
+                LinkActivity.open(c);
+                return;
             } else {
                 activity.startActivity(new Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
             }

@@ -200,6 +200,22 @@ final class German {
             case "Netflix, YouTube and Prime Video: the TV itself controls those buttons.": return "Netflix, YouTube und Prime Video: Diese Tasten steuert der Fernseher selbst.";
             case "The other buttons: the TV itself controls them.": return "Die anderen Tasten steuert der Fernseher selbst.";
             case "TCL remote buttons: on this TV they work as always.": return "TCL-Fernbedienung: Die Tasten funktionieren hier wie immer.";
+            case "Link this TV to your family": return "Verbinde diesen Fernseher mit deiner Familie";
+            case "On your phone, open Beyond Family › Family › TVs › Add a TV, and type": return "Öffne auf dem Handy Beyond Family › Familie › Fernseher › Fernseher hinzufügen und tippe";
+            case "Talking to Beyond Family…": return "Verbinde mit Beyond Family…";
+            case "The code lasts ": return "Der Code gilt ";
+            case "Couldn't reach Beyond Family. Check the TV's internet and try again.": return "Beyond Family war nicht erreichbar. Prüfe das Internet des Fernsehers und versuche es noch einmal.";
+            case "Linked to ": return "Verbunden mit ";
+            case "This TV shows your family's people, follows the remote on your phone and shows the family's messages.": return "Dieser Fernseher zeigt eure Familie, folgt der Fernbedienung auf dem Handy und zeigt die Nachrichten der Familie.";
+            case "Unlink this TV": return "Diesen Fernseher trennen";
+            case "Unlinked from Beyond Family": return "Von Beyond Family getrennt";
+            case "Beyond Family unlinked this TV": return "Beyond Family hat diesen Fernseher getrennt";
+            case "Link": return "Verbinden";
+            case "From ": return "Von ";
+            case "just now": return "gerade eben";
+            case "Now watching: ": return "Jetzt schaut: ";
+            case "That app isn't on this TV": return "Diese App ist nicht auf diesem Fernseher";
+            case "Listening for the family's remote and messages": return "Wartet auf die Fernbedienung und Nachrichten der Familie";
             default:
                 if (english.startsWith("Beyond™ TV is on: new home screen and screensaver, ")) {
                     return "Beyond™ TV ist an: neuer Startbildschirm und Bildschirmschoner, "

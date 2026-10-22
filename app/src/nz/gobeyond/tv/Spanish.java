@@ -192,6 +192,22 @@ final class Spanish {
             case "Netflix, YouTube and Prime Video: the TV itself controls those buttons.": return "Netflix, YouTube y Prime Video: el propio TV controla esos botones.";
             case "The other buttons: the TV itself controls them.": return "Los demás botones: el propio TV los controla.";
             case "TCL remote buttons: on this TV they work as always.": return "Botones del control de TCL: en este TV funcionan como siempre.";
+            case "Link this TV to your family": return "Vincula este TV a tu familia";
+            case "On your phone, open Beyond Family › Family › TVs › Add a TV, and type": return "En tu teléfono, abre Beyond Family › Familia › TVs › Añadir TV, y escribe";
+            case "Talking to Beyond Family…": return "Hablando con Beyond Family…";
+            case "The code lasts ": return "El código dura ";
+            case "Couldn't reach Beyond Family. Check the TV's internet and try again.": return "No se pudo conectar con Beyond Family. Revisa el internet del TV e inténtalo de nuevo.";
+            case "Linked to ": return "Vinculado a ";
+            case "This TV shows your family's people, follows the remote on your phone and shows the family's messages.": return "Este TV muestra a tu familia, sigue el control en tu teléfono y muestra los mensajes de la familia.";
+            case "Unlink this TV": return "Desvincular este TV";
+            case "Unlinked from Beyond Family": return "Desvinculado de Beyond Family";
+            case "Beyond Family unlinked this TV": return "Beyond Family desvinculó este TV";
+            case "Link": return "Vincular";
+            case "From ": return "De ";
+            case "just now": return "ahora";
+            case "Now watching: ": return "Ahora: ";
+            case "That app isn't on this TV": return "Esa app no está en este TV";
+            case "Listening for the family's remote and messages": return "Atento al control y los mensajes de la familia";
             default:
                 if (english.startsWith("Beyond™ TV is on: new home screen and screensaver, ")) {
                     return "Beyond™ TV está activo: nueva pantalla de inicio y protector, "

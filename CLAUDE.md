@@ -253,6 +253,15 @@ HDMI (Chromecast with Google TV, Google TV Streamer, onn 4K, NVIDIA Shield). Set
   it never touches the name, shelf, PIN or kid flag, and a Beyond Family refresh keeps what they picked.
   `tools/webapp.py` is what both builds share. Preview: `python3 webos/build.py --preview` (or `tizen/build.py`), then
   open `out/webos/index.html` in a browser (a stand-in lists sample apps).
+- Beyond Family on Android (`Family.java`, `FamilyService.java`, `LinkActivity.java`, all in `:home`): the same
+  server and protocol as `web/family.js` (`/tv/hello`, `/tv/code`, `/tv/sync` long poll, `/tv/bye`), state in
+  `files/family.json` (the boot receiver in the main process reads it). Settings › Beyond Family shows the code or the
+  household. Linked, `FamilyService` (a foreground service, so it keeps listening while another app has the screen)
+  turns the household's people into `People` (ids `bf-<member id>`) and runs commands: `key` and `launch` go through
+  the TV's own ADB (never asking for the key from there), falling back to our own screens; `say` is a card over the
+  home screen or a toast over other apps; `profile` switches who's watching. Together, reactions, bedtime, the dinner
+  question, picks for kids, earn your screen and the noticeboard are still LG and Samsung only: port them from
+  `web/` into the same `Family.run`.
 - Te reo word of the day: `web/kupu.js` and `Kupu.java` hold the same list and pick by the same local day, so every
   TV in a house shows the same kupu. Change one, change both. On Android it leads the quotes row (`HomeView.kupuFor`,
   measured once a day, never in the frame loop); *Te reo word of the day* in Home Settings turns it off.

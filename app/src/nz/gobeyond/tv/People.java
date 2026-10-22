@@ -81,6 +81,17 @@ final class People {
         Prefs.version++;
     }
 
+    /** The same people as now, in the same order: nothing for the home screen to redraw. */
+    static boolean sameAs(Context c, List<Person> people) {
+        List<Person> now = list(c);
+        if (now.size() != people.size()) return false;
+        for (int i = 0; i < now.size(); i++) {
+            Person a = now.get(i), b = people.get(i);
+            if (!a.id.equals(b.id) || !a.name.equals(b.name) || a.colour != b.colour || a.kid != b.kid) return false;
+        }
+        return true;
+    }
+
     static Person family() {
         Person f = new Person();
         f.id = FAMILY;
