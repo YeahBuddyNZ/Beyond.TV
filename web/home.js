@@ -668,7 +668,12 @@
       {label: tr('Protetor de tela', 'Screensaver', 'Salvapantallas'),
         value: Prefs.screensaver() === 'art' ? tr('Arte', 'Art', 'Arte') : Prefs.screensaver() === 'photos' ? tr('Fotos de filmes', 'Film photos', 'Fotos de películas')
           : Art.on() ? tr('Automático (arte)', 'Automatic (art)', 'Automático (arte)') : tr('Automático (fotos)', 'Automatic (photos)', 'Automático (fotos)'),
-        step: function (d) { cycle('screensaver', ['auto', 'art', 'photos'], Prefs.screensaver(), d); }}
+        step: function (d) { cycle('screensaver', ['auto', 'art', 'photos'], Prefs.screensaver(), d); }},
+      {label: tr('Tipo de arte', 'Kind of art', 'Tipo de arte'), value: Art.kindName(),
+        step: function (d) {
+          cycle('artKind', Art.kinds.map(function (k) { return k.id; }), Prefs.artKind(), d);
+          Art.refresh();
+        }}
     ];
     var names = ['Bitcoin', 'Ethereum', 'Solana', tr('Dólar', 'Dollar', 'Dólar')];
     if (CONFIG.showCrypto === true) {
@@ -1038,13 +1043,10 @@
           front = back;
         }, 60);
       } else if (p && art) {
-        // A painting on its mat, like a Samsung Frame: no zoom across it, only a slow drift.
+        // A painting filling the screen, still. The small copy sits under the big one in case the big one won't come.
         back.innerHTML = '';
-        back.style.backgroundImage = '';
         setClass(back, 'art', true);
-        var img = el('img', 'painting', back);
-        img.onerror = function () { img.onerror = null; img.src = Art.image(p, true); };
-        img.src = Art.image(p);
+        back.style.backgroundImage = 'url(' + Art.image(p) + '), url(' + Art.image(p, true) + ')';
         back.style.webkitTransform = back.style.transform = 'none';
         setTimeout(function () {
           setClass(back, 'on', true);

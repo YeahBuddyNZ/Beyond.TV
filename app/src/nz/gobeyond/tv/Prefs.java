@@ -125,6 +125,11 @@ final class Prefs {
 
     static void setScreensaver(String v) { put("screensaver", v); }
 
+    /** Which art the screensaver shows (Art.KINDS ids): "mixed" changes theme every day. */
+    static String artKind() { return sp().getString("artKind", "mixed"); }
+
+    static void setArtKind(String v) { put("artKind", v); }
+
     /** Art on the screensaver: chosen, or automatic without a TMDB key (no film photos to show). */
     static boolean art() {
         String v = screensaver();

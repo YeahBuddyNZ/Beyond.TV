@@ -751,9 +751,10 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .bt-layer.bt-sleep { background: #000; }
 .bt-layer.bt-sleep::before { display: none; }
 
-/* Art mode on the screensaver: the painting as big as the screen allows, on a dark wall, with nothing written on it. */
+/* Art mode on the screensaver: the painting fills the screen, with nothing written on it. */
 #saver.gallery .brand, #saver.gallery .clock, #saver.gallery .shade, #saver.gallery .board { display: none; }
 #saver.gallery .photo { -webkit-transition: opacity 3s; transition: opacity 3s; }
+<<<<<<< HEAD
 #saver .photo.art {
   background: -webkit-radial-gradient(50% 50%, circle, #1E1B19, #0B0A09 75%);
   background: radial-gradient(circle at 50% 50%, #1E1B19, #0B0A09 75%);
@@ -862,3 +863,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .night #sky .hills .near { fill: rgba(8, 7, 16, 0.45); }
 .in-world #sky .hills { display: none; }
 .card.screen.kidpick .emoji { margin-top: -50px; font-size: 100px; line-height: 100px; }
+=======
+#saver .photo.art { background-color: #0B0A09; }
+#saver .photo.art { background-size: cover; background-position: 50% 50%; }
+>>>>>>> 6f46cbf (Art fills the screen, and a choice of art)

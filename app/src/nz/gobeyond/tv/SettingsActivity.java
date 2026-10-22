@@ -668,9 +668,10 @@ public class SettingsActivity extends Activity {
 
         private static final String[] LANGUAGES = {"auto", "pt", "en", "es", "de", "ru"}, UNITS = {"auto", "C", "F"}, THEMES = {"auto", "light", "dark"},
                 SAVERS = {"auto", "art", "photos"};
-        /** Home Settings: language, temperature, theme, sounds, weather, city, te reo word, screensaver, help fix problems, then
+        /** Home Settings: language, temperature, theme, sounds, weather, city, te reo word, screensaver, kind of art, help fix problems, then
          *  (only in a build with show_crypto=true) the quotes widget and one row per coin. */
-        private static final int CITY_ROW = 5, KUPU_ROW = 6, SAVER_ROW = 7, HELP_ROW = 8, QUOTES_ROW = 9, COIN_ROWS = 10;
+        private static final int CITY_ROW = 5, KUPU_ROW = 6, SAVER_ROW = 7, ART_ROW = 8, HELP_ROW = 9, QUOTES_ROW = 10,
+                COIN_ROWS = 11;
 
         private boolean dollar() {
             return "BRL".equalsIgnoreCase(Config.CURRENCY.trim());
@@ -686,6 +687,7 @@ public class SettingsActivity extends Activity {
             l.add(Ui.tr("Cidade", "City"));
             l.add(Ui.tr("Palavra do dia em te reo Māori", "Te reo word of the day"));
             l.add(Ui.tr("Protetor de tela", "Screensaver"));
+            l.add(Ui.tr("Tipo de arte", "Kind of art"));
             l.add(Ui.tr("Ajudar a corrigir problemas", "Help fix problems"));
             if (Config.SHOW_CRYPTO) l.add(Ui.tr("Widget de cotações", "Quotes widget"));
             // The coins only while the quotes widget is on: off, they would be a list of switches that do nothing.
@@ -715,11 +717,24 @@ public class SettingsActivity extends Activity {
             String saver = Prefs.screensaver();
             v[SAVER_ROW] = saver.equals("art") ? Ui.tr("Arte", "Art") : saver.equals("photos") ? Ui.tr("Fotos de filmes", "Film photos")
                     : Prefs.art() ? Ui.tr("Automático (arte)", "Automatic (art)") : Ui.tr("Automático (fotos)", "Automatic (photos)");
+            v[ART_ROW] = artKindName(Prefs.artKind());
             v[HELP_ROW] = onOff(Checkin.on(getContext()));
             if (Config.SHOW_CRYPTO) v[QUOTES_ROW] = onOff(Prefs.quotes());
             // No quotes widget, nowhere to show prices: the coins read as off (and stay locked) until it is back on.
             for (int i = COIN_ROWS; i < v.length; i++) v[i] = onOff(Prefs.quotes() && Prefs.coin(i - COIN_ROWS));
             return v;
+        }
+
+        private static String artKindName(String id) {
+            switch (id) {
+                case "landscapes": return Ui.tr("Paisagens", "Landscapes");
+                case "sea": return Ui.tr("O mar", "The sea");
+                case "gardens": return Ui.tr("Jardins e flores", "Gardens and flowers");
+                case "mountains": return Ui.tr("Montanhas", "Mountains");
+                case "impressionism": return Ui.tr("Impressionismo", "Impressionism");
+                case "still life": return Ui.tr("Natureza-morta", "Still life");
+                default: return Ui.tr("Variada", "Mixed");
+            }
         }
 
         private static String onOff(boolean on) {
@@ -796,6 +811,13 @@ public class SettingsActivity extends Activity {
                 case SAVER_ROW: {
                     int at = java.util.Arrays.asList(SAVERS).indexOf(Prefs.screensaver());
                     Prefs.setScreensaver(SAVERS[(at + dir + SAVERS.length) % SAVERS.length]);
+                    break;
+                }
+                case ART_ROW: {
+                    int at = 0;
+                    for (int i = 0; i < Art.KINDS.length; i++) if (Art.KINDS[i][0].equals(Prefs.artKind())) at = i;
+                    Prefs.setArtKind(Art.KINDS[(at + dir + Art.KINDS.length) % Art.KINDS.length][0]);
+                    Art.get(getContext()).refresh();
                     break;
                 }
                 case HELP_ROW: Checkin.setOn(getContext(), !Checkin.on(getContext())); invalidate(); return;

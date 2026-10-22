@@ -52,6 +52,8 @@ var Prefs = (function () {
     kupu: function () { return pick('kupu', true); },
     /** The screensaver: 'art' (paintings, like a Samsung Frame), 'photos' (the picks' film photos) or 'auto'. */
     screensaver: function () { return pick('screensaver', 'auto'); },
+    /** Which art the screensaver shows (Art.KINDS ids): 'mixed' changes theme every day. */
+    artKind: function () { return pick('artKind', 'mixed'); },
     coin: function (i) { var c = pick('coins', null); return c ? c[i] !== false : true; },
     /** The shelf is each profile's own (Profiles), falling back to the TV's. */
     shelf: function () {

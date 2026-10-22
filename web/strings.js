@@ -192,7 +192,15 @@ var I18N = (function () {
     "Link Beyond Family": "Mit Beyond Family verbinden",
     "And your home's plans show up here": "Dann erscheinen hier die Pläne deines Zuhauses",
     "High ": "Max. ",
-    "Low ": "Min. "
+    "Low ": "Min. ",
+    "Kind of art": "Art der Kunst",
+    "Mixed": "Gemischt",
+    "Landscapes": "Landschaften",
+    "The sea": "Das Meer",
+    "Gardens and flowers": "Gärten und Blumen",
+    "Mountains": "Berge",
+    "Impressionism": "Impressionismus",
+    "Still life": "Stillleben"
   };
 
   /** German by the English; text built at runtime by its English pattern. */
@@ -406,7 +414,15 @@ var I18N = (function () {
     "Link Beyond Family": "Подключить Beyond Family",
     "And your home's plans show up here": "И здесь появятся планы вашего дома",
     "High ": "Макс. ",
-    "Low ": "Мин. "
+    "Low ": "Мин. ",
+    "Kind of art": "Вид искусства",
+    "Mixed": "Разное",
+    "Landscapes": "Пейзажи",
+    "The sea": "Море",
+    "Gardens and flowers": "Сады и цветы",
+    "Mountains": "Горы",
+    "Impressionism": "Импрессионизм",
+    "Still life": "Натюрморт"
   };
 
   function russianText(en) {

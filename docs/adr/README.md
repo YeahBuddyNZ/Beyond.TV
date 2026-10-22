@@ -13,3 +13,4 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0003](0003-the-way-back-always-works.md) | The way back always works |
 | [0004](0004-installing-by-itself-is-their-choice.md) | Installing by itself is their choice |
 | [0005](0005-never-turn-off-an-app-that-saved-wifi.md) | Never turn off an app that saved Wi-Fi |
+| [0006](0006-art-fills-the-screen.md) | Art fills the screen |
