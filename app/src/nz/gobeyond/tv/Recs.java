@@ -52,6 +52,9 @@ final class Recs {
         long watchedAt;         // Keep watching: when it was opened from the home screen (0 on a pick)
         String emoji;           // a kid's pick (KidPicks): drawn as this on their colour, no photo
         int colour;
+        String tile;            // pinned from Beyond Family: "app", "show", "jobs" or "camera"
+        String camera;          // a camera tile's picture address, on the home network
+        org.json.JSONArray kids; // the jobs tile: [{name, colour, jobs: [{title, done}]}]
     }
 
     interface Listener { void onRecs(); }

@@ -7,6 +7,16 @@ var I18N = (function () {
 
   var lang = 'en';
   var german = {
+    "Pinned": "Angeheftet",
+    "App": "App",
+    "Not on this TV": "Nicht auf diesem Fernseher",
+    "Jobs today": "Aufgaben heute",
+    "No jobs today": "Heute keine Aufgaben",
+    "All done!": "Alles erledigt!",
+    " of ": " von ",
+    " done": " erledigt",
+    "Camera": "Kamera",
+    "That app isn't on this TV": "Diese App ist nicht auf diesem Fernseher",
     " and ": " und ",
     "Did ": "Haben ",
     " get fed today?": " heute schon Futter bekommen?",
@@ -223,6 +233,16 @@ var I18N = (function () {
   }
 
   var russian = {
+    "Pinned": "Закреплённое",
+    "App": "Приложение",
+    "Not on this TV": "Нет на этом телевизоре",
+    "Jobs today": "Дела на сегодня",
+    "No jobs today": "Сегодня дел нет",
+    "All done!": "Всё сделано!",
+    " of ": " из ",
+    " done": " сделано",
+    "Camera": "Камера",
+    "That app isn't on this TV": "Этого приложения нет на телевизоре",
     " and ": " и ",
     "Did ": "Покормили ",
     " get fed today?": " сегодня?",

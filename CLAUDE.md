@@ -269,6 +269,9 @@ HDMI (Chromecast with Google TV, Google TV Streamer, onn 4K, NVIDIA Shield). Set
   turns the household's people into `People` (ids `bf-<member id>`) and runs commands: `key` and `launch` go through
   the TV's own ADB (never asking for the key from there), falling back to our own screens; `say` is a card over the
   home screen or a toast over other apps; `profile` switches who's watching; `bedtime` opens `BedtimeActivity`; the
+  Pinned tiles (`home.widgets` from `/tv/sync`, ADR 0009): a *Pinned* tab first, drawn by `pinnedCards` in `web/home.js`
+  (six) and `HomeView.pinnedCards` (three); camera pictures through `Cameras.java` (home network only, its own socket for
+  http) and `CameraActivity` full screen.
   `question*` commands drive `DinnerActivity`; the noticeboard (`Family.board`) and earn your screen
   (`Family.jobs`, `JobsActivity`) read the sync. `KidPicks` fills a kid's cards. Together and reactions are still LG and Samsung
   only: port them from `web/` into the same `Family.run`.
