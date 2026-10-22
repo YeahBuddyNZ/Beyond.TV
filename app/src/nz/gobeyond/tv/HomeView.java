@@ -180,6 +180,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
     private final Paint personInk = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Paint lTileName;
     private String[] tileNames = new String[0];   // each shelf app's name, cut to fit under its icon
+    private Paint lPickEmoji;
     private Paint lTitle, lTab, lTabOn, lCardTitle, lCardMeta, lQuote, lTip, lClock, lClockQuote;
     private Paint lInfo, lInfoTime, lKupu, lKupuWord, lWhen, lHead, lRowWhat, lRowMore, lBadge, lBadgeHome, lEmoji, lFace;
 
@@ -663,6 +664,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         lKupu = Ui.text(Ui.medium, 24 * k, L_DIM);
         lKupuWord = Ui.text(Ui.semibold, 24 * k, L_INK);
         lWhen = Ui.text(Ui.semibold, 19 * k, 0xFFFFFFFF);
+        lPickEmoji = Ui.text(Ui.regular, 96 * k, 0xFFFFFFFF);
+        lPickEmoji.setTextAlign(Paint.Align.CENTER);
         lHead = Ui.text(Ui.displaySemibold, 32 * k, L_INK);
         lRowWhat = Ui.text(Ui.semibold, 26 * k, L_INK);
         lRowMore = Ui.text(Ui.medium, 21 * k, L_DIM);
@@ -2382,6 +2385,11 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             it = HomeApps.app(p.pkg, p.watchedAt != 0 ? p.app : Recs.serviceName(p), p.link);
             r = cardRects[cardIndex];
             from = p;
+            if (p.emoji != null) {
+                // A TV app can't be asked for one show by name: say what to look for.
+                android.widget.Toast.makeText(getContext(), Ui.tr("Abrindo ", "Opening ", "Abriendo ") + Recs.serviceName(p)
+                        + Ui.tr(". Procure ", ": look for ", ". Busca ") + p.title, android.widget.Toast.LENGTH_LONG).show();
+            }
         } else {
             if (shelf.isEmpty()) return;
             it = shelf.get(shelfIndex);
@@ -2880,7 +2888,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         }
         String kind = tab < kinds.size() ? kinds.get(tab) : null;
         List<Recs.Pick> list = kind == null ? new ArrayList<>()
-                : "watching".equals(kind) ? watchingCards() : recs.now("all".equals(kind) ? null : kind);
+                : "watching".equals(kind) ? watchingCards() : picksFor("all".equals(kind) ? null : kind);
         if (!samePicks(list, cards)) {
             cards = list;
             cardIndex = Math.min(cardIndex, Math.max(0, list.size() - 1));
@@ -2901,6 +2909,12 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         updateTonight();
         heroDirty = true;
         spoken.focusMoved();    // new picks under the focused card
+    }
+
+    /** A kid watching gets their own picks (KidPicks) when they have any; everyone else this hour's picks. */
+    private List<Recs.Pick> picksFor(String kind) {
+        List<Recs.Pick> kid = KidPicks.cards(getContext(), kind);
+        return kid != null ? kid : recs.now(kind);
     }
 
     /** Keep watching as screens: the show and its app when it came from a pick, otherwise just the app. */
@@ -3033,8 +3047,9 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         drawQuotes(c);
     }
 
+    /** Picks show with a TMDB key, or for a kid watching who has picks of their own (KidPicks, no key needed). */
     private boolean picksOn() {
-        return Recs.hasKey(getContext());
+        return Recs.hasKey(getContext()) || KidPicks.any(getContext());
     }
 
     /**
@@ -3086,6 +3101,13 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             c.drawRoundRect(cell, r0, r0, fill);
             if (app.logo != null) drawLogo(c, app, cell, 1, style != null ? style[2] : 0);
             else roundImage(c, app.tile, cell, r0);
+        } else if (p.emoji != null) {
+            // A kid's pick: what it's "because of", big, on their colour.
+            fill.setColor(p.colour);
+            c.drawRoundRect(cell, r0, r0, fill);
+            fill.setColor(0x33000000);
+            c.drawRoundRect(cell, r0, r0, fill);
+            c.drawText(p.emoji, cell.centerX(), cell.centerY() - (lPickEmoji.ascent() + lPickEmoji.descent()) / 2, lPickEmoji);
         } else {
             fill.setColor(0xFF2C2458);
             c.drawRoundRect(cell, r0, r0, fill);

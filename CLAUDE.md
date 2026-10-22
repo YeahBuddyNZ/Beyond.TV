@@ -252,7 +252,7 @@ HDMI (Chromecast with Google TV, Google TV Streamer, onn 4K, NVIDIA Shield). Set
   `web/profiles.js` is Who's watching: Family comes first (`together`, never in the list or Beyond Family's members),
   with family-friendly picks (`Profiles.gentle()`) and its own shelf; a kid needs the PIN to switch to it.
   `web/bedtime.js` is Bedtime breathing: a night light that slows from six breaths a minute and fades to dark (moon button at night, or a `bedtime` command from Beyond Family).
-  `web/kidpicks.js` is Picks for kids: for a kid watching, the cards are a hand-picked list of each service's own shows matched to `likes` (a grown-up's, from Beyond Family or the profile editor behind the PIN) and `loves` (the kid's own), or one "What do you like to watch?" card; now and then, back from an app, it suggests one. No TMDB needed. Its like ids match Beyond Family's `TV_LIKES`.
+  `web/kidpicks.js` is Picks for kids: for a kid watching, the cards are a hand-picked list of each service's own shows matched to `likes` (a grown-up's, from Beyond Family or the profile editor behind the PIN) and `loves` (the kid's own), or one "What do you like to watch?" card; now and then, back from an app, it suggests one. No TMDB needed. Its like ids match Beyond Family's `TV_LIKES`. `KidPicks.java` holds the same lists for Google TV (likes from `Family.likes`): change one, change both.
   `web/pets.js` asks a kid who just picked their face whether the household's pets got fed (`pets` in `/tv/sync`, each with `due` worked out by Beyond Family); "Yes" posts `/tv/pets/fed` with the kid's member id, "Not yet" asks again after 30 minutes.
   `web/outside.js` is the fine day nudge: once a day on a mild, dry day, coming back from an app suggests going outside, and the next key press 10+ minutes later offers to count it as green time (`POST /tv/green`).
   The dinner question lives in `web/family.js` (`dinner`): `question` opens it, `question-answered` fills in faces (never the words), `question-reveal` shows the answers, `question-end` closes it.
@@ -268,7 +268,7 @@ HDMI (Chromecast with Google TV, Google TV Streamer, onn 4K, NVIDIA Shield). Set
   the TV's own ADB (never asking for the key from there), falling back to our own screens; `say` is a card over the
   home screen or a toast over other apps; `profile` switches who's watching; `bedtime` opens `BedtimeActivity`; the
   `question*` commands drive `DinnerActivity`; the noticeboard (`Family.board`) and earn your screen
-  (`Family.jobs`, `JobsActivity`) read the sync. Together, reactions and picks for kids are still LG and Samsung
+  (`Family.jobs`, `JobsActivity`) read the sync. `KidPicks` fills a kid's cards. Together and reactions are still LG and Samsung
   only: port them from `web/` into the same `Family.run`.
   Your face on any TV: each person's look (`profile` in `/tv/sync`: emoji, colour, world, loves, shelf by app name
   `t:netflix`) lives in Beyond Family. On the web a change marks the person `pending` and `Family.pushProfile` sends it

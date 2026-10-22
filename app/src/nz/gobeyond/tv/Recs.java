@@ -50,6 +50,8 @@ final class Recs {
         boolean detailed;
         boolean gentle;         // family, kids' or animation: shown to Family and to kids' profiles
         long watchedAt;         // Keep watching: when it was opened from the home screen (0 on a pick)
+        String emoji;           // a kid's pick (KidPicks): drawn as this on their colour, no photo
+        int colour;
     }
 
     interface Listener { void onRecs(); }
