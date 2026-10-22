@@ -403,8 +403,19 @@ final class Family {
                     changed();
                 });
                 break;
+            case "bedtime":
+                final int minutes = cmd.optInt("minutes", 15);
+                MAIN.post(() -> {
+                    try {
+                        BedtimeActivity.open(app, minutes);
+                    } catch (RuntimeException e) {
+                        // Android may not let us open a screen over another app: say it instead.
+                        say(app, Ui.tr("Hora de dormir", "Time for bed", "Hora de dormir"), "bedtime", "");
+                    }
+                });
+                break;
             default:
-                // Watching together, reactions, bedtime breathing and the dinner question are on LG and Samsung so far.
+                // Watching together, reactions and the dinner question are on LG and Samsung so far.
                 break;
         }
     }
