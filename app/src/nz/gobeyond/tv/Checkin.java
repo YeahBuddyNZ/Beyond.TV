@@ -31,6 +31,8 @@ final class Checkin {
     private Checkin() {}
 
     static final String URL_BASE = "https://beyondfamily.app/api/tv/checkin";
+    private static final String FEEDBACK = "https://beyondfamily.app/api/tv/feedback",
+            MESSAGES = "https://beyondfamily.app/api/tv/messages";
     private static final long DAY = 24L * 60 * 60 * 1000, HOUR = 60L * 60 * 1000;
     private static final int KEEP = 20;
     private static final Object LOCK = new Object();
@@ -168,6 +170,83 @@ final class Checkin {
             write(file(c, "errors.txt"), String.join("", now));
         }
         AppLog.w("checkin: sent");
+    }
+
+    // MARK: - Talk to Beyond
+
+    /**
+     * A line from the feedback button, against this TV's made-up id, so Beyond can answer this TV. Sent because
+     * somebody pressed Send, so it goes even with the daily check-in off. Blocking: call it off the UI thread.
+     */
+    static boolean feedback(Context c, String text) {
+        try {
+            JSONObject body = new JSONObject()
+                    .put("id", id(c))
+                    .put("text", cut(text, 1000))
+                    .put("platform", "android")
+                    .put("brand", cut(Build.BRAND, 40))
+                    .put("model", cut(Build.MODEL, 60))
+                    .put("version", cut(c.getPackageManager().getPackageInfo(c.getPackageName(), 0).versionName, 30));
+            String city = Prefs.city();
+            if (!city.isEmpty()) body.put("city", cut(city, 60));
+            post(FEEDBACK, body.toString());
+            touch(file(c, "talked"));
+            return true;
+        } catch (Throwable t) {
+            AppLog.w("feedback: " + t);
+            return false;
+        }
+    }
+
+    interface Replies {
+        void heard(List<String> lines);
+    }
+
+    /**
+     * Beyond's answers to this TV's feedback, each handed over once. Only TVs that have said something ask, at most
+     * every 10 minutes and for two weeks after, so nobody else's TV ever polls. `then` runs on a background thread.
+     */
+    static void maybeHear(Context c, final Replies then) {
+        final Context app = c.getApplicationContext();
+        File talked = file(app, "talked");
+        if (!talked.exists() || System.currentTimeMillis() - talked.lastModified() > 14 * DAY) return;
+        File heard = file(app, "heard");
+        if (System.currentTimeMillis() - heard.lastModified() < 10 * 60_000L) return;
+        new Thread(() -> {
+            try {
+                touch(heard);
+                String json = get(MESSAGES + "?id=" + id(app));
+                JSONArray list = new JSONObject(json).optJSONArray("messages");
+                List<String> out = new ArrayList<>();
+                for (int i = 0; list != null && i < list.length(); i++) {
+                    String t = list.optJSONObject(i) == null ? "" : list.optJSONObject(i).optString("text").trim();
+                    if (!t.isEmpty()) out.add(t);
+                }
+                if (!out.isEmpty()) then.heard(out);
+            } catch (Throwable t) {
+                AppLog.w("feedback replies: " + t);
+            }
+        }, "beyond-tv-replies").start();
+    }
+
+    private static String get(String url) throws IOException {
+        HttpURLConnection h = (HttpURLConnection) new URL(url).openConnection();
+        try {
+            h.setConnectTimeout(10_000);
+            h.setReadTimeout(20_000);
+            h.setRequestProperty("User-Agent", "BeyondTV");
+            int code = h.getResponseCode();
+            if (code / 100 != 2) throw new IOException("HTTP " + code);
+            try (InputStream in = h.getInputStream()) {
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                byte[] buffer = new byte[8192];
+                int n;
+                while ((n = in.read(buffer)) > 0 && out.size() < 64 * 1024) out.write(buffer, 0, n);
+                return out.toString(StandardCharsets.UTF_8.name());
+            }
+        } finally {
+            h.disconnect();
+        }
     }
 
     // MARK: - Helpers

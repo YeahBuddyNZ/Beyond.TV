@@ -115,6 +115,17 @@ final class Russian {
             case "Couldn't check just now. It tries again by itself": return "Сейчас не удалось проверить. Попробует снова само";
             case "Taking a short break. They'll be back by themselves.": return "Небольшой перерыв. Скоро вернутся сами.";
             case "Updates come straight from Beyond, and only the real Beyond™ TV ever installs.": return "Обновления приходят прямо от Beyond, и устанавливается только настоящий Beyond™ TV.";
+            case "Talk to Beyond": return "Написать в Beyond";
+            case "What would make Beyond™ TV better? Say it, or type it. We read every one.": return "Что сделает Beyond™ TV лучше? Скажите или напишите. Мы читаем всё.";
+            case "Or type it here": return "Или напишите здесь";
+            case "Speak": return "Сказать";
+            case "Say it again": return "Сказать ещё раз";
+            case "Send to Beyond": return "Отправить в Beyond";
+            case "What would make Beyond™ TV better?": return "Что сделает Beyond™ TV лучше?";
+            case "This TV can't listen, so type it below.": return "Этот телевизор не слышит, напишите ниже.";
+            case "Sending…": return "Отправляем…";
+            case "Thank you! If we reply, it shows up here on your TV.": return "Спасибо! Если мы ответим, ответ появится здесь, на телевизоре.";
+            case "That didn't go. Check the internet and try again.": return "Не отправилось. Проверьте интернет и попробуйте снова.";
             case "Updates": return "Обновления";
             case "Updates, ": return "Обновления, ";
             case "New version": return "Новая версия";
