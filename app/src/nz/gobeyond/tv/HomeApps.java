@@ -59,6 +59,8 @@ final class HomeApps {
     static final int INPUTS = 7;
     /** "Talk to Beyond": the feedback screen (the home screen handles it). */
     static final int FEEDBACK = 8;
+    /** Who's watching: the face in the corner, opening the picker. */
+    static final int PEOPLE = 9;
     /** Image size of each card (16:9; on screen it shows up to ~330 px wide). */
     static final int TILE_W = 384, TILE_H = 216;
 
@@ -163,6 +165,12 @@ final class HomeApps {
 
     /** The shelf's packages in order: the user's list (Settings > Shelf), or the built-in one. */
     static List<String> shelfPackages(Context c) {
+        if (People.kid(c)) {
+            // A kids' profile: the kids' apps the TV has, the well-known ones first.
+            List<String> kids = new ArrayList<>();
+            for (String[] app : shelfCandidates(c)) if (kids.size() < MAX_SHELF && People.kidApp(app[0])) kids.add(app[0]);
+            if (!kids.isEmpty()) return kids;
+        }
         List<String> custom = Prefs.shelf();
         if (custom != null) return custom;
         List<String> out = new ArrayList<>();
