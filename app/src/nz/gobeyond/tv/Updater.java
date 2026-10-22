@@ -113,6 +113,8 @@ final class Updater {
     static String status(Context c) {
         long checked = stamp(c, "checked").lastModified(), asked = stamp(c, "asked-check").lastModified();
         if (apk(c).isFile()) {
+            if (!canInstall(c))
+                return Ui.tr("Pronta, mas a TV precisa do seu OK uma vez: OK mostra como", "Ready, but the TV needs your OK once: press OK to allow it");
             String name = readText(stamp(c, "ready-name"));
             return Ui.tr("Versão ", "Version ") + (name.isEmpty() ? "" : name + " ") + Ui.tr("pronta: OK instala", "ready: OK installs it");
         }
@@ -299,6 +301,46 @@ final class Updater {
 
     static boolean ready(Context c) { return apk(c).isFile(); }
 
+    /**
+     * Whether the TV lets us hand an update to its installer. Android 8 and later ask for "install unknown apps" per
+     * app, and without it the installer shows a dead end ("your phone is not allowed..."). See docs/adr/0002.
+     */
+    static boolean canInstall(Context c) {
+        return Build.VERSION.SDK_INT < 26 || c.getPackageManager().canRequestPackageInstalls();
+    }
+
+    /**
+     * Says in plain words why the TV needs one OK, then opens the page where Beyond TV is switched on. Coming back to
+     * the home screen offers the update again. "Not now" waits as long as a declined update does.
+     */
+    private static void askToAllow(final Activity a) {
+        if (a.isFinishing()) return;
+        new android.app.AlertDialog.Builder(a, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+                .setTitle(Ui.tr("Uma nova versão está pronta", "A new version is ready"))
+                .setMessage(Ui.tr("Para se manter em dia, o Beyond TV precisa do OK da TV para instalar as próprias "
+                                + "atualizações. Na próxima tela, ligue o Beyond TV e depois aperte Voltar.",
+                        "To keep itself up to date, Beyond TV needs the TV's OK to install its own updates. On the "
+                                + "next screen, switch Beyond TV on, then press Back."))
+                .setPositiveButton(Ui.tr("Mostrar", "Show me"), (d, w) -> openAllowPage(a))
+                .setNegativeButton(Ui.tr("Agora não", "Not now"), (d, w) -> {
+                    try { touch(stamp(a, "asked")); } catch (IOException ignored) {}
+                })
+                .show();
+    }
+
+    private static void openAllowPage(Activity a) {
+        Intent page = new Intent(android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                android.net.Uri.parse("package:" + a.getPackageName()));
+        if (page.resolveActivity(a.getPackageManager()) == null)
+            page = new Intent(android.provider.Settings.ACTION_SECURITY_SETTINGS);
+        try {
+            a.startActivity(page);
+        } catch (Exception e) {
+            AppLog.w("update: no page to allow installs on: " + e);
+            Checkin.error(a, "update", "no page to allow installs: " + e.getMessage());
+        }
+    }
+
     static void offer(final Activity a, boolean now) {
         final Context c = a.getApplicationContext();
         final File file = apk(c);
@@ -310,6 +352,10 @@ final class Updater {
                 String problem = problem(c, file, installed);
                 if (problem != null) {   // installed meanwhile, or the file changed: forget it
                     file.delete();
+                    return;
+                }
+                if (!canInstall(c)) {   // never hand it to an installer that will only say no
+                    a.runOnUiThread(() -> askToAllow(a));
                     return;
                 }
                 touch(stamp(c, "asked"));

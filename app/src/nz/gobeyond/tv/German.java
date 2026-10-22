@@ -175,6 +175,11 @@ final class German {
             case "Updates": return "Updates";
             case "Updates, ": return "Updates, ";
             case "New version": return "Neue Version";
+            case "Ready, but the TV needs your OK once: press OK to allow it": return "Bereit, aber der Fernseher braucht einmal dein OK: OK drücken, um es zu erlauben";
+            case "A new version is ready": return "Eine neue Version ist bereit";
+            case "To keep itself up to date, Beyond TV needs the TV's OK to install its own updates. On the next screen, switch Beyond TV on, then press Back.": return "Damit Beyond TV aktuell bleibt, braucht es das OK des Fernsehers, um eigene Updates zu installieren. Schalte Beyond TV auf dem nächsten Bildschirm ein und drücke dann Zurück.";
+            case "Show me": return "Zeig es mir";
+            case "Not now": return "Jetzt nicht";
             case "Install the new version": return "Neue Version installieren";
             case "Check for updates": return "Nach Updates suchen";
             case "Install updates by themselves": return "Updates selbst installieren";
