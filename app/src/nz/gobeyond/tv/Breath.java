@@ -44,7 +44,7 @@ final class Breath {
     // MARK: - The four dots
 
     static final int MOSS = 0xFF2F7D6D, EMBER = 0xFFE8A33D, CORAL = 0xFFD85A30, BLUE = 0xFF378ADD;
-    private static final int[] DOTS = {MOSS, EMBER, BLUE, CORAL};   // reading order: top left, top right, bottom...
+    private static final int[] DOTS = {MOSS, EMBER, CORAL, BLUE};   // reading order: top left, top right, bottom...
     // ...but the breath goes round the square (top left, top right, bottom right, bottom left), like a held hand.
     private static final int[] ROUND = {0, 1, 3, 2};
 

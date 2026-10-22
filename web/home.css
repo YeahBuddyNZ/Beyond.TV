@@ -558,3 +558,15 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .lockup .dots { margin-right: 14px; }
 #saver .brand { position: absolute; left: 84px; top: 70px; font-size: 34px; color: rgba(247, 246, 242, 0.92); }
 .key.focus { box-shadow: 0 16px 34px rgba(0, 0, 0, 0.42), 0 0 0 4px #2F7D6D; }
+
+/* The four dots on the Talk to Beyond button breathe: six breaths a minute, each dot a little after the one before,
+   round the square. Transform and opacity only, so old TVs animate it on the GPU. */
+.round .dots { position: absolute; left: 19px; top: 19px; }
+.round .dots i { -webkit-animation: btv-breathe 10s ease-in-out infinite; animation: btv-breathe 10s ease-in-out infinite; }
+.round .dots i.b { -webkit-animation-delay: 0.9s; animation-delay: 0.9s; }
+.round .dots i.d { -webkit-animation-delay: 1.8s; animation-delay: 1.8s; }
+.round .dots i.c { -webkit-animation-delay: 2.7s; animation-delay: 2.7s; }
+@-webkit-keyframes btv-breathe { 0%, 100% { -webkit-transform: scale(0.9); } 40% { -webkit-transform: scale(1.05); } }
+@keyframes btv-breathe { 0%, 100% { transform: scale(0.9); } 40% { transform: scale(1.05); } }
+@media (prefers-reduced-motion: reduce) { .round .dots i { -webkit-animation: none; animation: none; } }
+.bt-talk .bt-keyboard { margin-top: 40px; }

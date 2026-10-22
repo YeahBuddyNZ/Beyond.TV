@@ -213,6 +213,8 @@
   /** The round buttons at the top right: Live TV, HDMI Inputs, Settings and whoever's watching (kids get fewer). */
   function topButtons() {
     var kid = Profiles.kid(), list = [];
+    // Talk to Beyond: the four dots, breathing. Feedback, typed on the remote (talkToBeyond).
+    if (!kid) list.push({dots: true, label: tr('Fale com a Beyond', 'Talk to Beyond', 'Habla con Beyond'), run: talkToBeyond});
     list.push({icon: 'live_tv', label: tr('TV aberta', 'Live TV', 'TV en vivo'), run: function () {
       var live = liveTV(); if (live) launcher(live.id, tr('TV aberta', 'Live TV', 'TV en vivo'))();
     }});
@@ -243,6 +245,7 @@
       var r = el('button', 'round' + (b === n - 1 ? ' last' : '') + (defs[b].person ? ' me' : ''), buttons);
       r.style.left = (1772 - 88 * (n - 1 - b)) + 'px';
       if (defs[b].person) UI.avatar(defs[b].person, r, 68);
+      else if (defs[b].dots) UI.dots(r);
       else sym(defs[b].icon, r);
       el('div', 'tip', r, defs[b].label);
       hover(r, Z.TOP, 3 + b);
@@ -930,6 +933,28 @@
 
   // MARK: - Start
 
+  /** Talk to Beyond: say what would make it better; if Beyond answers, it shows here (Checkin.hear). */
+  function talkToBeyond() {
+    UI.open({cls: 'bt-talk', build: function (layer, api) {
+      UI.heading(layer, tr('Fale com a Beyond', 'Talk to Beyond', 'Habla con Beyond'),
+        tr('O que deixaria o Beyond™ TV melhor? A gente lê tudo.', 'What would make Beyond™ TV better? We read every one.',
+          '¿Qué haría mejor Beyond™ TV? Leemos todo.'));
+      var sent = false;
+      UI.keyboard(layer, api, {max: 300, placeholder: tr('Escreva aqui', 'Type it here', 'Escríbelo aquí'),
+        spaceLabel: tr('Espaço', 'Space', 'Espacio'), doneLabel: tr('Enviar', 'Send', 'Enviar'),
+        done: function (text) {
+          if (sent || !text) return;
+          sent = true;
+          Checkin.feedback(text, function (ok) {
+            sent = false;
+            if (!ok) { UI.toast(tr('Não foi agora. Confira a internet e tente de novo.', "That didn't go. Check the internet and try again.", 'No se envió. Revisa internet e inténtalo de nuevo.')); return; }
+            api.close();
+            UI.toast(tr('Obrigado! Se a gente responder, aparece aqui na sua TV.', 'Thank you! If we reply, it shows up here on your TV.', '¡Gracias! Si respondemos, aparece aquí en tu TV.'));
+          });
+        }});
+    }});
+  }
+
   /** Someone else is watching now: their shelf, their picks, their name. */
   function makeItYours() {
     Profiles.setOwn('offered', true);
@@ -1015,6 +1040,10 @@
     if (Profiles.count() > 1) Profiles.pick(false, profileChosen);
   });
   Checkin.start();
+  // Beyond's answers to this TV's feedback, if it ever gave any: when the home screen opens, then now and then.
+  function hearBeyond() { Checkin.hear(function (text) { toast('Beyond: ' + text); }); }
+  hearBeyond();
+  setInterval(hearBeyond, 10 * 60 * 1000 + 5000);
   Profiles.onChange(function () { renderTop(); paintWorld(); updateFocus(); });
   setInterval(function () {
     renderClock();

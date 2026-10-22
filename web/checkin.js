@@ -87,6 +87,48 @@ var Checkin = (function () {
     });
   }
 
+  // MARK: - Talk to Beyond
+
+  var TALKED = 'btv.talked';
+
+  /** A line from the feedback button, against this TV's made-up id, so Beyond can answer this TV. */
+  function feedback(text, done) {
+    if (!state.id) { state.id = newId(); save(); }
+    TV.info(function (tv) {
+      var body = {id: state.id, text: cut(text, 1000), platform: TV.name === 'webos' ? 'webos' : 'tizen',
+        brand: cut(tv.brand, 40), model: cut(tv.model, 60), version: cut((window.CONFIG && CONFIG.version) || '', 30)};
+      if (Place.city) body.city = cut(Place.city, 60);
+      post('/tv/feedback', body, function (ok) {
+        if (ok) { try { localStorage.setItem(TALKED, String(new Date().getTime())); } catch (e) {} }
+        done(ok);
+      });
+    });
+  }
+
+  /**
+   * Beyond's answers, each handed over once. Only a TV that has said something asks, every 10 minutes at most and
+   * for two weeks after, so nobody else's TV ever polls.
+   */
+  var lastHeard = 0;
+  function hear(then) {
+    var talked = 0;
+    try { talked = parseInt(localStorage.getItem(TALKED), 10) || 0; } catch (e) {}
+    var now = new Date().getTime();
+    if (!talked || !state.id || now - talked > 14 * DAY || now - lastHeard < 10 * 60 * 1000) return;
+    lastHeard = now;
+    var x = new XMLHttpRequest();
+    x.open('GET', API + '/tv/messages?id=' + state.id, true);
+    x.timeout = 20000;
+    x.onreadystatechange = function () {
+      if (x.readyState !== 4 || x.status !== 200) return;
+      try {
+        var list = JSON.parse(x.responseText).messages || [];
+        for (var i = 0; i < list.length; i++) if (list[i].text) then(list[i].text);
+      } catch (e) {}
+    };
+    x.send();
+  }
+
   function start() {
     if (TV.name === 'browser' || !on()) return;   // the browser preview never checks in
     state.opens = (state.opens || 0) + 1;
@@ -114,5 +156,5 @@ var Checkin = (function () {
     error(where, (e && e.message) || 'error');
   });
 
-  return {on: on, set: set, start: start, error: error};
+  return {on: on, set: set, start: start, error: error, feedback: feedback, hear: hear};
 })();
