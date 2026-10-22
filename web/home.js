@@ -138,6 +138,11 @@
           if ((SHELF[s][1].test(apps[a].id) || SHELF[s][2].test(apps[a].title)) && out.indexOf(apps[a]) < 0) { out.push(apps[a]); break; }
         }
       }
+      if (window.Profiles && Profiles.kid()) {
+        // A kids' profile starts with the kids' apps the TV has, in the same order.
+        out = out.filter(function (a) { return Profiles.kidApp(a); });
+        for (var k = 0; k < apps.length && out.length < MAX_SHELF; k++) if (Profiles.kidApp(apps[k]) && out.indexOf(apps[k]) < 0) out.push(apps[k]);
+      }
       if (!out.length) out = apps.slice(0, MAX_SHELF);
     }
     shelf = out;
@@ -205,8 +210,24 @@
 
   var TAB_KIND = [null, 'movie', 'tv'];
 
+  /** The round buttons at the top right: Live TV, HDMI Inputs, Settings and whoever's watching (kids get fewer). */
+  function topButtons() {
+    var kid = Profiles.kid(), list = [];
+    list.push({icon: 'live_tv', label: tr('TV aberta', 'Live TV', 'TV en vivo'), run: function () {
+      var live = liveTV(); if (live) launcher(live.id, tr('TV aberta', 'Live TV', 'TV en vivo'))();
+    }});
+    if (!kid) list.push({icon: 'hdmi', label: tr('Entradas HDMI', 'HDMI Inputs', 'Entradas HDMI'), run: function () {
+      st.zone = Z.SHELF; openDrawer(); st.drawer = 1 < drawerInputs ? 1 : 0; updateFocus();
+    }});
+    list.push({icon: 'settings', label: tr('Ajustes', 'Settings', 'Ajustes'), run: function () { openSettings(); }});
+    if (Profiles.count() > 1 || window.Family) list.push({person: Profiles.current(), label: tr('Trocar perfil', 'Switch profile', 'Cambiar perfil'),
+      run: function () { Profiles.pick(false, profileChosen); }});
+    return list;
+  }
+
   function renderTop() {
-    $('title').textContent = tr('Para você', 'For You', 'Para ti');
+    var me = Profiles.current();
+    $('title').textContent = Profiles.count() > 1 ? tr('Para ', 'For ', 'Para ') + me.name : tr('Para você', 'For You', 'Para ti');
     var tabs = $('tabs');
     tabs.innerHTML = '';
     var names = [tr('Explorar', 'Explore', 'Explorar'), tr('Filmes', 'Movies', 'Películas'), tr('Séries', 'Shows', 'Series')];
@@ -216,13 +237,13 @@
     }
     var buttons = $('buttons');
     buttons.innerHTML = '';
-    var defs = [['live_tv', tr('TV aberta', 'Live TV', 'TV en vivo')], ['hdmi', tr('Entradas HDMI', 'HDMI Inputs', 'Entradas HDMI')],
-      ['settings', tr('Ajustes', 'Settings', 'Ajustes')]];
-    for (var b = 0; b < 3; b++) {
-      var r = el('button', 'round' + (b === 2 ? ' last' : ''), buttons);
-      r.style.left = (1596 + 88 * b) + 'px';
-      sym(defs[b][0], r);
-      el('div', 'tip', r, defs[b][1]);
+    var defs = topButtons(), n = defs.length;
+    for (var b = 0; b < n; b++) {
+      var r = el('button', 'round' + (b === n - 1 ? ' last' : '') + (defs[b].person ? ' me' : ''), buttons);
+      r.style.left = (1772 - 88 * (n - 1 - b)) + 'px';
+      if (defs[b].person) UI.avatar(defs[b].person, r, 68);
+      else sym(defs[b].icon, r);
+      el('div', 'tip', r, defs[b].label);
       hover(r, Z.TOP, 3 + b);
     }
   }
@@ -335,14 +356,16 @@
     var d = $('drawer');
     d.innerHTML = '';
     drawerItems = [];
+    var kid = Profiles.kid();
     for (var i = 0; i < inputs.length; i++) {
       var x = inputs[i];
+      if (kid && x.key !== 'live') continue;   // kids get Live TV, not the HDMI inputs
       drawerItems.push({label: x.label || tr('TV aberta', 'Live TV', 'TV en vivo'), symbol: x.symbol, off: !x.connected, run: launcher(x.id, x.label)});
     }
     drawerInputs = drawerItems.length;
     drawerItems.push({label: tr('Todos os Apps', 'All Apps', 'Todas las apps'), symbol: 'apps', run: openApps});
     drawerItems.push({label: tr('Ajustes do Início', 'Home Settings', 'Ajustes de inicio'), symbol: 'settings', run: openSettings});
-    drawerItems.push({label: tr('Ajustes da TV', 'TV Settings', 'Ajustes del TV'), symbol: 'tv_settings', run: tvSettings});
+    if (!kid) drawerItems.push({label: tr('Ajustes da TV', 'TV Settings', 'Ajustes del TV'), symbol: 'tv_settings', run: tvSettings});
     var n = drawerItems.length, gap = 18, groupGap = 56, groups = drawerInputs > 0 && drawerInputs < n ? 2 : 1;
     var tw = Math.min(230, (1760 - Math.max(0, n - groups) * gap - (groups - 1) * groupGap) / Math.max(1, n));
     var xPos = 80;
@@ -503,7 +526,9 @@
           step: function () { if (Prefs.quotes()) { Prefs.setCoin(i, !Prefs.coin(i)); Data.settingsChanged(); } }});
       })(i);
     }
-    rows.push({label: tr('Prateleira', 'Shelf', 'Estante'), value: '›', step: function (d) { if (d >= 0) openShelfEdit(); }});
+    rows.push({label: tr('Perfis', 'Profiles', 'Perfiles'), value: '›', step: function (d) { if (d >= 0) { closeSheets(); Profiles.manage(function () { profileChosen(); }); } }});
+    rows.push({label: tr('PIN de adulto', 'Grown-up PIN', 'PIN de adulto'), value: '›', step: function (d) { if (d >= 0) Profiles.setPin(); }});
+    rows.push({label: tr('Prateleira de ', 'Shelf for ', 'Estante de ') + Profiles.current().name, value: '›', step: function (d) { if (d >= 0) openShelfEdit(); }});
     rows.push({label: tr('Ajustes da TV', 'TV Settings', 'Ajustes del TV'), value: '›', step: function (d) { if (d >= 0) tvSettings(); }});
     return rows;
   }
@@ -539,6 +564,10 @@
   }
 
   function openSettings() {
+    Profiles.guard(tr('Ajustes do Início', 'Home Settings', 'Ajustes de inicio'), showSettings);
+  }
+
+  function showSettings() {
     st.zone = Z.SETTINGS;
     st.row = 0;
     renderSettings();
@@ -638,9 +667,8 @@
     switch (st.zone) {
       case Z.TOP:
         if (st.top < 3) return;
-        if (st.top === 3) { var live = liveTV(); if (live) launcher(live.id, tr('TV aberta', 'Live TV', 'TV en vivo'))(); }
-        else if (st.top === 4) { st.zone = Z.SHELF; openDrawer(); st.drawer = 1 < drawerInputs ? 1 : 0; updateFocus(); }
-        else openSettings();
+        var btn = topButtons()[st.top - 3];
+        if (btn) btn.run();
         return;
       case Z.CARDS:
         var p = cards[st.card], app = p && Data.appFor(p.app);
@@ -688,7 +716,7 @@
         break;
       case Z.TOP:
         if (dx) {
-          st.top = Math.max(0, Math.min(5, st.top + dx));
+          st.top = Math.max(0, Math.min(2 + topButtons().length, st.top + dx));
           if (st.top < 3) selectTab(st.top);   // as on Apple TV: focusing a tab selects it
         } else if (dy > 0) {
           if (cards.length) { st.zone = Z.CARDS; st.card = Math.min(cards.length - 1, st.top < 3 ? 0 : cards.length - 1); }
@@ -719,7 +747,7 @@
   }
 
   function back() {
-    if (st.zone === Z.EDIT) { setClass($('shelfedit'), 'open', false); openSettings(); st.row = rowsNow.length - 2; updateFocus(); return; }
+    if (st.zone === Z.EDIT) { setClass($('shelfedit'), 'open', false); showSettings(); st.row = rowsNow.length - 2; updateFocus(); return; }
     if (sheetOpen()) { closeSheets(); return; }
     if (st.zone === Z.DRAWER) { closeDrawer(); return; }
     if (st.zone !== Z.SHELF && shelf.length) { st.zone = Z.SHELF; updateFocus(); return; }
@@ -729,6 +757,7 @@
   /** The pointer focuses what it's over (the Magic Remote, or a mouse when previewing). */
   function hover(node, zone, index) {
     node.onmouseover = function () {
+      if (UI.active()) return;
       if (saverOn || (sheetOpen() !== (zone === Z.APPS || zone === Z.SETTINGS || zone === Z.EDIT))) return;
       if (zone === Z.DRAWER && st.zone !== Z.DRAWER) return;
       if (zone !== Z.DRAWER && st.zone === Z.DRAWER && zone !== Z.SHELF) return;
@@ -768,6 +797,7 @@
   function showSaver() {
     var photos = Data.showcase().filter(function (p) { return p.backdrop && Data.appFor(p.app); });
     saverOn = true;
+    saverAt = Date.now();
     var s = $('saver');
     s.innerHTML = '';
     var a = el('div', 'photo', s), b = el('div', 'photo', s);
@@ -812,7 +842,10 @@
     }
   }
 
+  var saverAt = 0, ASK_AGAIN_AFTER = 20 * 60000;
+
   function hideSaver() {
+    if (saverOn && Date.now() - saverAt > ASK_AGAIN_AFTER && Profiles.count() > 1) setTimeout(function () { Profiles.pick(false, profileChosen); }, 300);
     saverOn = false;
     clearTimeout(saverTimer);
     setClass($('saver'), 'on', false);
@@ -829,6 +862,13 @@
   document.addEventListener('keydown', function (e) {
     var k = e.keyCode;
     if (poke()) { e.preventDefault(); return; }   // the first press only wakes the screen
+    if (UI.active()) {
+      if (k >= 37 && k <= 40 || k === TV.keys.ok || k === TV.keys.back || k === 27 || k === 8 || k >= 48 && k <= 57 || k >= 65 && k <= 90 || k === 32) {
+        UI.key(k);
+        e.preventDefault();
+      }
+      return;
+    }
     if (k === TV.keys.left) move(-1, 0);
     else if (k === TV.keys.right) move(1, 0);
     else if (k === TV.keys.up) move(0, -1);
@@ -841,6 +881,15 @@
   document.addEventListener('mousemove', function () { poke(); });
 
   // MARK: - Start
+
+  /** Someone else is watching now: their shelf, their picks, their name. */
+  function profileChosen() {
+    pickShelf();
+    cards = [];
+    st.zone = Z.SHELF;
+    st.shelf = 0;
+    renderAll();
+  }
 
   function renderAll() {
     renderTop();
@@ -906,15 +955,18 @@
   loadApps(function () {
     renderAll();
     Data.refresh();
+    if (Profiles.count() > 1) Profiles.pick(false, profileChosen);
   });
+  Profiles.onChange(function () { renderTop(); updateFocus(); });
   setInterval(function () {
     renderClock();
     checkNight();
     Data.refresh();
-    if (!saverOn && !sheetOpen() && Date.now() - idleAt > SAVER_AFTER) showSaver();
+    if (!saverOn && !sheetOpen() && !UI.active() && Date.now() - idleAt > SAVER_AFTER) showSaver();
     if (saverOn) tickSaverClock($('saver').querySelector('.clock'));
   }, 30000);
 
   // For the browser preview and tests.
-  window.BeyondTV = {state: st, move: move, activate: activate, back: back, showSaver: showSaver, hideSaver: hideSaver, toast: toast};
+  window.BeyondTV = {state: st, move: move, activate: activate, back: back, showSaver: showSaver, hideSaver: hideSaver, toast: toast,
+    refresh: profileChosen, apps: function () { return apps; }, launch: function (id, name) { launcher(id, name)(); }};
 })();

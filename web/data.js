@@ -49,8 +49,16 @@ var Prefs = (function () {
     weather: function () { return pick('weather', true); },
     quotes: function () { return pick('quotes', CONFIG.showCrypto !== false); },
     coin: function (i) { var c = pick('coins', null); return c ? c[i] !== false : true; },
-    shelf: function () { return pick('shelf', null); },
-    set: function (name, value) { v[name] = value; save(); this.version++; },
+    /** The shelf is each profile's own (Profiles), falling back to the TV's. */
+    shelf: function () {
+      var own = window.Profiles && Profiles.own('shelf');
+      return own || (window.Profiles && Profiles.kid() ? null : pick('shelf', null));
+    },
+    set: function (name, value) {
+      if (name === 'shelf' && window.Profiles) Profiles.setOwn('shelf', value);
+      else { v[name] = value; save(); }
+      this.version++;
+    },
     setCoin: function (i, on) {
       var c = (pick('coins', null) || [true, true, true, true]).slice();
       c[i] = on;
@@ -278,13 +286,19 @@ var Data = (function () {
     return (cut > 0 ? t.slice(0, cut) : t).replace(/^\s+|\s+$/g, '');
   }
 
+  /** TMDB's Family (10751), Animation (16) and Kids (10762, shows) genres: what a kids' profile is shown. */
+  function forKids(p) {
+    for (var i = 0; p.genres && i < p.genres.length; i++) if (p.genres[i] === 10751 || p.genres[i] === 16 || p.genres[i] === 10762) return true;
+    return false;
+  }
+
   /** This hour's 3 picks: movies ("movie"), shows ("tv") or both (null). */
   function now(kind) {
-    var list = [];
+    var list = [], kids = window.Profiles && Profiles.kid();
     if (!KEY) return list;
     for (var i = 0; i < picks.length; i++) {
       var p = picks[i];
-      if ((kind === null || kind === p.kind) && (!p.detailed || (p.app && appFor(p.app)))) list.push(p);
+      if ((kind === null || kind === p.kind) && (!p.detailed || (p.app && appFor(p.app))) && (!kids || forKids(p))) list.push(p);
     }
     if (!list.length) return list;
     var hour = Math.floor(Date.now() / 3600000), out = [], seen = {};
@@ -386,7 +400,8 @@ var Data = (function () {
   function addPick(list, o, kind) {
     if (!o.backdrop_path) return;
     if (CONFIG.hideAnimation && animated(o)) return;
-    list.push({id: o.id, kind: kind, title: kind === 'movie' ? o.title : o.name, backdrop: o.backdrop_path, meta: '', app: null, detailed: false});
+    list.push({id: o.id, kind: kind, title: kind === 'movie' ? o.title : o.name, backdrop: o.backdrop_path, meta: '', app: null, detailed: false,
+      genres: o.genre_ids || []});
   }
 
   function keyOf(p) { return p.kind + ':' + p.id; }
