@@ -2,7 +2,7 @@
 
 <img src="docs/assets/icon-512.png" width="96" alt="">
 
-# Beyond TV
+# Beyond™ TV
 
 **One calm home screen for the whole whānau, on Google TV, LG and Samsung TVs.**
 
@@ -11,9 +11,19 @@ Free and open source, built in Aotearoa by [Beyond](https://gobeyond.co.nz). One
 
 [Install](#install) · [LG TVs](#lg-tvs-webos) · [Samsung TVs](#samsung-tvs-tizen) · [Any TV](#any-tv) · [Make it yours](#make-it-yours) · [Roadmap](#roadmap)
 
-<img src="docs/assets/banner.png" width="640" alt="The Beyond TV logo: Beyond's four coloured dots beside the words Beyond TV">
+<img src="docs/assets/banner.png" width="640" alt="The Beyond™ TV logo: Beyond's four coloured dots beside the words Beyond™ TV">
 
 </div>
+
+## Screenshots
+
+<table>
+<tr><td><img src="docs/screenshots/whos-watching.jpg" alt="Who's watching: Mum, Dad, and two kids' profiles with a unicorn and a dinosaur"></td>
+<td><img src="docs/screenshots/home-night.jpg" alt="The home screen at night: a big clock and the streaming apps on one shelf"></td></tr>
+<tr><td><img src="docs/screenshots/kids-home.jpg" alt="A kid's home screen with only the apps picked for them"></td>
+<td><img src="docs/screenshots/plex.jpg" alt="Plex built in: Continue Watching with progress bars, and Recently Added"></td></tr>
+<tr><td colspan="2" align="center"><img src="docs/screenshots/message-from-the-app.jpg" width="640" alt="A message from the Beyond Family app on the TV: 5 minutes to dinner, from Kyle"></td></tr>
+</table>
 
 ## What you get
 
@@ -40,10 +50,10 @@ About ten minutes. You need a Google TV or Android TV (Android 8 or newer, so So
 
 1. **On the TV**, turn on developer mode: Settings → System → About → press *Android TV OS build* 7 times. Then Settings → System → Developer options → turn on **USB debugging**. Write down the TV's IP address (Settings → Network & Internet).
 2. **On your computer**, open an AI coding assistant ([Claude Code](https://claude.com/claude-code), Codex or Antigravity) and say:
-   > Install Beyond TV (github.com/YeahBuddyNZ/Beyond.TV) on my TV at 192.168.1.50. I live in Auckland.
+   > Install Beyond™ TV (github.com/YeahBuddyNZ/Beyond.TV) on my TV at 192.168.1.50. I live in Auckland.
 
    It downloads the code, installs the tools it needs, builds the app and puts it on your TV, and asks before anything important. Swap in your TV's IP and your city.
-3. **On the TV**, open *Beyond TV* → *Home Screen* → *Beyond TV*, and accept the debugging prompt (tick *Always allow*).
+3. **On the TV**, open *Beyond™ TV* → *Home Screen* → *Beyond™ TV*, and accept the debugging prompt (tick *Always allow*).
 
 ### The manual way
 
@@ -68,11 +78,11 @@ About ten minutes. You need a Google TV or Android TV (Android 8 or newer, so So
    ```bash
    adb shell "appops set nz.gobeyond.tv AUTO_START allow || appops set nz.gobeyond.tv APP_AUTO_START allow"
    ```
-5. **On the TV**, open *Beyond TV* → *Home Screen* → *Beyond TV*.
+5. **On the TV**, open *Beyond™ TV* → *Home Screen* → *Beyond™ TV*.
 
 ## LG TVs (webOS)
 
-The same home screen as an LG app: the picks, the glass shelf with your apps, the drawer with inputs, weather and prices, day and night, Home Settings and the shelf editor. It installs through LG's own Developer Mode, with nothing rooted or changed on the TV. LG's home screen stays where it is, and Beyond TV is one press of a number key away.
+The same home screen as an LG app: the picks, the glass shelf with your apps, the drawer with inputs, weather and prices, day and night, Home Settings and the shelf editor. It installs through LG's own Developer Mode, with nothing rooted or changed on the TV. LG's home screen stays where it is, and Beyond™ TV is one press of a number key away.
 
 You need an LG TV (webOS 3 or newer) and a computer on the same Wi-Fi, with Python 3.
 
@@ -86,11 +96,11 @@ You need an LG TV (webOS 3 or newer) and a computer on the same Wi-Fi, with Pyth
    ```bash
    python3 webos/install.py 192.168.1.50
    ```
-4. **On the TV**, while Beyond TV is open, hold a number key on the remote. From then on, that key opens it from anywhere.
+4. **On the TV**, while Beyond™ TV is open, hold a number key on the remote. From then on, that key opens it from anywhere.
 
-With an AI assistant, say *"Install Beyond TV (github.com/YeahBuddyNZ/Beyond.TV) on my LG TV at 192.168.1.50. I live in Auckland."* It builds the app and hands you the install command, so you type the passphrase yourself.
+With an AI assistant, say *"Install Beyond™ TV (github.com/YeahBuddyNZ/Beyond.TV) on my LG TV at 192.168.1.50. I live in Auckland."* It builds the app and hands you the install command, so you type the passphrase yourself.
 
-Developer Mode lasts about 40 days: open the Developer Mode app now and then and press **EXTEND**. To remove Beyond TV, run `python3 webos/install.py 192.168.1.50 --uninstall`.
+Developer Mode lasts about 40 days: open the Developer Mode app now and then and press **EXTEND**. To remove Beyond™ TV, run `python3 webos/install.py 192.168.1.50 --uninstall`.
 
 ## Samsung TVs (Tizen)
 
@@ -101,13 +111,13 @@ You need a Samsung TV from 2017 or newer (Tizen 3+) and a computer on the same W
 1. **On the TV**, open **Apps** and type `1 2 3 4 5` on the remote. Turn **Developer mode** on, type your computer's IP address in **Host PC IP**, and restart the TV.
 2. **On your computer**, download [TizenBrew Installer](https://github.com/reisxd/TizenBrewInstaller/releases/latest), the community's installer for Samsung TVs, open it and connect to your TV.
 3. **Install from GitHub:** type `YeahBuddyNZ/Beyond.TV`. On 2023 and newer TVs it asks you to sign in to your Samsung account once, to sign the app for your TV.
-4. **Straight to it:** in the TV's settings, under Start Screen Options, turn on **Autorun Last App**: the TV turns on into Beyond TV.
+4. **Straight to it:** in the TV's settings, under Start Screen Options, turn on **Autorun Last App**: the TV turns on into Beyond™ TV.
 
-This build takes your city from the TV's time zone. For your exact city and the trending picks, build it with your own `config.properties` and [TMDB key](#the-tmdb-key): open the folder in Claude Code and say *"Install Beyond TV on my Samsung TV at 192.168.1.50. I live in Auckland."* It sets up Samsung's tools, and on 2023 and newer TVs you sign in to your Samsung account in the browser to make the certificate. Your signed build installs with `python3 tizen/install.py 192.168.1.50`, which needs only Python: no Tizen Studio, and no Rosetta on Apple Silicon Macs.
+This build takes your city from the TV's time zone. For your exact city and the trending picks, build it with your own `config.properties` and [TMDB key](#the-tmdb-key): open the folder in Claude Code and say *"Install Beyond™ TV on my Samsung TV at 192.168.1.50. I live in Auckland."* It sets up Samsung's tools, and on 2023 and newer TVs you sign in to your Samsung account in the browser to make the certificate. Your signed build installs with `python3 tizen/install.py 192.168.1.50`, which needs only Python: no Tizen Studio, and no Rosetta on Apple Silicon Macs.
 
 ## Settings
 
-The first values come from `config.properties`, created by the first build (Google TV, LG and Samsung use the same file). Most of them can also be changed on the TV, in *Beyond TV* → *Home Settings*, and the TV's choice wins:
+The first values come from `config.properties`, created by the first build (Google TV, LG and Samsung use the same file). Most of them can also be changed on the TV, in *Beyond™ TV* → *Home Settings*, and the TV's choice wins:
 
 | Key | What it does | Default |
 |---|---|---|
@@ -135,9 +145,9 @@ With a free [Watchmode](https://api.watchmode.com/) key (`watchmode_key=` in `co
 
 ## Going back
 
-On the TV: *Beyond TV* → *Home Screen* → *Original*. The factory home screen, screensaver and every app come back exactly as they were. If the new home screen ever crashes three times in five minutes, it switches back by itself.
+On the TV: *Beyond™ TV* → *Home Screen* → *Original*. The factory home screen, screensaver and every app come back exactly as they were. If the new home screen ever crashes three times in five minutes, it switches back by itself.
 
-To remove it for good, switch to *Original* first, then uninstall *Beyond TV* (Settings → Apps). Uninstalled it while it was on? Install it again and pick *Original*: the list of what it turned off is kept in the TV's settings, so everything comes back.
+To remove it for good, switch to *Original* first, then uninstall *Beyond™ TV* (Settings → Apps). Uninstalled it while it was on? Install it again and pick *Original*: the list of what it turned off is kept in the TV's settings, so everything comes back.
 
 ## What it changes
 
@@ -150,17 +160,17 @@ To remove it for good, switch to *Original* first, then uninstall *Beyond TV* (S
   - on Multilaser TVs, Anoki's screen-content recognition (ACR), the store demo and the manual;
   - on KTC-made TVs (NextStar), Anoki's screen-content recognition (ACR), the store demo and the manual;
   - Google Assistant, only with `disable_assistant=true`.
-- On TCL TVs, the remote's Netflix, YouTube and Prime buttons keep working through a small accessibility service that only reads those buttons. Pick what each one opens in *Beyond TV* → *Remote Buttons*; *Original* turns the service off. On Vestel-made TVs (F&U and other store brands) and Xiaomi (Formovie) projectors the same goes for the Netflix button, and on KTC-made TVs (NextStar) for the Tabii button. On Sony TVs, the BRAVIA CORE, Netflix, Disney+, Prime Video, YouTube and Crunchyroll buttons can each open the app you pick, or keep Sony's default.
+- On TCL TVs, the remote's Netflix, YouTube and Prime buttons keep working through a small accessibility service that only reads those buttons. Pick what each one opens in *Beyond™ TV* → *Remote Buttons*; *Original* turns the service off. On Vestel-made TVs (F&U and other store brands) and Xiaomi (Formovie) projectors the same goes for the Netflix button, and on KTC-made TVs (NextStar) for the Tabii button. On Sony TVs, the BRAVIA CORE, Netflix, Disney+, Prime Video, YouTube and Crunchyroll buttons can each open the app you pick, or keep Sony's default.
 - Picture, sound, inputs, remote pairing, Google services and the Play Store are on a protected list, checked before every change.
 - Apps that saved a Wi-Fi network are never turned off, since Android would erase the network. If the TV's first setup saved yours, the switch asks you to forget the network and connect again in Settings first (saved networks out of range don't show there; Claude Code can remove them).
 
 ## Any TV
 
-Beyond TV runs on Google TV and Android TV: TCL, Sony, Hisense, Philips, Xiaomi, Vestel-made TVs (F&U), KTC-made TVs (NextStar) and more, plus streamers like Chromecast with Google TV, the Google TV Streamer, onn 4K and NVIDIA Shield. And on [LG](#lg-tvs-webos) and [Samsung](#samsung-tvs-tizen) TVs, as an app.
+Beyond™ TV runs on Google TV and Android TV: TCL, Sony, Hisense, Philips, Xiaomi, Vestel-made TVs (F&U), KTC-made TVs (NextStar) and more, plus streamers like Chromecast with Google TV, the Google TV Streamer, onn 4K and NVIDIA Shield. And on [LG](#lg-tvs-webos) and [Samsung](#samsung-tvs-tizen) TVs, as an app.
 
 **Any other TV:** plug a Google TV streamer into HDMI and free that one. Same steps, same home screen.
 
-**A different brand or model:** ask Claude. Beyond TV is made to be adapted by AI. Open the folder in Claude Code and say *"set it up for my Sony"*: it reads your TV, finds its home screen and its promo apps, updates the lists below and walks you through a test. [CLAUDE.md](CLAUDE.md) tells it how.
+**A different brand or model:** ask Claude. Beyond™ TV is made to be adapted by AI. Open the folder in Claude Code and say *"set it up for my Sony"*: it reads your TV, finds its home screen and its promo apps, updates the lists below and walks you through a test. [CLAUDE.md](CLAUDE.md) tells it how.
 
 | What | Where |
 |---|---|
@@ -190,7 +200,7 @@ It's your code, and Claude Code finds its way around it. Try:
 | File | What it is |
 |---|---|
 | [`HomeView.java`](app/src/nz/gobeyond/tv/HomeView.java) | The home screen |
-| [`HomeMode.java`](app/src/nz/gobeyond/tv/HomeMode.java) | Switching between Beyond TV and Original |
+| [`HomeMode.java`](app/src/nz/gobeyond/tv/HomeMode.java) | Switching between Beyond™ TV and Original |
 | [`Adb.java`](app/src/nz/gobeyond/tv/Adb.java) | The TV's own ADB, from inside the TV |
 | [`Recs.java`](app/src/nz/gobeyond/tv/Recs.java) | The picks (TMDB) |
 | [`HomeData.java`](app/src/nz/gobeyond/tv/HomeData.java) | Weather and prices |
@@ -224,5 +234,5 @@ No accounts, no analytics, no tracking. The app talks to TMDB, Open-Meteo (with 
 
 ## Licence
 
-Beyond TV is GPL-3.0 ([LICENSE](LICENSE)). It began as a fork of [Free My TV](https://github.com/simbasjungles/free-my-tv)
+Beyond™ TV is GPL-3.0 ([LICENSE](LICENSE)). It began as a fork of [Free My TV](https://github.com/simbasjungles/free-my-tv)
 and keeps its history; that code's MIT licence is kept in [LICENSE-free-my-tv.txt](LICENSE-free-my-tv.txt).

@@ -71,8 +71,8 @@ final class Russian {
             case "Switching the home screen and screensaver…": return "Переключение главного экрана и заставки…";
             case "Android didn't accept the new home screen": return "Android не принял новый главный экран";
             case "Turning off apps (": return "Отключение приложений (";
-            case "Measuring Beyond TV…": return "Замер Beyond TV…";
-            case "Couldn't turn on Beyond TV: ": return "Не удалось включить Beyond TV: ";
+            case "Measuring Beyond™ TV…": return "Замер Beyond™ TV…";
+            case "Couldn't turn on Beyond™ TV: ": return "Не удалось включить Beyond™ TV: ";
             case "Turning the apps back on…": return "Включение приложений…";
             case "Turning apps back on (": return "Включение приложений (";
             case "Restoring the original home screen…": return "Восстановление заводского главного экрана…";
@@ -80,13 +80,13 @@ final class Russian {
             case "the original home screen": return "заводской главный экран";
             case "Original mode, but I couldn't turn back on: ": return "Заводской режим, но не удалось включить: ";
             case "Couldn't go back to the original: ": return "Не удалось восстановить заводской режим: ";
-            case "Beyond TV's home screen crashed 3 times in a row; I switched back to the original one.": return "Главный экран Beyond TV аварийно завершился 3 раза подряд; восстановлен заводской главный экран.";
+            case "Beyond™ TV's home screen crashed 3 times in a row; I switched back to the original one.": return "Главный экран Beyond™ TV аварийно завершился 3 раза подряд; восстановлен заводской главный экран.";
             case "the home screen": return "главный экран";
             case "the screensaver": return "заставка";
-            case "Couldn't check Beyond TV: ": return "Не удалось проверить Beyond TV: ";
+            case "Couldn't check Beyond™ TV: ": return "Не удалось проверить Beyond™ TV: ";
             case "The TV update turned back on ": return "После обновления телевизора снова включены: ";
             case "Turned off what was missing: ": return "Дополнительно отключены: ";
-            case "The TV was updated; Beyond TV is still on.": return "Телевизор обновлён; Beyond TV по-прежнему включён.";
+            case "The TV was updated; Beyond™ TV is still on.": return "Телевизор обновлён; Beyond™ TV по-прежнему включён.";
             case "Connecting…": return "Подключение…";
             case "Accept “Allow USB debugging?” on the TV (tick “Always allow”).": return "На телевизоре разрешите отладку по USB и отметьте «Всегда разрешать».";
             case "Language": return "Язык";
@@ -165,7 +165,7 @@ final class Russian {
             case "Soap": return "Мыльная опера";
             case "Talk": return "Ток-шоу";
             case "": return "";
-            case "Beyond TV's home screen ran into a problem.\nGoing back to the TV's original home screen…": return "Ошибка главного экрана Beyond TV.\nВозвращаемся к заводскому главному экрану…";
+            case "Beyond™ TV's home screen ran into a problem.\nGoing back to the TV's original home screen…": return "Ошибка главного экрана Beyond™ TV.\nВозвращаемся к заводскому главному экрану…";
             case "debugging is off on the TV (port 5555 closed)": return "отладка на телевизоре выключена (порт 5555 закрыт)";
             case "debugging permission wasn't accepted on the TV": return "на телевизоре не разрешена отладка";
             case "the TV's ADB didn't respond": return "ADB телевизора не ответил";
@@ -183,7 +183,7 @@ final class Russian {
                         + "Недоступные сети там не отображаются: Claude Code может удалить их с компьютера.";
             default:
                 // Notices are saved in the language in use when they were generated.
-                String[] prefixes = {"Couldn't check Beyond TV: ", "Couldn't turn on Beyond TV: ",
+                String[] prefixes = {"Couldn't check Beyond™ TV: ", "Couldn't turn on Beyond™ TV: ",
                         "Couldn't go back to the original: ", "Original mode, but I couldn't turn back on: "};
                 for (String p : prefixes) if (english.startsWith(p)) return text(p) + text(english.substring(p.length()));
                 String shelfPrefix = "OK adds or removes (up to ";
@@ -192,10 +192,10 @@ final class Russian {
                     String n = english.substring(shelfPrefix.length(), english.length() - shelfSuffix.length());
                     return "OK — добавить или убрать (до " + n + "). ← → — изменить порядок.";
                 }
-                String prefix = "Beyond TV is on: new home screen and screensaver, ";
+                String prefix = "Beyond™ TV is on: new home screen and screensaver, ";
                 if (english.startsWith(prefix) && english.endsWith(" apps turned off.")) {
                     String n = english.substring(prefix.length(), english.length() - " apps turned off.".length());
-                    return "Beyond TV включён: новый главный экран и заставка; отключено приложений: " + n + ".";
+                    return "Beyond™ TV включён: новый главный экран и заставка; отключено приложений: " + n + ".";
                 }
                 if (english.startsWith("On · ") && english.endsWith(" titles from the TV's apps, 3 new ones every hour.")) {
                     String n = english.substring(5, english.length() - " titles from the TV's apps, 3 new ones every hour.".length());

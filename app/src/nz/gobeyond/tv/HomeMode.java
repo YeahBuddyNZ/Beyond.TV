@@ -311,15 +311,15 @@ final class HomeMode {
                     AppLog.w("remote buttons service: " + e.getMessage());
                 }
             }
-            notice(c, Ui.tr("Beyond TV ligado: Início e tela de descanso novos, " + disabled.size() + " apps desligados.",
-                    "Beyond TV is on: new home screen and screensaver, " + disabled.size() + " apps turned off."));
-            busy(c, Ui.tr("Medindo o Beyond TV…", "Measuring Beyond TV…"));
+            notice(c, Ui.tr("Beyond™ TV ligado: Início e tela de descanso novos, " + disabled.size() + " apps desligados.",
+                    "Beyond™ TV is on: new home screen and screensaver, " + disabled.size() + " apps turned off."));
+            busy(c, Ui.tr("Medindo o Beyond™ TV…", "Measuring Beyond™ TV…"));
             measureHomeTime(c, adb, FREE);
             done(c, null);
             adb.shell("am start -a android.intent.action.MAIN -c android.intent.category.HOME");
             ModeJob.schedule(c, ModeJob.MEMORY, FREE, 120_000);
         } catch (Exception e) {
-            done(c, Ui.tr("Não deu para ligar o Beyond TV: ", "Couldn't turn on Beyond TV: ") + (Ui.ru ? Russian.text(e.getMessage() == null ? "" : e.getMessage()) : e.getMessage()));
+            done(c, Ui.tr("Não deu para ligar o Beyond™ TV: ", "Couldn't turn on Beyond™ TV: ") + (Ui.ru ? Russian.text(e.getMessage() == null ? "" : e.getMessage()) : e.getMessage()));
         }
     }
 
@@ -416,8 +416,8 @@ final class HomeMode {
                 restoreScreensaver(adb, s);
                 s.put("homeReverted", true).put("disabled", kept);
                 save(app, s);
-                notice(app, Ui.tr("O Início do Beyond TV caiu 3 vezes seguidas; voltei para o Início original.",
-                        "Beyond TV's home screen crashed 3 times in a row; I switched back to the original one."));
+                notice(app, Ui.tr("O Início do Beyond™ TV caiu 3 vezes seguidas; voltei para o Início original.",
+                        "Beyond™ TV's home screen crashed 3 times in a row; I switched back to the original one."));
                 adb.shell("am start -a android.intent.action.MAIN -c android.intent.category.HOME");
             } catch (Exception e) {
                 AppLog.w("could not give the home screen back: " + e.getMessage());
@@ -484,14 +484,14 @@ final class HomeMode {
                 latest.put("disabled", new JSONArray(sorted(disabled)));
                 save(app, latest);
             } catch (Exception e) {
-                notice(app, Ui.tr("Não consegui conferir o Beyond TV: ", "Couldn't check Beyond TV: ") + (Ui.ru ? Russian.text(e.getMessage() == null ? "" : e.getMessage()) : e.getMessage()));
+                notice(app, Ui.tr("Não consegui conferir o Beyond™ TV: ", "Couldn't check Beyond™ TV: ") + (Ui.ru ? Russian.text(e.getMessage() == null ? "" : e.getMessage()) : e.getMessage()));
                 return;
             }
             if (!fixed.isEmpty()) {
                 notice(app, (updated ? Ui.tr("A atualização da TV religou ", "The TV update turned back on ")
                         : Ui.tr("Desliguei o que faltava: ", "Turned off what was missing: ")) + String.join(", ", fixed) + ".");
             } else if (updated) {
-                notice(app, Ui.tr("A TV foi atualizada; o Beyond TV continua igual.", "The TV was updated; Beyond TV is still on."));
+                notice(app, Ui.tr("A TV foi atualizada; o Beyond™ TV continua igual.", "The TV was updated; Beyond™ TV is still on."));
             }
         }
     }

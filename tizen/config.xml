@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <widget xmlns="http://www.w3.org/ns/widgets" xmlns:tizen="http://tizen.org/ns/widgets" id="https://gobeyond.co.nz/tv" version="1.1.0" viewmodes="maximized">
     <tizen:application id="BeyondTVnz.BeyondTV" package="BeyondTVnz" required_version="3.0"/>
-    <name>Beyond TV</name>
+    <name>Beyond™ TV</name>
     <author href="https://gobeyond.co.nz">Beyond TV</author>
     <description>A fast, ad-free home screen.</description>
     <content src="index.html"/>
