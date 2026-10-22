@@ -13,6 +13,11 @@ final class German {
             case "Sleep timer off.": return "Ausschalt-Timer aus.";
             case "The TV turns off in ": return "Der Fernseher geht aus in ";
             case "The TV turns off in a minute. Sleep Timer in the menu stops it.": return "Der Fernseher geht in einer Minute aus. Ausschalt-Timer im Menü hält ihn an.";
+            case "Art": return "Kunst";
+            case "Film photos": return "Filmfotos";
+            case "Automatic (art)": return "Automatisch (Kunst)";
+            case "Automatic (photos)": return "Automatisch (Fotos)";
+            case "ART": return "KUNST";
             case "Home Settings": return "Start-Einstellungen";
             case "TV Settings": return "TV-Einstellungen";
             case "HDMI Inputs": return "HDMI-Eingänge";

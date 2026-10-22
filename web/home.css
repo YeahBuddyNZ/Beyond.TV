@@ -740,3 +740,15 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 /* The sleep timer's dark screen (where the TV can't be turned off): black, fading in over a few seconds. */
 .bt-layer.bt-sleep { background: #000; }
 .bt-layer.bt-sleep::before { display: none; }
+
+/* Art mode on the screensaver: the painting framed on a deep plum mat, like a Samsung Frame. */
+#saver .photo.art {
+  /* Right of the clock, so the corner glass never covers the painting. */
+  background: -webkit-radial-gradient(50% 45%, circle, rgba(110, 61, 219, 0.25), rgba(110, 61, 219, 0) 60%), -webkit-linear-gradient(top, #2A2340, #17142A);
+  background: radial-gradient(circle at 50% 45%, rgba(110, 61, 219, 0.25), rgba(110, 61, 219, 0) 60%), linear-gradient(#2A2340, #17142A);
+}
+#saver .photo.art .painting {
+  position: absolute; left: 61%; top: 47%; max-width: 1000px; max-height: 760px;
+  -webkit-transform: translate(-50%, -50%); transform: translate(-50%, -50%);
+  border: 13px solid #0E0C14; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.55), 0 8px 18px rgba(0, 0, 0, 0.4);
+}

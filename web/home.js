@@ -548,7 +548,11 @@
       {label: tr('Widget de cotações', 'Quotes widget', 'Widget de cotizaciones'), toggle: Prefs.quotes(),
         step: function () { Prefs.set('quotes', !Prefs.quotes()); Data.settingsChanged(); }},
       {label: tr('Palavra do dia em te reo Māori', 'Te reo word of the day', 'Palabra del día en te reo maorí'), toggle: Prefs.kupu(),
-        step: function () { Prefs.set('kupu', !Prefs.kupu()); renderQuotes(); }}
+        step: function () { Prefs.set('kupu', !Prefs.kupu()); renderQuotes(); }},
+      {label: tr('Protetor de tela', 'Screensaver', 'Salvapantallas'),
+        value: Prefs.screensaver() === 'art' ? tr('Arte', 'Art', 'Arte') : Prefs.screensaver() === 'photos' ? tr('Fotos de filmes', 'Film photos', 'Fotos de películas')
+          : Art.on() ? tr('Automático (arte)', 'Automatic (art)', 'Automático (arte)') : tr('Automático (fotos)', 'Automatic (photos)', 'Automático (fotos)'),
+        step: function (d) { cycle('screensaver', ['auto', 'art', 'photos'], Prefs.screensaver(), d); }}
     ];
     var names = ['Bitcoin', 'Ethereum', 'Solana', tr('Dólar', 'Dollar', 'Dólar')];
     var count = Data.currency === 'BRL' ? 4 : 3;
@@ -866,7 +870,9 @@
   var saverOn = false, idleAt = Date.now(), saverIndex = 0, saverTimer = 0, SAVER_AFTER = 5 * 60000;
 
   function showSaver() {
-    var photos = Data.showcase().filter(function (p) { return p.backdrop && Data.appFor(p.app); });
+    var art = Art.on();
+    var photos = art ? Art.list() : Data.showcase().filter(function (p) { return p.backdrop && Data.appFor(p.app); });
+    if (art) Art.refresh(function () { if (saverOn && !photos.length) photos = Art.list(); });
     saverOn = true;
     saverAt = Date.now();
     var s = $('saver');
@@ -891,7 +897,24 @@
       if (!saverOn) return;
       var p = photos.length ? photos[saverIndex++ % photos.length] : null;
       var back = front === a ? b : a;
-      if (p) {
+      if (p && art) {
+        // A painting on its mat, like a Samsung Frame: no zoom across it, only a slow drift.
+        back.innerHTML = '';
+        back.style.backgroundImage = '';
+        setClass(back, 'art', true);
+        var img = el('img', 'painting', back);
+        img.src = Art.image(p);
+        back.style.webkitTransform = back.style.transform = 'scale(1.0)';
+        clock.lastChild.textContent = p.title + (p.meta ? '  ·  ' + p.meta : '');
+        setTimeout(function () {
+          setClass(back, 'on', true);
+          setClass(front, 'on', false);
+          back.style.webkitTransform = back.style.transform = 'scale(1.03)';
+          front = back;
+        }, 60);
+      } else if (p) {
+        setClass(back, 'art', false);
+        back.innerHTML = '';
         back.style.backgroundImage = 'url(' + Data.image(p.backdrop, 'original') + ')';
         back.style.webkitTransform = back.style.transform = 'scale(1.0)';
         clock.lastChild.textContent = p.title;

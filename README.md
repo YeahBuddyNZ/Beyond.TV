@@ -58,6 +58,7 @@ Free and open source, built in Aotearoa by [Beyond](https://gobeyond.co.nz). One
 13. Beyond™ TV for business (testing now): shop-window screens changed from the web, as a subscription. Open `/screen` on the TV, type its code into Beyond™ Spaces, and it plays your pictures, videos and web pages. Free for homes, always.
 14. Your face on any TV: done on Google TV, LG and Samsung. Each person's face, colour, world, loves and shelf live with them in Beyond Family, so every TV at home shows them and a new TV brings them across. On somebody else's Beyond TV, Who's watching › Sign in with Beyond Family shows a code to type into your phone, and your own profile is there until you sign out. Google TV takes the face and colour; the rest follows.
 15. Sleep timer: done on Google TV, LG and Samsung. Sleep Timer in the menu under the shelf: each press picks 15, 30, 60 or 90 minutes, or off. A note a minute before, then the TV turns off (on Samsung, which lets no app turn it off, the screen goes dark until a key is pressed).
+16. Art mode: done on Google TV, LG and Samsung. Like a Samsung Frame, the screensaver shows paintings from the Art Institute of Chicago's public domain collection, framed on a plum mat with the title and artist, a new set each day. On by itself when there is no TMDB key; Home Settings › Screensaver picks Art or Film photos.
 
 Ideas welcome: press the four dots (*Talk to Beyond*) on the TV.
 
@@ -265,7 +266,7 @@ The website is in [`docs/`](docs): plain HTML and CSS on GitHub Pages.
 
 ## Privacy
 
-No accounts, no ads, no tracking. The app talks to TMDB, Open-Meteo (with the coordinates you set, or your time zone's main city), Binance only when `show_crypto=true`, Watchmode only when you set a `watchmode_key`, and Beyond Family only when you link the TV to it. Your settings stay on your computer and your TV.
+No accounts, no ads, no tracking. The app talks to TMDB, Open-Meteo (with the coordinates you set, or your time zone's main city), Binance only when `show_crypto=true`, Watchmode only when you set a `watchmode_key`, the Art Institute of Chicago (for the paintings) when the screensaver is in Art mode, and Beyond Family only when you link the TV to it. Your settings stay on your computer and your TV.
 
 **The daily check-in.** So we can fix a problem on one make of TV before anybody has to ask, once a day the TV tells Beyond (beyondfamily.app) a made-up id, its city rounded to about 10km, its make, model and Android or TV software version, the Beyond TV version, which home screen is on, how many times the home screen opened and crashed, and its last 20 error messages. Never what anybody watches, never an IP address kept, never a name or a household.
 
