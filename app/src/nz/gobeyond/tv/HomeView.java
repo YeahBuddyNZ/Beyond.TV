@@ -1212,6 +1212,24 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
 
     private Quotes quotes;
 
+    // Today's te reo word as drawn, and its width: worked out once a day, never in the frame loop.
+    private String kupuLine = "";
+    private float kupuWidth, kupuSize;
+    private long kupuDay = Long.MIN_VALUE, kupuChecked;
+
+    private void kupuFor(Paint text) {
+        long now = System.currentTimeMillis();
+        // The day is only looked up once a minute: a Calendar per frame would be garbage on every frame.
+        if (kupuDay != Long.MIN_VALUE && now - kupuChecked < 60_000L && text.getTextSize() == kupuSize) return;
+        kupuChecked = now;
+        long day = Kupu.day(now);
+        if (day == kupuDay && text.getTextSize() == kupuSize) return;
+        kupuDay = day;
+        kupuSize = text.getTextSize();
+        kupuLine = Kupu.line(now);
+        kupuWidth = text.measureText(kupuLine);
+    }
+
     /** Coin logo + price in the configured currency, in a row at the right end of the tab bar. */
     private void drawQuotes(Canvas c) {
         boolean clock = !picksOn();
@@ -1225,7 +1243,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         int textColor = text.getColor();
         text.setColor(Ui.alpha(textColor, fade));
         int n = HomeData.coinCount();
-        if (n == 0) { text.setColor(textColor); return; }
+        boolean word = Prefs.kupu();
+        if (n == 0 && !word) { text.setColor(textColor); return; }
         // Measured once per set of prices: this row is redrawn on every frame of the cards' focus animation, and
         // measuring text there cost ~3 ms a frame on a Mi Box 3.
         int[] coins = HomeData.active();
@@ -1233,12 +1252,19 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         if (q == null || !q.matches(coins, data.prices, text.getTextSize())) {
             q = quotes = new Quotes(coins, data.prices, text);
         }
+        // Te reo word of the day, first in the row. Measured once a day (or when the text size changes).
+        if (word) kupuFor(text);
         // On the tab row, at the right.
         float base = clock ? L_QUOTES_BASE * k : (L_TABBAR_TOP + L_TABBAR_H / 2) * k + q.halfCap;
         float cap = q.cap, gap = (clock ? 8 : 6) * k, spacing = (clock ? 32 : 24) * k;
-        float total = spacing * (n - 1);
+        float total = n > 0 ? spacing * (n - 1) : 0;
         for (int i = 0; i < n; i++) total += q.glyphs[i] + gap + q.widths[i];
+        if (word) total += kupuWidth + (n > 0 ? spacing : 0);
         float x = clock ? MARGIN * k : right - total;
+        if (word) {
+            c.drawText(kupuLine, x, base, text);
+            x += kupuWidth + spacing;
+        }
         int coinColor = clock ? text.getColor() : Ui.alpha(tone(0xB38E8E93, 0x8CFFFFFF), fade);
         for (int i = 0; i < n; i++) {
             Glyphs.coin(getContext(), c, HomeData.COINS[coins[i]], x + q.glyphs[i] / 2, base - cap / 2, cap, coinColor);
@@ -1247,6 +1273,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             x += q.widths[i] + spacing;
         }
         text.setColor(textColor);
+        if (n == 0) return;
         String stale = HomeData.staleness(data.pricesAt, 5 * 60_000L);
         if (stale.isEmpty()) return;
         if (clock) c.drawText(stale, x - spacing + 24 * k + staleQuote.measureText(stale), base, staleQuote);
@@ -2726,7 +2753,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         applyTone();
         if (!picksOn()) {
             drawClock(c);
-            if (HomeData.coinCount() > 0) drawQuotes(c);
+            if (HomeData.coinCount() > 0 || Prefs.kupu()) drawQuotes(c);
             return;
         }
         String hello = helloLine;
@@ -2759,7 +2786,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         for (int i = 0; i < 3; i++) if (cardFocus[i].value > 0.02f && (top < 0 || cardFocus[i].value > cardFocus[top].value)) top = i;
         for (int i = 0; i < 3; i++) if (i != top) drawLightCard(c, i);
         if (top >= 0) drawLightCard(c, top);
-        if (HomeData.coinCount() > 0) drawQuotes(c);
+        if (HomeData.coinCount() > 0 || Prefs.kupu()) drawQuotes(c);
     }
 
     private boolean picksOn() {

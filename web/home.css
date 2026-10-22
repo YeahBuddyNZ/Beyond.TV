@@ -152,6 +152,8 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   font-feature-settings: 'tnum';
 }
 #quotes .q { display: inline-block; margin-left: 24px; }
+#quotes .kupu b { font-weight: 600; color: #55534B; }
+.night #quotes .kupu b { color: rgba(247, 246, 242, 0.85); }
 #quotes svg { width: 15px; height: 15px; vertical-align: -1px; margin-right: 6px; fill: rgba(138, 135, 125, 0.7); }
 #quotes.hide { opacity: 0; }
 .night #quotes { color: rgba(247, 246, 242, 0.62); }
@@ -503,6 +505,8 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 }
 #saver .clock .time { font-size: 150px; font-weight: 300; line-height: 1; letter-spacing: -0.02em; font-feature-settings: 'tnum'; }
 #saver .clock .date { margin-top: 10px; font-size: 34px; font-weight: 500; color: rgba(255, 255, 255, 0.82); }
+#saver .clock .kupu { margin-top: 16px; font-size: 26px; font-weight: 500; color: rgba(255, 255, 255, 0.72); }
+#saver .clock .kupu b { font-weight: 600; color: #FFF; }
 #saver .clock .title { margin-top: 18px; font-size: 26px; font-weight: 500; color: rgba(255, 255, 255, 0.65); }
 
 /* The house noticeboard: today, beside the clock, when the household switched it on in Beyond Family. */

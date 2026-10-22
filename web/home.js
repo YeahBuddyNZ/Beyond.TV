@@ -258,6 +258,12 @@
   function renderQuotes() {
     var q = $('quotes'), coins = Data.activeCoins();
     q.innerHTML = '';
+    // Te reo word of the day, first in the row: the kupu, then what it means.
+    if (Prefs.kupu()) {
+      var k = Kupu.today(), word = el('span', 'q kupu', q);
+      el('b', '', word, k.word);
+      word.appendChild(document.createTextNode(' · ' + k.meaning));
+    }
     for (var i = 0; i < coins.length; i++) {
       var item = el('span', 'q', q);
       coin(coins[i], item);
@@ -523,7 +529,9 @@
       {label: tr('Widget do clima', 'Weather widget', 'Widget del clima'), toggle: Prefs.weather(),
         step: function () { Prefs.set('weather', !Prefs.weather()); renderPanels(); }},
       {label: tr('Widget de cotações', 'Quotes widget', 'Widget de cotizaciones'), toggle: Prefs.quotes(),
-        step: function () { Prefs.set('quotes', !Prefs.quotes()); Data.settingsChanged(); }}
+        step: function () { Prefs.set('quotes', !Prefs.quotes()); Data.settingsChanged(); }},
+      {label: tr('Palavra do dia em te reo Māori', 'Te reo word of the day', 'Palabra del día en te reo maorí'), toggle: Prefs.kupu(),
+        step: function () { Prefs.set('kupu', !Prefs.kupu()); renderQuotes(); }}
     ];
     var names = ['Bitcoin', 'Ethereum', 'Solana', tr('Dólar', 'Dollar', 'Dólar')];
     var count = Data.currency === 'BRL' ? 4 : 3;
@@ -850,6 +858,11 @@
     el('div', 'time', clock);
     el('div', 'date', clock);
     el('div', 'title', clock);
+    if (Prefs.kupu()) {
+      var k = Kupu.today(), kupu = el('div', 'kupu', clock);
+      el('b', '', kupu, k.word);
+      kupu.appendChild(document.createTextNode('  ' + k.say + ' · ' + k.meaning));
+    }
     var notice = el('div', 'board', s);
     var front = a;
     function next() {

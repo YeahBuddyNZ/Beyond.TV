@@ -113,6 +113,10 @@ final class Prefs {
     static boolean quotes() { return sp().getBoolean("quotes", Config.SHOW_CRYPTO); }
     static void setQuotes(boolean on) { put("quotes", on); }
 
+    /** Te reo word of the day (Kupu), in the quotes row. On unless they turn it off. */
+    static boolean kupu() { return sp().getBoolean("kupu", true); }
+    static void setKupu(boolean on) { put("kupu", on); }
+
     static boolean coin(int i) { return sp().getBoolean("coin" + i, true); }
     static void setCoin(int i, boolean on) { put("coin" + i, on); }
 
