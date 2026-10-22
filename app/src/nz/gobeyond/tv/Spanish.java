@@ -171,6 +171,14 @@ final class Spanish {
             case "To keep itself up to date, Beyond TV needs the TV's OK to install its own updates. On the next screen, switch Beyond TV on, then press Back.": return "Para mantenerse al día, Beyond TV necesita el OK de la TV para instalar sus propias actualizaciones. En la siguiente pantalla, activa Beyond TV y pulsa Atrás.";
             case "Show me": return "Muéstrame";
             case "Not now": return "Ahora no";
+            case "Kind of art": return "Tipo de arte";
+            case "Mixed": return "Variada";
+            case "Landscapes": return "Paisajes";
+            case "The sea": return "El mar";
+            case "Gardens and flowers": return "Jardines y flores";
+            case "Mountains": return "Montañas";
+            case "Impressionism": return "Impresionismo";
+            case "Still life": return "Naturaleza muerta";
             case "Install the new version": return "Instalar la nueva versión";
             case "Check for updates": return "Buscar actualizaciones";
             case "Install updates by themselves": return "Instalar actualizaciones solas";

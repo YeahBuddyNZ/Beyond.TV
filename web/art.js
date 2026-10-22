@@ -1,8 +1,9 @@
 /*
  * Art mode, like a Samsung Frame: the screensaver shows paintings from the Art Institute of Chicago's public domain
- * collection (free, no key), as big as the screen allows on a dark wall, with nothing written on it. A new set once a
- * day from a theme (landscapes, the sea, gardens...); the list is kept, the images come straight from the museum.
- * In a season (Halloween, Christmas...) it shows our own art instead, listed in docs/art/seasons.json on the website.
+ * collection (free, no key), filling the whole screen with nothing written on it. Only paintings about the screen's
+ * shape are picked, so filling it crops little. A new set once a day from the kind they chose in Home Settings
+ * (Art.KINDS), or a different theme each day on Mixed; the list is kept, the images come straight from the museum.
+ * On Mixed, a season (Halloween, Christmas...) shows our own art instead, listed in docs/art/seasons.json.
  * Same idea and themes as Art.java on Google TV. Plain ES5.
  */
 var Art = (function () {
@@ -13,13 +14,29 @@ var Art = (function () {
   var SEASONS = 'https://yeahbuddynz.github.io/Beyond.TV/art/';
   var THEMES = ['landscape', 'sea', 'garden', 'flowers', 'mountains', 'river', 'sky', 'autumn', 'harbour', 'trees',
     'impressionism', 'still life'];
+  /** What they can pick in Home Settings, each with the museum searches behind it. Same ids as Art.java. */
+  var KINDS = [
+    {id: 'mixed', name: function () { return tr('Variada', 'Mixed', 'Variada'); }},
+    {id: 'landscapes', q: ['landscape', 'countryside', 'river'], name: function () { return tr('Paisagens', 'Landscapes', 'Paisajes'); }},
+    {id: 'sea', q: ['sea', 'harbour', 'coast'], name: function () { return tr('O mar', 'The sea', 'El mar'); }},
+    {id: 'gardens', q: ['garden', 'flowers'], name: function () { return tr('Jardins e flores', 'Gardens and flowers', 'Jardines y flores'); }},
+    {id: 'mountains', q: ['mountains', 'alps', 'valley'], name: function () { return tr('Montanhas', 'Mountains', 'Montañas'); }},
+    {id: 'impressionism', q: ['impressionism', 'Monet'], name: function () { return tr('Impressionismo', 'Impressionism', 'Impresionismo'); }},
+    {id: 'still life', q: ['still life'], name: function () { return tr('Natureza-morta', 'Still life', 'Naturaleza muerta'); }}
+  ];
   var KEY = 'btv.art', KEEP = 24;
-  var list = [], day = -1, loading = false;
+  var list = [], day = -1, kindOf = 'mixed', loading = false;
 
   try {
     var saved = JSON.parse(localStorage.getItem(KEY));
-    if (saved && saved.list) { list = saved.list; day = saved.day; }
+    if (saved && saved.list) { list = saved.list; day = saved.day; kindOf = saved.kind || 'mixed'; }
   } catch (e) {}
+
+  function kind() {
+    var v = Prefs.artKind();
+    for (var i = 0; i < KINDS.length; i++) if (KINDS[i].id === v) return KINDS[i];
+    return KINDS[0];
+  }
 
   /** Today on the TV's own clock, as a number (20261031), so the set changes at local midnight. */
   function today() { var d = new Date(); return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate(); }
@@ -47,7 +64,8 @@ var Art = (function () {
   function keep(found, d) {
     list = shuffle(found, d).slice(0, KEEP);
     day = d;
-    try { localStorage.setItem(KEY, JSON.stringify({day: day, list: list})); } catch (e) {}
+    kindOf = kind().id;
+    try { localStorage.setItem(KEY, JSON.stringify({day: day, kind: kindOf, list: list})); } catch (e) {}
   }
 
   /** The season's own pictures, when one is on today; otherwise calls done(false). */
@@ -79,9 +97,10 @@ var Art = (function () {
   }
 
   function refresh(done) {
-    if (loading || (day === today() && list.length)) { if (done) done(); return; }
+    if (loading || (day === today() && kindOf === kind().id && list.length)) { if (done) done(); return; }
     loading = true;
     var d = today();
+    if (kind().q) { museum(d, done); return; }
     season(d, function (got) {
       if (got) { loading = false; if (done) done(); return; }
       museum(d, done);
@@ -89,22 +108,33 @@ var Art = (function () {
   }
 
   function museum(d, done) {
-    var theme = THEMES[Math.floor(Date.now() / 86400000) % THEMES.length];
-    var url = API + '?q=' + encodeURIComponent(theme) + '&query%5Bterm%5D%5Bis_public_domain%5D=true&limit=60' +
-      '&fields=id,title,artist_title,image_id,date_display,artwork_type_title';
+    var k = kind(), n = Math.floor(Date.now() / 86400000);
+    var theme = k.q ? k.q[n % k.q.length] : THEMES[n % THEMES.length];
+    var url = API + '?q=' + encodeURIComponent(theme) + '&query%5Bterm%5D%5Bis_public_domain%5D=true&limit=100' +
+      '&fields=id,title,artist_title,image_id,date_display,artwork_type_title,thumbnail';
     get(url, function (res) {
       loading = false;
-      var found = [];
+      var wide = [], other = [];
       var data = res && res.data ? res.data : [];
       for (var i = 0; i < data.length; i++) {
         var o = data[i], type = o.artwork_type_title;
         if (!o.image_id || (type !== 'Painting' && type !== 'Drawing and Watercolor')) continue;
         var meta = [o.artist_title, o.date_display].filter(function (s) { return s; }).join(' · ');
-        found.push({id: o.id, title: o.title || '', image: o.image_id, meta: meta});
+        var a = {id: o.id, title: o.title || '', image: o.image_id, meta: meta};
+        (shaped(o.thumbnail) ? wide : other).push(a);
       }
+      // Filling a 16:9 screen crops a tall painting badly: wide ones first, others only when there are too few.
+      var found = wide.length >= 8 ? wide : wide.concat(other);
       if (found.length) keep(found, d);
       if (done) done();
     });
+  }
+
+  /** About the screen's shape (from 5:4 to 12:5), so filling it crops only the edges. */
+  function shaped(t) {
+    if (!t || !t.width || !t.height) return false;
+    var r = t.width / t.height;
+    return r >= 1.25 && r <= 2.4;
   }
 
   return {
@@ -113,6 +143,9 @@ var Art = (function () {
     list: function () { return list; },
     /** The painting itself, 1686 wide (public domain works come that big); `small` is the 843 the museum always serves. */
     image: function (a, small) { return IIIF + a.image + '/full/' + (small ? '843' : '1686') + ',/0/default.jpg'; },
+    /** The kinds of art to pick from: [{id, name()}]. */
+    kinds: KINDS,
+    kindName: function () { return kind().name(); },
     /** Art on the screensaver: chosen, or automatic without a TMDB key (no film photos to show). */
     on: function () {
       var v = Prefs.screensaver();

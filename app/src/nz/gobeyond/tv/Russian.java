@@ -179,6 +179,14 @@ final class Russian {
             case "To keep itself up to date, Beyond TV needs the TV's OK to install its own updates. On the next screen, switch Beyond TV on, then press Back.": return "Чтобы обновляться, Beyond TV нужно разрешение телевизора на установку своих обновлений. На следующем экране включите Beyond TV и нажмите «Назад».";
             case "Show me": return "Показать";
             case "Not now": return "Не сейчас";
+            case "Kind of art": return "Вид искусства";
+            case "Mixed": return "Разное";
+            case "Landscapes": return "Пейзажи";
+            case "The sea": return "Море";
+            case "Gardens and flowers": return "Сады и цветы";
+            case "Mountains": return "Горы";
+            case "Impressionism": return "Импрессионизм";
+            case "Still life": return "Натюрморт";
             case "Install the new version": return "Установить новую версию";
             case "Check for updates": return "Проверить обновления";
             case "Install updates by themselves": return "Устанавливать обновления самостоятельно";

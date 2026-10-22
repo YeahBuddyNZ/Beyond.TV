@@ -5,9 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.RadialGradient;
 import android.graphics.RectF;
-import android.graphics.Shader;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -31,10 +29,10 @@ import java.util.concurrent.Executors;
 
 /**
  * Art mode, like a Samsung Frame: the screensaver shows paintings from the Art Institute of Chicago's public domain
- * collection (free, no key), each one as big as fits on a dark wall with a thin dark frame and a soft shadow, and
- * nothing written on it, so it looks like a painting hanging there. Once a day a new set of up to 24 is picked from a theme (landscapes, the sea,
- * gardens, flowers...); each is downloaded once, framed once and kept on disk as a 16:9 picture, so the screensaver
- * treats it like any other photo. It speaks the same Recs.Pick and listener shape, so DreamView only swaps the source.
+ * collection (free, no key), filling the whole screen with nothing written on it. Only paintings about the screen's
+ * shape are picked, so filling crops only the edges. Once a day a new set of up to 24 comes from the kind chosen in
+ * Home Settings (KINDS; Mixed changes theme each day); each is downloaded once, cropped to 16:9 once and kept on disk,
+ * so the screensaver treats it like any other photo. Same kinds and ids as web/art.js. It speaks the same Recs.Pick and listener shape, so DreamView only swaps the source.
  */
 final class Art {
     private static final String API = "https://api.artic.edu/api/v1/artworks/search";
@@ -43,14 +41,22 @@ final class Art {
     static final String SEASONS = "https://yeahbuddynz.github.io/Beyond.TV/art/";
     private static final String[] THEMES = {"landscape", "sea", "garden", "flowers", "mountains", "river", "sky",
             "autumn", "harbour", "trees", "impressionism", "still life"};
+    /** The kinds to pick from in Home Settings: {id, the museum searches behind it}. Mixed is THEMES, one a day. */
+    static final String[][] KINDS = {
+            {"mixed"},
+            {"landscapes", "landscape", "countryside", "river"},
+            {"sea", "sea", "harbour", "coast"},
+            {"gardens", "garden", "flowers"},
+            {"mountains", "mountains", "alps", "valley"},
+            {"impressionism", "impressionism", "Monet"},
+            {"still life", "still life"}};
     private static final int KEEP = 24;
     /** The framed picture's size: the screensaver's photo size (10% larger than the screen, for the slow zoom). */
     private static final int W = 2112, H = 1188;
-    private static final int WALL_MIDDLE = 0xFF1E1B19, WALL_EDGE = 0xFF0B0A09, FRAME = 0xFF0A0908;
 
     private static Art instance;
     private final Context context;
-    private final File dir, listFile;
+    private final File dir, listFile, kindFile;
     private final List<Recs.Pick> picks = new ArrayList<>();
     private final List<Recs.Listener> listeners = new ArrayList<>();
     private final ExecutorService io = Executors.newSingleThreadExecutor();
@@ -68,6 +74,7 @@ final class Art {
         dir = new File(c.getCacheDir(), "art");
         dir.mkdirs();
         listFile = new File(c.getFilesDir(), "art.json");
+        kindFile = new File(c.getFilesDir(), "art-kind.txt");
         load();
     }
 
@@ -122,6 +129,7 @@ final class Art {
 
     private boolean stale() {
         synchronized (picks) { if (picks.isEmpty()) return true; }
+        if (!Prefs.artKind().equals(readKind())) return true;   // they picked another kind of art
         // A new set each day, at midnight on the TV's own clock, so a season starts on its first morning.
         java.text.SimpleDateFormat day = new java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.ROOT);
         return !day.format(new java.util.Date(listFile.lastModified())).equals(day.format(new java.util.Date()));
@@ -131,17 +139,20 @@ final class Art {
 
     private void fetchList() throws Exception {
         long day = System.currentTimeMillis() / 86_400_000L;
-        try {
-            if (fetchSeason(day)) return;
-        } catch (Exception e) {
-            AppLog.w("art: seasons: " + e.getMessage());   // no season art today: the museum, as always
+        String[] kind = kind();
+        if (kind.length == 1) {   // Mixed: a season's own art when one is on
+            try {
+                if (fetchSeason(day)) return;
+            } catch (Exception e) {
+                AppLog.w("art: seasons: " + e.getMessage());   // no season art today: the museum, as always
+            }
         }
-        String theme = THEMES[(int) (day % THEMES.length)];
+        String theme = kind.length > 1 ? kind[1 + (int) (day % (kind.length - 1))] : THEMES[(int) (day % THEMES.length)];
         String q = "q=" + URLEncoder.encode(theme, "UTF-8")
-                + "&query%5Bterm%5D%5Bis_public_domain%5D=true&limit=60"
-                + "&fields=id,title,artist_title,image_id,date_display,artwork_type_title";
+                + "&query%5Bterm%5D%5Bis_public_domain%5D=true&limit=100"
+                + "&fields=id,title,artist_title,image_id,date_display,artwork_type_title,thumbnail";
         JSONArray data = new JSONObject(read(API + "?" + q)).getJSONArray("data");
-        List<Recs.Pick> found = new ArrayList<>();
+        List<Recs.Pick> found = new ArrayList<>(), other = new ArrayList<>();
         for (int i = 0; i < data.length(); i++) {
             JSONObject o = data.getJSONObject(i);
             String image = o.optString("image_id", "");
@@ -157,8 +168,10 @@ final class Art {
             String date = o.isNull("date_display") ? "" : o.optString("date_display", "");
             p.meta = artist.isEmpty() ? date : date.isEmpty() ? artist : artist + " · " + date;
             p.gentle = true;
-            found.add(p);
+            (shaped(o.optJSONObject("thumbnail")) ? found : other).add(p);
         }
+        // Filling a 16:9 screen crops a tall painting badly: wide ones only, unless there are too few.
+        if (found.size() < 8) found.addAll(other);
         if (found.isEmpty()) throw new Exception("no paintings for " + theme);
         Collections.shuffle(found, new Random(day));
         while (found.size() > KEEP) found.remove(found.size() - 1);
@@ -167,6 +180,28 @@ final class Art {
             picks.addAll(found);
         }
         save();
+    }
+
+    /** About the screen's shape (from 5:4 to 12:5), so filling it crops only the edges. */
+    private static boolean shaped(JSONObject t) {
+        if (t == null) return false;
+        double w = t.optDouble("width", 0), h = t.optDouble("height", 0);
+        return w > 0 && h > 0 && w / h >= 1.25 && w / h <= 2.4;
+    }
+
+    /** The chosen kind of art: {id, searches...}; Mixed when the setting is unknown. */
+    private static String[] kind() {
+        String id = Prefs.artKind();
+        for (String[] k : KINDS) if (k[0].equals(id)) return k;
+        return KINDS[0];
+    }
+
+    private String readKind() {
+        try {
+            return new String(java.nio.file.Files.readAllBytes(kindFile.toPath()), StandardCharsets.UTF_8);
+        } catch (Exception | LinkageError e) {
+            return "mixed";
+        }
     }
 
     /** In a season (Halloween, Christmas...), its pictures instead of the museum's. False when no season is on. */
@@ -223,6 +258,9 @@ final class Art {
             try (FileOutputStream out = new FileOutputStream(listFile)) {
                 out.write(a.toString().getBytes(StandardCharsets.UTF_8));
             }
+            try (FileOutputStream out = new FileOutputStream(kindFile)) {
+                out.write(kind()[0].getBytes(StandardCharsets.UTF_8));
+            }
         } catch (Exception e) {
             AppLog.w("art: save: " + e.getMessage());
         }
@@ -256,68 +294,29 @@ final class Art {
     }
 
     private File file(Recs.Pick p) {
-        // "-wall": the paintings as hung on the dark wall (the plum mat ones are tidied away and drawn again).
-        return new File(dir, p.id + "-wall.jpg");
+        // "-fill": the paintings filling the screen (the ones on a wall are tidied away and drawn again).
+        return new File(dir, p.id + "-fill.jpg");
     }
 
     // MARK: - Framing
 
-    /** Downloads the painting and draws it framed on the mat, saved as a 16:9 JPEG the screensaver loads like a photo. */
+    /** Downloads the painting (or a season's picture) and crops it to fill the screen, saved as a 16:9 JPEG. */
     private void frame(Recs.Pick p) throws Exception {
-        if (p.backdrop.startsWith("http")) { fill(p); return; }
         byte[] bytes;
-        try {
-            bytes = download(IIIF + p.backdrop + "/full/1686,/0/default.jpg");
-        } catch (Exception e) {
-            bytes = download(IIIF + p.backdrop + "/full/843,/0/default.jpg");   // the size the museum always serves
-        }
-        BitmapFactory.Options o = new BitmapFactory.Options();
-        o.inPreferredConfig = Bitmap.Config.RGB_565;
-        Bitmap art = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, o);
-        if (art == null) throw new Exception("unreadable image");
-        Bitmap out = Bitmap.createBitmap(W, H, Bitmap.Config.RGB_565);
-        try {
-            Canvas c = new Canvas(out);
-            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG | Paint.DITHER_FLAG);
-            // The wall: dark, a touch warmer in the middle, like a gallery with the lights down.
-            paint.setShader(new RadialGradient(W / 2f, H / 2f, W * 0.75f, WALL_MIDDLE, WALL_EDGE, Shader.TileMode.CLAMP));
-            c.drawRect(0, 0, W, H, paint);
-            paint.setShader(null);
-            // The painting fills the screen as far as its shape allows (1840 × 1000 of a 1920 × 1080 screen), never
-            // upscaled past 1.6x. The whole picture is shown, so W × H is the screen.
-            float boxW = W * 1840f / 1920, boxH = H * 1000f / 1080;
-            float scale = Math.min(Math.min(boxW / art.getWidth(), boxH / art.getHeight()), 1.6f * W / 1920f);
-            float aw = art.getWidth() * scale, ah = art.getHeight() * scale;
-            float left = (W - aw) / 2f, top = (H - ah) / 2f;
-            float border = H * 0.004f;
-            RectF frame = new RectF(left - border, top - border, left + aw + border, top + ah + border);
-            // A soft shadow under the frame, as if it hangs a little off the wall.
-            paint.setColor(0xFF000000);
-            for (int i = 6; i >= 1; i--) {
-                paint.setAlpha(12);
-                RectF sh = new RectF(frame);
-                sh.inset(-i * 6, -i * 6);
-                sh.offset(0, i * 5);
-                c.drawRoundRect(sh, i * 6, i * 6, paint);
+        if (p.backdrop.startsWith("http")) {
+            bytes = download(p.backdrop);
+        } else {
+            try {
+                bytes = download(IIIF + p.backdrop + "/full/1686,/0/default.jpg");
+            } catch (Exception e) {
+                bytes = download(IIIF + p.backdrop + "/full/843,/0/default.jpg");   // the size the museum always serves
             }
-            paint.setAlpha(255);
-            paint.setColor(FRAME);
-            c.drawRect(frame, paint);
-            c.drawBitmap(art, null, new RectF(left, top, left + aw, top + ah), paint);
-            File f = file(p), tmp = new File(dir, p.id + ".part");
-            try (FileOutputStream fo = new FileOutputStream(tmp)) {
-                out.compress(Bitmap.CompressFormat.JPEG, 90, fo);
-            }
-            if (!tmp.renameTo(f)) throw new Exception("could not save");
-        } finally {
-            art.recycle();
-            out.recycle();
         }
+        fill(p, bytes);
     }
 
-    /** Season art is drawn for the whole screen: no mat, just scaled to fill and saved like a framed painting. */
-    private void fill(Recs.Pick p) throws Exception {
-        byte[] bytes = download(p.backdrop);
+    /** Scaled to fill the screen, centred, the edges cropped. */
+    private void fill(Recs.Pick p, byte[] bytes) throws Exception {
         BitmapFactory.Options o = new BitmapFactory.Options();
         o.inPreferredConfig = Bitmap.Config.RGB_565;
         Bitmap art = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, o);
