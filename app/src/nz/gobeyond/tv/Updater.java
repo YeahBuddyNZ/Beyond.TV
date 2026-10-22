@@ -338,11 +338,13 @@ final class Updater {
         return Build.VERSION.SDK_INT >= 28 ? p.getLongVersionCode() : p.versionCode;
     }
 
-    private static HttpURLConnection open(String url) throws IOException {
+    // Every header goes on before getResponseCode: after it the connection is made and Android throws.
+    private static HttpURLConnection open(String url, String accept) throws IOException {
         HttpURLConnection c = (HttpURLConnection) new URL(url).openConnection();
         c.setConnectTimeout(10_000);
         c.setReadTimeout(20_000);
         c.setRequestProperty("User-Agent", "BeyondTV");
+        if (accept != null) c.setRequestProperty("Accept", accept);
         c.setInstanceFollowRedirects(true);   // release files live on GitHub's download host
         if (c.getResponseCode() != 200) {
             c.disconnect();
@@ -352,8 +354,7 @@ final class Updater {
     }
 
     private static String get(String url) throws IOException {
-        HttpURLConnection c = open(url);
-        c.setRequestProperty("Accept", "application/vnd.github+json");
+        HttpURLConnection c = open(url, "application/vnd.github+json");
         try (InputStream in = c.getInputStream()) {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             copy(in, out, 2L * 1024 * 1024);
@@ -364,7 +365,7 @@ final class Updater {
     }
 
     private static void download(String url, File to) throws IOException {
-        HttpURLConnection c = open(url);
+        HttpURLConnection c = open(url, null);
         try (InputStream in = c.getInputStream(); OutputStream out = new FileOutputStream(to)) {
             copy(in, out, MAX_BYTES);
         } finally {

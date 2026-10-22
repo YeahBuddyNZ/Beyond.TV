@@ -9,6 +9,14 @@ final class Spanish {
             case "Live TV": return "TV en vivo";
             case "All Apps": return "Todas las apps";
             case "Settings": return "Ajustes";
+            case "Sleep Timer": return "Temporizador";
+            case "Sleep timer off.": return "Temporizador apagado.";
+            case "The TV turns off in a minute. Sleep Timer in the menu stops it.": return "La TV se apaga en un minuto. Temporizador en el menú lo detiene.";
+            case "Art": return "Arte";
+            case "Film photos": return "Fotos de películas";
+            case "Automatic (art)": return "Automático (arte)";
+            case "Automatic (photos)": return "Automático (fotos)";
+            case "ART": return "ARTE";
             case "Home Settings": return "Ajustes de inicio";
             case "TV Settings": return "Ajustes del TV";
             case "HDMI Inputs": return "Entradas HDMI";
@@ -114,7 +122,13 @@ final class Spanish {
             case "Family": return "Familia";
             case "For the family": return "Para la familia";
             case "For ": return "Para ";
+            case "Sign in with Beyond Family": return "Entrar con Beyond Family";
+            case "Sign in with your Beyond Family": return "Entra con tu Beyond Family";
+            case "Sign out of this TV": return "Cerrar sesión en este TV";
+            case "On your phone, open Beyond Family › Family › TVs › On somebody else's TV, and type": return "En tu teléfono, abre Beyond Family › Familia › TVs › En el TV de otra persona, y escribe";
+            case "Your family is on this TV already. This is for somebody from another home.": return "Tu familia ya está en este TV. Esto es para alguien de otra casa.";
             case "Manage people": return "Administrar personas";
+            case "Bring in your family from Beyond Family": return "Traer a tu familia desde Beyond Family";
             case "Grown-up PIN": return "PIN de adulto";
             case "People": return "Personas";
             case "Pick someone to change, or add someone.": return "Elige a alguien para cambiar, o añade a alguien.";

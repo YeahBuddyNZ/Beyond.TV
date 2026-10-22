@@ -115,6 +115,20 @@ final class Prefs {
 
     /** Te reo word of the day (Kupu), in the quotes row. On unless they turn it off. */
     static boolean kupu() { return sp().getBoolean("kupu", true); }
+
+    /** The screensaver: "art" (paintings, like a Samsung Frame), "photos" (the picks' film photos) or "auto". */
+    static String screensaver() {
+        String v = sp().getString("screensaver", "auto");
+        return v.equals("art") || v.equals("photos") ? v : "auto";
+    }
+
+    static void setScreensaver(String v) { put("screensaver", v); }
+
+    /** Art on the screensaver: chosen, or automatic without a TMDB key (no film photos to show). */
+    static boolean art() {
+        String v = screensaver();
+        return v.equals("art") || (v.equals("auto") && Config.TMDB_KEY.trim().isEmpty());
+    }
     static void setKupu(boolean on) { put("kupu", on); }
 
     static boolean coin(int i) { return sp().getBoolean("coin" + i, true); }

@@ -90,6 +90,13 @@
   ];
   var MAX_SHELF = 8;
 
+  /**
+   * An app on a shelf by its name ("t:netflix"), the same on every make of TV, so a shelf kept in Beyond Family finds
+   * the same apps on the next TV. Shelves saved before this hold app ids, which still match.
+   */
+  function shelfName(app) { return 't:' + String(app.title || '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40); }
+  function onShelf(app, entry) { return app.id === entry || shelfName(app) === entry; }
+
   function shelfKey(app) {
     for (var i = 0; i < SHELF.length; i++) if (SHELF[i][1].test(app.id) || SHELF[i][2].test(app.title)) return SHELF[i];
     return null;
@@ -130,7 +137,7 @@
     var chosen = Prefs.shelf(), out = [];
     if (chosen) {
       for (var i = 0; i < chosen.length && out.length < MAX_SHELF; i++) {
-        for (var j = 0; j < apps.length; j++) if (apps[j].id === chosen[i]) out.push(apps[j]);
+        for (var j = 0; j < apps.length; j++) if (onShelf(apps[j], chosen[i]) && out.indexOf(apps[j]) < 0) { out.push(apps[j]); break; }
       }
     } else {
       for (var s = 0; s < SHELF.length && out.length < MAX_SHELF; s++) {
@@ -169,7 +176,7 @@
     setClass($('quotes'), 'hide', st.zone === Z.TOP && st.top >= 3);
     list = $('cards').children;
     for (i = 0; i < list.length; i++) setClass(list[i], 'focus', st.zone === Z.CARDS && st.card === i);
-    list = $('tiles').children;
+    list = $('tiles').querySelectorAll('.tile');
     for (i = 0; i < list.length; i++) setClass(list[i], 'focus', st.zone === Z.SHELF && st.shelf === i);
     list = document.querySelectorAll('#drawer .key');
     for (i = 0; i < list.length; i++) setClass(list[i], 'focus', st.zone === Z.DRAWER && st.drawer === i);
@@ -341,27 +348,31 @@
   // MARK: - Shelf
 
   function renderShelf() {
-    var n = shelf.length, gap = 48, pad = 40;
-    // 16:9 tiles, as on Android: never taller than 126, and the glass keeps its bottom edge.
-    var tw = Math.min(126 * 16 / 9, (1760 - Math.max(0, n - 1) * gap) / Math.max(1, n)), th = tw * 9 / 16;
-    var width = n * tw + Math.max(0, n - 1) * gap, left = (1920 - width) / 2;
+    var n = shelf.length, gap = 52, pad = 32, nameH = 38, bottom = 1020;
+    // Square icons with the name under each, like an iPad (as on Android). The glass keeps its bottom edge.
+    var tw = Math.min(132, (1760 - Math.max(0, n - 1) * gap) / Math.max(1, n)), th = tw;
+    var width = n * tw + Math.max(0, n - 1) * gap, left = (1920 - width) / 2, top = bottom - th - nameH - 2 * pad;
     var platter = $('platter');
     platter.style.display = n ? '' : 'none';
     platter.style.left = (left - pad) + 'px';
     platter.style.width = (width + 2 * pad) + 'px';
-    platter.style.top = (814 + 126 - th) + 'px';
-    platter.style.height = (th + 2 * pad) + 'px';
+    platter.style.top = top + 'px';
+    platter.style.height = (bottom - top) + 'px';
     $('quotes').style.right = (1920 - left - width) + 'px';
     var tiles = $('tiles');
     tiles.innerHTML = '';
     for (var i = 0; i < n; i++) {
-      var t = el('div', 'tile', tiles);
-      t.style.left = (left + i * (tw + gap)) + 'px';
-      t.style.top = (854 + 126 - th) + 'px';
+      var t = el('div', 'tile', tiles), x = left + i * (tw + gap);
+      t.style.left = x + 'px';
+      t.style.top = (top + pad) + 'px';
       t.style.width = tw + 'px';
       t.style.height = th + 'px';
-      face(shelf[i], t, wordFit(shelf[i].title, tw, 30));
+      face(shelf[i], t, wordFit(shelf[i].title, tw, 26));
       hover(t, Z.SHELF, i);
+      var name = el('div', 'tile-name', tiles, shelf[i].title);
+      name.style.left = (x - gap / 2) + 'px';
+      name.style.width = (tw + gap) + 'px';
+      name.style.top = (top + pad + th + 12) + 'px';
     }
     st.shelf = Math.min(st.shelf, Math.max(0, n - 1));
   }
@@ -382,6 +393,7 @@
     }
     drawerInputs = drawerItems.length;
     drawerItems.push({label: tr('Todos os Apps', 'All Apps', 'Todas las apps'), symbol: 'apps', run: openApps});
+    drawerItems.push({label: tr('Timer de desligar', 'Sleep Timer', 'Temporizador'), symbol: 'bedtime', run: function () { toast(Sleep.press()); }});
     drawerItems.push({label: tr('Ajustes do Início', 'Home Settings', 'Ajustes de inicio'), symbol: 'settings', run: openSettings});
     if (!kid) drawerItems.push({label: tr('Ajustes da TV', 'TV Settings', 'Ajustes del TV'), symbol: 'tv_settings', run: tvSettings});
     var n = drawerItems.length, gap = 18, groupGap = 56, groups = drawerInputs > 0 && drawerInputs < n ? 2 : 1;
@@ -473,7 +485,7 @@
 
   function openDrawer() {
     if (!drawerItems.length) return;
-    var tiles = $('tiles').children;
+    var tiles = $('tiles').querySelectorAll('.tile');
     st.zone = Z.DRAWER;
     st.drawer = Math.min(drawerItems.length - 1, nearest(document.querySelectorAll('#drawer .key'), centerX(tiles[st.shelf])));
     updateFocus();
@@ -482,7 +494,7 @@
   function closeDrawer() {
     var keys = document.querySelectorAll('#drawer .key');
     st.zone = Z.SHELF;
-    if (shelf.length) st.shelf = nearest($('tiles').children, centerX(keys[st.drawer]));
+    if (shelf.length) st.shelf = nearest($('tiles').querySelectorAll('.tile'), centerX(keys[st.drawer]));
     updateFocus();
   }
 
@@ -536,7 +548,11 @@
       {label: tr('Widget de cotações', 'Quotes widget', 'Widget de cotizaciones'), toggle: Prefs.quotes(),
         step: function () { Prefs.set('quotes', !Prefs.quotes()); Data.settingsChanged(); }},
       {label: tr('Palavra do dia em te reo Māori', 'Te reo word of the day', 'Palabra del día en te reo maorí'), toggle: Prefs.kupu(),
-        step: function () { Prefs.set('kupu', !Prefs.kupu()); renderQuotes(); }}
+        step: function () { Prefs.set('kupu', !Prefs.kupu()); renderQuotes(); }},
+      {label: tr('Protetor de tela', 'Screensaver', 'Salvapantallas'),
+        value: Prefs.screensaver() === 'art' ? tr('Arte', 'Art', 'Arte') : Prefs.screensaver() === 'photos' ? tr('Fotos de filmes', 'Film photos', 'Fotos de películas')
+          : Art.on() ? tr('Automático (arte)', 'Automatic (art)', 'Automático (arte)') : tr('Automático (fotos)', 'Automatic (photos)', 'Automático (fotos)'),
+        step: function (d) { cycle('screensaver', ['auto', 'art', 'photos'], Prefs.screensaver(), d); }}
     ];
     var names = ['Bitcoin', 'Ethereum', 'Solana', tr('Dólar', 'Dollar', 'Dólar')];
     var count = Data.currency === 'BRL' ? 4 : 3;
@@ -675,7 +691,10 @@
       ids.splice(at, 1);
       ids.splice(to, 0, app.id);
     }
-    Prefs.set('shelf', ids);
+    Prefs.set('shelf', ids.map(function (id) {
+      for (var j = 0; j < apps.length; j++) if (apps[j].id === id) return shelfName(apps[j]);
+      return id;
+    }));
     pickShelf();
     renderShelf();
     var again = editList();
@@ -746,7 +765,7 @@
   }
 
   function move(dx, dy) {
-    var tiles = $('tiles').children, cardNodes = $('cards').children;
+    var tiles = $('tiles').querySelectorAll('.tile'), cardNodes = $('cards').children;
     switch (st.zone) {
       case Z.SHELF:
         if (dx) st.shelf = Math.max(0, Math.min(shelf.length - 1, st.shelf + dx));
@@ -851,7 +870,9 @@
   var saverOn = false, idleAt = Date.now(), saverIndex = 0, saverTimer = 0, SAVER_AFTER = 5 * 60000;
 
   function showSaver() {
-    var photos = Data.showcase().filter(function (p) { return p.backdrop && Data.appFor(p.app); });
+    var art = Art.on();
+    var photos = art ? Art.list() : Data.showcase().filter(function (p) { return p.backdrop && Data.appFor(p.app); });
+    if (art) Art.refresh(function () { if (saverOn && !photos.length) photos = Art.list(); });
     saverOn = true;
     saverAt = Date.now();
     var s = $('saver');
@@ -876,7 +897,37 @@
       if (!saverOn) return;
       var p = photos.length ? photos[saverIndex++ % photos.length] : null;
       var back = front === a ? b : a;
-      if (p) {
+      if (p && art && p.url) {
+        // Season art (Halloween, Christmas...) is drawn for the whole screen: no mat, a gentle zoom.
+        setClass(back, 'art', false);
+        back.innerHTML = '';
+        back.style.backgroundImage = 'url(' + p.url + ')';
+        back.style.webkitTransform = back.style.transform = 'scale(1.0)';
+        clock.lastChild.textContent = p.title + (p.meta ? '  ·  ' + p.meta : '');
+        setTimeout(function () {
+          setClass(back, 'on', true);
+          setClass(front, 'on', false);
+          back.style.webkitTransform = back.style.transform = 'scale(1.04)';
+          front = back;
+        }, 60);
+      } else if (p && art) {
+        // A painting on its mat, like a Samsung Frame: no zoom across it, only a slow drift.
+        back.innerHTML = '';
+        back.style.backgroundImage = '';
+        setClass(back, 'art', true);
+        var img = el('img', 'painting', back);
+        img.src = Art.image(p);
+        back.style.webkitTransform = back.style.transform = 'scale(1.0)';
+        clock.lastChild.textContent = p.title + (p.meta ? '  ·  ' + p.meta : '');
+        setTimeout(function () {
+          setClass(back, 'on', true);
+          setClass(front, 'on', false);
+          back.style.webkitTransform = back.style.transform = 'scale(1.03)';
+          front = back;
+        }, 60);
+      } else if (p) {
+        setClass(back, 'art', false);
+        back.innerHTML = '';
         back.style.backgroundImage = 'url(' + Data.image(p.backdrop, 'original') + ')';
         back.style.webkitTransform = back.style.transform = 'scale(1.0)';
         clock.lastChild.textContent = p.title;

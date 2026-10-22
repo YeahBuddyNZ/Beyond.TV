@@ -49,6 +49,8 @@ var Prefs = (function () {
     weather: function () { return pick('weather', true); },
     quotes: function () { return pick('quotes', CONFIG.showCrypto !== false); },
     kupu: function () { return pick('kupu', true); },
+    /** The screensaver: 'art' (paintings, like a Samsung Frame), 'photos' (the picks' film photos) or 'auto'. */
+    screensaver: function () { return pick('screensaver', 'auto'); },
     coin: function (i) { var c = pick('coins', null); return c ? c[i] !== false : true; },
     /** The shelf is each profile's own (Profiles), falling back to the TV's. */
     shelf: function () {

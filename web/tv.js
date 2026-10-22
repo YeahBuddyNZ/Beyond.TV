@@ -38,8 +38,8 @@ var TV = (function () {
   // The TV asks once to allow it; the key it gives back is kept.
   var SSAP_KEY = 'btv.ssapKey', SSAP_REFUSED = 'btv.ssapRefused';
 
-  /** One call to the remote control API; done(result) with null on failure. */
-  function ssap(uri, done) {
+  /** One call to the remote control API; done(result) with null on failure. `power` also asks to turn the TV off. */
+  function ssap(uri, done, power) {
     var ws = null, finished = false, key = null;
     var timer = setTimeout(function () { finish(null); }, 90000);   // time to answer the TV's prompt
     function finish(result) {
@@ -53,7 +53,7 @@ var TV = (function () {
     try { ws = new WebSocket('ws://127.0.0.1:3000'); } catch (e) { finish(null); return; }
     ws.onopen = function () {
       var payload = {forcePairing: false, pairingType: 'PROMPT',
-        manifest: {manifestVersion: 1, appVersion: '1.0', permissions: ['READ_INSTALLED_APPS']}};
+        manifest: {manifestVersion: 1, appVersion: '1.0', permissions: power ? ['READ_INSTALLED_APPS', 'CONTROL_POWER'] : ['READ_INSTALLED_APPS']}};
       if (key) payload['client-key'] = key;
       ws.send(JSON.stringify({type: 'register', id: 'register', payload: payload}));
     };
@@ -286,6 +286,12 @@ var TV = (function () {
   return {
     name: webos ? 'webos' : samsung ? 'tizen' : 'browser',
     info: info,
+
+    /** Turns the TV off (the sleep timer). LG only, through the remote control API, which asks once; done(ok). */
+    powerOff: function (done) {
+      if (!webos) { done(false); return; }
+      ssap('system/turnOff', function (res) { done(!!res); }, true);
+    },
 
     /** Installed apps, as the TV's launcher lists them: [{id, title, icon, color}]. */
     apps: function (done) {

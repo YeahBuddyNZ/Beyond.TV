@@ -99,6 +99,12 @@ final class Family {
         return !s.optString("id").isEmpty() && s.optJSONObject("home") != null;
     }
 
+    /** Linked, or somebody from Beyond Family is signed in here as a visitor: either way the TV keeps listening. */
+    static boolean listening(Context c) {
+        JSONObject s = state(c);
+        return !s.optString("id").isEmpty() && (s.optJSONObject("home") != null || s.optBoolean("visiting"));
+    }
+
     static String homeName(Context c) {
         JSONObject home = state(c).optJSONObject("home");
         return home == null ? "" : home.optString("name", "Beyond Family");
@@ -191,8 +197,55 @@ final class Family {
     /** One look, without waiting: linked yet? Applies the household when it is. */
     static JSONObject check(Context c) throws IOException {
         JSONObject res = call(c, "GET", "/tv/sync?wait=0", null, 15_000);
-        if (res.optBoolean("paired")) apply(c, res.optJSONObject("home"));
+        apply(c, res.optBoolean("paired") ? res.optJSONObject("home") : null, res.optJSONArray("visitors"));
         return res;
+    }
+
+    // MARK: - Your face on any TV
+
+    /**
+     * A code for somebody to sign in here from their own Beyond Family (TVs › On somebody else's TV). Any TV may show
+     * one, linked or not; a TV with no id says hello first.
+     */
+    static JSONObject visitCode(Context c) throws IOException {
+        if (state(c).optString("id").isEmpty()) {
+            try {
+                JSONObject res = call(c, "POST", "/tv/hello", new JSONObject().put("name", tvName()), 15_000);
+                save(c, new JSONObject().put("id", res.getString("id")).put("secret", res.getString("secret")));
+            } catch (JSONException e) {
+                throw new Fail(0, "an answer without an id: " + e);
+            }
+        }
+        try {
+            return call(c, "POST", "/tv/visit/code", new JSONObject(), 15_000);
+        } catch (Fail f) {
+            if (f.status != 401) throw f;
+            forget(c);
+            return visitCode(c);
+        }
+    }
+
+    /** Signs a visitor out of this TV, on a thread. They're gone from the TV's people already. */
+    static void signOut(Context c, String member) {
+        final Context app = c.getApplicationContext();
+        new Thread(() -> {
+            try {
+                call(app, "POST", "/tv/visit/bye", new JSONObject().put("member", member), 10_000);
+            } catch (Throwable ignored) {
+            }
+        }, "beyond-family-visit-bye").start();
+    }
+
+    /** A Beyond Family person's new colour, chosen here: kept with them, so their other TVs get it too. */
+    static void pushColour(Context c, String member, int colour) {
+        final Context app = c.getApplicationContext();
+        final String hex = String.format(Locale.ROOT, "#%06X", colour & 0xFFFFFF);
+        new Thread(() -> {
+            try {
+                call(app, "POST", "/tv/people/" + member, new JSONObject().put("colour", hex), 10_000);
+            } catch (Throwable ignored) {
+            }
+        }, "beyond-family-profile").start();
     }
 
     /** Unlink from the TV's side. Forgets here at once, whether or not Beyond Family hears it. */
@@ -219,39 +272,71 @@ final class Family {
 
     private static String lastPeople = "";
 
-    /** Beyond Family's people become the TV's people. Only when they changed, so nobody's screen jumps. */
-    static void apply(Context c, JSONObject home) {
-        if (home == null) return;
+    static void apply(Context c, JSONObject home) { apply(c, home, null); }
+
+    /**
+     * Beyond Family's people become the TV's people: the household's when linked, plus anybody signed in here from
+     * another home. On a TV that isn't linked, its own people stay and the visitors join them. Only when they changed,
+     * so nobody's screen jumps.
+     */
+    static void apply(Context c, JSONObject home, JSONArray visitorsIn) {
+        final JSONArray visitors = visitorsIn == null ? new JSONArray() : visitorsIn;
         try {
             JSONObject s = state(c);
             JSONObject was = s.optJSONObject("home");
-            if (was == null || !home.optString("name").equals(was.optString("name"))) {
-                save(c, s.put("home", new JSONObject().put("name", home.optString("name", "Beyond Family"))));
+            boolean visiting = visitors.length() > 0;
+            if (home != null && (was == null || !home.optString("name").equals(was.optString("name")))) {
+                s.put("home", new JSONObject().put("name", home.optString("name", "Beyond Family")));
+                save(c, s.put("visiting", visiting));
+            } else if (s.optBoolean("visiting") != visiting && !s.optString("id").isEmpty()) {
+                save(c, s.put("visiting", visiting));
             }
         } catch (Exception ignored) {
         }
-        final JSONArray people = home.optJSONArray("people");
-        if (people == null || people.length() == 0) return;
-        String sig = people.toString();
+        final JSONArray people = home == null ? null : home.optJSONArray("people");
+        if (home != null && (people == null || people.length() == 0)) return;
+        String sig = (people == null ? "" : people.toString()) + "|" + visitors;
         if (sig.equals(lastPeople)) return;
         lastPeople = sig;
         final Context app = c.getApplicationContext();
         MAIN.post(() -> {
             List<People.Person> list = new ArrayList<>();
-            for (int i = 0; i < people.length(); i++) {
-                JSONObject p = people.optJSONObject(i);
-                if (p == null || p.optString("id").isEmpty()) continue;
-                People.Person person = new People.Person();
-                person.id = "bf-" + p.optString("id");
-                person.name = p.optString("name", "?");
-                person.colour = colour(p.optString("colour"), People.COLOURS[i % People.COLOURS.length]);
-                person.kid = p.optBoolean("kid");
-                list.add(person);
+            if (people != null) {
+                for (int i = 0; i < people.length(); i++) {
+                    People.Person p = person(people.optJSONObject(i), i);
+                    if (p != null) list.add(p);
+                }
+            } else {
+                // Not linked: this TV's own people stay.
+                for (People.Person p : People.list(app)) if (!p.visitor) list.add(p);
+            }
+            for (int i = 0; i < visitors.length(); i++) {
+                People.Person p = person(visitors.optJSONObject(i), list.size());
+                if (p == null) continue;
+                p.visitor = true;
+                list.add(p);
             }
             if (list.isEmpty() || People.sameAs(app, list)) return;
             People.save(app, list);
             changed();
         });
+    }
+
+    /** One of Beyond Family's people, with their face and colour on Beyond TV when they've chosen them. */
+    private static People.Person person(JSONObject p, int i) {
+        if (p == null || p.optString("id").isEmpty()) return null;
+        People.Person person = new People.Person();
+        person.id = "bf-" + p.optString("id");
+        person.name = p.optString("name", "?");
+        person.colour = colour(p.optString("colour"), People.COLOURS[i % People.COLOURS.length]);
+        person.kid = p.optBoolean("kid");
+        JSONObject look = p.optJSONObject("profile");
+        if (look != null) {
+            person.colour = colour(look.optString("colour"), person.colour);
+            String e = look.optString("emoji");
+            if (e.length() <= 16) person.emoji = e;
+        }
+        return person;
     }
 
     private static int colour(String hex, int fallback) {

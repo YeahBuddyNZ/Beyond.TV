@@ -25,7 +25,7 @@ public class FamilyService extends Service {
 
     /** Starts the wait when the TV is linked. Safe to call often (home screen, settings, boot). */
     static void start(Context c) {
-        if (!Family.linked(c)) return;
+        if (!Family.listening(c)) return;
         try {
             c.startForegroundService(new Intent(c, FamilyService.class));
         } catch (Throwable t) {
@@ -43,7 +43,7 @@ public class FamilyService extends Service {
 
     @Override public int onStartCommand(Intent intent, int flags, int startId) {
         startForeground(1, notification());
-        if (!Family.linked(this)) {
+        if (!Family.listening(this)) {
             stopSelf();
             return START_NOT_STICKY;
         }
@@ -71,15 +71,22 @@ public class FamilyService extends Service {
 
     private void waitForFamily() {
         long backoff = 0;
-        while (running && Family.linked(this)) {
+        while (running && Family.listening(this)) {
             try {
                 JSONObject res = Family.call(this, "GET", "/tv/sync?wait=20", null, 26_000);
                 backoff = 0;
                 if (!res.optBoolean("paired", true)) {
-                    unlinked(null);
-                    return;
+                    // Unlinked in the app: forget the household. A TV that was never linked listens for its visitors.
+                    if (Family.linked(this)) {
+                        unlinked(null);
+                        return;
+                    }
+                    Family.apply(this, null, res.optJSONArray("visitors"));
+                    if (!Family.listening(this)) break;
+                    Thread.sleep(250);
+                    continue;
                 }
-                Family.apply(this, res.optJSONObject("home"));
+                Family.apply(this, res.optJSONObject("home"), res.optJSONArray("visitors"));
                 JSONArray list = res.optJSONArray("commands");
                 for (int i = 0; list != null && i < list.length(); i++) {
                     JSONObject cmd = list.optJSONObject(i);
