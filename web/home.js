@@ -526,6 +526,8 @@
           step: function () { if (Prefs.quotes()) { Prefs.setCoin(i, !Prefs.coin(i)); Data.settingsChanged(); } }});
       })(i);
     }
+    rows.push({label: Family.linked() ? 'Beyond Family · ' + Family.homeName() : tr('Ligar ao Beyond Family', 'Link Beyond Family', 'Vincular Beyond Family'),
+      value: '›', step: function (d) { if (d >= 0) { if (Family.linked()) Family.manage(); else Family.link(function () { renderSettings(); }); } }});
     if (!Plex.linked()) rows.push({label: tr('Ligar o Plex', 'Link Plex', 'Enlazar Plex'), value: '›', step: function (d) { if (d >= 0) Plex.link(function () { renderSettings(); }); }});
     else {
       rows.push({label: tr('Usuário Plex de ', 'Plex user for ', 'Usuario Plex de ') + Profiles.current().name + ' · ' + ((Profiles.own('plexUser') || {}).name || tr('dono', 'owner', 'dueño')),
@@ -658,9 +660,10 @@
   function launcher(id, name) {
     return function () {
       // Plex opens Beyond TV's own Plex screen: Continue Watching, the libraries and the player, right here.
-      if (/plex/i.test(name || '') || /plex|cdp-30/i.test(id || '')) { Plex.open(); return; }
+      if (/plex/i.test(name || '') || /plex|cdp-30/i.test(id || '')) { Plex.open(); Family.now('Plex'); return; }
       TV.launch(id, null, function (ok) {
         if (!ok) toast(tr('Não deu para abrir ', "Couldn't open ", 'No se pudo abrir ') + (name || id));
+        else Family.now(name || id);
       });
     };
   }
@@ -872,15 +875,16 @@
 
   // MARK: - Keys
 
-  document.addEventListener('keydown', function (e) {
-    var k = e.keyCode;
-    if (poke()) { e.preventDefault(); return; }   // the first press only wakes the screen
+  /** One key, from the remote in the hand or the one on a phone (Beyond Family). True if it was used. */
+  function key(k) {
+    if (poke()) return true;   // the first press only wakes the screen
+    if (Family.hide()) return true;   // or puts a family message away
     if (UI.active()) {
       if (k >= 37 && k <= 40 || k === TV.keys.ok || k === TV.keys.back || k === 27 || k === 8 || k >= 48 && k <= 57 || k >= 65 && k <= 90 || k === 32) {
         UI.key(k);
-        e.preventDefault();
+        return true;
       }
-      return;
+      return false;
     }
     if (k === TV.keys.left) move(-1, 0);
     else if (k === TV.keys.right) move(1, 0);
@@ -888,9 +892,22 @@
     else if (k === TV.keys.down) move(0, 1);
     else if (k === TV.keys.ok) activate();
     else if (k === TV.keys.back || k === 27 || k === 8) back();
-    else return;
-    e.preventDefault();
+    else return false;
+    return true;
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (key(e.keyCode)) e.preventDefault();
   });
+
+  /** Opens a shelf app by its key ("netflix", "plex"), for Beyond Family's remote. False if this TV hasn't got it. */
+  function openShelf(name) {
+    for (var i = 0; i < apps.length; i++) {
+      var s = shelfKey(apps[i]);
+      if (s && s[0] === name) { launcher(apps[i].id, apps[i].title)(); return true; }
+    }
+    return false;
+  }
   document.addEventListener('mousemove', function () { poke(); });
 
   // MARK: - Start
@@ -959,6 +976,7 @@
   document.addEventListener('visibilitychange', function () {
     if (document.hidden) { hideSaver(); return; }
     idleAt = Date.now();
+    Family.now();
     loadApps(function () { renderShelf(); renderDrawer(); updateFocus(); Data.refresh(); });
   });
 
@@ -981,5 +999,6 @@
 
   // For the browser preview and tests.
   window.BeyondTV = {state: st, move: move, activate: activate, back: back, showSaver: showSaver, hideSaver: hideSaver, toast: toast,
-    refresh: profileChosen, apps: function () { return apps; }, launch: function (id, name) { launcher(id, name)(); }};
+    refresh: profileChosen, apps: function () { return apps; }, launch: function (id, name) { launcher(id, name)(); },
+    key: key, home: reset, openShelf: openShelf};
 })();

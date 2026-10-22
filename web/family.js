@@ -1,0 +1,310 @@
+/*
+ * Beyond Family on the TV: link this TV to the household, and do what the family app asks.
+ *
+ * Linking: the TV says hello to Beyond Family and gets back its own secret (kept here, never shown) and a six-letter
+ * code (shown big). A grown-up types the code into Beyond Family › TVs on their phone, and the TV is the household's.
+ * From then on the household's people are the TV's profiles (first names and colours, nothing else ever comes), and
+ * the TV waits for things to do: a remote press, an app to open, someone to switch to, or a message for the screen
+ * ("5 minutes to dinner"). Unpaired in the app, it hears within 20 seconds and forgets.
+ *
+ * Messages show over whatever Beyond TV is showing, Plex included, with a soft chime. They can't show over another
+ * company's app (Netflix has the screen then); they wait and show when the family comes back to Beyond TV, for up to
+ * ten minutes.
+ *
+ * Plain ES5, like the rest of web/.
+ */
+var Family = (function () {
+  'use strict';
+
+  var KEY = 'btv.family';
+  var API = (window.CONFIG && CONFIG.familyApi) || 'https://beyondfamily.app/api';
+
+  function load() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+  var state = load();
+
+  function call(method, path, body, done, timeout) {
+    var x = new XMLHttpRequest(), over = false;
+    x.open(method, API + path, true);
+    x.timeout = timeout || 15000;
+    if (state.id && state.secret) x.setRequestHeader('Authorization', 'Bearer ' + state.id + '.' + state.secret);
+    if (body !== undefined) x.setRequestHeader('Content-Type', 'application/json');
+    x.onreadystatechange = function () {
+      if (x.readyState !== 4 || over) return;
+      over = true;
+      var json = null;
+      try { json = x.responseText ? JSON.parse(x.responseText) : {}; } catch (e) { json = {}; }
+      if (x.status < 200 || x.status >= 300) { done({status: x.status, message: json && json.error}); return; }
+      done(null, json);
+    };
+    x.ontimeout = x.onerror = function () { if (!over) { over = true; done({status: 0}); } };
+    x.send(body === undefined ? null : JSON.stringify(body));
+  }
+
+  function linked() { return !!(state.id && state.home); }
+
+  /** Back to a TV that knows nobody: the secret is useless now anyway. */
+  function forget(why) {
+    var was = linked();
+    state = {};
+    save();
+    clearTimeout(loopTimer);
+    if (was && why) UI.toast(why);
+    if (window.BeyondTV && BeyondTV.refresh) BeyondTV.refresh();
+  }
+
+  // MARK: - The household
+
+  var lastPeople = '';
+
+  /** Beyond Family's people become the TV's profiles. Only when they changed, so nobody's screen jumps. */
+  function apply(home) {
+    if (!home) return;
+    var sig = JSON.stringify(home.people || []);
+    state.home = {name: home.name};
+    save();
+    if (sig === lastPeople || !home.people || !home.people.length) return;
+    lastPeople = sig;
+    Profiles.replace(home.people.map(function (p) {
+      return {id: 'bf-' + p.id, name: p.name, colour: p.colour || '#2F7D6D', kid: !!p.kid, family: p.id};
+    }));
+  }
+
+  // MARK: - Linking
+
+  function spaced(code) { return code ? code.slice(0, 3) + ' ' + code.slice(3) : ''; }
+
+  function link(done) {
+    var api = null, codeNode = null, noteNode = null, timer = 0, closed = false;
+
+    function note(text) { if (noteNode) noteNode.textContent = text; }
+    function show(code) { if (codeNode) { codeNode.textContent = spaced(code); UI.setClass(codeNode, 'waiting', !code); } }
+
+    function hello() {
+      show('');
+      note(tr('Falando com o Beyond Family…', 'Talking to Beyond Family…', 'Hablando con Beyond Family…'));
+      var name = TV.samsung ? 'Samsung TV' : TV.webos ? 'LG TV' : 'TV';
+      var fresh = !state.id;
+      var go = function (err, res) {
+        if (closed) return;
+        if (err && err.status === 401) { state = {}; save(); hello(); return; }
+        if (err) {
+          note(tr('Não deu para falar com o Beyond Family. Veja a internet da TV e tente de novo.',
+            "Couldn't reach Beyond Family. Check the TV's internet and try again.",
+            'No se pudo conectar con Beyond Family. Revisa el internet del TV e inténtalo de nuevo.'));
+          return;
+        }
+        if (res.paired) { check(); return; }
+        if (fresh) { state = {id: res.id, secret: res.secret}; save(); }
+        show(res.code);
+        note(tr('O código vale por ', 'The code lasts ', 'El código dura ') + (res.minutes || 10) + ' min.');
+        timer = setTimeout(check, 3000);
+      };
+      if (fresh) call('POST', '/tv/hello', {name: name}, go);
+      else call('POST', '/tv/code', {}, go);
+    }
+
+    function check() {
+      if (closed) return;
+      call('GET', '/tv/sync?wait=0', undefined, function (err, res) {
+        if (closed) return;
+        if (err && err.status === 401) { state = {}; save(); hello(); return; }
+        if (err) { timer = setTimeout(check, 5000); return; }
+        if (!res.paired) { if (res.expired) hello(); else timer = setTimeout(check, 3000); return; }
+        apply(res.home);
+        closed = true;
+        api.close();
+        UI.toast(tr('Ligada a ', 'Linked to ', 'Vinculado a ') + (res.home ? res.home.name : 'Beyond Family'));
+        start();
+        if (done) done(true);
+      });
+    }
+
+    UI.open({
+      cls: 'bt-link bt-family-link',
+      build: function (layer, a) {
+        api = a;
+        var box = UI.el('div', 'bt-linkbox', layer);
+        var mark = UI.el('div', 'bt-family-mark', box);
+        UI.dots(mark);
+        UI.el('span', '', mark, 'Beyond Family');
+        UI.el('div', 'bt-heading', box, tr('Ligue esta TV à família', 'Link this TV to your family', 'Vincula este TV a tu familia'));
+        UI.el('div', 'bt-sub', box, tr('No celular, abra Beyond Family › Família › TVs › Adicionar TV, e digite',
+          'On your phone, open Beyond Family › Family › TVs › Add a TV, and type',
+          'En tu teléfono, abre Beyond Family › Familia › TVs › Añadir TV, y escribe'));
+        codeNode = UI.el('div', 'bt-code', box);
+        noteNode = UI.el('div', 'bt-note', box);
+        var row = UI.el('div', 'bt-buttons', box);
+        a.add(UI.button(row, tr('Cancelar', 'Cancel', 'Cancelar')), function () { a.close(); }, {first: true});
+        hello();
+      },
+      closed: function () { closed = true; clearTimeout(timer); }
+    });
+  }
+
+  /** The settings row's answer when linked: say which household, and offer to unlink. */
+  function manage() {
+    UI.open({
+      cls: 'bt-link bt-family-link',
+      build: function (layer, a) {
+        var box = UI.el('div', 'bt-linkbox', layer);
+        var mark = UI.el('div', 'bt-family-mark', box);
+        UI.dots(mark);
+        UI.el('span', '', mark, 'Beyond Family');
+        UI.el('div', 'bt-heading', box, state.home ? state.home.name : 'Beyond Family');
+        UI.el('div', 'bt-note', box, tr('Esta TV mostra os perfis da família, obedece ao controle no celular e mostra os recados.',
+          "This TV shows your family's profiles, follows the remote on your phone and shows the family's messages.",
+          'Este TV muestra los perfiles de la familia, sigue el control en tu teléfono y muestra los mensajes.'));
+        var row = UI.el('div', 'bt-buttons', box);
+        a.add(UI.button(row, tr('Pronto', 'Done', 'Listo')), function () { a.close(); }, {first: true});
+        a.add(UI.button(row, tr('Desligar esta TV', 'Unlink this TV', 'Desvincular este TV'), null, 'danger'), function () {
+          Profiles.guard(tr('Desligar do Beyond Family', 'Unlink from Beyond Family', 'Desvincular de Beyond Family'), function () {
+            call('POST', '/tv/bye', {}, function () {});
+            forget(tr('Desligada do Beyond Family', 'Unlinked from Beyond Family', 'Desvinculado de Beyond Family'));
+            a.close();
+          });
+        });
+      }
+    });
+  }
+
+  // MARK: - Doing what the app asks
+
+  var loopTimer = 0, backoff = 0, running = false;
+
+  function start() {
+    if (running || !state.id) return;
+    running = true;
+    clearTimeout(loopTimer);
+    loop();
+  }
+
+  function loop() {
+    if (!state.id) { running = false; return; }
+    call('GET', '/tv/sync?wait=20', undefined, function (err, res) {
+      if (err && err.status === 401) {
+        running = false;
+        forget(tr('O Beyond Family desligou esta TV', 'Beyond Family unlinked this TV', 'Beyond Family desvinculó este TV'));
+        return;
+      }
+      if (err) {
+        backoff = Math.min(60000, backoff ? backoff * 2 : 3000);
+        loopTimer = setTimeout(loop, backoff);
+        return;
+      }
+      backoff = 0;
+      if (res.paired === false) { running = false; forget(); return; }
+      apply(res.home);
+      var list = res.commands || [];
+      for (var i = 0; i < list.length; i++) run(list[i]);
+      loopTimer = setTimeout(loop, 250);
+    }, 26000);
+  }
+
+  var KEYS = {up: 38, down: 40, left: 37, right: 39, ok: 13};
+
+  function run(c) {
+    if (c.kind === 'say') { say(c.text, c.tone, c.from); return; }
+    if (hide()) { if (c.kind === 'key') return; }  // the first press puts a message away, like it would on the remote
+    if (c.kind === 'key') {
+      if (c.key === 'home') { UI.closeAll(); BeyondTV.home(); return; }
+      if (c.key === 'back') { BeyondTV.key(TV.keys.back); return; }
+      if (c.key === 'playpause') {
+        // Beyond TV's own player pauses on OK. Anywhere else there's nothing of ours to pause.
+        if (document.querySelector('.px-player.open')) BeyondTV.key(KEYS.ok);
+        return;
+      }
+      if (KEYS[c.key]) BeyondTV.key(KEYS[c.key]);
+      return;
+    }
+    if (c.kind === 'launch') {
+      if (!BeyondTV.openShelf(c.app)) UI.toast(tr('Esse app não está nesta TV', "That app isn't on this TV", 'Esa app no está en este TV'));
+      return;
+    }
+    if (c.kind === 'profile') {
+      if (Profiles.use('bf-' + c.memberId)) UI.toast(tr('Agora: ', 'Now watching: ', 'Ahora: ') + Profiles.current().name);
+    }
+  }
+
+  // MARK: - Messages on the screen
+
+  var TONES = {
+    info: {icon: '✦', colour: '#2F7D6D'},
+    dinner: {icon: '🍽', colour: '#E8A33D'},
+    tidy: {icon: '🧺', colour: '#D85A30'},
+    bedtime: {icon: '🌙', colour: '#7A4FD0'},
+    alarm: {icon: '⏰', colour: '#D85A30'},
+    security: {icon: '🔔', colour: '#D85A30'},
+    call: {icon: '📞', colour: '#378ADD'}
+  };
+  var shown = null, hideTimer = 0;
+
+  function chime() {
+    try {
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      var ctx = chime.ctx || (chime.ctx = new Ctx());
+      var notes = [660, 880];
+      for (var i = 0; i < notes.length; i++) {
+        var o = ctx.createOscillator(), g = ctx.createGain(), t = ctx.currentTime + i * 0.18;
+        o.type = 'sine';
+        o.frequency.value = notes[i];
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.18, t + 0.03);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(t); o.stop(t + 0.65);
+      }
+    } catch (e) {}
+  }
+
+  /** A message over everything: icon, words, who it's from. Gone after 15 seconds or the next key press. */
+  function say(text, tone, from) {
+    hide(true);
+    var t = TONES[tone] || TONES.info;
+    var stage = document.getElementById('stage');
+    var card = UI.el('div', 'bt-alert', stage);
+    card.style.borderColor = t.colour;
+    var icon = UI.el('div', 'bt-alert-icon', card, t.icon);
+    icon.style.background = t.colour;
+    var body = UI.el('div', 'bt-alert-body', card);
+    UI.el('div', 'bt-alert-text', body, text);
+    UI.el('div', 'bt-alert-from', body, (from ? tr('De ', 'From ', 'De ') + from + ' · ' : '') + tr('agora', 'just now', 'ahora'));
+    shown = card;
+    setTimeout(function () { UI.setClass(card, 'on', true); }, 20);
+    chime();
+    hideTimer = setTimeout(function () { hide(); }, 15000);
+  }
+
+  /** Puts the message away. True if there was one, so the key that did it does nothing else. */
+  function hide(now) {
+    if (!shown) return false;
+    var card = shown;
+    shown = null;
+    clearTimeout(hideTimer);
+    UI.setClass(card, 'on', false);
+    setTimeout(function () { if (card.parentNode) card.parentNode.removeChild(card); }, now ? 0 : 400);
+    return true;
+  }
+
+  // MARK: - What's on, for the remote
+
+  function now(app, title) {
+    if (!linked()) return;
+    var who = Profiles.current();
+    // An empty answer means back on Beyond TV's home: nothing playing.
+    call('POST', '/tv/now', app ? {app: String(app).slice(0, 40), title: title ? String(title).slice(0, 120) : undefined, who: who ? who.name : undefined} : {}, function () {});
+  }
+
+  if (linked()) start();
+
+  return {
+    linked: linked,
+    homeName: function () { return state.home ? state.home.name : ''; },
+    link: link,
+    manage: manage,
+    say: say,
+    hide: hide,
+    now: now
+  };
+})();

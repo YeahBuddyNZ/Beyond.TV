@@ -156,7 +156,7 @@ var Profiles = (function () {
           var m = UI.button(foot, tr('Gerenciar perfis', 'Manage profiles', 'Administrar perfiles'), 'settings');
           api.add(m, function () { guard(tr('Gerenciar perfis', 'Manage profiles', 'Administrar perfiles'), function () { pick(true, function () { UI.top() && UI.top().rebuild(); }); }); });
         }
-        if (window.Family && Family.paired()) UI.el('div', 'bt-who-note', foot, tr('Do Beyond Family: ', 'From Beyond Family: ', 'De Beyond Family: ') + Family.householdName());
+        if (window.Family && Family.linked()) UI.el('div', 'bt-who-note', foot, tr('Do Beyond Family: ', 'From Beyond Family: ', 'De Beyond Family: ') + Family.homeName());
       },
       back: function () { return !manage && !current(); },
       closed: function () { whoOpen = false; if (manage && done) done(); }
@@ -303,13 +303,15 @@ var Profiles = (function () {
       for (var i = 0; i < list.length; i++) keep[list[i].id] = list[i];
       list = people.map(function (p) {
         var old = keep[p.id];
-        if (old) { p.shelf = old.shelf; p.plexUser = old.plexUser; }
+        if (old) { p.shelf = old.shelf; p.plexUser = old.plexUser; p.emoji = p.emoji || old.emoji; }
         return p;
       });
       if (!find(who)) who = list[0].id;
       save(WHO, who);
       changed();
     },
+    /** Switches to someone from Beyond Family's remote. The app already checked who may (a kid only to themselves). */
+    use: function (id) { if (!find(id) || id === who) return false; who = id; save(WHO, who); changed(); return true; },
     onChange: function (fn) { listeners.push(fn); }
   };
 })();
