@@ -47,7 +47,7 @@ Free and open source, built in Aotearoa by [Beyond](https://gobeyond.co.nz). One
 2. Plex built in: link with a code at plex.tv/link, then Continue Watching and Recently Added on the home screen.
 3. All your services as one: one "What's on" across every service you have, opening each title in its own app.
 4. Beyond Family: pair the TV with your household, a phone remote in the Beyond Family app, voice search for kids, and the family house game on the big screen.
-5. Picks for kids: interests set by a grown-up, gentle suggestions of something better to watch, and a parent code for the grown-up settings.
+5. Picks for kids: done on LG and Samsung. A kid's cards are good shows matched to what they're into, set by a grown-up (Beyond Family or behind the PIN) or by the kid ("What do you like to watch?"), and coming back from an app the TV now and then suggests one. No TMDB key needed. Google TV once it pairs with Beyond Family.
 6. Two homes, one show: done on LG and Samsung. The Beyond Family app starts a countdown on every TV in two linked homes, and reactions come from phones. Google TV once it pairs with Beyond Family.
 7. Earn your screen: done on LG and Samsung. Switched on in Beyond Family, a kid's apps wait until their jobs for today are ticked off. Google TV once it pairs with Beyond Family.
 8. The house noticeboard: done on LG and Samsung. Switched on in Beyond Family, the screensaver shows today's calendar, tea, birthdays and notes beside the clock. Google TV once it pairs with Beyond Family.
@@ -265,7 +265,9 @@ The website is in [`docs/`](docs): plain HTML and CSS on GitHub Pages.
 
 No accounts, no ads, no tracking. The app talks to TMDB, Open-Meteo (with the coordinates you set, or your time zone's main city), Binance only when `show_crypto=true`, Watchmode only when you set a `watchmode_key`, and Beyond Family only when you link the TV to it. Your settings stay on your computer and your TV.
 
-**The daily check-in.** So we can fix a problem on one make of TV before anybody has to ask, once a day the TV tells Beyond (beyondfamily.app) a made-up id, its city rounded to about 10km, its make, model and Android or TV software version, the Beyond TV version, which home screen is on, how many times the home screen opened and crashed, and its last 20 error messages. Never what anybody watches, never an IP address kept, never a name or a household. **Home Settings → Help fix problems** turns it off, and turning it off asks Beyond to delete everything it had for that TV. The code is [`Checkin.java`](app/src/nz/gobeyond/tv/Checkin.java) and [`web/checkin.js`](web/checkin.js).
+**The daily check-in.** So we can fix a problem on one make of TV before anybody has to ask, once a day the TV tells Beyond (beyondfamily.app) a made-up id, its city rounded to about 10km, its make, model and Android or TV software version, the Beyond TV version, which home screen is on, how many times the home screen opened and crashed, and its last 20 error messages. Never what anybody watches, never an IP address kept, never a name or a household.
+
+**Linked to Beyond Family**, the TV learns the household's name and each person's first name, colour and whether they're a kid, plus what the household switched on (today's jobs, the noticeboard) and what a grown-up said each kid is into, for their picks. What a kid is into stays on the TV otherwise. **Home Settings → Help fix problems** turns it off, and turning it off asks Beyond to delete everything it had for that TV. The code is [`Checkin.java`](app/src/nz/gobeyond/tv/Checkin.java) and [`web/checkin.js`](web/checkin.js).
 
 ## Credits
 

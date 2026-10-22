@@ -667,3 +667,20 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .bt-dinner .answer b { display: block; font-size: 28px; font-weight: 600; color: rgba(247, 246, 242, 0.75); margin-bottom: 8px; }
 .bt-dinner .answer span { display: block; font-size: 38px; line-height: 1.25; }
 .bt-dinner .hold { position: absolute; left: 0; top: 0; width: 1px; height: 1px; }
+
+/* Kids' picks (kidpicks.js): a show matched to what they're into, drawn as a big emoji on their colour. */
+.card.kidpick .emoji {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  margin-top: -80px;
+  font-size: 160px;
+  line-height: 160px;
+  text-align: center;
+  text-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+.bt-likes .bt-box { position: absolute; left: 0; right: 0; top: 140px; text-align: center; }
+.bt-likes .bt-heading { display: inline-block; }
+.bt-likes .bt-sub { max-width: 1100px; margin: 18px auto 50px; }
+.bt-likes .bt-buttons { margin-top: 30px; text-align: center; }
