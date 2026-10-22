@@ -57,6 +57,7 @@ Free and open source, built in Aotearoa by [Beyond](https://gobeyond.co.nz). One
 12. Te reo word of the day: done on Google TV, LG and Samsung. A new kupu each day on the home screen, with what it means, and on the LG and Samsung screensaver how to say it. Settings can turn it off.
 13. Beyond™ TV for business (testing now): shop-window screens changed from the web, as a subscription. Open `/screen` on the TV, type its code into Beyond™ Spaces, and it plays your pictures, videos and web pages. Free for homes, always.
 14. Your face on any TV: done on Google TV, LG and Samsung. Each person's face, colour, world, loves and shelf live with them in Beyond Family, so every TV at home shows them and a new TV brings them across. On somebody else's Beyond TV, Who's watching › Sign in with Beyond Family shows a code to type into your phone, and your own profile is there until you sign out. Google TV takes the face and colour; the rest follows.
+15. Sleep timer: done on Google TV, LG and Samsung. Sleep Timer in the menu under the shelf: each press picks 15, 30, 60 or 90 minutes, or off. A note a minute before, then the TV turns off (on Samsung, which lets no app turn it off, the screen goes dark until a key is pressed).
 
 Ideas welcome: press the four dots (*Talk to Beyond*) on the TV.
 

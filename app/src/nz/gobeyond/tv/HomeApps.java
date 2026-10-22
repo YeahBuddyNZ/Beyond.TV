@@ -61,6 +61,8 @@ final class HomeApps {
     static final int FEEDBACK = 8;
     /** Who's watching: the face in the corner, opening the picker. */
     static final int PEOPLE = 9;
+    /** The sleep timer (Sleep): each press moves to the next choice. */
+    static final int SLEEP = 10;
     /** Image size of each card (16:9; on screen it shows up to ~330 px wide). */
     static final int TILE_W = 384, TILE_H = 216;
 
@@ -229,6 +231,7 @@ final class HomeApps {
     static List<Item> drawerShortcuts() {
         List<Item> items = new ArrayList<>();
         items.add(shortcut(ALL_APPS, "all", Ui.tr("Todos os Apps", "All Apps"), "apps"));
+        items.add(shortcut(SLEEP, "sleep", Ui.tr("Timer de desligar", "Sleep Timer"), "bedtime"));
         items.add(shortcut(SETTINGS, "settings", Ui.tr("Ajustes do Início", "Home Settings"), "settings"));
         items.add(shortcut(ANDROID_SETTINGS, "tv-settings", Ui.tr("Ajustes da TV", "TV Settings"), "tv_settings"));
         return items;

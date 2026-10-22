@@ -195,6 +195,11 @@
             android:process=":home"
             android:exported="false" />
 
+        <!-- The sleep timer: a minute's warning, then the TV turns off (Sleep). -->
+        <receiver
+            android:name=".Sleep$Receiver"
+            android:exported="false" />
+
         <receiver
             android:name=".HomeReceiver"
             android:exported="false">
