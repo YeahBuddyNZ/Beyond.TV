@@ -1126,6 +1126,7 @@
     // A kid who hasn't made it theirs yet is asked once, the first time they pick their face.
     var me = Profiles.current();
     if (me.kid && !me.look && !me.offered) setTimeout(makeItYours, 450);
+    else if (me.kid) setTimeout(Pets.ask, 600);   // and have the pets been fed today?
     pickShelf();
     cards = [];
     st.zone = Z.SHELF;

@@ -7,6 +7,18 @@ var I18N = (function () {
 
   var lang = 'en';
   var german = {
+    " and ": " und ",
+    "Did ": "Haben ",
+    " get fed today?": " heute schon Futter bekommen?",
+    "Hey ": "Hallo ",
+    ", Beyond Family will know too.": ", Beyond Family erfährt es auch.",
+    "Yes, they're fed": "Ja, sie haben gefressen",
+    "Not yet": "Noch nicht",
+    "Off you go! ": "Los geht's! ",
+    " would love some food.": " hätten gern ihr Fressen.",
+    "Couldn't tell Beyond Family just now.": "Beyond Family ließ sich gerade nicht erreichen.",
+    "Thanks, ": "Danke, ",
+    "! It's ticked off in Beyond Family.": "! Es ist in Beyond Family abgehakt.",
     "Live TV": "Live-TV",
     "All Apps": "Alle Apps",
     "Settings": "Einstellungen",
@@ -181,6 +193,18 @@ var I18N = (function () {
   }
 
   var russian = {
+    " and ": " и ",
+    "Did ": "Покормили ",
+    " get fed today?": " сегодня?",
+    "Hey ": "Привет, ",
+    ", Beyond Family will know too.": "! Beyond Family тоже узнает.",
+    "Yes, they're fed": "Да, покормили",
+    "Not yet": "Ещё нет",
+    "Off you go! ": "Беги! ",
+    " would love some food.": " ждут еду.",
+    "Couldn't tell Beyond Family just now.": "Сейчас не получилось сообщить Beyond Family.",
+    "Thanks, ": "Спасибо, ",
+    "! It's ticked off in Beyond Family.": "! Отмечено в Beyond Family.",
     "Live TV": "Телеканалы",
     "All Apps": "Приложения",
     "Settings": "Настройки",
