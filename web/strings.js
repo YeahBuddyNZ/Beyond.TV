@@ -175,13 +175,32 @@ var I18N = (function () {
     "Sign in with your Beyond Family": "Melde dich mit deinem Beyond Family an",
     "Sign out of this TV": "Von diesem Fernseher abmelden",
     "On your phone, open Beyond Family › Family › TVs › On somebody else's TV, and type": "Öffne auf dem Handy Beyond Family › Familie › Fernseher › Auf einem anderen Fernseher und tippe",
-    "Your family is on this TV already. This is for somebody from another home.": "Deine Familie ist schon auf diesem Fernseher. Das hier ist für jemanden aus einem anderen Zuhause."
+    "Your family is on this TV already. This is for somebody from another home.": "Deine Familie ist schon auf diesem Fernseher. Das hier ist für jemanden aus einem anderen Zuhause.",
+    "Kia ora": "Kia ora",
+    ", whānau": ", whānau",
+    "Keep watching": "Weiterschauen",
+    "te reo word of the day": "Te-Reo-Wort des Tages",
+    "Just now": "Gerade eben",
+    "An hour ago": "Vor einer Stunde",
+    "Last night": "Gestern Abend",
+    "Yesterday": "Gestern",
+    "Tonight at home": "Heute Abend zu Hause",
+    "Today at home": "Heute zu Hause",
+    "Linked": "Verbunden",
+    "Tea tonight": "Heute zum Abendessen",
+    "The moon button, up the top": "Der Mond-Knopf, ganz oben",
+    "Link Beyond Family": "Mit Beyond Family verbinden",
+    "And your home's plans show up here": "Dann erscheinen hier die Pläne deines Zuhauses",
+    "High ": "Max. ",
+    "Low ": "Min. "
   };
 
   /** German by the English; text built at runtime by its English pattern. */
   function germanText(en) {
     if (Object.prototype.hasOwnProperty.call(german, en)) return german[en];
-    var m = /^(\d+) (min|h) ago$/.exec(en);
+    var m = /^(\d+) hours ago$/.exec(en);
+    if (m) return 'Vor ' + m[1] + ' Stunden';
+    m = /^(\d+) (min|h) ago$/.exec(en);
     if (m) return 'vor ' + m[1] + (m[2] === 'min' ? ' Min.' : ' Std.');
     m = /^(\d+) seasons?$/.exec(en);
     if (m) return m[1] + (m[1] === '1' ? ' Staffel' : ' Staffeln');
@@ -370,12 +389,31 @@ var I18N = (function () {
     "Sign in with your Beyond Family": "Войдите через свой Beyond Family",
     "Sign out of this TV": "Выйти на этом телевизоре",
     "On your phone, open Beyond Family › Family › TVs › On somebody else's TV, and type": "На телефоне откройте Beyond Family › Семья › Телевизоры › На чужом телевизоре и введите",
-    "Your family is on this TV already. This is for somebody from another home.": "Ваша семья уже на этом телевизоре. Это для гостей из другого дома."
+    "Your family is on this TV already. This is for somebody from another home.": "Ваша семья уже на этом телевизоре. Это для гостей из другого дома.",
+    "Kia ora": "Kia ora",
+    ", whānau": ", whānau",
+    "Keep watching": "Продолжить просмотр",
+    "te reo word of the day": "слово дня на те рео",
+    "Just now": "Только что",
+    "An hour ago": "Час назад",
+    "Last night": "Вчера вечером",
+    "Yesterday": "Вчера",
+    "Tonight at home": "Сегодня вечером дома",
+    "Today at home": "Сегодня дома",
+    "Linked": "Подключено",
+    "Tea tonight": "Ужин сегодня",
+    "The moon button, up the top": "Кнопка с луной, наверху",
+    "Link Beyond Family": "Подключить Beyond Family",
+    "And your home's plans show up here": "И здесь появятся планы вашего дома",
+    "High ": "Макс. ",
+    "Low ": "Мин. "
   };
 
   function russianText(en) {
     if (Object.prototype.hasOwnProperty.call(russian, en)) return russian[en];
-    var m = /^(\d+) (min|h) ago$/.exec(en);
+    var m = /^(\d+) hours ago$/.exec(en);
+    if (m) return m[1] + ' ч назад';
+    m = /^(\d+) (min|h) ago$/.exec(en);
     if (m) return m[1] + (m[2] === 'min' ? ' мин назад' : ' ч назад');
     m = /^The shelf holds up to (\d+) apps\.$/.exec(en);
     if (m) return 'В избранное можно добавить не более ' + m[1] + ' приложений.';

@@ -1,8 +1,10 @@
 /*
  * The home screen for web-app TVs (LG webOS, Samsung Tizen), with the Android app's design and behavior (HomeView):
- *  - top: the "For You" title and the tabs (Explore, Movies, Shows); icon-only glass buttons at the right (Live TV,
- *    HDMI Inputs, Settings) and the crypto quotes at the end of the tab row;
- *  - three picks for this hour in the selected tab; the background is the first one's photo, blurred and almost white;
+ *  - top: "Kia ora, Mum", the time, date and weather on one line, and the te reo word of the day; icon-only glass
+ *    buttons at the right (Live TV, HDMI Inputs, Settings);
+ *  - tabs (Keep watching, Explore, Movies, Shows) over three little TV screens: what was last opened from here, or the
+ *    picks for this hour; the background is the first pick's photo, blurred and almost white;
+ *  - "Tonight at home" at the right, with Beyond Family's badge when the TV is linked;
  *  - the glass shelf with the apps; ↓ opens the drawer (inputs, shortcuts, weather, prices); ↑ or Back closes it;
  *  - a night look from sunset to sunrise; a screensaver after a few idle minutes.
  * The remote's arrows, OK and Back move the focus; a pointer (LG's Magic Remote) focuses what it points at.
@@ -172,8 +174,8 @@
       setClass(list[i], 'focus', st.zone === Z.TOP && st.top === i);
     }
     list = $('buttons').children;
-    for (i = 0; i < list.length; i++) setClass(list[i], 'focus', st.zone === Z.TOP && st.top === 3 + i);
-    setClass($('quotes'), 'hide', st.zone === Z.TOP && st.top >= 3);
+    for (i = 0; i < list.length; i++) setClass(list[i], 'focus', st.zone === Z.TOP && st.top === kinds.length + i);
+    setClass($('quotes'), 'hide', st.zone === Z.TOP && st.top >= kinds.length);
     list = $('cards').children;
     for (i = 0; i < list.length; i++) setClass(list[i], 'focus', st.zone === Z.CARDS && st.card === i);
     list = $('tiles').querySelectorAll('.tile');
@@ -215,7 +217,24 @@
 
   // MARK: - Top: title, tabs, buttons, quotes
 
-  var TAB_KIND = [null, 'movie', 'tv'];
+  /**
+   * The tabs over the screens: Keep watching once something was opened from here, then the picks (Explore, Movies,
+   * Shows) when there are picks to show (a TMDB key, or a kid's own list).
+   */
+  var kinds = [];
+
+  function tabKinds() {
+    var k = [];
+    if (Watched.list(1).length) k.push('watching');
+    if (Data.hasKey() || Profiles.kid()) k.push('all', 'movie', 'tv');
+    return k;
+  }
+
+  function tabName(kind) {
+    return kind === 'watching' ? tr('Continuar assistindo', 'Keep watching', 'Seguir viendo')
+      : kind === 'movie' ? tr('Filmes', 'Movies', 'Películas') : kind === 'tv' ? tr('Séries', 'Shows', 'Series')
+      : tr('Explorar', 'Explore', 'Explorar');
+  }
 
   /** The round buttons at the top right: Live TV, HDMI Inputs, Settings and whoever's watching (kids get fewer). */
   function topButtons() {
@@ -238,14 +257,16 @@
   }
 
   function renderTop() {
-    var me = Profiles.current();
-    $('title').textContent = me.together ? tr('Para a família', 'For the family', 'Para la familia')
-      : Profiles.count() > 1 ? tr('Para ', 'For ', 'Para ') + me.name : tr('Para você', 'For You', 'Para ti');
+    var me = Profiles.current(), hello = tr('Olá', 'Kia ora', 'Hola');
+    $('title').textContent = me.together ? hello + tr(', família', ', whānau', ', familia')
+      : Profiles.count() > 1 ? hello + ', ' + me.name : hello;
+    var was = kinds[st.tab];
+    kinds = tabKinds();
+    st.tab = Math.max(0, kinds.indexOf(was));
     var tabs = $('tabs');
     tabs.innerHTML = '';
-    var names = [tr('Explorar', 'Explore', 'Explorar'), tr('Filmes', 'Movies', 'Películas'), tr('Séries', 'Shows', 'Series')];
-    for (var i = 0; i < 3; i++) {
-      var t = el('button', 'tab', tabs, names[i]);
+    for (var i = 0; i < kinds.length; i++) {
+      var t = el('button', 'tab', tabs, tabName(kinds[i]));
       hover(t, Z.TOP, i);
     }
     var buttons = $('buttons');
@@ -258,18 +279,21 @@
       else if (defs[b].dots) UI.dots(r);
       else sym(defs[b].icon, r);
       el('div', 'tip', r, defs[b].label);
-      hover(r, Z.TOP, 3 + b);
+      hover(r, Z.TOP, kinds.length + b);
     }
   }
 
   function renderQuotes() {
     var q = $('quotes'), coins = Data.activeCoins();
     q.innerHTML = '';
-    // Te reo word of the day, first in the row: the kupu, then what it means.
+    // Te reo word of the day, in its own chip under the time: the kupu, then what it means.
+    var kupu = $('kupu');
+    kupu.innerHTML = '';
+    setClass(kupu, 'on', Prefs.kupu());
     if (Prefs.kupu()) {
-      var k = Kupu.today(), word = el('span', 'q kupu', q);
-      el('b', '', word, k.word);
-      word.appendChild(document.createTextNode(' · ' + k.meaning));
+      var k = Kupu.today();
+      el('b', '', kupu, k.word);
+      el('span', '', kupu, k.meaning + ' · ' + tr('palavra do dia em te reo', 'te reo word of the day', 'palabra del día en te reo'));
     }
     for (var i = 0; i < coins.length; i++) {
       var item = el('span', 'q', q);
@@ -281,8 +305,9 @@
   // MARK: - Picks and background
 
   function renderCards() {
-    // A kid watching gets good shows matched to what they're into, or a card asking what that is.
-    var list = KidPicks.cards(TAB_KIND[st.tab]) || Data.picks(TAB_KIND[st.tab]);
+    // Keep watching, or the picks: a kid watching gets good shows matched to what they're into, or a card asking.
+    var kind = kinds[st.tab], pickKind = kind === 'all' ? null : kind;
+    var list = kind === 'watching' ? watchingCards() : kind ? KidPicks.cards(pickKind) || Data.picks(pickKind) : [];
     var holder = $('cards');
     setClass(body, 'no-picks', !list.length);
     var same = list.length === cards.length;
@@ -290,25 +315,54 @@
     if (same && holder.children.length === list.length) return;
     cards = list;
     holder.innerHTML = '';
-    var rects = [[80, 1040], [1160, 320], [1520, 320]];
-    for (var c = 0; c < list.length; c++) {
-      var p = list[c], card = el('div', 'card', holder);
-      card.style.left = rects[c][0] + 'px';
-      card.style.width = rects[c][1] + 'px';
+    // Three little TV screens on stands, like the Beyond mark.
+    for (var c = 0; c < list.length && c < 3; c++) {
+      var p = list[c], card = el('div', 'card screen', holder);
+      card.style.left = (80 + c * 400) + 'px';
       var img = el('div', 'img', card);
+      el('div', 'stand', card);
       if (p.kid || p.ask) {
         setClass(card, 'kidpick', true);
         img.style.background = 'linear-gradient(135deg, ' + p.colour + ', #2C2458)';
         el('div', 'emoji', img, p.emoji);
-      } else img.style.backgroundImage = 'url(' + Data.image(p.backdrop, c === 0 ? 'w1280' : 'w780') + ')';
+      } else if (p.watched) {
+        var app = appById(p.watched.app);
+        if (p.watched.image) img.style.backgroundImage = 'url(' + p.watched.image + ')';
+        else if (app) { setClass(img, 'face', true); face(app, img, 30); }
+        else img.style.background = '#2C2458';
+        el('div', 'when', img, Watched.when(p.watched.at));
+      } else img.style.backgroundImage = 'url(' + Data.image(p.backdrop, 'w780') + ')';
+      el('div', 'play', img);
       el('div', 'name', card, p.title);
-      if (c === 0 && p.meta) el('div', 'meta', card, p.meta);
+      if (p.meta) el('div', 'meta', card, p.meta);
       hover(card, Z.CARDS, c);
     }
+    list = list.slice(0, 3);
+    cards = list;
     st.card = Math.min(st.card, Math.max(0, list.length - 1));
     if (!list.length && st.zone === Z.CARDS) st.zone = Z.SHELF;
     backdrop(list.length && list[0].backdrop ? Data.image(list[0].backdrop, 'w300') : '');
+    renderClock();
     updateFocus();
+  }
+
+  function appById(id) {
+    for (var i = 0; i < apps.length; i++) if (apps[i].id === id) return apps[i];
+    return null;
+  }
+
+  /** Keep watching as cards: the show and its app when it came from a pick, otherwise just the app. */
+  function watchingCards() {
+    return Watched.list(3).map(function (x) {
+      var app = appById(x.app), name = (app && app.title) || x.name;
+      return {id: 'w:' + x.app + ':' + x.title + ':' + x.at, watched: x, title: x.title || name, meta: x.title ? name : '', app: x.app};
+    });
+  }
+
+  /** Something opened from here goes to the front of Keep watching. */
+  function remember(app, title, image) {
+    if (!app) return;
+    Watched.add({app: app.id, name: app.title, title: title || '', image: image || ''});
   }
 
   var bgUrl = null, bgFront = 'bgA';
@@ -336,13 +390,78 @@
   }
 
   function renderClock() {
-    var d = new Date(), c = $('clock');
+    var d = new Date(), c = $('clock'), date;
     c.firstChild.textContent = Data.time(d.getTime());
     try {
-      c.lastChild.textContent = d.toLocaleDateString(I18N.locale(), {weekday: 'long', day: 'numeric', month: 'long'});
+      date = d.toLocaleDateString(I18N.locale(), {weekday: 'long', day: 'numeric', month: 'long'});
     } catch (e) {
-      c.lastChild.textContent = d.toDateString();
+      date = d.toDateString();
     }
+    c.lastChild.textContent = date;
+    // One line under the greeting: the time, the day and the weather outside.
+    var info = $('info'), w = Data.weather;
+    info.innerHTML = '';
+    // Without screens to show, the big clock has the time, so the line starts with the day.
+    if (!hasClass(body, 'no-picks')) { el('b', 'time', info, Data.time(d.getTime())); el('span', '', info, '  ·  '); }
+    el('span', '', info, date);
+    if (w && Prefs.weather()) el('span', '', info, '  ·  ' + (Data.city ? Data.city + ' ' : '') + Data.degrees(w.temp) + ', ' + Data.condition(w.code, w.isDay).toLowerCase());
+  }
+
+  // MARK: - Tonight at home
+
+  /**
+   * The card at the right: Beyond Family's badge when the TV is linked (the four dots, the household and its faces),
+   * then what's on at home today from the noticeboard (tea, birthdays, the calendar, notes), the weather, and at
+   * night, bedtime breathing.
+   */
+  function renderTonight() {
+    var box = $('tonight');
+    box.innerHTML = '';
+    var kid = Profiles.kid(), linked = Family.linked(), night = Data.isNight(Date.now());
+    if (linked) {
+      var badge = el('div', 'family', box);
+      el('i', 'live', badge);
+      dots(badge);
+      var words = el('div', 'words', badge);
+      el('b', '', words, 'Beyond Family');
+      el('span', '', words, Family.homeName() || tr('Conectado', 'Linked', 'Conectado'));
+      var faces = el('div', 'faces', badge), people = Profiles.list().filter(function (p) { return !p.together; });
+      for (var f = 0; f < people.length && f < 5; f++) {
+        var face1 = el('i', 'face', faces, people[f].emoji || (people[f].name || '?').charAt(0).toUpperCase());
+        face1.style.background = people[f].colour || '#2F7D6D';
+      }
+    }
+    el('div', 'head', box, night ? tr('Hoje à noite em casa', 'Tonight at home', 'Esta noche en casa') : tr('Hoje em casa', 'Today at home', 'Hoy en casa'));
+    var rows = [], b = Family.board ? Family.board() : null;
+    if (b) {
+      for (var i = 0; i < (b.birthdays || []).length; i++) rows.push(['🎂', tr('Feliz aniversário, ', 'Happy birthday, ', '¡Feliz cumpleaños, ') + b.birthdays[i] + '!', '']);
+      if (b.tea) rows.push(['🍲', b.tea, tr('Jantar', 'Tea tonight', 'Cena')]);
+      var events = b.events || [];
+      for (var e = 0; e < events.length; e++) {
+        var ev = events[e];
+        rows.push(['📅', ev.title, [ev.time ? Data.time(clockAt(ev.time)) : tr('O dia todo', 'All day', 'Todo el día'), ev.who, ev.where].filter(function (x) { return x; }).join(' · ')]);
+      }
+      var notes = b.notes || [];
+      for (var n = 0; n < notes.length; n++) rows.push(['💬', notes[n].text, notes[n].from]);
+    }
+    var w = Data.weather;
+    if (w && Prefs.weather()) {
+      rows.push([null, Data.degrees(w.temp) + ', ' + Data.condition(w.code, w.isDay).toLowerCase(),
+        (I18N.lang === 'en' ? 'High ' + Data.degrees(w.max) + ', low ' + Data.degrees(w.min) : tr('Máx. ', 'High ', 'Máx. ') + Data.degrees(w.max) + '  ' + tr('Mín. ', 'Low ', 'Mín. ') + Data.degrees(w.min)),
+        Data.symbol(w.code, w.isDay)]);
+    }
+    if (night) rows.push(['🌙', tr('Respirar para dormir', 'Bedtime breathing', 'Respirar para dormir'), tr('No botão da lua, lá em cima', 'The moon button, up the top', 'En el botón de la luna, arriba')]);
+    if (!linked && !kid) rows.push(['✨', tr('Conecte o Beyond Family', 'Link Beyond Family', 'Conecta Beyond Family'), tr('E os planos da casa aparecem aqui', "And your home's plans show up here", 'Y los planes de casa aparecen aquí')]);
+    var room = linked ? 3 : 4;
+    for (var r = 0; r < rows.length && r < room; r++) {
+      var row = el('div', 'row', box), icon = el('div', 'icon', row);
+      if (rows[r][0]) icon.textContent = rows[r][0];
+      else sym(rows[r][3], icon, 34);
+      var text = el('div', 'text', row);
+      el('div', 'what', text, rows[r][1]);
+      if (rows[r][2]) el('div', 'more', text, rows[r][2]);
+    }
+    setClass(box, 'on', rows.length > 0 || linked);
   }
 
   // MARK: - Shelf
@@ -358,7 +477,6 @@
     platter.style.width = (width + 2 * pad) + 'px';
     platter.style.top = top + 'px';
     platter.style.height = (bottom - top) + 'px';
-    $('quotes').style.right = (1920 - left - width) + 'px';
     var tiles = $('tiles');
     tiles.innerHTML = '';
     for (var i = 0; i < n; i++) {
@@ -733,24 +851,30 @@
   function activate() {
     switch (st.zone) {
       case Z.TOP:
-        if (st.top < 3) return;
-        var btn = topButtons()[st.top - 3];
+        if (st.top < kinds.length) return;
+        var btn = topButtons()[st.top - kinds.length];
         if (btn) btn.run();
         return;
       case Z.CARDS:
-        var p = cards[st.card], app = p && Data.appFor(p.app);
+        var p = cards[st.card];
+        if (p && p.watched) {
+          var again = appById(p.watched.app);
+          if (again) { remember(again, p.watched.title, p.watched.image); launcher(again.id, again.title)(); }
+          return;
+        }
+        var app = p && Data.appFor(p.app);
         if (p && p.ask) KidPicks.ask(renderCards);
-        else if (p && p.kid) KidPicks.watch(p, function (id, title) { launcher(id, title)(); });
-        else if (app) launcher(app.id, app.title)();
+        else if (p && p.kid) KidPicks.watch(p, function (id, title) { remember(appById(id), p.title); launcher(id, title)(); });
+        else if (app) { remember(app, p.title, p.backdrop ? Data.image(p.backdrop, 'w780') : ''); launcher(app.id, app.title)(); }
         return;
       case Z.SHELF:
-        if (shelf[st.shelf]) launcher(shelf[st.shelf].id, shelf[st.shelf].title)();
+        if (shelf[st.shelf]) { remember(shelf[st.shelf]); launcher(shelf[st.shelf].id, shelf[st.shelf].title)(); }
         return;
       case Z.DRAWER:
         if (drawerItems[st.drawer]) drawerItems[st.drawer].run();
         return;
       case Z.APPS:
-        if (others[st.grid]) launcher(others[st.grid].id, others[st.grid].title)();
+        if (others[st.grid]) { remember(others[st.grid]); launcher(others[st.grid].id, others[st.grid].title)(); }
         return;
       case Z.SETTINGS:
         if (rowsNow[st.row]) { rowsNow[st.row].step(1); if (st.zone === Z.SETTINGS) renderSettings(); }
@@ -775,7 +899,7 @@
         else if (dy > 0) { openDrawer(); return; }
         else if (dy < 0) {
           if (cards.length) { st.zone = Z.CARDS; st.card = nearest(cardNodes, centerX(tiles[st.shelf])); }
-          else { st.zone = Z.TOP; st.top = st.tab; }
+          else { st.zone = Z.TOP; st.top = kinds.length ? st.tab : 0; }
         }
         break;
       case Z.CARDS:
@@ -785,10 +909,10 @@
         break;
       case Z.TOP:
         if (dx) {
-          st.top = Math.max(0, Math.min(2 + topButtons().length, st.top + dx));
-          if (st.top < 3) selectTab(st.top);   // as on Apple TV: focusing a tab selects it
+          st.top = Math.max(0, Math.min(kinds.length - 1 + topButtons().length, st.top + dx));
+          if (st.top < kinds.length) selectTab(st.top);   // as on Apple TV: focusing a tab selects it
         } else if (dy > 0) {
-          if (cards.length) { st.zone = Z.CARDS; st.card = Math.min(cards.length - 1, st.top < 3 ? 0 : cards.length - 1); }
+          if (cards.length) { st.zone = Z.CARDS; st.card = Math.min(cards.length - 1, st.top < kinds.length ? 0 : cards.length - 1); }
           else st.zone = Z.SHELF;
         }
         break;
@@ -832,7 +956,7 @@
       if (zone !== Z.DRAWER && st.zone === Z.DRAWER && zone !== Z.SHELF) return;
       if (zone === Z.SHELF && st.zone === Z.DRAWER) closeDrawer();
       st.zone = zone;
-      if (zone === Z.TOP) { st.top = index; if (index < 3) selectTab(index); }
+      if (zone === Z.TOP) { st.top = index; if (index < kinds.length) selectTab(index); }
       else if (zone === Z.CARDS) st.card = index;
       else if (zone === Z.SHELF) st.shelf = index;
       else if (zone === Z.DRAWER) st.drawer = index;
@@ -1144,6 +1268,7 @@
     renderShelf();
     renderDrawer();
     renderClock();
+    renderTonight();
     paintWorld();
     if (st.zone === Z.SETTINGS) renderSettings();
     updateFocus();
@@ -1167,14 +1292,22 @@
     closeSheets();
     st.zone = Z.SHELF;
     st.shelf = 0;
-    if (st.tab !== 0) { st.tab = 0; renderCards(); }
+    st.tab = 0;
+    kinds = [];
+    renderTop();
+    cards = [];
+    renderCards();
+    renderTonight();
     updateFocus();
   }
 
   Data.onChange(function () {
+    if (tabKinds().join() !== kinds.join()) renderTop();
     renderQuotes();
     renderCards();
     renderPanels();
+    renderClock();
+    renderTonight();
     checkNight();
   });
 
@@ -1191,6 +1324,12 @@
   document.addEventListener('visibilitychange', function () {
     if (document.hidden) { hideSaver(); return; }
     idleAt = Date.now();
+    // Back from an app: what was just opened leads Keep watching.
+    st.tab = 0;
+    kinds = [];
+    renderTop();
+    cards = [];
+    renderCards();
     Family.now();
     loadApps(function () { renderShelf(); renderDrawer(); updateFocus(); Data.refresh(); });
     // Back from a show: on a fine day, suggest going outside (once a day). Or welcome back those who did.
@@ -1214,9 +1353,10 @@
   function hearBeyond() { Checkin.hear(function (text) { toast('Beyond: ' + text); }); }
   hearBeyond();
   setInterval(hearBeyond, 10 * 60 * 1000 + 5000);
-  Profiles.onChange(function () { renderTop(); paintWorld(); renderCards(); updateFocus(); jobsChanged(); });
+  Profiles.onChange(function () { renderTop(); paintWorld(); renderCards(); renderTonight(); updateFocus(); jobsChanged(); });
   setInterval(function () {
     renderClock();
+    renderTonight();
     checkNight();
     Data.refresh();
     if (!saverOn && !sheetOpen() && !UI.active() && Date.now() - idleAt > SAVER_AFTER) showSaver();

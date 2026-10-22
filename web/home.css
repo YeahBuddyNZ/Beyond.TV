@@ -763,3 +763,102 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   -webkit-transform: translate(-50%, -50%); transform: translate(-50%, -50%);
   box-shadow: 0 0 0 4px #0A0908, 0 30px 70px rgba(0, 0, 0, 0.7);
 }
+
+/*
+ * MARK: - The new home: a greeting, one line with the time and the weather, the kupu in a chip, Keep watching on
+ * little TV screens, Tonight at home at the right, and hills along the bottom of the sky.
+ */
+#title { top: 56px; font-size: 82px; }
+#info { position: absolute; left: 80px; top: 162px; font-size: 31px; font-weight: 500; color: #55534B; white-space: nowrap; }
+#info .time { font-weight: 700; color: #22221F; }
+.night #info { color: rgba(247, 246, 242, 0.78); }
+.night #info .time { color: #F7F6F2; }
+#kupu {
+  position: absolute; left: 76px; top: 214px; height: 50px; padding: 0 24px; border-radius: 25px;
+  font-size: 24px; line-height: 50px; white-space: nowrap; color: #55534B; display: none;
+  background: rgba(255, 255, 255, 0.55); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+}
+#kupu.on { display: block; }
+#kupu b { font-weight: 700; color: #22221F; margin-right: 12px; }
+.night #kupu { color: rgba(247, 246, 242, 0.72); background: rgba(255, 255, 255, 0.07); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12); }
+.night #kupu b { color: #F7F6F2; }
+
+#tabs { top: 296px; }
+#quotes { top: 316px; right: 680px; }
+
+/* The cards as TV screens on a stand: a dark bezel round the picture. */
+.card.screen { top: 384px; width: 360px; height: 203px; }
+.card.screen .img { border-radius: 16px; box-shadow: 0 0 0 6px #15131F, 0 14px 34px rgba(0, 0, 0, 0.28); }
+.card.screen .img::after { border-radius: 16px; }
+.card.screen .stand {
+  position: absolute; left: 50%; top: 213px; width: 96px; height: 10px; margin-left: -48px; border-radius: 5px;
+  background: #15131F; opacity: 0.55;
+}
+.card.screen .name { top: 240px; font-size: 28px; }
+.card.screen .meta { top: 280px; font-size: 23px; }
+.card.screen.focus { -webkit-transform: translateY(-6px) scale(1.06); transform: translateY(-6px) scale(1.06); }
+.card.screen.focus .img {
+  box-shadow: 0 0 0 6px #15131F, 0 0 0 10px #F7F6F2, 0 0 0 14px #6E3DDB, 0 0 46px 12px rgba(158, 123, 255, 0.5), 0 24px 46px rgba(0, 0, 0, 0.34);
+}
+.card .img.face img { position: absolute; left: 50%; top: 50%; max-width: 46%; max-height: 46%; -webkit-transform: translate(-50%, -50%); transform: translate(-50%, -50%); }
+.card .img.face .word { position: absolute; left: 8%; right: 8%; top: 50%; margin-top: -20px; text-align: center; font-weight: 700; color: #FFF; white-space: nowrap; overflow: hidden; }
+.card .img .when {
+  position: absolute; left: 14px; top: 14px; padding: 0 14px; height: 36px; border-radius: 18px;
+  font-size: 19px; font-weight: 600; line-height: 36px; color: #FFF; background: rgba(13, 12, 24, 0.72);
+}
+/* A play button, shown on the focused screen. */
+.card .img .play {
+  position: absolute; right: 16px; bottom: 16px; width: 58px; height: 58px; border-radius: 29px; background: #FFF;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35); opacity: 0; -webkit-transition: opacity 0.25s; transition: opacity 0.25s;
+}
+.card .img .play::after {
+  content: ''; position: absolute; left: 23px; top: 18px; width: 0; height: 0;
+  border-top: 11px solid transparent; border-bottom: 11px solid transparent; border-left: 17px solid #6135D6;
+}
+.card.focus .img .play { opacity: 1; }
+.card.kidpick .img .play { display: none; }
+
+.no-picks #clock { top: 392px; font-size: 150px; }
+.no-picks #clock .date { display: none; }
+
+/* Tonight at home: Beyond Family's badge when linked, then a few lines about today. */
+#tonight {
+  position: absolute; left: 1300px; top: 296px; width: 540px; padding: 26px 30px 14px; border-radius: 36px;
+  -webkit-box-sizing: border-box; box-sizing: border-box; display: none;
+}
+#tonight.on { display: block; }
+#tonight .family { position: relative; height: 64px; margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px solid rgba(34, 34, 31, 0.1); }
+#tonight .family .live { position: absolute; left: 0; top: 25px; width: 12px; height: 12px; border-radius: 6px; background: #2FBF71; box-shadow: 0 0 10px 2px rgba(47, 191, 113, 0.6); }
+#tonight .family .dots { position: absolute; left: 26px; top: 16px; }
+#tonight .family .words { position: absolute; left: 72px; top: 4px; right: 150px; white-space: nowrap; overflow: hidden; }
+#tonight .family .words b { display: block; font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 27px; font-weight: 700; }
+#tonight .family .words span { display: block; font-size: 20px; color: #55534B; overflow: hidden; text-overflow: ellipsis; }
+#tonight .family .faces { position: absolute; right: 0; top: 10px; white-space: nowrap; }
+#tonight .family .faces .face {
+  display: inline-block; width: 44px; height: 44px; margin-left: -10px; border-radius: 22px; vertical-align: top;
+  font-style: normal; font-size: 20px; font-weight: 700; line-height: 44px; text-align: center; color: #FFF; box-shadow: 0 0 0 3px #FFF;
+}
+#tonight .head { font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 32px; font-weight: 700; margin-bottom: 10px; }
+#tonight .row { position: relative; min-height: 76px; padding-left: 72px; }
+#tonight .row .icon {
+  position: absolute; left: 0; top: 6px; width: 54px; height: 54px; border-radius: 16px; text-align: center;
+  font-size: 28px; line-height: 54px; background: rgba(34, 34, 31, 0.06); color: #22221F;
+}
+#tonight .row .icon .sym { margin-top: 10px; }
+#tonight .row .what { padding-top: 6px; font-size: 26px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#tonight .row .more { margin-top: 2px; font-size: 21px; color: #55534B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.night #tonight .family { border-bottom-color: rgba(255, 255, 255, 0.1); }
+.night #tonight .family .words span, .night #tonight .row .more { color: rgba(247, 246, 242, 0.62); }
+.night #tonight .family .faces .face { box-shadow: 0 0 0 3px #1B1A26; }
+.night #tonight .row .icon { background: rgba(255, 255, 255, 0.08); color: #F7F6F2; }
+.night #tonight { color: #F7F6F2; }
+.drawer-open #tonight, .drawer-open #kupu, .drawer-open #info { opacity: 0; }
+
+/* Hills along the bottom of the sky, behind the shelf. */
+#sky .hills { position: absolute; left: 0; bottom: 0; width: 1920px; height: 300px; }
+#sky .hills .far { fill: rgba(110, 61, 219, 0.08); }
+#sky .hills .near { fill: rgba(110, 61, 219, 0.13); }
+.night #sky .hills .far { fill: rgba(158, 123, 255, 0.07); }
+.night #sky .hills .near { fill: rgba(8, 7, 16, 0.45); }
+.in-world #sky .hills { display: none; }
+.card.screen.kidpick .emoji { margin-top: -50px; font-size: 100px; line-height: 100px; }
