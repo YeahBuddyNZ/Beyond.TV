@@ -245,6 +245,7 @@ HDMI (Chromecast with Google TV, Google TV Streamer, onn 4K, NVIDIA Shield). Set
   (`tools/make_zones.py`, from the tz database) turns the TV's time zone into the city, the currency and the region.
   `web/profiles.js` is Who's watching: Family comes first (`together`, never in the list or Beyond Family's members),
   with family-friendly picks (`Profiles.gentle()`) and its own shelf; a kid needs the PIN to switch to it.
+  `web/bedtime.js` is Bedtime breathing: a night light that slows from six breaths a minute and fades to dark (moon button at night, or a `bedtime` command from Beyond Family).
   `web/myworld.js` is Make it yours: a kid restyles their own profile (buddy, colour, world, loves) with no PIN;
   it never touches the name, shelf, PIN or kid flag, and a Beyond Family refresh keeps what they picked.
   `tools/webapp.py` is what both builds share. Preview: `python3 webos/build.py --preview` (or `tizen/build.py`), then

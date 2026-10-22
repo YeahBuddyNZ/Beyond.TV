@@ -218,6 +218,7 @@ var Family = (function () {
     if (c.kind === 'together') { together(c); return; }
     if (c.kind === 'together-end') { togetherEnd(c.session); return; }
     if (c.kind === 'react') { react(c.emoji, c.from, c.colour); return; }
+    if (c.kind === 'bedtime') { hide(); Bedtime.start(c.minutes); return; }
     if (hide()) { if (c.kind === 'key') return; }  // the first press puts a message away, like it would on the remote
     if (c.kind === 'key') {
       if (c.key === 'home') { UI.closeAll(); BeyondTV.home(); return; }
