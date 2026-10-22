@@ -145,8 +145,10 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
     private int tab, topIndex, cardIndex;
     private int widgetIndex;    // with TalkBack on, the drawer's weather (0) or quotes (1) card can take the focus
     private List<Recs.Pick> cards = new ArrayList<>();
-    private final Spring[] topFocus = new Spring[8];
-    private final RectF[] topRects = new RectF[8];
+    // The three tabs, then the round buttons (five today). Room to spare: one past the end would crash the home
+    // screen, the way a 13th row crashed Home Settings.
+    private final Spring[] topFocus = new Spring[12];
+    private final RectF[] topRects = new RectF[12];
     private final Spring[] cardFocus = new Spring[3];
     private final RectF[] cardRects = new RectF[3];
     private final List<HomeApps.Item> lightButtons = new ArrayList<>();
