@@ -205,6 +205,9 @@ final class German {
             case "A remote on your phone, and messages on the TV": return "Eine Fernbedienung auf dem Handy und Nachrichten auf dem Fernseher";
             case "High ": return "Max. ";
             case "Low ": return "Min. ";
+            case "Happy birthday, ": return "Alles Gute zum Geburtstag, ";
+            case "Tea tonight": return "Heute zum Abendessen";
+            case "All day": return "Ganztägig";
             case "Install the new version": return "Neue Version installieren";
             case "Check for updates": return "Nach Updates suchen";
             case "Install updates by themselves": return "Updates selbst installieren";

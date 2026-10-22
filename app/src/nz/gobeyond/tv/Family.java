@@ -117,6 +117,7 @@ final class Family {
             file(c).delete();
         }
         lastPeople = "";
+        board = null;
     }
 
     // MARK: - Talking to Beyond Family
@@ -272,6 +273,12 @@ final class Family {
 
     private static String lastPeople = "";
 
+    /** The house noticeboard (only when the household turned it on): today's calendar, birthdays, tea, notes. Kept in
+     *  memory only, never saved; the home screen reads it every 15 seconds. Same as web/family.js. */
+    private static volatile JSONObject board;
+
+    static JSONObject board() { return board; }
+
     static void apply(Context c, JSONObject home) { apply(c, home, null); }
 
     /**
@@ -281,6 +288,7 @@ final class Family {
      */
     static void apply(Context c, JSONObject home, JSONArray visitorsIn) {
         final JSONArray visitors = visitorsIn == null ? new JSONArray() : visitorsIn;
+        board = home == null ? null : home.optJSONObject("board");
         try {
             JSONObject s = state(c);
             JSONObject was = s.optJSONObject("home");
