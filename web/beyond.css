@@ -340,3 +340,83 @@
 .bt-alert-body { margin-left: 112px; }
 .bt-alert-text { font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 44px; font-weight: 700; line-height: 1.15; }
 .bt-alert-from { margin-top: 10px; font-size: 24px; color: rgba(247, 246, 242, 0.55); }
+
+/* MARK: - Make it yours (myworld.js): a kid's own world. Only transform and opacity animate. */
+
+.mw-sky { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; }
+.mw-thing {
+  position: absolute;
+  opacity: 0.5;
+  -webkit-animation: mw-drift 14s ease-in-out infinite alternate;
+  animation: mw-drift 14s ease-in-out infinite alternate;
+}
+.mw-thing.d1 { -webkit-animation-duration: 17s; animation-duration: 17s; -webkit-animation-delay: -5s; animation-delay: -5s; }
+.mw-thing.d2 { -webkit-animation-duration: 21s; animation-duration: 21s; -webkit-animation-delay: -9s; animation-delay: -9s; }
+.mw-thing.d3 { -webkit-animation-duration: 12s; animation-duration: 12s; -webkit-animation-delay: -3s; animation-delay: -3s; }
+@-webkit-keyframes mw-drift { from { -webkit-transform: translate(0, 0) rotate(-8deg); } to { -webkit-transform: translate(46px, -34px) rotate(8deg); } }
+@keyframes mw-drift { from { transform: translate(0, 0) rotate(-8deg); } to { transform: translate(46px, -34px) rotate(8deg); } }
+
+/* On the home screen: the world takes the place of the sky and its photo. */
+.in-world #sky .grad, .in-world #sky canvas, .in-world #sky .veil { display: none; }
+.in-world #sky .mw-thing { opacity: 0.42; }
+
+/* The steps */
+.mw .mw-sky::after { content: ''; position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: rgba(10, 10, 9, 0.38); }
+.mw-head { position: absolute; left: 140px; top: 70px; width: 1640px; height: 140px; }
+.mw-face { position: absolute; left: 0; top: 10px; }
+.mw-words { position: absolute; left: 160px; top: 0; }
+.mw-step { font-size: 22px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(247, 246, 242, 0.7); }
+.mw-title { font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 68px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; white-space: nowrap; text-shadow: 0 4px 24px rgba(0, 0, 0, 0.35); }
+.mw-sub { margin-top: 6px; font-size: 30px; color: rgba(247, 246, 242, 0.82); }
+.mw-body { position: absolute; left: 140px; top: 290px; width: 1640px; height: 620px; }
+.mw-grid { position: relative; margin: 0 auto; }
+.mw-choice {
+  position: absolute;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(18, 18, 16, 0.62);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  -webkit-transition: -webkit-transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.3), box-shadow 0.2s;
+  transition: transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.3), box-shadow 0.2s;
+}
+.mw-choice.on { box-shadow: 0 0 0 6px rgba(10, 10, 9, 0.5), 0 0 0 11px #E8A33D; }
+.mw-choice.focus { -webkit-transform: scale(1.14); transform: scale(1.14); box-shadow: 0 0 0 6px rgba(10, 10, 9, 0.5), 0 0 0 11px #F7F6F2, 0 20px 44px rgba(0, 0, 0, 0.45); z-index: 2; }
+.mw-choice.on.focus { box-shadow: 0 0 0 6px rgba(10, 10, 9, 0.5), 0 0 0 11px #E8A33D, 0 20px 44px rgba(0, 0, 0, 0.45); }
+.mw-choice.pop { -webkit-animation: mw-pop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.4); animation: mw-pop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.4); }
+@-webkit-keyframes mw-pop { 0% { -webkit-transform: scale(1.14); } 40% { -webkit-transform: scale(1.32) rotate(-6deg); } 100% { -webkit-transform: scale(1.14); } }
+@keyframes mw-pop { 0% { transform: scale(1.14); } 40% { transform: scale(1.32) rotate(-6deg); } 100% { transform: scale(1.14); } }
+.mw-emoji { font-size: 58px; line-height: 1; }
+.mw-emoji.big { font-size: 76px; }
+.mw-love-name { margin-top: 12px; font-size: 24px; font-weight: 600; }
+.mw-world { border-radius: 36px; overflow: hidden; }
+.mw-world-things { font-size: 50px; letter-spacing: 6px; }
+.mw-world-name { margin-top: 14px; font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 30px; font-weight: 700; text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4); }
+.mw-foot { position: absolute; right: 140px; bottom: 70px; white-space: nowrap; }
+.mw-foot .bt-button { margin: 0 0 0 18px; height: 84px; line-height: 84px; font-size: 32px; padding: 0 44px; border-radius: 42px; }
+
+/* The party */
+.mw-burst { position: absolute; left: 960px; top: 470px; width: 0; height: 0; }
+.mw-bit {
+  position: absolute;
+  left: -40px;
+  top: -40px;
+  font-size: 72px;
+  opacity: 0;
+  -webkit-transform: scale(0.2);
+  transform: scale(0.2);
+  -webkit-transition: -webkit-transform 1.1s cubic-bezier(0.15, 0.9, 0.25, 1.15), opacity 0.6s;
+  transition: transform 1.1s cubic-bezier(0.15, 0.9, 0.25, 1.15), opacity 0.6s;
+}
+.mw-party.go .mw-bit { opacity: 1; }
+.mw-party-face { position: absolute; left: 830px; top: 340px; -webkit-transform: scale(0.4); transform: scale(0.4); opacity: 0; -webkit-transition: -webkit-transform 0.8s cubic-bezier(0.2, 0.9, 0.3, 1.4), opacity 0.4s; transition: transform 0.8s cubic-bezier(0.2, 0.9, 0.3, 1.4), opacity 0.4s; }
+.mw-party.go .mw-party-face { -webkit-transform: none; transform: none; opacity: 1; }
+.mw-party-title { z-index: 2; position: absolute; left: 0; right: 0; top: 660px; text-align: center; font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 76px; font-weight: 700; letter-spacing: -0.02em; text-shadow: 0 4px 30px rgba(0, 0, 0, 0.45); }
+.mw-party-foot { position: absolute; left: 0; right: 0; top: 840px; text-align: center; }
+.mw-party-foot .bt-button { height: 90px; line-height: 90px; font-size: 36px; padding: 0 56px; border-radius: 45px; margin: 0; }
