@@ -114,7 +114,7 @@ final class Prefs {
     static boolean quotes() { return Config.SHOW_CRYPTO && sp().getBoolean("quotes", true); }
     static void setQuotes(boolean on) { put("quotes", on); }
 
-    /** Te reo word of the day (Kupu), in the quotes row. On unless they turn it off. */
+    /** Te reo Māori: the word of the day (Kupu) and "Kia ora". On unless they turn it off. */
     static boolean kupu() { return sp().getBoolean("kupu", true); }
 
     /** The screensaver: "art" (paintings, like a Samsung Frame), "photos" (the picks' film photos) or "auto". */

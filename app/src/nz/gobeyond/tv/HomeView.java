@@ -505,8 +505,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
     private void makeLightButtons() {
         lightButtons.clear();
         watcher = People.current(getContext());
-        String hello = Ui.tr("Olá", "Kia ora", "Hola");
-        helloLine = watcher.together() ? hello + Ui.tr(", família", ", whānau", ", familia")
+        String hello = Ui.hello();
+        helloLine = watcher.together() ? hello + Ui.tr(", família", Prefs.kupu() ? ", whānau" : ", everyone", ", familia")
                 : People.count(getContext()) > 1 ? hello + ", " + watcher.name : hello;
         watcherInitial = watcher.initial();
         personInk.setTypeface(Ui.semibold);

@@ -120,7 +120,9 @@ final class Russian {
             case "No city with that name.": return "Город с таким названием не найден.";
             case "Couldn't search now: ": return "Не удалось выполнить поиск: ";
             case "Quotes widget": return "Виджет котировок";
-            case "Te reo word of the day": return "Слово дня на те рео маори";
+            case "Te reo Māori": return "Те рео маори";
+            case "Hello": return "Привет";
+            case ", everyone": return ", все";
             case "Help fix problems": return "Помогать исправлять ошибки";
             case "Couldn't check just now. It tries again by itself": return "Сейчас не удалось проверить. Попробует снова само";
             case "Taking a short break. They'll be back by themselves.": return "Небольшой перерыв. Скоро вернутся сами.";

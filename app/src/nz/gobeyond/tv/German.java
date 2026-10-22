@@ -121,7 +121,9 @@ final class German {
             case "No city with that name.": return "Keine Stadt mit diesem Namen.";
             case "Couldn't search now: ": return "Suche gerade nicht möglich: ";
             case "Quotes widget": return "Kurs-Widget";
-            case "Te reo word of the day": return "Te-reo-Wort des Tages";
+            case "Te reo Māori": return "Te reo Māori";
+            case "Hello": return "Hallo";
+            case ", everyone": return ", alle";
             case "Help fix problems": return "Bei Problemen helfen";
             case "Couldn't check just now. It tries again by itself": return "Gerade nicht geprüft. Es versucht es von selbst wieder";
             case "Taking a short break. They'll be back by themselves.": return "Kurze Pause. Sie kommen von selbst wieder.";

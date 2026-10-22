@@ -128,7 +128,7 @@ var MyWorld = (function () {
     }
 
     function buddy(n) {
-      frame(n, tr('Oi, ', 'Kia ora, ', 'Hola, ') + me.name + '!',
+      frame(n, tr('Oi, ', Prefs.kupu() ? 'Kia ora, ' : 'Hello, ', 'Hola, ') + me.name + '!',
         tr('Escolha seu parceiro. Ele é você na TV.', "Pick your buddy. They'll be you on the TV.", 'Elige a tu compañero. Serás tú en la TV.'),
         function (body, api) {
           grid(body, api, BUDDIES, 12, 104, function (e) { return p.emoji === e; }, function (e) { p.emoji = e; },

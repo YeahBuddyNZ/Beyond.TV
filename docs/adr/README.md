@@ -15,3 +15,4 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0005](0005-never-turn-off-an-app-that-saved-wifi.md) | Never turn off an app that saved Wi-Fi |
 | [0006](0006-art-fills-the-screen.md) | Art fills the screen |
 | [0007](0007-keep-watching-stays-on-the-tv.md) | Keep watching stays on the TV |
+| [0008](0008-one-switch-for-te-reo.md) | One switch for te reo |
