@@ -1,0 +1,25 @@
+{
+  "note": "Beyond TV's seasonal art for Art mode. Each season shows from 'from' to 'to' (MM-DD, the TV's own date, both days included). Add a picture: put a 2560 x 1440 JPEG in the season's folder and a line here. Only pictures we made or own.",
+  "seasons": [
+    {
+      "id": "halloween", "from": "10-24", "to": "11-01",
+      "art": [
+        {"file": "halloween/pumpkin-moon.jpg", "title": "Pumpkin moon"},
+        {"file": "halloween/friendly-ghosts.jpg", "title": "Friendly ghosts"},
+        {"file": "halloween/four-pumpkins.jpg", "title": "Four little pumpkins"},
+        {"file": "halloween/villa-night.jpg", "title": "The villa on Halloween"},
+        {"file": "halloween/black-cat.jpg", "title": "Cat on the fence"}
+      ]
+    },
+    {
+      "id": "christmas", "from": "12-01", "to": "12-26",
+      "art": [
+        {"file": "christmas/pohutukawa.jpg", "title": "Pōhutukawa Christmas"},
+        {"file": "christmas/beach-tree.jpg", "title": "Christmas at the beach"},
+        {"file": "christmas/tree-lights.jpg", "title": "Lights on the tree"},
+        {"file": "christmas/four-baubles.jpg", "title": "Four baubles"},
+        {"file": "christmas/pavlova.jpg", "title": "Pav for pudding"}
+      ]
+    }
+  ]
+}

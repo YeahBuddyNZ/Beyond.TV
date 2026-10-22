@@ -7,13 +7,14 @@
 # "latest", which TizenBrew reads for the Samsung .wgt). TVs running Beyond TV find it within a day and ask once:
 # Android's own install prompt, one OK press (Updater.java). The same APK also goes to the "tv" release, one fixed
 # address for new installs: install.sh, install.ps1 and the TV download page (docs/tv) all fetch it from there.
+# Next to it, latest.json names the newest APK: the updater's second way to find it if the releases list fails.
 name: Android APK
 
 on:
   push:
-    paths: ["app/**", "build.sh", "config.example.properties", ".github/workflows/android.yml"]
+    paths: ["app/**", "tests/**", "build.sh", "config.example.properties", ".github/workflows/android.yml"]
   pull_request:
-    paths: ["app/**", "build.sh", "config.example.properties", ".github/workflows/android.yml"]
+    paths: ["app/**", "tests/**", "build.sh", "config.example.properties", ".github/workflows/android.yml"]
   workflow_dispatch:
 
 permissions:
@@ -31,6 +32,12 @@ jobs:
       - name: Android SDK
         run: |
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "build-tools;34.0.0" "platforms;android-34" >/dev/null
+      - name: Updater downloads
+        # The updater's own download code, run as a TV runs it: a bug there strands every TV, so it fails the build.
+        run: |
+          mkdir -p out/test
+          javac -d out/test app/src/nz/gobeyond/tv/Http.java tests/UpdaterHttpTest.java
+          java -cp out/test nz.gobeyond.tv.UpdaterHttpTest
       - name: Signing key
         env:
           KEYSTORE: ${{ secrets.ANDROID_KEYSTORE }}
@@ -67,3 +74,7 @@ jobs:
             --title "Beyond TV for Android: install" \
             --notes "The newest Beyond TV for Android, always at this address, for new installs. Updates after that come by themselves: the TV asks, and one OK press installs them."
           gh release upload tv BeyondTV.apk --clobber
+          # The second way TVs hear about updates (Updater.LATEST): a plain file, no API, no rate limit.
+          printf '{"code":%s,"name":"%s","url":"https://github.com/YeahBuddyNZ/Beyond.TV/releases/download/android-%s/BeyondTV.apk","sha256":"%s"}\n' \
+            "$BTV_VERSION_CODE" "$BTV_VERSION_NAME" "$BTV_VERSION_CODE" "$(sha256sum BeyondTV.apk | cut -d' ' -f1)" > latest.json
+          gh release upload tv latest.json --clobber
