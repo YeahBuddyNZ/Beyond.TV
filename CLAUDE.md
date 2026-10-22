@@ -149,6 +149,12 @@ Updates checks now and shows what is ready. *Install updates by themselves* is o
 the app installs through the TV's own ADB (`pm install`, only once its key is allowed, never asking from there), waits
 until nobody is on the home screen, and says so afterwards. Never turn it on for them: the choice is the person's say.
 
+A broken updater strands every TV on the version it has, since it never hears about the fix (22/10/2026: a header set
+after connecting threw on every check, 1.09 to 1.59). So: TVs hear about updates two ways, the GitHub releases list
+and `latest.json` next to the APK in the `tv` release (CI writes it), and either one is enough. The download code is
+plain Java in `Http.java`, which CI runs against a local server and the real addresses (`tests/UpdaterHttpTest.java`)
+before building. Keep anything the updater needs from the network in `Http.java`.
+
 ## Adapting it to another TV
 
 Read first, change after. Read-only commands that tell you what the TV has:
