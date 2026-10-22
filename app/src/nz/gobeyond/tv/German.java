@@ -64,8 +64,8 @@ final class German {
             case "Switching the home screen and screensaver…": return "Startbildschirm und Bildschirmschoner werden gewechselt…";
             case "Android didn't accept the new home screen": return "Android hat den neuen Startbildschirm nicht angenommen";
             case "Turning off apps (": return "Apps werden ausgeschaltet (";
-            case "Measuring Beyond TV…": return "Beyond TV wird gemessen…";
-            case "Couldn't turn on Beyond TV: ": return "Beyond TV ließ sich nicht einschalten: ";
+            case "Measuring Beyond™ TV…": return "Beyond™ TV wird gemessen…";
+            case "Couldn't turn on Beyond™ TV: ": return "Beyond™ TV ließ sich nicht einschalten: ";
             case "Turning the apps back on…": return "Die Apps werden wieder eingeschaltet…";
             case "Turning apps back on (": return "Apps werden wieder eingeschaltet (";
             case "Restoring the original home screen…": return "Der ursprüngliche Startbildschirm wird wiederhergestellt…";
@@ -73,16 +73,16 @@ final class German {
             case "the original home screen": return "den ursprünglichen Startbildschirm";
             case "Original mode, but I couldn't turn back on: ": return "Originalmodus, aber das ließ sich nicht wieder einschalten: ";
             case "Couldn't go back to the original: ": return "Zurück zum Original ging nicht: ";
-            case "Beyond TV's home screen crashed 3 times in a row; I switched back to the original one.": return "Der Startbildschirm von Beyond TV ist 3-mal hintereinander abgestürzt; der ursprüngliche ist wieder aktiv.";
+            case "Beyond™ TV's home screen crashed 3 times in a row; I switched back to the original one.": return "Der Startbildschirm von Beyond™ TV ist 3-mal hintereinander abgestürzt; der ursprüngliche ist wieder aktiv.";
             case "the home screen": return "den Startbildschirm";
             case "the screensaver": return "den Bildschirmschoner";
-            case "Couldn't check Beyond TV: ": return "Beyond TV ließ sich nicht prüfen: ";
+            case "Couldn't check Beyond™ TV: ": return "Beyond™ TV ließ sich nicht prüfen: ";
             case "The TV update turned back on ": return "Das TV-Update hat wieder eingeschaltet: ";
             case "Turned off what was missing: ": return "Ausgeschaltet, was noch fehlte: ";
-            case "The TV was updated; Beyond TV is still on.": return "Der Fernseher wurde aktualisiert; Beyond TV ist weiter aktiv.";
+            case "The TV was updated; Beyond™ TV is still on.": return "Der Fernseher wurde aktualisiert; Beyond™ TV ist weiter aktiv.";
             case "Connecting…": return "Verbindung wird hergestellt…";
             case "Accept “Allow USB debugging?” on the TV (tick “Always allow”).": return "Am Fernseher „USB-Debugging zulassen?“ bestätigen („Immer zulassen“ ankreuzen).";
-            case "Beyond TV's home screen ran into a problem.\nGoing back to the TV's original home screen…": return "Der Startbildschirm von Beyond TV hatte ein Problem.\nZurück zum ursprünglichen Startbildschirm…";
+            case "Beyond™ TV's home screen ran into a problem.\nGoing back to the TV's original home screen…": return "Der Startbildschirm von Beyond™ TV hatte ein Problem.\nZurück zum ursprünglichen Startbildschirm…";
             case "the TV's first setup saved the Wi-Fi, and turning it off would erase those networks. "
                     + "In Settings → Network & Internet, forget the network and connect again (networks out of range don't "
                     + "show there: Claude Code can remove them from your computer), then try once more.":
@@ -139,9 +139,9 @@ final class German {
             case "The other buttons: the TV itself controls them.": return "Die anderen Tasten steuert der Fernseher selbst.";
             case "TCL remote buttons: on this TV they work as always.": return "TCL-Fernbedienung: Die Tasten funktionieren hier wie immer.";
             default:
-                if (english.startsWith("Beyond TV is on: new home screen and screensaver, ")) {
-                    return "Beyond TV ist an: neuer Startbildschirm und Bildschirmschoner, "
-                            + english.substring("Beyond TV is on: new home screen and screensaver, ".length()).replace(" apps turned off.", " Apps ausgeschaltet.");
+                if (english.startsWith("Beyond™ TV is on: new home screen and screensaver, ")) {
+                    return "Beyond™ TV ist an: neuer Startbildschirm und Bildschirmschoner, "
+                            + english.substring("Beyond™ TV is on: new home screen and screensaver, ".length()).replace(" apps turned off.", " Apps ausgeschaltet.");
                 }
                 if (english.startsWith("On · ")) {
                     return "An · " + english.substring(5).replace(" titles from the TV's apps, 3 new ones every hour.",

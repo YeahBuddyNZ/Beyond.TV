@@ -820,7 +820,7 @@
     el('div', 'shade', s);
     var brand = el('div', 'brand lockup', s);
     dots(brand);
-    brand.appendChild(document.createTextNode('Beyond TV'));
+    brand.appendChild(document.createTextNode('Beyond™ TV'));
     var clock = el('div', 'clock', s);
     el('div', 'time', clock);
     el('div', 'date', clock);

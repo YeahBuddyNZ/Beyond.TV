@@ -46,21 +46,27 @@ def font(px, weight=700):
 
 
 def banner(w=640, h=360):
-    """Android TV's launcher banner: the dots and "Beyond TV" in paper on ink."""
+    """Android TV's launcher banner: the dots and "Beyond™ TV" in paper on ink, the ™ small and raised."""
     s = 4
     img = Image.new("RGBA", (w * s, h * s), INK + (255,))
     d = ImageDraw.Draw(img)
-    f = font(int(h * 0.16 * s))
-    text = "Beyond TV"
-    box = d.textbbox((0, 0), text, font=f)
+    size = int(h * 0.16 * s)
+    f, small = font(size), font(int(size * 0.38))
+    parts = [("Beyond", f, 0), ("\u2122", small, -0.42 * size), (" TV", f, 0)]
+    widths = [d.textlength(t, font=pf) for t, pf, _ in parts]
+    box = d.textbbox((0, 0), "Beyond TV", font=f)
     r, gap = h * 0.055 * s, h * 0.022 * s
     mark_w = 4 * r + gap
     space = int(w * 0.045 * s)
-    total = mark_w + space + (box[2] - box[0])
+    total = mark_w + space + sum(widths)
     x = (w * s - total) / 2
     dots(d, x + mark_w / 2, h * s / 2, r, gap)
     y = (h * s - (box[3] - box[1])) / 2 - box[1]
-    d.text((x + mark_w + space - box[0], y), text, font=f, fill=PAPER + (255,))
+    tx = x + mark_w + space - box[0]
+    base = y + f.getmetrics()[0]
+    for (t, pf, lift), tw in zip(parts, widths):
+        d.text((tx, base + lift), t, font=pf, fill=PAPER + (255,), anchor="ls")
+        tx += tw
     return img.resize((w, h), Image.LANCZOS)
 
 
