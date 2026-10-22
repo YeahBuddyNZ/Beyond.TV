@@ -48,7 +48,11 @@ public class HomeActivity extends Activity {
             recreate();   // a new language or city: draw everything again
             return;
         }
-        if (home != null) home.resume();
+        if (home != null) {
+            home.resume();
+            Updater.maybeCheck(this);
+            Updater.offer(this);
+        }
     }
 
     @Override protected void onPause() {
