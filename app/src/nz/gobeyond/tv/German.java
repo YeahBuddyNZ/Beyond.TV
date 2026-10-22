@@ -188,6 +188,21 @@ final class German {
             case "Mountains": return "Berge";
             case "Impressionism": return "Impressionismus";
             case "Still life": return "Stillleben";
+            case "Kia ora": return "Kia ora";
+            case ", whānau": return ", whānau";
+            case "Keep watching": return "Weiterschauen";
+            case "te reo word of the day": return "Te-Reo-Wort des Tages";
+            case "Just now": return "Gerade eben";
+            case "An hour ago": return "Vor einer Stunde";
+            case "Last night": return "Gestern Abend";
+            case "Yesterday": return "Gestern";
+            case "Tonight at home": return "Heute Abend zu Hause";
+            case "Today at home": return "Heute zu Hause";
+            case "Linked": return "Verbunden";
+            case "Link Beyond Family": return "Mit Beyond Family verbinden";
+            case "A remote on your phone, and messages on the TV": return "Eine Fernbedienung auf dem Handy und Nachrichten auf dem Fernseher";
+            case "High ": return "Max. ";
+            case "Low ": return "Min. ";
             case "Install the new version": return "Neue Version installieren";
             case "Check for updates": return "Nach Updates suchen";
             case "Install updates by themselves": return "Updates selbst installieren";
@@ -257,6 +272,7 @@ final class German {
                     return "OK fügt hinzu oder entfernt (bis zu " + english.substring("OK adds or removes (up to ".length())
                             .replace("). ← → change the order.", "). ← → ändern die Reihenfolge.");
                 }
+                if (english.endsWith(" hours ago")) return "Vor " + english.substring(0, english.length() - 10) + " Stunden";
                 if (english.endsWith(" min ago")) return "vor " + english.substring(0, english.length() - 8) + " Min.";
                 if (english.endsWith(" h ago")) return "vor " + english.substring(0, english.length() - 6) + " Std.";
                 if (english.endsWith(" days ago")) return "vor " + english.substring(0, english.length() - 9) + " Tagen";

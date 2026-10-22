@@ -187,6 +187,21 @@ final class Russian {
             case "Mountains": return "Горы";
             case "Impressionism": return "Импрессионизм";
             case "Still life": return "Натюрморт";
+            case "Kia ora": return "Kia ora";
+            case ", whānau": return ", whānau";
+            case "Keep watching": return "Продолжить просмотр";
+            case "te reo word of the day": return "слово дня на те рео";
+            case "Just now": return "Только что";
+            case "An hour ago": return "Час назад";
+            case "Last night": return "Вчера вечером";
+            case "Yesterday": return "Вчера";
+            case "Tonight at home": return "Сегодня вечером дома";
+            case "Today at home": return "Сегодня дома";
+            case "Linked": return "Подключено";
+            case "Link Beyond Family": return "Подключить Beyond Family";
+            case "A remote on your phone, and messages on the TV": return "Пульт в телефоне и сообщения на телевизоре";
+            case "High ": return "Макс. ";
+            case "Low ": return "Мин. ";
             case "Install the new version": return "Установить новую версию";
             case "Check for updates": return "Проверить обновления";
             case "Install updates by themselves": return "Устанавливать обновления самостоятельно";
@@ -307,6 +322,7 @@ final class Russian {
                     String n = english.substring(5, english.length() - " titles from the TV's apps, 3 new ones every hour.".length());
                     return "Вкл. · Рекомендаций из приложений телевизора: " + n + "; 3 новых каждый час.";
                 }
+                if (english.endsWith(" hours ago")) return english.substring(0, english.length() - 10) + " ч назад";
                 if (english.endsWith(" min ago")) return english.substring(0, english.length() - 8) + " мин назад";
                 if (english.endsWith(" h ago")) return english.substring(0, english.length() - 6) + " ч назад";
                 if (english.endsWith(" days ago")) {

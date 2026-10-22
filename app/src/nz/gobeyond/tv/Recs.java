@@ -49,6 +49,7 @@ final class Recs {
         String link;            // opens the title in its app (looked up with Watchmode), or null: the app's home
         boolean detailed;
         boolean gentle;         // family, kids' or animation: shown to Family and to kids' profiles
+        long watchedAt;         // Keep watching: when it was opened from the home screen (0 on a pick)
     }
 
     interface Listener { void onRecs(); }
@@ -758,7 +759,9 @@ final class Recs {
             if (forLight != light) return;   // the design changed midway: this one is stale
             synchronized (images) {
                 images.put(p.backdrop, backdrop);
-                while (images.size() > (forLight ? 10 : 4)) images.remove(images.keySet().iterator().next());
+                // Light: the 9 picks of the three tabs and the 3 in Keep watching, with room to spare (a smaller
+                // cache would throw one out and fetch it again on every look).
+                while (images.size() > (forLight ? 14 : 4)) images.remove(images.keySet().iterator().next());
             }
             notifyListeners();
         } catch (IOException | RuntimeException | OutOfMemoryError e) {
@@ -769,9 +772,10 @@ final class Recs {
     }
 
     void trim() {
-        // Explore's picks stay: the home screen opens on that tab, so its cards are never gray when you come back.
+        // Keep watching's and Explore's stay: the home screen opens on those, so they are never gray when you come back.
         java.util.Set<String> keep = new java.util.HashSet<>();
         for (Pick p : now(null)) if (p.backdrop != null) keep.add(p.backdrop);
+        for (Watched.Item x : Watched.list(context, 3)) if (!x.backdrop.isEmpty()) keep.add(x.backdrop);
         synchronized (images) {
             images.keySet().retainAll(keep);
         }
