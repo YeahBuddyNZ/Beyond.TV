@@ -262,6 +262,12 @@ HDMI (Chromecast with Google TV, Google TV Streamer, onn 4K, NVIDIA Shield). Set
   home screen or a toast over other apps; `profile` switches who's watching. Together, reactions, bedtime, the dinner
   question, picks for kids, earn your screen and the noticeboard are still LG and Samsung only: port them from
   `web/` into the same `Family.run`.
+  Your face on any TV: each person's look (`profile` in `/tv/sync`: emoji, colour, world, loves, shelf by app name
+  `t:netflix`) lives in Beyond Family. On the web a change marks the person `pending` and `Family.pushProfile` sends it
+  (`POST /tv/people/:member`); until Beyond Family has it, the TV's copy wins. `visitors` in `/tv/sync` are people
+  signed in from another home (Who's watching › Sign in with Beyond Family, `POST /tv/visit/code`); a TV that isn't
+  linked keeps its own people and adds them, and keeps listening while it has any. Android takes the face (drawn
+  in place of the initial) and colour, sends a colour change, and has the same sign in and sign out.
 - Te reo word of the day: `web/kupu.js` and `Kupu.java` hold the same list and pick by the same local day, so every
   TV in a house shows the same kupu. Change one, change both. On Android it leads the quotes row (`HomeView.kupuFor`,
   measured once a day, never in the frame loop); *Te reo word of the day* in Home Settings turns it off.

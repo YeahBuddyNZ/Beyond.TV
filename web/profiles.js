@@ -5,6 +5,9 @@
  *  - Profiles live on the TV (localStorage). Paired with Beyond Family (family.js), they come from the household's
  *    members instead: same names, same colours, kids already marked.
  *  - "Who's watching?" opens when the home screen starts and after a long idle, when there's more than one profile.
+ *  - Each Beyond Family person's face, colour, world, loves and shelf are kept with them in Beyond Family: a change
+ *    here is sent up (family.js) and comes down on every other TV they're on. Somebody from another home can sign in
+ *    here as a visitor (Who's watching › Sign in with Beyond Family) and bring theirs across.
  *  - Family comes first: everyone watching together. Family-friendly picks, its own shelf, and the grown-up
  *    buttons stay (somebody grown up is usually on the couch too), but a kid needs the PIN to switch to it.
  */
@@ -42,6 +45,49 @@ var Profiles = (function () {
   var FAMILY = {id: 'together', together: true, colour: '#6E3DDB', shelf: load(TOGETHER, {}).shelf};
   var who = load(WHO, list[0].id);
   var listeners = [];
+
+  /** Somebody's look or shelf changed on this TV: keep it here until Beyond Family has it, then it's theirs everywhere. */
+  function touched(p) {
+    if (!p || !p.family) return;
+    p.pending = (p.pending || 0) + 1;
+    if (window.Family && Family.pushProfile) Family.pushProfile(p);
+  }
+
+  /** What Beyond Family keeps for a person, from this TV's copy. */
+  function look(p) {
+    return {emoji: p.emoji || '', colour: p.colour, world: p.world || undefined, loves: p.loves || [], shelf: p.shelf || undefined};
+  }
+
+  /**
+   * One person from Beyond Family, merged with this TV's copy of them: their shelf on this TV, their Plex user, and
+   * anything changed here that Beyond Family hasn't got yet. Otherwise what Beyond Family keeps wins, so a change on
+   * another TV shows up here.
+   */
+  function merge(p, old) {
+    var prof = p.profile;
+    delete p.profile;
+    if (old) {
+      p.shelf = old.shelf; p.plexUser = old.plexUser; p.emoji = p.emoji || old.emoji;
+      // What a kid picked in Make it yours stays theirs, even over the household's colour.
+      if (old.look) { p.look = true; p.emoji = old.emoji; p.colour = old.colour; p.world = old.world; }
+      // What a kid said they like is theirs; what the household set wins over what was set here.
+      p.loves = old.loves;
+      if (!p.likes) p.likes = old.likes;
+      p.offered = old.offered;
+      if (old.pending) { p.pending = old.pending; return p; }
+      // Made up on this TV before Beyond Family kept looks: send it up once, so it isn't lost.
+      if (old.look && !prof) p.pending = 1;
+    }
+    if (prof) {
+      if (prof.emoji !== undefined) p.emoji = prof.emoji;
+      if (prof.colour) p.colour = prof.colour;
+      if (prof.world !== undefined) p.world = prof.world;
+      if (prof.emoji || prof.colour || prof.world) p.look = true;
+      if (prof.loves) p.loves = prof.loves;
+      if (prof.shelf && prof.shelf.length) p.shelf = prof.shelf;
+    }
+    return p;
+  }
 
   function changed() { save(KEY, list); save(TOGETHER, {shelf: FAMILY.shelf}); for (var i = 0; i < listeners.length; i++) listeners[i](); }
 
@@ -160,6 +206,11 @@ var Profiles = (function () {
         if (!manage) {
           var m = UI.button(foot, tr('Gerenciar perfis', 'Manage profiles', 'Administrar perfiles'), 'settings');
           api.add(m, function () { guard(tr('Gerenciar perfis', 'Manage profiles', 'Administrar perfiles'), function () { pick(true, function () { UI.top() && UI.top().rebuild(); }); }); });
+          if (window.Family && Family.visit) {
+            // Your own face and apps from Beyond Family, on this TV or anybody's.
+            var s = UI.button(foot, tr('Entrar com o Beyond Family', 'Sign in with Beyond Family', 'Entrar con Beyond Family'), 'star');
+            api.add(s, function () { Family.visit(function (p) { if (p) choose(p, api, done); }); });
+          }
         }
         if (window.Family && Family.linked()) UI.el('div', 'bt-who-note', foot, tr('Do Beyond Family: ', 'From Beyond Family: ', 'De Beyond Family: ') + Family.homeName());
       },
@@ -253,11 +304,21 @@ var Profiles = (function () {
           if (!p.name) { UI.toast(tr('Dê um nome ao perfil.', 'Give the profile a name.', 'Ponle un nombre al perfil.')); return; }
           if (isNew) list.push(p);
           else for (var i = 0; i < list.length; i++) if (list[i].id === p.id) list[i] = p;
+          if (!isNew && (p.emoji !== person.emoji || p.colour !== person.colour)) { p.look = true; touched(p); }
           changed();
           api.close();
           if (done) done();
         });
-        if (!isNew && list.length > 1) {
+        if (!isNew && p.visitor) {
+          api.add(UI.button(actions, tr('Sair desta TV', 'Sign out of this TV', 'Cerrar sesión en este TV'), null, 'danger'), function () {
+            if (window.Family) Family.signOut(p);
+            list = list.filter(function (x) { return x.id !== p.id; });
+            if (who === p.id) { who = list[0].id; save(WHO, who); }
+            changed();
+            api.close();
+            if (done) done();
+          });
+        } else if (!isNew && list.length > 1) {
           api.add(UI.button(actions, tr('Apagar', 'Remove', 'Eliminar'), null, 'danger'), function () {
             if (!p.kid && grownUps().length <= 1) { UI.toast(tr('Precisa de pelo menos um adulto.', 'There needs to be at least one grown-up.', 'Hace falta al menos un adulto.')); return; }
             list = list.filter(function (x) { return x.id !== p.id; });
@@ -312,37 +373,43 @@ var Profiles = (function () {
     hasPin: function () { return !!pin(); },
     setPin: setPin,
     /** Saves something for the current profile only (its shelf, its Plex user...). */
-    setOwn: function (name, value) { var p = current(); p[name] = value; changed(); },
+    setOwn: function (name, value) { var p = current(); p[name] = value; if (name === 'shelf') touched(p); changed(); },
     own: function (name) { return current()[name]; },
     /** Replaces the people with a household's members (Beyond Family), keeping each one's shelf when the id matches. */
     replace: function (people) {
       var keep = {};
       for (var i = 0; i < list.length; i++) keep[list[i].id] = list[i];
-      list = people.map(function (p) {
-        var old = keep[p.id];
-        if (old) {
-          p.shelf = old.shelf; p.plexUser = old.plexUser; p.emoji = p.emoji || old.emoji;
-          // What a kid picked in Make it yours stays theirs, even over the household's colour.
-          if (old.look) { p.look = true; p.emoji = old.emoji; p.colour = old.colour; p.world = old.world; }
-          // What a kid said they like is theirs; what the household set wins over what was set here.
-          p.loves = old.loves;
-          if (!p.likes) p.likes = old.likes;
-          p.offered = old.offered;
-        }
-        return p;
-      });
+      list = people.map(function (p) { return merge(p, keep[p.id]); });
       if (!find(who)) who = list[0].id;
       save(WHO, who);
       changed();
     },
+    /** On a TV that isn't linked: this TV's own people stay, and whoever signed in from Beyond Family joins them. */
+    visitors: function (people) {
+      var keep = {}, mine = [];
+      for (var i = 0; i < list.length; i++) { keep[list[i].id] = list[i]; if (!list[i].visitor) mine.push(list[i]); }
+      list = mine.concat(people.map(function (p) { return merge(p, keep[p.id]); }));
+      if (!find(who)) who = list[0].id;
+      save(WHO, who);
+      changed();
+    },
+    /** Beyond Family has this person's change; from now on theirs wins again. Only when nothing changed since. */
+    saved: function (id, stamp) {
+      var p = find(id);
+      if (p && p.pending === stamp) { delete p.pending; save(KEY, list); }
+    },
+    look: look,
+    /** Everyone waiting for Beyond Family to take a change (sent again when the TV gets back online). */
+    unsent: function () { return list.filter(function (p) { return p.pending && p.family; }); },
     /** Make it yours (myworld.js): how the watcher's profile looks. Never the name, shelf, PIN or kid flag. */
     setLook: function (look) {
       var p = current();
       p.emoji = look.emoji; p.colour = look.colour; p.world = look.world; p.loves = look.loves; p.look = true;
+      touched(p);
       changed();
     },
     /** What the watching kid said they like to watch (kidpicks.js). */
-    setLoves: function (loves) { var p = current(); p.loves = loves; changed(); },
+    setLoves: function (loves) { var p = current(); p.loves = loves; touched(p); changed(); },
     /** Switches to someone from Beyond Family's remote. The app already checked who may (a kid only to themselves). */
     use: function (id) { if (!find(id) || id === who) return false; who = id; save(WHO, who); changed(); return true; },
     onChange: function (fn) { listeners.push(fn); }

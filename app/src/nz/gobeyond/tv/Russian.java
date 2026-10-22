@@ -121,6 +121,11 @@ final class Russian {
             case "Family": return "Семья";
             case "For the family": return "Для всей семьи";
             case "For ": return "Для ";
+            case "Sign in with Beyond Family": return "Войти через Beyond Family";
+            case "Sign in with your Beyond Family": return "Войдите через свой Beyond Family";
+            case "Sign out of this TV": return "Выйти на этом телевизоре";
+            case "On your phone, open Beyond Family › Family › TVs › On somebody else's TV, and type": return "На телефоне откройте Beyond Family › Семья › Телевизоры › На чужом телевизоре и введите";
+            case "Your family is on this TV already. This is for somebody from another home.": return "Ваша семья уже на этом телевизоре. Это для гостей из другого дома.";
             case "Manage people": return "Управлять профилями";
             case "Bring in your family from Beyond Family": return "Добавить семью из Beyond Family";
             case "Grown-up PIN": return "PIN взрослого";

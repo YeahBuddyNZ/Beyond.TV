@@ -152,6 +152,11 @@ public class WhoActivity extends Activity {
             add(foot, Ui.tr("Trazer a família do Beyond Family", "Bring in your family from Beyond Family"), false,
                     v -> guard(() -> LinkActivity.open(this)));
         }
+        // Your own face from Beyond Family, on this TV or anybody's.
+        add(foot, Ui.tr("Entrar com o Beyond Family", "Sign in with Beyond Family"), false, v -> {
+            LinkActivity.visit(this);
+            finish();
+        });
         if (first != null) first.requestFocus();
     }
 
@@ -213,6 +218,8 @@ public class WhoActivity extends Activity {
             p.name = person.name;
             p.colour = person.colour;
             p.kid = person.kid;
+            p.emoji = person.emoji;
+            p.visitor = person.visitor;
         }
         LinearLayout c = page(isNew ? Ui.tr("Adicionar alguém", "Add someone") : p.name, null);
 
@@ -279,9 +286,18 @@ public class WhoActivity extends Activity {
             }
             if (!found) people.add(p);
             People.save(this, people);
+            // A colour chosen here is theirs on every TV.
+            if (!isNew && p.member() != null && p.colour != person.colour) Family.pushColour(this, p.member(), p.colour);
             manage();
         });
-        if (!isNew && people.size() > 1) {
+        if (!isNew && p.visitor && p.member() != null) {
+            add(actions, Ui.tr("Sair desta TV", "Sign out of this TV"), false, v -> {
+                Family.signOut(this, p.member());
+                for (int i = people.size() - 1; i >= 0; i--) if (people.get(i).id.equals(p.id)) people.remove(i);
+                People.save(this, people);
+                manage();
+            });
+        } else if (!isNew && people.size() > 1) {
             add(actions, Ui.tr("Remover", "Remove"), false, v -> {
                 if (!person.kid && grownUps(people) <= 1) {
                     note(Ui.tr("Precisa de pelo menos um adulto.", "There needs to be at least one grown-up."));
