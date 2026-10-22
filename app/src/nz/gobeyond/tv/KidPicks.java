@@ -121,7 +121,9 @@ final class KidPicks {
         People.Person me = People.current(c);
         if (me == null || !me.kid) return null;
         List<String> likes = new ArrayList<>();
-        for (String id : Family.likes(me.id)) if (like(id) != null && !likes.contains(id)) likes.add(id);
+        List<String> all = new ArrayList<>(Family.likes(me.id));
+        all.addAll(me.loves);   // what they picked in Make it yours
+        for (String id : all) if (like(id) != null && !likes.contains(id)) likes.add(id);
         if (likes.isEmpty()) return null;
         long now = System.currentTimeMillis();
         long day = (now + TimeZone.getDefault().getOffset(now)) / 86400000L;

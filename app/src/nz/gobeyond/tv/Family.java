@@ -251,6 +251,28 @@ final class Family {
         }, "beyond-family-profile").start();
     }
 
+    /** Make it yours, chosen here: a Beyond Family person's face, colour, world and loves, kept with them. */
+    static void pushLook(Context c, People.Person p) {
+        final String member = p.member();
+        if (member == null) return;
+        final Context app = c.getApplicationContext();
+        final JSONObject look = new JSONObject();
+        try {
+            look.put("emoji", p.emoji == null ? "" : p.emoji)
+                    .put("colour", String.format(Locale.ROOT, "#%06X", p.colour & 0xFFFFFF))
+                    .put("loves", new JSONArray(p.loves));
+            if (p.world != null && !p.world.isEmpty()) look.put("world", p.world);
+        } catch (Exception e) {
+            return;
+        }
+        new Thread(() -> {
+            try {
+                call(app, "POST", "/tv/people/" + member, look, 10_000);
+            } catch (Throwable ignored) {
+            }
+        }, "beyond-family-profile").start();
+    }
+
     /** Unlink from the TV's side. Forgets here at once, whether or not Beyond Family hears it. */
     static void bye(Context c) {
         final JSONObject was = state(c);
@@ -395,6 +417,12 @@ final class Family {
             person.colour = colour(look.optString("colour"), person.colour);
             String e = look.optString("emoji");
             if (e.length() <= 16) person.emoji = e;
+            if (MyWorldActivity.world(look.optString("world")) != null) person.world = look.optString("world");
+            JSONArray loves = look.optJSONArray("loves");
+            for (int j = 0; loves != null && j < loves.length() && j < 12; j++) {
+                String id = loves.optString(j);
+                if (!id.isEmpty() && !person.loves.contains(id)) person.loves.add(id);
+            }
         }
         return person;
     }

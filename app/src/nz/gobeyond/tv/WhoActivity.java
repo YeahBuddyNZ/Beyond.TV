@@ -146,6 +146,13 @@ public class WhoActivity extends Activity {
             if (p.id.equals(now.id)) first = f;
         }
         LinearLayout foot = row(c, 40);
+        if (now.kid && !now.together()) {
+            // Their buddy, colour, world and loves: theirs to change, no PIN.
+            add(foot, Ui.tr("Do seu jeito", "Make it yours", "A tu manera"), true, v -> {
+                MyWorldActivity.open(this);
+                finish();
+            });
+        }
         add(foot, Ui.tr("Gerenciar pessoas", "Manage people"), false, v -> guard(this::manage));
         if (!Family.linked(this)) {
             // On its own, a TV only knows "Me". Linked, it shows everyone in the family, in their own faces.
@@ -164,6 +171,7 @@ public class WhoActivity extends Activity {
         People.Person now = People.current(this);
         Runnable go = () -> {
             People.use(this, p.id);
+            MyWorldActivity.offer(this, p);   // a kid's first time: make it yours
             finish();
         };
         // A kid moving to Family or a grown-up needs the PIN; anyone moving to a kid's profile doesn't.

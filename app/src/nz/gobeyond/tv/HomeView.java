@@ -132,6 +132,13 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
     // Night look (like Apple's "Automatic" appearance): darker from sunset to sunrise, with a 2 s transition.
     private static final long NIGHT_MS = 2000;
     private boolean nightTarget;
+    /** The dark look: at night, or while a kid's world is behind the home screen (its skies are dark). */
+    private boolean darkTarget;
+    /** Make it yours: the watcher's world behind the apps, or null for the usual sky. */
+    private MyWorldActivity.World world;
+    private String[] worldThings = new String[0];
+    private final Paint worldSky = new Paint();
+    private Paint[] worldPaints;
     private float night, nightFrom;     // 0 = day, 1 = night
     private long nightAt;
     private final int[] glassNight = new int[Backdrop.GW * Backdrop.GH], frostNight = new int[Backdrop.FW * Backdrop.FH];
@@ -510,6 +517,9 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         helloLine = watcher.together() ? hello + Ui.tr(", família", Prefs.kupu() ? ", whānau" : ", everyone", ", familia")
                 : People.count(getContext()) > 1 ? hello + ", " + watcher.name : hello;
         watcherInitial = watcher.initial();
+        world = MyWorldActivity.world(watcher.world);
+        worldThings = MyWorldActivity.things(world, watcher.loves);
+        if (world != null && h > 0) worldSky.setShader(MyWorldActivity.sky(world, h));
         personInk.setTypeface(Ui.semibold);
         personInk.setColor(0xFFFFFFFF);
         personInk.setTextAlign(Paint.Align.CENTER);
@@ -620,6 +630,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         h = height;
         k = w / 1920f;
         screen.set(0, 0, w, h);
+        worldPaints = MyWorldActivity.paints(k);
+        if (world != null) worldSky.setShader(MyWorldActivity.sky(world, h));
         scene.setSize(w, h);
         glow.setSize(w, h);
         makePaints();
@@ -776,7 +788,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
                 || drawerOpen || drawer.value > 0.001f || toast != null || !toasts.isEmpty();
         idle = !busy;
         // Breathing: the sky alone, a few times a second, while nothing else is moving.
-        boolean breathing = bgTo == null && bgFadeAt == 0;
+        boolean breathing = (bgTo == null && bgFadeAt == 0) || world != null;
         if (breathing && !busy && up - lastBreath >= BREATH_FRAME - 8) {
             lastBreath = up;
             sky.invalidate();
@@ -971,13 +983,17 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
     /** Day or night right now (from the sun at your location); `animate`: with the transition. */
     private void checkNight(boolean animate) {
         boolean want = data.isNight(System.currentTimeMillis());
-        if (want == nightTarget) return;
-        nightTarget = want;
-        // The moon button comes at night and goes in the morning.
-        makeLightButtons();
-        layoutLight();
-        int top = tabCount() + lightButtons.size();
-        if (zone == Z_TOP && topIndex >= top) topIndex = Math.max(0, top - 1);
+        if (want != nightTarget) {
+            nightTarget = want;
+            // The moon button comes at night and goes in the morning.
+            makeLightButtons();
+            layoutLight();
+            int top = tabCount() + lightButtons.size();
+            if (zone == Z_TOP && topIndex >= top) topIndex = Math.max(0, top - 1);
+        }
+        want = want || world != null;
+        if (want == darkTarget) return;
+        darkTarget = want;
         if (animate && running) {
             nightFrom = night;
             nightAt = SystemClock.uptimeMillis();
@@ -991,7 +1007,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
     /** Advances the day ⇄ night transition; true while it runs. */
     private boolean tickNight(long up) {
         if (nightAt == 0) return false;
-        float t = Ui.clamp((up - nightAt) / NIGHT_MS), to = nightTarget ? 1 : 0;
+        float t = Ui.clamp((up - nightAt) / NIGHT_MS), to = darkTarget ? 1 : 0;
         night = nightFrom + (to - nightFrom) * t * t * (3 - 2 * t);
         if (t >= 1) {
             night = to;
@@ -2983,6 +2999,17 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         long up = SystemClock.uptimeMillis();
         float e = bgFadeAt == 0 ? 1 : fadeEase(bgFadeAt, up);
         boolean fading = bgFadeAt != 0;
+        if (world != null && worldPaints != null) {
+            // Make it yours: their world instead of the sky, its things drifting slowly.
+            if (bornAt == 0) bornAt = up;
+            MyWorldActivity.draw(c, w, h, worldSky, worldThings, worldPaints, k, (up - bornAt) / 1000f, 1);
+            float veilAmount = 0.42f * Ui.clamp(drawer.value);
+            if (veilAmount > 0.002f) {
+                veilPaint.setColor(Ui.alpha(0xFF000000, veilAmount));
+                c.drawRect(screen, veilPaint);
+            }
+            return;
+        }
         // Drawer open: the background lightens (by day) or darkens (at night), as a filter on the drawing itself.
         android.graphics.ColorFilter v = veil(tone(0.32f, 0.42f) * Ui.clamp(drawer.value), blend(0xFFFFFFFF, 0xFF000000, night));
         if (bgTo == null || (fading && bgFrom == null)) {
