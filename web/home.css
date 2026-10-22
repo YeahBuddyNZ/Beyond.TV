@@ -505,6 +505,34 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 #saver .clock .date { margin-top: 10px; font-size: 34px; font-weight: 500; color: rgba(255, 255, 255, 0.82); }
 #saver .clock .title { margin-top: 18px; font-size: 26px; font-weight: 500; color: rgba(255, 255, 255, 0.65); }
 
+/* The house noticeboard: today, beside the clock, when the household switched it on in Beyond Family. */
+#saver .board {
+  position: absolute;
+  right: 80px;
+  bottom: 90px;
+  width: 660px;
+  padding: 30px 40px 32px;
+  border-radius: 40px;
+  color: #FFF;
+  opacity: 0;
+  background: -webkit-linear-gradient(top, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.1));
+  background: linear-gradient(rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.1));
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35), inset 0 1.5px 0 rgba(255, 255, 255, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  -webkit-transition: opacity 1.2s;
+  transition: opacity 1.2s;
+}
+#saver .board.on { opacity: 1; }
+#saver .board .head { font-size: 36px; font-weight: 600; margin-bottom: 14px; }
+#saver .board .bday { font-size: 28px; font-weight: 600; color: #F2C27A; margin-bottom: 10px; }
+#saver .board .row { position: relative; padding-left: 150px; margin: 8px 0; font-size: 27px; line-height: 1.3; }
+#saver .board .when { position: absolute; left: 0; top: 0; width: 118px; color: rgba(255, 255, 255, 0.7); font-feature-settings: 'tnum'; }
+#saver .board .dot { position: absolute; left: 124px; top: 12px; width: 14px; height: 14px; border-radius: 7px; }
+#saver .board .what { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#saver .board .more { color: rgba(255, 255, 255, 0.65); }
+#saver .board .tea, #saver .board .note { margin-top: 14px; font-size: 26px; line-height: 1.35; color: rgba(255, 255, 255, 0.88); }
+#saver .board .tea b, #saver .board .note b { font-weight: 600; color: #FFF; }
+#saver .board .note { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+
 /* MARK: - Toast */
 
 #toast {

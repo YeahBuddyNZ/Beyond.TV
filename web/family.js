@@ -47,6 +47,7 @@ var Family = (function () {
   function forget(why) {
     var was = linked();
     state = {};
+    board = null;
     save();
     clearTimeout(loopTimer);
     if (was && why) UI.toast(why);
@@ -56,6 +57,8 @@ var Family = (function () {
   // MARK: - The household
 
   var lastPeople = '';
+  // The house noticeboard (only when the household turned it on): today, for the screensaver. Kept in memory only.
+  var board = null;
 
   /** Beyond Family's people become the TV's profiles. Only when they changed, so nobody's screen jumps. */
   function apply(home) {
@@ -63,6 +66,7 @@ var Family = (function () {
     var sig = JSON.stringify(home.people || []);
     state.home = {name: home.name};
     save();
+    board = home.board || null;
     if (sig === lastPeople || !home.people || !home.people.length) return;
     lastPeople = sig;
     Profiles.replace(home.people.map(function (p) {
@@ -401,6 +405,7 @@ var Family = (function () {
     say: say,
     hide: hide,
     togetherKey: togetherKey,
+    board: function () { return linked() ? board : null; },
     now: now
   };
 })();

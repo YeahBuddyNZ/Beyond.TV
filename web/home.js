@@ -848,6 +848,7 @@
     el('div', 'time', clock);
     el('div', 'date', clock);
     el('div', 'title', clock);
+    var notice = el('div', 'board', s);
     var front = a;
     function next() {
       if (!saverOn) return;
@@ -865,6 +866,7 @@
         }, 60);
       }
       tickSaverClock(clock);
+      paintBoard(notice);
       saverTimer = setTimeout(next, 12000);
     }
     setClass(s, 'on', true);
@@ -879,6 +881,56 @@
     } catch (e) {
       clock.children[1].textContent = d.toDateString();
     }
+  }
+
+  var lastBoard = '';
+
+  /**
+   * The house noticeboard beside the clock: today's family calendar, birthdays, tea and recent notes, when the
+   * household switched it on in Beyond Family. Built again only when it changed, so it doesn't flicker every photo.
+   */
+  function paintBoard(box) {
+    var b = window.Family && Family.board ? Family.board() : null;
+    var empty = !b || !((b.events && b.events.length) || (b.birthdays && b.birthdays.length) || b.tea || (b.notes && b.notes.length));
+    var sig = empty ? '' : JSON.stringify(b) + I18N.locale();
+    setClass(box, 'on', !empty);
+    if (sig === lastBoard && box.firstChild) return;
+    lastBoard = sig;
+    box.innerHTML = '';
+    if (empty) return;
+    el('div', 'head', box, tr('Hoje', 'Today', 'Hoy'));
+    for (var i = 0; i < (b.birthdays || []).length; i++) {
+      el('div', 'bday', box, '🎂 ' + tr('Feliz aniversário, ', 'Happy birthday, ', '¡Feliz cumpleaños, ') + b.birthdays[i] + '!');
+    }
+    var events = b.events || [];
+    for (var e = 0; e < events.length; e++) {
+      var ev = events[e];
+      var row = el('div', 'row', box);
+      el('span', 'when', row, ev.time ? Data.time(clockAt(ev.time)) : tr('O dia todo', 'All day', 'Todo el día'));
+      var dot = el('i', 'dot', row);
+      dot.style.background = ev.colour || 'rgba(255, 255, 255, 0.5)';
+      var what = el('span', 'what', row, ev.title);
+      var more = [ev.who, ev.where].filter(function (x) { return x; }).join(' · ');
+      if (more) el('span', 'more', what, '  ' + more);
+    }
+    if (b.tea) {
+      var tea = el('div', 'tea', box);
+      el('b', '', tea, tr('Jantar', 'Tea', 'Cena') + ' ');
+      tea.appendChild(document.createTextNode(b.tea));
+    }
+    var notes = b.notes || [];
+    for (var n = 0; n < notes.length; n++) {
+      var note = el('div', 'note', box);
+      el('b', '', note, notes[n].from + ' ');
+      note.appendChild(document.createTextNode(notes[n].text));
+    }
+  }
+
+  /** "15:30" today, as a time the clock words can say in the TV's own style. */
+  function clockAt(hm) {
+    var d = new Date();
+    d.setHours(+hm.slice(0, 2), +hm.slice(3, 5), 0, 0);
+    return d.getTime();
   }
 
   var saverAt = 0, ASK_AGAIN_AFTER = 20 * 60000;
