@@ -244,7 +244,7 @@ public class LinkActivity extends Activity {
                     }
                     FamilyService.start(app);
                     People.use(app, fresh.id);
-                    Toast.makeText(app, "Kia ora, " + fresh.name, Toast.LENGTH_LONG).show();
+                    Toast.makeText(app, Ui.hello() + ", " + fresh.name, Toast.LENGTH_LONG).show();
                     finish();
                 }, 300);
             }, "beyond-family-visit-check").start();

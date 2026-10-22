@@ -170,7 +170,7 @@ var Family = (function () {
         if (!fresh) { timer = setTimeout(check, 3000); return; }
         closed = true;
         api.close();
-        UI.toast(tr('Olá, ', 'Kia ora, ', 'Hola, ') + fresh.name);
+        UI.toast(tr('Olá, ', Prefs.kupu() ? 'Kia ora, ' : 'Hello, ', 'Hola, ') + fresh.name);
         start();
         if (done) done(fresh);
       });

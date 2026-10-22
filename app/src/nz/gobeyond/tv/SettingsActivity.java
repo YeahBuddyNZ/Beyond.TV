@@ -685,7 +685,7 @@ public class SettingsActivity extends Activity {
             l.add(Ui.tr("Sons de navegação", "Navigation sounds"));
             l.add(Ui.tr("Widget do clima", "Weather widget"));
             l.add(Ui.tr("Cidade", "City"));
-            l.add(Ui.tr("Palavra do dia em te reo Māori", "Te reo word of the day"));
+            l.add(Ui.tr("Te reo maori", "Te reo Māori", "Te reo maorí"));
             l.add(Ui.tr("Protetor de tela", "Screensaver"));
             l.add(Ui.tr("Tipo de arte", "Kind of art"));
             l.add(Ui.tr("Ajudar a corrigir problemas", "Help fix problems"));

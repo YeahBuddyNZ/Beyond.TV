@@ -112,7 +112,7 @@ final class Spanish {
             case "No city with that name.": return "Ninguna ciudad con ese nombre.";
             case "Couldn't search now: ": return "No se pudo buscar ahora: ";
             case "Quotes widget": return "Widget de cotizaciones";
-            case "Te reo word of the day": return "Palabra del día en te reo maorí";
+            case "Te reo Māori": return "Te reo maorí";
             case "Help fix problems": return "Ayudar a corregir problemas";
             case "Couldn't check just now. It tries again by itself": return "No se pudo buscar ahora. Lo vuelve a intentar solo";
             case "Taking a short break. They'll be back by themselves.": return "Una pequeña pausa. Vuelven solas.";

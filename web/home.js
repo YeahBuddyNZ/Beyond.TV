@@ -257,8 +257,8 @@
   }
 
   function renderTop() {
-    var me = Profiles.current(), hello = tr('Olá', 'Kia ora', 'Hola');
-    $('title').textContent = me.together ? hello + tr(', família', ', whānau', ', familia')
+    var me = Profiles.current(), reo = Prefs.kupu(), hello = tr('Olá', reo ? 'Kia ora' : 'Hello', 'Hola');
+    $('title').textContent = me.together ? hello + tr(', família', reo ? ', whānau' : ', everyone', ', familia')
       : Profiles.count() > 1 ? hello + ', ' + me.name : hello;
     var was = kinds[st.tab];
     kinds = tabKinds();
@@ -663,8 +663,8 @@
         step: function (d) { cycle('theme', ['auto', 'light', 'dark'], theme, d); checkNight(); }},
       {label: tr('Widget do clima', 'Weather widget', 'Widget del clima'), toggle: Prefs.weather(),
         step: function () { Prefs.set('weather', !Prefs.weather()); renderPanels(); }},
-      {label: tr('Palavra do dia em te reo Māori', 'Te reo word of the day', 'Palabra del día en te reo maorí'), toggle: Prefs.kupu(),
-        step: function () { Prefs.set('kupu', !Prefs.kupu()); renderQuotes(); }},
+      {label: tr('Te reo maori', 'Te reo Māori', 'Te reo maorí'), toggle: Prefs.kupu(),
+        step: function () { Prefs.set('kupu', !Prefs.kupu()); renderTop(); renderQuotes(); }},
       {label: tr('Protetor de tela', 'Screensaver', 'Salvapantallas'),
         value: Prefs.screensaver() === 'art' ? tr('Arte', 'Art', 'Arte') : Prefs.screensaver() === 'photos' ? tr('Fotos de filmes', 'Film photos', 'Fotos de películas')
           : Art.on() ? tr('Automático (arte)', 'Automatic (art)', 'Automático (arte)') : tr('Automático (fotos)', 'Automatic (photos)', 'Automático (fotos)'),

@@ -220,4 +220,9 @@ final class Ui {
         OVAL.set(cx - r, cy - r, cx + r, cy + r);
         c.drawArc(OVAL, (seconds * 360f) % 360f, 270f, false, stroke);
     }
+
+    /** "Kia ora", or "Hello" when te reo is turned off in Home Settings. */
+    static String hello() {
+        return tr("Olá", Prefs.kupu() ? "Kia ora" : "Hello", "Hola");
+    }
 }
