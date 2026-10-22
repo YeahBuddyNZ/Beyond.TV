@@ -75,8 +75,10 @@ find_tvs() {
   out="$(mktemp)"
   for i in $(seq 1 254); do
     [ "$base.$i" = "$me" ] && continue
-    ( ( exec 3<>"/dev/tcp/$base.$i/5555" ) 2>/dev/null && echo "$base.$i" >>"$out" ) &
-    ( sleep 2; kill $! 2>/dev/null ) >/dev/null 2>&1 &
+    # Every job lets go of stdout: an address that never answers holds its connect for over a minute on a Mac,
+    # and one still holding the $(...) pipe would keep the search waiting for it.
+    ( ( exec 3<>"/dev/tcp/$base.$i/5555" ) 2>/dev/null && echo "$base.$i" >>"$out" ) >/dev/null 2>&1 </dev/null &
+    ( sleep 2; kill $! 2>/dev/null ) >/dev/null 2>&1 </dev/null &
   done 2>/dev/null
   sleep 3
   sort -t. -k4 -n "$out"; rm -f "$out"
@@ -100,7 +102,15 @@ IP="${IP%:5555}"
 T="$IP:5555"
 
 say "Connecting to $T"
-"$ADB" start-server >/dev/null 2>&1 || true
+# On a Mac, Local Network privacy blocks an adb server that adb starts in the background ("No route to host"),
+# so it's started from here instead, under the terminal's permission.
+if [ "$(uname -s)" = Darwin ]; then
+  "$ADB" kill-server >/dev/null 2>&1 || true
+  ( "$ADB" nodaemon server >/dev/null 2>&1 </dev/null & )
+  sleep 1
+else
+  "$ADB" start-server >/dev/null 2>&1 || true
+fi
 state=""
 told=no
 for _ in $(seq 1 90); do
