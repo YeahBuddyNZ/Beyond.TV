@@ -290,3 +290,12 @@ No accounts, no ads, no tracking. The app talks to TMDB, Open-Meteo (with the co
 
 Beyond™ TV is GPL-3.0 ([LICENSE](LICENSE)). It began as a fork of [Free My TV](https://github.com/simbasjungles/free-my-tv)
 and keeps its history; that code's MIT licence is kept in [LICENSE-free-my-tv.txt](LICENSE-free-my-tv.txt).
+
+## Trade marks
+
+The code is GPL-3.0, so you are free to use, change and share it under that licence. The name is not part of the
+licence. Beyond™, Beyond™ TV, Beyond™ Spaces, Beyond™ Family and Beyond's four coloured dots are trade marks of Global
+Support Limited (BEYOND is registered in New Zealand, IPONZ 1251473). If you share a changed version, give it your own
+name and icon, and don't say it comes from Beyond.
+
+Beyond™ TV for business, the paid shop-window screens, is a separate product and is not in this repository.
