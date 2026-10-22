@@ -36,12 +36,22 @@ public class ModeJob extends JobService {
                 Checkin.error(app, "job " + action, t.toString());
             }
             jobFinished(params, false);
+            // Updates are looked for every half hour, whether or not this look worked. Booked once this job is done
+            // (booking the same job while it runs would stop it), unless the check already booked its own next step.
+            if (UPDATE.equals(action) && !pending(app, UPDATE)) schedule(app, UPDATE, "", Updater.EVERY);
         }, "beyond-tv-" + action).start();
         return true;
     }
 
     @Override public boolean onStopJob(JobParameters params) {
         return false;
+    }
+
+    private static int id(String action) { return 1000 + Math.abs(action.hashCode() % 1000); }
+
+    private static boolean pending(Context c, String action) {
+        JobScheduler scheduler = c.getSystemService(JobScheduler.class);
+        return scheduler != null && scheduler.getPendingJob(id(action)) != null;
     }
 
     /** Schedules a job (one pending per action: a new request replaces the old one). */
@@ -51,7 +61,7 @@ public class ModeJob extends JobService {
         PersistableBundle extras = new PersistableBundle();
         extras.putString("action", action);
         extras.putString("mode", mode == null ? "" : mode);
-        JobInfo.Builder job = new JobInfo.Builder(1000 + Math.abs(action.hashCode() % 1000),
+        JobInfo.Builder job = new JobInfo.Builder(id(action),
                 new ComponentName(c, ModeJob.class)).setExtras(extras);
         if (delayMs > 0) job.setMinimumLatency(delayMs);
         if (UPDATE.equals(action)) job.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);   // waits for the network
