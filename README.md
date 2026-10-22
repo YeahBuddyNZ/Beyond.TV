@@ -48,7 +48,7 @@ Free and open source, built in Aotearoa by [Beyond](https://gobeyond.co.nz). One
 3. All your services as one: one "What's on" across every service you have, opening each title in its own app.
 4. Beyond Family: pair the TV with your household, a phone remote in the Beyond Family app, voice search for kids, and the family house game on the big screen.
 5. Picks for kids: interests set by a grown-up, gentle suggestions of something better to watch, and a parent code for the grown-up settings.
-6. Two homes, one show: co-parents' TVs play the same thing at the same time, with reactions from phones.
+6. Two homes, one show: done on LG and Samsung. The Beyond Family app starts a countdown on every TV in two linked homes, and reactions come from phones. Google TV once it pairs with Beyond Family.
 7. Earn your screen (Beyond Family jobs unlock the kids' apps), the house noticeboard when nobody's watching, a bedtime breathing night light, a fine day nudge that counts as green time, a dinner question answered from phones, and a te reo word of the day.
 8. Beyond™ TV for business: shop-window screens changed from the web, as a subscription. Free for homes, always.
 

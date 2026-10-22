@@ -171,6 +171,7 @@ var Family = (function () {
   // MARK: - Doing what the app asks
 
   var loopTimer = 0, backoff = 0, running = false;
+  var clockOffset = 0;   // Beyond Family's clock minus this TV's, so two homes count down to the same moment
 
   function start() {
     if (running || !state.id) return;
@@ -194,6 +195,10 @@ var Family = (function () {
       }
       backoff = 0;
       if (res.paired === false) { running = false; forget(); return; }
+      if (res.serverTime) {
+        var t = Date.parse(res.serverTime);
+        if (!isNaN(t)) clockOffset = t - Date.now();
+      }
       apply(res.home);
       var list = res.commands || [];
       for (var i = 0; i < list.length; i++) run(list[i]);
@@ -205,6 +210,9 @@ var Family = (function () {
 
   function run(c) {
     if (c.kind === 'say') { say(c.text, c.tone, c.from); return; }
+    if (c.kind === 'together') { together(c); return; }
+    if (c.kind === 'together-end') { togetherEnd(c.session); return; }
+    if (c.kind === 'react') { react(c.emoji, c.from, c.colour); return; }
     if (hide()) { if (c.kind === 'key') return; }  // the first press puts a message away, like it would on the remote
     if (c.kind === 'key') {
       if (c.key === 'home') { UI.closeAll(); BeyondTV.home(); return; }
@@ -287,6 +295,92 @@ var Family = (function () {
     return true;
   }
 
+  // MARK: - Watching together
+
+  // Two homes, one show. Beyond Family sends the moment to press play; this TV counts down to it by Beyond Family's
+  // clock. OK opens the app (the countdown carries on, on everyone's phones). Reactions from phones float up.
+
+  var tg = null, tgTimer = 0;
+
+  function together(c) {
+    togetherEnd();
+    var at = Date.parse(c.startsAt);
+    if (isNaN(at)) return;
+    var stage = document.getElementById('stage');
+    var card = UI.el('div', 'bt-together', stage);
+    var head = UI.el('div', 'bt-together-head', card);
+    UI.dots(head);
+    UI.el('span', '', head, c['with'] && c['with'].length ? tr('Assistindo junto com ', 'Watching together with ', 'Viendo juntos con ') + c['with'].join(' & ')
+      : tr('Todas as TVs juntas', 'Every TV together', 'Todos los TV juntos'));
+    UI.el('div', 'bt-together-title', card, c.title);
+    var count = UI.el('div', 'bt-together-count', card, '');
+    var hint = UI.el('div', 'bt-together-hint', card, '');
+    tg = {session: c.session, card: card, app: c.app};
+    UI.setClass(card, 'on', true);
+    chime();
+    function tick() {
+      if (!tg || tg.card !== card) return;
+      var left = Math.ceil((at - (Date.now() + clockOffset)) / 1000);
+      if (left > 0) {
+        count.textContent = left;
+        hint.textContent = c.app ? tr('Aperte OK para abrir o app e achar. Aperte play quando chegar a zero.', 'Press OK to open the app and find it. Press play at zero.', 'Pulsa OK para abrir la app y buscarlo. Dale a play en cero.')
+          : tr('Prepare tudo. Aperte play quando chegar a zero.', 'Get it ready. Press play at zero.', 'Prepáralo. Dale a play en cero.');
+        tgTimer = setTimeout(tick, 250);
+      } else if (left > -5) {
+        count.textContent = tr('Play!', 'Play!', '¡Play!');
+        hint.textContent = tr('Bom filme!', 'Enjoy the show!', '¡Que lo disfrutes!');
+        tgTimer = setTimeout(tick, 250);
+      } else {
+        hideTogether();
+      }
+    }
+    tick();
+  }
+
+  /** OK on the countdown opens the app, if there is one. True when it used the key. */
+  function togetherKey(code) {
+    if (!tg) return false;
+    if (code === KEYS.ok && tg.app) {
+      var app = tg.app;
+      hideTogether();
+      if (!BeyondTV.openShelf(app)) UI.toast(tr('Esse app não está nesta TV', "That app isn't on this TV", 'Esa app no está en este TV'));
+      return true;
+    }
+    if (code === TV.keys.back) { hideTogether(); return true; }
+    return false;
+  }
+
+  function hideTogether() {
+    clearTimeout(tgTimer);
+    if (!tg) return;
+    var card = tg.card;
+    tg = null;
+    UI.setClass(card, 'on', false);
+    setTimeout(function () { if (card.parentNode) card.parentNode.removeChild(card); }, 400);
+  }
+
+  function togetherEnd(session) {
+    if (!tg || (session && tg.session !== session)) return;
+    hideTogether();
+  }
+
+  var floating = 0;
+
+  /** A reaction drifting up the right of the screen, with who (or which home) sent it. */
+  function react(emoji, from, colour) {
+    if (!emoji || floating > 12) return;
+    var stage = document.getElementById('stage');
+    var r = UI.el('div', 'bt-react', stage);
+    UI.el('div', 'e', r, emoji);
+    var name = UI.el('div', 'n', r, from || '');
+    if (colour) name.style.background = colour;
+    r.style.right = (90 + Math.round(Math.random() * 220)) + 'px';
+    var wait = 30 + floating * 400;   // a few at once go up one after another, not in a pile
+    floating++;
+    setTimeout(function () { UI.setClass(r, 'up', true); }, wait);
+    setTimeout(function () { floating--; if (r.parentNode) r.parentNode.removeChild(r); }, wait + 4300);
+  }
+
   // MARK: - What's on, for the remote
 
   function now(app, title) {
@@ -305,6 +399,7 @@ var Family = (function () {
     manage: manage,
     say: say,
     hide: hide,
+    togetherKey: togetherKey,
     now: now
   };
 })();

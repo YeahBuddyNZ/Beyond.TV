@@ -342,6 +342,39 @@
 .bt-alert-text { font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 44px; font-weight: 700; line-height: 1.15; }
 .bt-alert-from { margin-top: 10px; font-size: 24px; color: rgba(247, 246, 242, 0.55); }
 
+/* MARK: - Watching together (family.js): a countdown both homes share, and reactions drifting up. */
+
+.bt-together {
+  position: absolute; z-index: 91; left: 50%; top: 150px; width: 980px; margin-left: -490px;
+  padding: 48px 56px 52px; border-radius: 44px; text-align: center;
+  background: rgba(13, 12, 24, 0.94);
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6), inset 0 0 0 2px rgba(158, 123, 255, 0.35);
+  color: #F7F6F2;
+  opacity: 0;
+  -webkit-transform: scale(0.94); transform: scale(0.94);
+  -webkit-transition: opacity 0.35s, -webkit-transform 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+  transition: opacity 0.35s, transform 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+.bt-together.on { opacity: 1; -webkit-transform: none; transform: none; }
+.bt-together-head { font-size: 28px; color: rgba(247, 246, 242, 0.7); }
+.bt-together-head .dots { margin-right: 16px; }
+.bt-together-title { margin-top: 18px; font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 60px; font-weight: 700; line-height: 1.1; }
+.bt-together-count { margin-top: 20px; font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 200px; font-weight: 700; line-height: 1; color: #9E7BFF; }
+.bt-together-hint { margin-top: 18px; font-size: 30px; color: rgba(247, 246, 242, 0.75); }
+
+.bt-react {
+  position: absolute; z-index: 92; bottom: 80px; text-align: center;
+  opacity: 0;
+  -webkit-transition: opacity 0.5s, -webkit-transform 4s ease-out;
+  transition: opacity 0.5s, transform 4s ease-out;
+}
+.bt-react.up { opacity: 1; -webkit-transform: translate(0, -720px); transform: translate(0, -720px); }
+.bt-react .e { font-size: 96px; line-height: 1.1; }
+.bt-react .n {
+  display: inline-block; margin-top: 6px; padding: 6px 18px; border-radius: 20px;
+  background: rgba(110, 61, 219, 0.9); color: #FFF; font-size: 24px; font-weight: 600; white-space: nowrap;
+}
+
 /* MARK: - Make it yours (myworld.js): a kid's own world. Only transform and opacity animate. */
 
 .mw-sky { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; }
