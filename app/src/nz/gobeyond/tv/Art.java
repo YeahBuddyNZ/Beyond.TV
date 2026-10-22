@@ -40,6 +40,8 @@ import java.util.concurrent.Executors;
 final class Art {
     private static final String API = "https://api.artic.edu/api/v1/artworks/search";
     private static final String IIIF = "https://www.artic.edu/iiif/2/";
+    /** Our own seasonal art (Halloween, Christmas...), drawn by us and served from the website: docs/art. */
+    static final String SEASONS = "https://yeahbuddynz.github.io/Beyond.TV/art/";
     private static final String[] THEMES = {"landscape", "sea", "garden", "flowers", "mountains", "river", "sky",
             "autumn", "harbour", "trees", "impressionism", "still life"};
     private static final int KEEP = 24;
@@ -121,13 +123,20 @@ final class Art {
 
     private boolean stale() {
         synchronized (picks) { if (picks.isEmpty()) return true; }
-        return System.currentTimeMillis() - listFile.lastModified() > 24 * 3600_000L;
+        // A new set each day, at midnight on the TV's own clock, so a season starts on its first morning.
+        java.text.SimpleDateFormat day = new java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.ROOT);
+        return !day.format(new java.util.Date(listFile.lastModified())).equals(day.format(new java.util.Date()));
     }
 
     // MARK: - The list
 
     private void fetchList() throws Exception {
         long day = System.currentTimeMillis() / 86_400_000L;
+        try {
+            if (fetchSeason(day)) return;
+        } catch (Exception e) {
+            AppLog.w("art: seasons: " + e.getMessage());   // no season art today: the museum, as always
+        }
         String theme = THEMES[(int) (day % THEMES.length)];
         String q = "q=" + URLEncoder.encode(theme, "UTF-8")
                 + "&query%5Bterm%5D%5Bis_public_domain%5D=true&limit=60"
@@ -159,6 +168,49 @@ final class Art {
             picks.addAll(found);
         }
         save();
+    }
+
+    /** In a season (Halloween, Christmas...), its pictures instead of the museum's. False when no season is on. */
+    private boolean fetchSeason(long day) throws Exception {
+        JSONArray seasons = new JSONObject(read(SEASONS + "seasons.json")).getJSONArray("seasons");
+        java.util.Calendar now = java.util.Calendar.getInstance();
+        String today = String.format(java.util.Locale.ROOT, "%02d-%02d", now.get(java.util.Calendar.MONTH) + 1,
+                now.get(java.util.Calendar.DAY_OF_MONTH));
+        for (int i = 0; i < seasons.length(); i++) {
+            JSONObject s = seasons.getJSONObject(i);
+            if (!inSeason(today, s.optString("from"), s.optString("to"))) continue;
+            JSONArray art = s.getJSONArray("art");
+            List<Recs.Pick> found = new ArrayList<>();
+            for (int j = 0; j < art.length(); j++) {
+                JSONObject o = art.getJSONObject(j);
+                String file = o.optString("file", "");
+                if (file.isEmpty()) continue;
+                Recs.Pick p = new Recs.Pick();
+                p.kind = "art";
+                p.id = file.hashCode() & 0x7FFFFFFF;
+                p.title = o.optString("title", "");
+                p.backdrop = SEASONS + file;
+                p.meta = o.optString("by", "Beyond™ TV");
+                p.gentle = true;
+                found.add(p);
+            }
+            if (found.isEmpty()) return false;
+            Collections.shuffle(found, new Random(day));
+            synchronized (picks) {
+                picks.clear();
+                picks.addAll(found);
+            }
+            save();
+            return true;
+        }
+        return false;
+    }
+
+    /** MM-DD strings compare in date order; a season may run over New Year (from after to). */
+    static boolean inSeason(String today, String from, String to) {
+        if (from.length() != 5 || to.length() != 5) return false;
+        return from.compareTo(to) <= 0 ? today.compareTo(from) >= 0 && today.compareTo(to) <= 0
+                : today.compareTo(from) >= 0 || today.compareTo(to) <= 0;
     }
 
     private void save() {
@@ -212,6 +264,7 @@ final class Art {
 
     /** Downloads the painting and draws it framed on the mat, saved as a 16:9 JPEG the screensaver loads like a photo. */
     private void frame(Recs.Pick p) throws Exception {
+        if (p.backdrop.startsWith("http")) { fill(p); return; }
         byte[] bytes;
         try {
             bytes = download(IIIF + p.backdrop + "/full/1686,/0/default.jpg");
@@ -253,6 +306,30 @@ final class Art {
             paint.setColor(FRAME);
             c.drawRect(frame, paint);
             c.drawBitmap(art, null, new RectF(left, top, left + aw, top + ah), paint);
+            File f = file(p), tmp = new File(dir, p.id + ".part");
+            try (FileOutputStream fo = new FileOutputStream(tmp)) {
+                out.compress(Bitmap.CompressFormat.JPEG, 90, fo);
+            }
+            if (!tmp.renameTo(f)) throw new Exception("could not save");
+        } finally {
+            art.recycle();
+            out.recycle();
+        }
+    }
+
+    /** Season art is drawn for the whole screen: no mat, just scaled to fill and saved like a framed painting. */
+    private void fill(Recs.Pick p) throws Exception {
+        byte[] bytes = download(p.backdrop);
+        BitmapFactory.Options o = new BitmapFactory.Options();
+        o.inPreferredConfig = Bitmap.Config.RGB_565;
+        Bitmap art = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, o);
+        if (art == null) throw new Exception("unreadable image");
+        Bitmap out = Bitmap.createBitmap(W, H, Bitmap.Config.RGB_565);
+        try {
+            float scale = Math.max((float) W / art.getWidth(), (float) H / art.getHeight());
+            float aw = art.getWidth() * scale, ah = art.getHeight() * scale;
+            new Canvas(out).drawBitmap(art, null, new RectF((W - aw) / 2f, (H - ah) / 2f, (W + aw) / 2f, (H + ah) / 2f),
+                    new Paint(Paint.FILTER_BITMAP_FLAG | Paint.DITHER_FLAG));
             File f = file(p), tmp = new File(dir, p.id + ".part");
             try (FileOutputStream fo = new FileOutputStream(tmp)) {
                 out.compress(Bitmap.CompressFormat.JPEG, 90, fo);

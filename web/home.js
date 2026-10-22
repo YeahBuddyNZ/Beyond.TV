@@ -897,7 +897,20 @@
       if (!saverOn) return;
       var p = photos.length ? photos[saverIndex++ % photos.length] : null;
       var back = front === a ? b : a;
-      if (p && art) {
+      if (p && art && p.url) {
+        // Season art (Halloween, Christmas...) is drawn for the whole screen: no mat, a gentle zoom.
+        setClass(back, 'art', false);
+        back.innerHTML = '';
+        back.style.backgroundImage = 'url(' + p.url + ')';
+        back.style.webkitTransform = back.style.transform = 'scale(1.0)';
+        clock.lastChild.textContent = p.title + (p.meta ? '  ·  ' + p.meta : '');
+        setTimeout(function () {
+          setClass(back, 'on', true);
+          setClass(front, 'on', false);
+          back.style.webkitTransform = back.style.transform = 'scale(1.04)';
+          front = back;
+        }, 60);
+      } else if (p && art) {
         // A painting on its mat, like a Samsung Frame: no zoom across it, only a slow drift.
         back.innerHTML = '';
         back.style.backgroundImage = '';
