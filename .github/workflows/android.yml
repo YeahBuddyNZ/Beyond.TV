@@ -2,6 +2,10 @@
 # (Actions, the run, Artifacts). Signed with the ANDROID_KEYSTORE secret when it is set (base64 of a keystore
 # whose alias and passwords are "beyondtv"), so updates install over the top. Without it, each run makes a new
 # key and the TV needs the old app removed first.
+#
+# On main, with the key set, every build is also published as a release tagged android-<versionCode> (never marked
+# "latest", which TizenBrew reads for the Samsung .wgt). TVs running Beyond TV find it within a day and ask once:
+# Android's own install prompt, one OK press (Updater.java).
 name: Android APK
 
 on:
@@ -12,7 +16,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   apk:
@@ -30,13 +34,30 @@ jobs:
         env:
           KEYSTORE: ${{ secrets.ANDROID_KEYSTORE }}
         run: |
-          if [ -n "$KEYSTORE" ]; then printf '%s' "$KEYSTORE" | base64 -d > beyondtv.keystore; fi
+          if [ -n "$KEYSTORE" ]; then
+            printf '%s' "$KEYSTORE" | base64 -d > beyondtv.keystore
+            echo "SIGNED=yes" >> "$GITHUB_ENV"
+          fi
       - name: Build
         run: |
           cp config.example.properties config.properties
+          # Each run is newer than the last: 100 + the run number (the first sideloaded build was 1).
+          export BTV_VERSION_CODE=$((100 + GITHUB_RUN_NUMBER))
+          export BTV_VERSION_NAME="1.$GITHUB_RUN_NUMBER"
+          echo "BTV_VERSION_CODE=$BTV_VERSION_CODE" >> "$GITHUB_ENV"
+          echo "BTV_VERSION_NAME=$BTV_VERSION_NAME" >> "$GITHUB_ENV"
           ./build.sh
       - uses: actions/upload-artifact@v4
         with:
           name: BeyondTV-apk
           path: BeyondTV.apk
           retention-days: 30
+      - name: Release for the TVs
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && env.SIGNED == 'yes'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "android-$BTV_VERSION_CODE" BeyondTV.apk \
+            --target "$GITHUB_SHA" --latest=false \
+            --title "Beyond TV for Android $BTV_VERSION_NAME" \
+            --notes "Installed by Beyond TV itself: the TV shows Android's install prompt on the home screen, and one OK press updates it."

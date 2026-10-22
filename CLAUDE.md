@@ -136,6 +136,12 @@ with a Tizen certificate (`--sign`), which 2017-2022 TVs install as it is; on 20
 with the person's Samsung certificate. Sign every release with the same author certificate: older TVs refuse an
 update signed by another. `python3 webos/build.py --generic` makes the LG `.ipk` that goes along.
 
+Android updates itself (`Updater.java`): on main, with the `ANDROID_KEYSTORE` secret set, CI publishes each build as a
+release tagged `android-<versionCode>` (100 + the run number, never marked latest). Once a day the TV downloads the
+newest, keeps it only if it is this app, newer and signed with the same key, and on the home screen hands it to
+Android's installer, which asks for one OK press. The TV asks once to allow Beyond TV to install apps. Never make it
+silent: the prompt is the person's say.
+
 ## Adapting it to another TV
 
 Read first, change after. Read-only commands that tell you what the TV has:

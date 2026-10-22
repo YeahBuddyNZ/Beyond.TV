@@ -13,7 +13,7 @@ import android.os.PersistableBundle;
  * the switch finishes, even with the screen showing something else.
  */
 public class ModeJob extends JobService {
-    static final String APPLY = "apply", VERIFY = "verify", REVERT = "revert", MEMORY = "memory", REMOTE = "remote";
+    static final String APPLY = "apply", VERIFY = "verify", REVERT = "revert", MEMORY = "memory", REMOTE = "remote", UPDATE = "update";
 
     @Override public boolean onStartJob(JobParameters params) {
         PersistableBundle extras = params.getExtras();
@@ -28,6 +28,7 @@ public class ModeJob extends JobService {
                     case REVERT: HomeMode.revertHomeNow(app); break;
                     case MEMORY: HomeMode.measureMemoryNow(app, mode); break;
                     case REMOTE: HomeMode.ensureRemoteServiceNow(app); break;
+                    case UPDATE: Updater.checkNow(app); break;
                     default: break;
                 }
             } catch (Throwable t) {
@@ -52,7 +53,8 @@ public class ModeJob extends JobService {
         JobInfo.Builder job = new JobInfo.Builder(1000 + Math.abs(action.hashCode() % 1000),
                 new ComponentName(c, ModeJob.class)).setExtras(extras);
         if (delayMs > 0) job.setMinimumLatency(delayMs);
-        job.setOverrideDeadline(delayMs + 2_000);
+        if (UPDATE.equals(action)) job.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);   // waits for the network
+        else job.setOverrideDeadline(delayMs + 2_000);
         scheduler.schedule(job.build());
     }
 }
