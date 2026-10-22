@@ -137,7 +137,19 @@ var I18N = (function () {
     "Cars": "Autos",
     "Funny stuff": "Lustiges",
     "Building": "Bauen",
-    "The ocean": "Das Meer"
+    "The ocean": "Das Meer",
+    "What do you like to watch?": "Was schaust du gern?",
+    "Tell me and I'll find something good": "Sag es mir, ich finde was Gutes",
+    "Because you love ": "Weil du das magst: ",
+    "Opening ": "Öffne ",
+    ": look for ": ": such nach ",
+    "How about something new?": "Wie wär's mit was Neuem?",
+    "Let's watch it": "Los geht's",
+    "Done": "Fertig",
+    "What they're into": "Was sie mögen",
+    "Their picks on the home screen come from this.": "Danach richten sich ihre Tipps auf dem Startbildschirm.",
+    "Pick as many as you like. I'll find good things to watch.": "Wähl so viel du willst. Ich finde gute Sachen zum Schauen.",
+    "What are you into, ": "Was magst du, "
   };
 
   /** German by the English; text built at runtime by its English pattern. */
@@ -294,7 +306,19 @@ var I18N = (function () {
     "Cars": "Машины",
     "Funny stuff": "Смешное",
     "Building": "Стройка",
-    "The ocean": "Океан"
+    "The ocean": "Океан",
+    "What do you like to watch?": "Что ты любишь смотреть?",
+    "Tell me and I'll find something good": "Расскажи, и я найду что-нибудь хорошее",
+    "Because you love ": "Потому что ты любишь: ",
+    "Opening ": "Открываю ",
+    ": look for ": ": ищи ",
+    "How about something new?": "Может, что-нибудь новое?",
+    "Let's watch it": "Смотрим",
+    "Done": "Готово",
+    "What they're into": "Что им нравится",
+    "Their picks on the home screen come from this.": "По этому подбираются их советы на главном экране.",
+    "Pick as many as you like. I'll find good things to watch.": "Выбирай сколько хочешь. Я найду, что хорошего посмотреть.",
+    "What are you into, ": "Что тебе нравится, "
   };
 
   function russianText(en) {

@@ -246,6 +246,7 @@ HDMI (Chromecast with Google TV, Google TV Streamer, onn 4K, NVIDIA Shield). Set
   `web/profiles.js` is Who's watching: Family comes first (`together`, never in the list or Beyond Family's members),
   with family-friendly picks (`Profiles.gentle()`) and its own shelf; a kid needs the PIN to switch to it.
   `web/bedtime.js` is Bedtime breathing: a night light that slows from six breaths a minute and fades to dark (moon button at night, or a `bedtime` command from Beyond Family).
+  `web/kidpicks.js` is Picks for kids: for a kid watching, the cards are a hand-picked list of each service's own shows matched to `likes` (a grown-up's, from Beyond Family or the profile editor behind the PIN) and `loves` (the kid's own), or one "What do you like to watch?" card; now and then, back from an app, it suggests one. No TMDB needed. Its like ids match Beyond Family's `TV_LIKES`.
   `web/outside.js` is the fine day nudge: once a day on a mild, dry day, coming back from an app suggests going outside, and the next key press 10+ minutes later offers to count it as green time (`POST /tv/green`).
   The dinner question lives in `web/family.js` (`dinner`): `question` opens it, `question-answered` fills in faces (never the words), `question-reveal` shows the answers, `question-end` closes it.
   `web/myworld.js` is Make it yours: a kid restyles their own profile (buddy, colour, world, loves) with no PIN;

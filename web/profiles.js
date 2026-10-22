@@ -237,7 +237,16 @@ var Profiles = (function () {
         kidLabel();
         api.add(kid, function () {
           if (p.kid && grownUps().length <= 1 && !isNew && !person.kid) { UI.toast(tr('Precisa de pelo menos um adulto.', 'There needs to be at least one grown-up.', 'Hace falta al menos un adulto.')); return; }
-          p.kid = !p.kid; kidLabel(); repaint();
+          p.kid = !p.kid; kidLabel(); repaint(); likesBtn.style.display = p.kid ? '' : 'none';
+        });
+        // What a kid is into, set by a grown-up (this is already behind the PIN): it picks the shows on their cards.
+        var likesBtn = UI.button(actions, tr('Do que gosta', "What they're into", 'Lo que le gusta'), 'star');
+        likesBtn.style.display = p.kid ? '' : 'none';
+        api.add(likesBtn, function () {
+          if (!p.kid) return;
+          KidPicks.choose(tr('Do que gosta', "What they're into", 'Lo que le gusta'),
+            tr('As escolhas na tela inicial vêm daqui.', 'Their picks on the home screen come from this.', 'Sus sugerencias salen de aquí.'),
+            p.likes || [], function (picked) { p.likes = picked; });
         });
         api.add(UI.button(actions, tr('Salvar', 'Save', 'Guardar'), 'check', 'primary'), function () {
           p.name = (kb.text() || '').replace(/^\s+|\s+$/g, '');
@@ -314,7 +323,10 @@ var Profiles = (function () {
         if (old) {
           p.shelf = old.shelf; p.plexUser = old.plexUser; p.emoji = p.emoji || old.emoji;
           // What a kid picked in Make it yours stays theirs, even over the household's colour.
-          if (old.look) { p.look = true; p.emoji = old.emoji; p.colour = old.colour; p.world = old.world; p.loves = old.loves; }
+          if (old.look) { p.look = true; p.emoji = old.emoji; p.colour = old.colour; p.world = old.world; }
+          // What a kid said they like is theirs; what the household set wins over what was set here.
+          p.loves = old.loves;
+          if (!p.likes) p.likes = old.likes;
           p.offered = old.offered;
         }
         return p;
@@ -329,6 +341,8 @@ var Profiles = (function () {
       p.emoji = look.emoji; p.colour = look.colour; p.world = look.world; p.loves = look.loves; p.look = true;
       changed();
     },
+    /** What the watching kid said they like to watch (kidpicks.js). */
+    setLoves: function (loves) { var p = current(); p.loves = loves; changed(); },
     /** Switches to someone from Beyond Family's remote. The app already checked who may (a kid only to themselves). */
     use: function (id) { if (!find(id) || id === who) return false; who = id; save(WHO, who); changed(); return true; },
     onChange: function (fn) { listeners.push(fn); }

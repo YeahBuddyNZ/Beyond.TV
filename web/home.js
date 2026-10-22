@@ -274,7 +274,8 @@
   // MARK: - Picks and background
 
   function renderCards() {
-    var list = Data.picks(TAB_KIND[st.tab]);
+    // A kid watching gets good shows matched to what they're into, or a card asking what that is.
+    var list = KidPicks.cards(TAB_KIND[st.tab]) || Data.picks(TAB_KIND[st.tab]);
     var holder = $('cards');
     setClass(body, 'no-picks', !list.length);
     var same = list.length === cards.length;
@@ -288,14 +289,18 @@
       card.style.left = rects[c][0] + 'px';
       card.style.width = rects[c][1] + 'px';
       var img = el('div', 'img', card);
-      img.style.backgroundImage = 'url(' + Data.image(p.backdrop, c === 0 ? 'w1280' : 'w780') + ')';
+      if (p.kid || p.ask) {
+        setClass(card, 'kidpick', true);
+        img.style.background = 'linear-gradient(135deg, ' + p.colour + ', #2C2458)';
+        el('div', 'emoji', img, p.emoji);
+      } else img.style.backgroundImage = 'url(' + Data.image(p.backdrop, c === 0 ? 'w1280' : 'w780') + ')';
       el('div', 'name', card, p.title);
       if (c === 0 && p.meta) el('div', 'meta', card, p.meta);
       hover(card, Z.CARDS, c);
     }
     st.card = Math.min(st.card, Math.max(0, list.length - 1));
     if (!list.length && st.zone === Z.CARDS) st.zone = Z.SHELF;
-    backdrop(list.length ? Data.image(list[0].backdrop, 'w300') : '');
+    backdrop(list.length && list[0].backdrop ? Data.image(list[0].backdrop, 'w300') : '');
     updateFocus();
   }
 
@@ -712,7 +717,9 @@
         return;
       case Z.CARDS:
         var p = cards[st.card], app = p && Data.appFor(p.app);
-        if (app) launcher(app.id, app.title)();
+        if (p && p.ask) KidPicks.ask(renderCards);
+        else if (p && p.kid) KidPicks.watch(p, function (id, title) { launcher(id, title)(); });
+        else if (app) launcher(app.id, app.title)();
         return;
       case Z.SHELF:
         if (shelf[st.shelf]) launcher(shelf[st.shelf].id, shelf[st.shelf].title)();
@@ -1132,7 +1139,11 @@
     Family.now();
     loadApps(function () { renderShelf(); renderDrawer(); updateFocus(); Data.refresh(); });
     // Back from a show: on a fine day, suggest going outside (once a day). Or welcome back those who did.
-    setTimeout(function () { if (!document.hidden && !Outside.back()) Outside.maybeNudge(); }, 4000);
+    setTimeout(function () {
+      if (document.hidden || Outside.back() || Outside.maybeNudge()) return;
+      // Or, for a kid, now and then a good show to watch next instead.
+      KidPicks.maybeNudge(function (id, title) { launcher(id, title)(); });
+    }, 4000);
   });
 
   I18N.set(Prefs.language());
@@ -1148,7 +1159,7 @@
   function hearBeyond() { Checkin.hear(function (text) { toast('Beyond: ' + text); }); }
   hearBeyond();
   setInterval(hearBeyond, 10 * 60 * 1000 + 5000);
-  Profiles.onChange(function () { renderTop(); paintWorld(); updateFocus(); jobsChanged(); });
+  Profiles.onChange(function () { renderTop(); paintWorld(); renderCards(); updateFocus(); jobsChanged(); });
   setInterval(function () {
     renderClock();
     checkNight();
