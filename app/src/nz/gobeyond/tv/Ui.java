@@ -208,10 +208,10 @@ final class Ui {
         }
     }
 
-    /** "domingo, 18 de outubro" (lowercase, like the iPhone in Portuguese); "Sunday, October 18" in English; "Sonntag, 18. Oktober". */
+    /** "domingo, 18 de outubro" (lowercase, like the iPhone in Portuguese); "Sunday 18 October" in English, the New Zealand way; "Sonntag, 18. Oktober". */
     static String date(long now) {
         return ru ? new SimpleDateFormat("EEEE, d MMMM", locale()).format(new Date(now))
-                : en ? new SimpleDateFormat("EEEE, MMMM d", Locale.US).format(new Date(now))
+                : en ? new SimpleDateFormat("EEEE d MMMM", Locale.UK).format(new Date(now))
                 : new SimpleDateFormat(de ? "EEEE, d. MMMM" : "EEEE, d 'de' MMMM", locale()).format(new Date(now));
     }
 
