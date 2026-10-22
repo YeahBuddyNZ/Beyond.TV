@@ -8,6 +8,11 @@
 # by the person holding the remote. Give the TV's IP to skip the search: `bash install.sh 192.168.1.50`.
 set -euo pipefail
 
+# Piped into bash, the script arrives on stdin as it runs, so anything that read stdin would swallow the rest of it
+# and bash would stop with no word. All of it is one function, read whole before anything runs, and adb is always
+# handed /dev/null.
+main() {
+
 APK_URL="${BEYONDTV_APK_URL:-https://github.com/YeahBuddyNZ/Beyond.TV/releases/download/tv/BeyondTV.apk}"
 PKG="nz.gobeyond.tv"
 HOME_DIR="${BEYONDTV_HOME:-$HOME/.beyondtv}"
@@ -105,17 +110,17 @@ say "Connecting to $T"
 # On a Mac, Local Network privacy blocks an adb server that adb starts in the background ("No route to host"),
 # so it's started from here instead, under the terminal's permission.
 if [ "$(uname -s)" = Darwin ]; then
-  "$ADB" kill-server >/dev/null 2>&1 || true
+  adb_ kill-server >/dev/null 2>&1 || true
   ( "$ADB" nodaemon server >/dev/null 2>&1 </dev/null & )
   sleep 1
 else
-  "$ADB" start-server >/dev/null 2>&1 || true
+  adb_ start-server >/dev/null 2>&1 || true
 fi
 state=""
 told=no
 for _ in $(seq 1 90); do
-  "$ADB" connect "$T" >/dev/null 2>&1 || true
-  state="$("$ADB" -s "$T" get-state 2>/dev/null || true)"
+  adb_ connect "$T" >/dev/null 2>&1 || true
+  state="$(adb_ -s "$T" get-state 2>/dev/null || true)"
   [ "$state" = "device" ] && break
   if [ "$told" = no ]; then
     tv "a box asks ${B}Allow USB debugging?${N} Tick ${B}Always allow from this computer${N}, then OK."
@@ -125,11 +130,11 @@ for _ in $(seq 1 90); do
   sleep 2
 done
 if [ "$state" != "device" ]; then
-  "$ADB" disconnect "$T" >/dev/null 2>&1 || true
+  adb_ disconnect "$T" >/dev/null 2>&1 || true
   oops "Couldn't reach the TV at $IP. Check the address, that USB debugging is on, and that both are on the same Wi-Fi, then run this again."
 fi
 
-prop() { "$ADB" -s "$T" shell getprop "$1" 2>/dev/null | tr -d '\r'; }
+prop() { adb_ -s "$T" shell getprop "$1" 2>/dev/null | tr -d '\r'; }
 brand="$(prop ro.product.brand)"; model="$(prop ro.product.model)"; sdk="$(prop ro.build.version.sdk)"
 say "Found ${B}$brand $model${N} (Android $(prop ro.build.version.release))"
 if [ -n "$sdk" ] && [ "$sdk" -lt 26 ]; then
@@ -141,15 +146,15 @@ fi
 step "3. Installing Beyond™ TV"
 apk="$(mktemp -d)/BeyondTV.apk"
 curl -fL# -o "$apk" "$APK_URL" || oops "Couldn't download Beyond™ TV. Check the internet connection and try again."
-result="$("$ADB" -s "$T" install -r "$apk" 2>&1 || true)"
+result="$(adb_ -s "$T" install -r "$apk" 2>&1 || true)"
 if ! printf '%s' "$result" | grep -q Success; then
   if printf '%s' "$result" | grep -q "UPDATE_INCOMPATIBLE\|signatures do not match"; then
     say "There's an older Beyond™ TV on this TV, signed differently, so it has to come off first."
     tv "if Beyond™ TV is your home screen now, open ${B}Beyond™ TV → Home Screen → Original${N} first."
     a="$(ask "Remove the old copy and install the new one? [y/N]")"
     case "$a" in y*|Y*) ;; *) oops "Nothing changed. Run this again when you're ready." ;; esac
-    "$ADB" -s "$T" uninstall "$PKG" >/dev/null 2>&1 || true
-    result="$("$ADB" -s "$T" install "$apk" 2>&1 || true)"
+    adb_ -s "$T" uninstall "$PKG" >/dev/null 2>&1 || true
+    result="$(adb_ -s "$T" install "$apk" 2>&1 || true)"
   fi
 fi
 printf '%s' "$result" | grep -q Success || oops "The TV didn't take it: $(printf '%s' "$result" | tail -1)"
@@ -158,12 +163,11 @@ say "Installed."
 
 # TCL blocks background jobs unless allowed, and the switch is one. Other TVs don't need it.
 case "$(printf '%s' "$brand" | tr '[:upper:]' '[:lower:]')" in
-  *tcl*) "$ADB" -s "$T" shell "appops set $PKG AUTO_START allow || appops set $PKG APP_AUTO_START allow" >/dev/null 2>&1 || true ;;
+  *tcl*) adb_ -s "$T" shell "appops set $PKG AUTO_START allow || appops set $PKG APP_AUTO_START allow" >/dev/null 2>&1 || true ;;
 esac
 
-"$ADB" -s "$T" shell monkey -p "$PKG" -c android.intent.category.LEANBACK_LAUNCHER 1 >/dev/null 2>&1 \
-  || "$ADB" -s "$T" shell monkey -p "$PKG" 1 >/dev/null 2>&1 || true
-"$ADB" disconnect "$T" >/dev/null 2>&1 || true
+adb_ -s "$T" shell am start -n "$PKG/.SettingsActivity" >/dev/null 2>&1 || true
+adb_ disconnect "$T" >/dev/null 2>&1 || true
 
 # MARK: Over to the TV
 
@@ -178,3 +182,8 @@ say "Your city, the shelf and the profiles are in Beyond™ TV's settings on the
 say "From now on it keeps itself up to date: when there's a new version, the TV asks, and one OK installs it."
 say ""
 say "${G}${B}Enjoy. Free your world.${N}"
+}
+
+adb_() { "$ADB" "$@" </dev/null; }
+
+main "$@"
