@@ -44,8 +44,8 @@ final class Updater {
     static final String LATEST = "https://github.com/YeahBuddyNZ/Beyond.TV/releases/download/tv/latest.json";
     private static final String DOWNLOADS = "https://github.com/YeahBuddyNZ/Beyond.TV/releases/download/android-";
     static final String ACTION_RESULT = "nz.gobeyond.tv.UPDATE_RESULT";
-    /** How often to look: new versions reach TVs within a few hours. */
-    private static final long EVERY = 6L * 60 * 60 * 1000;
+    /** How often to look: every half hour, so a new version reaches TVs the same evening. */
+    static final long EVERY = 30L * 60 * 1000;
     private static final long WAIT_FOR_QUIET = 30L * 60 * 1000;
     /** Asked once, then left alone for this long: "not now" is an answer. */
     private static final long ASK_AGAIN = 12L * 60 * 60 * 1000;
