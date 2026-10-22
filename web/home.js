@@ -880,6 +880,8 @@
     saverAt = Date.now();
     var s = $('saver');
     s.innerHTML = '';
+    // Art is a painting on the wall: no clock, no names, no captions. Messages from the family still come over it.
+    setClass(s, 'gallery', art);
     var a = el('div', 'photo', s), b = el('div', 'photo', s);
     el('div', 'shade', s);
     var brand = el('div', 'brand lockup', s);
@@ -905,12 +907,10 @@
         setClass(back, 'art', false);
         back.innerHTML = '';
         back.style.backgroundImage = 'url(' + p.url + ')';
-        back.style.webkitTransform = back.style.transform = 'scale(1.0)';
-        clock.lastChild.textContent = p.title + (p.meta ? '  ·  ' + p.meta : '');
+        back.style.webkitTransform = back.style.transform = 'none';
         setTimeout(function () {
           setClass(back, 'on', true);
           setClass(front, 'on', false);
-          back.style.webkitTransform = back.style.transform = 'scale(1.04)';
           front = back;
         }, 60);
       } else if (p && art) {
@@ -919,13 +919,12 @@
         back.style.backgroundImage = '';
         setClass(back, 'art', true);
         var img = el('img', 'painting', back);
+        img.onerror = function () { img.onerror = null; img.src = Art.image(p, true); };
         img.src = Art.image(p);
-        back.style.webkitTransform = back.style.transform = 'scale(1.0)';
-        clock.lastChild.textContent = p.title + (p.meta ? '  ·  ' + p.meta : '');
+        back.style.webkitTransform = back.style.transform = 'none';
         setTimeout(function () {
           setClass(back, 'on', true);
           setClass(front, 'on', false);
-          back.style.webkitTransform = back.style.transform = 'scale(1.03)';
           front = back;
         }, 60);
       } else if (p) {
@@ -942,8 +941,9 @@
         }, 60);
       }
       tickSaverClock(clock);
-      paintBoard(notice);
-      saverTimer = setTimeout(next, 12000);
+      if (!art) paintBoard(notice);
+      // A painting stays up long enough to look at; photos keep moving.
+      saverTimer = setTimeout(next, art ? 60000 : 12000);
     }
     setClass(s, 'on', true);
     next();

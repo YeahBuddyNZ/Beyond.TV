@@ -1,6 +1,6 @@
 /*
  * Art mode, like a Samsung Frame: the screensaver shows paintings from the Art Institute of Chicago's public domain
- * collection (free, no key), framed on a deep plum mat, with title, artist and date as the caption. A new set once a
+ * collection (free, no key), as big as the screen allows on a dark wall, with nothing written on it. A new set once a
  * day from a theme (landscapes, the sea, gardens...); the list is kept, the images come straight from the museum.
  * In a season (Halloween, Christmas...) it shows our own art instead, listed in docs/art/seasons.json on the website.
  * Same idea and themes as Art.java on Google TV. Plain ES5.
@@ -111,8 +111,8 @@ var Art = (function () {
     refresh: refresh,
     /** Today's paintings: [{id, title, image, meta}], or in a season [{id, title, url, meta}] (drawn for the whole screen). */
     list: function () { return list; },
-    /** The painting itself; 843 wide is the size the museum always serves. */
-    image: function (a) { return IIIF + a.image + '/full/843,/0/default.jpg'; },
+    /** The painting itself, 1686 wide (public domain works come that big); `small` is the 843 the museum always serves. */
+    image: function (a, small) { return IIIF + a.image + '/full/' + (small ? '843' : '1686') + ',/0/default.jpg'; },
     /** Art on the screensaver: chosen, or automatic without a TMDB key (no film photos to show). */
     on: function () {
       var v = Prefs.screensaver();
