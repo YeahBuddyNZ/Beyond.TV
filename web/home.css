@@ -754,16 +754,8 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 /* Art mode on the screensaver: the painting fills the screen, with nothing written on it. */
 #saver.gallery .brand, #saver.gallery .clock, #saver.gallery .shade, #saver.gallery .board { display: none; }
 #saver.gallery .photo { -webkit-transition: opacity 3s; transition: opacity 3s; }
-<<<<<<< HEAD
-#saver .photo.art {
-  background: -webkit-radial-gradient(50% 50%, circle, #1E1B19, #0B0A09 75%);
-  background: radial-gradient(circle at 50% 50%, #1E1B19, #0B0A09 75%);
-}
-#saver .photo.art .painting {
-  position: absolute; left: 50%; top: 50%; max-width: 1840px; max-height: 1000px;
-  -webkit-transform: translate(-50%, -50%); transform: translate(-50%, -50%);
-  box-shadow: 0 0 0 4px #0A0908, 0 30px 70px rgba(0, 0, 0, 0.7);
-}
+#saver .photo.art { background-color: #0B0A09; }
+#saver .photo.art { background-size: cover; background-position: 50% 50%; }
 
 /*
  * MARK: - The new home: a greeting, one line with the time and the weather, the kupu in a chip, Keep watching on
@@ -863,7 +855,50 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .night #sky .hills .near { fill: rgba(8, 7, 16, 0.45); }
 .in-world #sky .hills { display: none; }
 .card.screen.kidpick .emoji { margin-top: -50px; font-size: 100px; line-height: 100px; }
-=======
-#saver .photo.art { background-color: #0B0A09; }
-#saver .photo.art { background-size: cover; background-position: 50% 50%; }
->>>>>>> 6f46cbf (Art fills the screen, and a choice of art)
+
+/* Pinned tiles from Beyond Family: six smaller screens. Apps and shows wear the app's face; the jobs tile is each kid
+   with a dot per job; a camera is its latest picture with a live light. */
+.card.screen.pin { width: 260px; height: 146px; }
+.card.screen.pin .stand { top: 156px; width: 72px; margin-left: -36px; }
+.card.screen.pin .name { top: 178px; font-size: 24px; }
+.card.screen.pin .meta { top: 214px; font-size: 20px; }
+.card.screen.pin .img .play { width: 46px; height: 46px; right: 12px; bottom: 12px; }
+.card.screen.pin .img .play::after { left: 18px; top: 13px; border-top-width: 10px; border-bottom-width: 10px; border-left-width: 15px; }
+.card.pin .img.jobs .play, .card.pin .img.cam .play { display: none; }
+.card.pin .img.jobs { background: #2C2458; padding: 16px 18px; -webkit-box-sizing: border-box; box-sizing: border-box; }
+.card.pin .img.jobs .kid { height: 38px; line-height: 38px; color: #FFF; white-space: nowrap; overflow: hidden; }
+.card.pin .img.jobs .kid i { display: inline-block; width: 14px; height: 14px; border-radius: 7px; margin-right: 10px; vertical-align: middle; }
+.card.pin .img.jobs .kid b { display: inline-block; width: 92px; font-size: 21px; font-weight: 600; overflow: hidden; vertical-align: middle; }
+.card.pin .img.jobs .kid em {
+  display: inline-block; width: 12px; height: 12px; margin-right: 6px; border-radius: 6px; vertical-align: middle;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.6);
+}
+.card.pin .img.jobs .kid em.done { background: #E8A33D; box-shadow: none; }
+.card.pin .img.cam { background-color: #15131F; }
+.card.pin .img.cam.nocam { background-image: none !important; }
+.card.pin .img.cam .live {
+  position: absolute; left: 12px; top: 12px; width: 12px; height: 12px; border-radius: 6px; background: #D85A30;
+  box-shadow: 0 0 8px 2px rgba(216, 90, 48, 0.6);
+}
+.card.pin .img.cam.nocam .live { background: #55534B; box-shadow: none; }
+
+/* A camera full screen. */
+.bt-layer.bt-camera { background: #000; }
+.bt-camera .pic { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; background-size: contain; background-repeat: no-repeat; background-position: center; }
+.bt-camera .name {
+  position: absolute; left: 60px; top: 50px; padding: 0 26px; height: 60px; border-radius: 30px; line-height: 60px;
+  font-size: 30px; font-weight: 600; color: #FFF; background: rgba(13, 12, 24, 0.72);
+}
+.bt-job-who { margin: 26px 0 10px; font-size: 30px; font-weight: 700; }
+.bt-job.done { opacity: 0.55; text-decoration: line-through; }
+.bt-job.done::before { background: #E8A33D; border-color: #E8A33D; }
+.bt-jobs-list.all .bt-job { margin-top: 8px; padding: 12px 32px 12px 84px; font-size: 28px; }
+.card.screen.pin.small { width: 180px; height: 101px; }
+.card.screen.pin.small .stand { top: 111px; width: 56px; margin-left: -28px; }
+.card.screen.pin.small .name { top: 130px; font-size: 21px; }
+.card.screen.pin.small .meta { top: 162px; font-size: 18px; }
+.card.pin.small .img.jobs { padding: 8px 12px; }
+.card.pin.small .img.jobs .kid { height: 28px; line-height: 28px; }
+.card.pin.small .img.jobs .kid b { width: 64px; font-size: 17px; }
+.card.pin.small .img.jobs .kid em { width: 9px; height: 9px; margin-right: 4px; }
+.card.pin.small .img.jobs .kid i { width: 10px; height: 10px; margin-right: 6px; }

@@ -261,6 +261,13 @@ final class German {
             case "Snow day": return "Schneetag";
             case "Game day": return "Spieltag";
             case "The beach": return "Der Strand";
+            case "Pinned": return "Angeheftet";
+            case "App": return "App";
+            case "Not on this TV": return "Nicht auf diesem Fernseher";
+            case "Jobs today": return "Aufgaben heute";
+            case "No jobs today": return "Heute keine Aufgaben";
+            case "All done!": return "Alles erledigt!";
+            case "Camera": return "Kamera";
             case "Install the new version": return "Neue Version installieren";
             case "Check for updates": return "Nach Updates suchen";
             case "Install updates by themselves": return "Updates selbst installieren";
@@ -331,6 +338,7 @@ final class German {
                             .replace("). ← → change the order.", "). ← → ändern die Reihenfolge.");
                 }
                 if (english.endsWith(" hours ago")) return "Vor " + english.substring(0, english.length() - 10) + " Stunden";
+                if (english.matches("\\d+ of \\d+ done")) return english.replace(" of ", " von ").replace(" done", " erledigt");
                 if (english.endsWith(" to go. Tick them off in Beyond Family and the TV opens by itself.")) return english.substring(0, english.length() - 66) + " noch. Hak sie in Beyond Family ab, dann geht der Fernseher von selbst auf.";
                 if (english.endsWith(" min ago")) return "vor " + english.substring(0, english.length() - 8) + " Min.";
                 if (english.endsWith(" h ago")) return "vor " + english.substring(0, english.length() - 6) + " Std.";

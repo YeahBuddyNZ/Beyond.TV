@@ -161,6 +161,9 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
     private final String[] cardName = new String[3], cardMeta = new String[3], cardWhen = new String[3];
     private final float[] cardWhenW = new float[3];
     private final HomeApps.Item[] cardApp = new HomeApps.Item[3];
+    // The jobs tile, worked out in cardWords: each kid's first name (cut to fit), colour, jobs done and jobs in all.
+    private final String[][] jobKid = new String[3][3];
+    private final int[][] jobKidColour = new int[3][3], jobDone = new int[3][3], jobAll = new int[3][3];
     // The line under the greeting and the kupu chip, as drawn.
     private String infoTime = "", infoRest = "";
     private float infoTimeW;
@@ -187,7 +190,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
     private final Paint personInk = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Paint lTileName;
     private String[] tileNames = new String[0];   // each shelf app's name, cut to fit under its icon
-    private Paint lPickEmoji;
+    private Paint lPickEmoji, lJobKid;
+    private final Paint jobRing = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Paint lTitle, lTab, lTabOn, lCardTitle, lCardMeta, lQuote, lTip, lClock, lClockQuote;
     private Paint lInfo, lInfoTime, lKupu, lKupuWord, lWhen, lHead, lRowWhat, lRowMore, lBadge, lBadgeHome, lEmoji, lFace;
 
@@ -452,6 +456,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         recs.refreshIfStale();
         if (tvInputs != null) tvInputs.registerCallback(inputCallback, handler);
         handler.postDelayed(tick, 15_000);
+        handler.post(camTick);
         checkNotices();
         reload();
         updatePalette();
@@ -474,6 +479,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         okHeld = holdArmed = false;
         Choreographer.getInstance().removeFrameCallback(this);
         handler.removeCallbacks(tick);
+        handler.removeCallbacks(camTick);
         handler.removeCallbacks(reloadSoon);
         data.removeListener(this);
         recs.removeListener(this);
@@ -542,6 +548,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
     private static String tabName(String kind) {
         switch (kind) {
             case "watching": return Ui.tr("Continuar assistindo", "Keep watching", "Seguir viendo");
+            case "pinned": return Ui.tr("Fixados", "Pinned", "Fijados");
             case "movie": return tabs()[1];
             case "tv": return tabs()[2];
             default: return tabs()[0];
@@ -555,6 +562,9 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
     /** Keep watching once something was opened from here; then the picks, when there is a TMDB key. */
     private List<String> tabKinds() {
         List<String> out = new ArrayList<>();
+        // Pinned: the tiles the household chose in Beyond Family, first because somebody picked them on purpose.
+        JSONArray pinned = Family.widgets();
+        if (pinned != null && pinned.length() > 0) out.add("pinned");
         if (!Watched.list(getContext(), 1).isEmpty()) out.add("watching");
         if (picksOn()) {
             out.add("all");
@@ -677,6 +687,10 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         lKupuWord = Ui.text(Ui.semibold, 24 * k, L_INK);
         lWhen = Ui.text(Ui.semibold, 19 * k, 0xFFFFFFFF);
         lPickEmoji = Ui.text(Ui.regular, 96 * k, 0xFFFFFFFF);
+        lJobKid = Ui.text(Ui.semibold, 26 * k, 0xFFFFFFFF);
+        jobRing.setStyle(Paint.Style.STROKE);
+        jobRing.setStrokeWidth(2.5f * k);
+        jobRing.setColor(0x99FFFFFF);
         lPickEmoji.setTextAlign(Paint.Align.CENTER);
         lHead = Ui.text(Ui.displaySemibold, 32 * k, L_INK);
         lRowWhat = Ui.text(Ui.semibold, 26 * k, L_INK);
@@ -2397,10 +2411,26 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             r = topRects[topIndex];
         } else if (zone == Z_CARDS) {
             Recs.Pick p = cardIndex < cards.size() ? cards.get(cardIndex) : null;
+            if (p != null && p.camera != null) {
+                CameraActivity.open(activity, p.title, p.camera);
+                return;
+            }
+            if (p != null && "jobs".equals(p.tile)) {
+                showToast(jobsSummary(p.kids));
+                return;
+            }
+            if (p != null && p.tile != null && p.pkg == null) {
+                showToast(Ui.tr("Esse app não está nesta TV", "That app isn't on this TV", "Esa app no está en este TV"));
+                return;
+            }
             if (p == null || p.pkg == null) return;
-            it = HomeApps.app(p.pkg, p.watchedAt != 0 ? p.app : Recs.serviceName(p), p.link);
+            it = p.tile != null ? HomeApps.app(p.pkg, p.app, null) : HomeApps.app(p.pkg, p.watchedAt != 0 ? p.app : Recs.serviceName(p), p.link);
+            if ("show".equals(p.tile)) {
+                android.widget.Toast.makeText(getContext(), Ui.tr("Abrindo ", "Opening ", "Abriendo ") + p.app
+                        + Ui.tr(". Procure ", ": look for ", ". Busca ") + p.title, android.widget.Toast.LENGTH_LONG).show();
+            }
             r = cardRects[cardIndex];
-            from = p;
+            from = "app".equals(p.tile) ? null : p;
             if (p.emoji != null) {
                 // A TV app can't be asked for one show by name: say what to look for.
                 android.widget.Toast.makeText(getContext(), Ui.tr("Abrindo ", "Opening ", "Abriendo ") + Recs.serviceName(p)
@@ -2904,7 +2934,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         }
         String kind = tab < kinds.size() ? kinds.get(tab) : null;
         List<Recs.Pick> list = kind == null ? new ArrayList<>()
-                : "watching".equals(kind) ? watchingCards() : picksFor("all".equals(kind) ? null : kind);
+                : "pinned".equals(kind) ? pinnedCards() : "watching".equals(kind) ? watchingCards() : picksFor("all".equals(kind) ? null : kind);
         if (!samePicks(list, cards)) {
             cards = list;
             cardIndex = Math.min(cardIndex, Math.max(0, list.size() - 1));
@@ -2932,6 +2962,108 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         List<Recs.Pick> kid = KidPicks.cards(getContext(), kind);
         return kid != null ? kid : recs.now(kind);
     }
+
+    /**
+     * The tiles pinned in Beyond Family, as screens: an app (left off when this TV hasn't got it), a show on an app,
+     * the kids' jobs for today, a camera on the home network. The first three, the screens there are. Same as
+     * pinnedCards() in web/home.js.
+     */
+    private List<Recs.Pick> pinnedCards() {
+        List<Recs.Pick> out = new ArrayList<>();
+        JSONArray tiles = Family.widgets();
+        java.util.Set<String> cams = new java.util.HashSet<>();
+        for (int i = 0; tiles != null && i < tiles.length() && out.size() < 3; i++) {
+            JSONObject w = tiles.optJSONObject(i);
+            if (w == null) continue;
+            String kind = w.optString("kind");
+            HomeApps.Item app = appByShelf(w.optString("app"));
+            Recs.Pick p = new Recs.Pick();
+            p.kind = "pin";
+            p.tile = kind;
+            if ("app".equals(kind) && app != null) {
+                p.title = p.app = app.label;
+                p.pkg = app.pkg;
+                p.meta = Ui.tr("App", "App", "App");
+            } else if ("show".equals(kind)) {
+                p.title = w.optString("title");
+                p.app = app != null ? app.label : null;
+                p.pkg = app != null ? app.pkg : null;
+                p.meta = app != null ? app.label : Ui.tr("Não está nesta TV", "Not on this TV", "No está en este TV");
+            } else if ("jobs".equals(kind)) {
+                p.title = Ui.tr("Tarefas de hoje", "Jobs today", "Tareas de hoy");
+                p.kids = w.optJSONArray("kids");
+                p.meta = jobsLine(p.kids);
+                p.colour = 0xFF2F7D6D;
+            } else if ("camera".equals(kind) && !w.optString("url").isEmpty()) {
+                p.title = w.optString("name");
+                p.camera = w.optString("url");
+                p.meta = Ui.tr("Câmera", "Camera", "Cámara");
+                cams.add(p.camera);
+            } else {
+                continue;
+            }
+            p.id = (w.toString() + "|" + p.meta).hashCode();
+            out.add(p);
+        }
+        Cameras.keep(cams, camWidth());
+        return out;
+    }
+
+    /** The app on this TV with this shelf name ("t:netflix"), the same name Beyond Family keeps. */
+    private HomeApps.Item appByShelf(String name) {
+        if (name == null || name.isEmpty()) return null;
+        for (List<HomeApps.Item> list : java.util.Arrays.asList(shelf, others)) {
+            for (HomeApps.Item it : list) {
+                if (it.kind == HomeApps.APP && it.label != null
+                        && name.equals("t:" + it.label.toLowerCase(java.util.Locale.ROOT).replaceAll("[^a-z0-9]", ""))) return it;
+            }
+        }
+        return null;
+    }
+
+    /** "2 of 3 done", "All done!" or "No jobs today", over every kid. */
+    private static String jobsLine(JSONArray kids) {
+        int done = 0, all = 0;
+        for (int i = 0; kids != null && i < kids.length(); i++) {
+            JSONArray jobs = kids.optJSONObject(i) == null ? null : kids.optJSONObject(i).optJSONArray("jobs");
+            for (int j = 0; jobs != null && j < jobs.length(); j++) {
+                all++;
+                if (jobs.optJSONObject(j) != null && jobs.optJSONObject(j).optBoolean("done")) done++;
+            }
+        }
+        if (all == 0) return Ui.tr("Nenhuma tarefa hoje", "No jobs today", "Sin tareas hoy");
+        if (done == all) return Ui.tr("Tudo feito!", "All done!", "¡Todo hecho!");
+        return Ui.tr(done + " de " + all + " feitas", done + " of " + all + " done", done + " de " + all + " hechas");
+    }
+
+    /** "Mia: 1 of 2 done. Ari: all done!" for the jobs tile. */
+    private static String jobsSummary(JSONArray kids) {
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; kids != null && i < kids.length(); i++) {
+            JSONObject kid = kids.optJSONObject(i);
+            if (kid == null) continue;
+            JSONArray one = new JSONArray().put(kid);
+            if (out.length() > 0) out.append("  ·  ");
+            out.append(kid.optString("name")).append(": ").append(jobsLine(one));
+        }
+        return out.length() == 0 ? jobsLine(null) : out.toString();
+    }
+
+    private int camWidth() {
+        return Math.max(1, Math.round(L_CARD_W * k));
+    }
+
+    /** The cameras on the Pinned tab, a fresh picture every five seconds while the home screen is showing them. */
+    private final Runnable camTick = new Runnable() {
+        @Override public void run() {
+            if (!running) return;
+            String kind = tab < kinds.size() ? kinds.get(tab) : null;
+            if ("pinned".equals(kind)) {
+                for (Recs.Pick p : cards) if (p.camera != null) Cameras.refresh(p.camera, camWidth(), HomeView.this::invalidateAll);
+            }
+            handler.postDelayed(this, 5000);
+        }
+    };
 
     /** Keep watching as screens: the show and its app when it came from a pick, otherwise just the app. */
     private List<Recs.Pick> watchingCards() {
@@ -2968,7 +3100,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         float bw = L_CARD_W * k;
         for (int i = 0; i < 3; i++) {
             Recs.Pick p = i < cards.size() ? cards.get(i) : null;
-            cardApp[i] = p != null && p.watchedAt != 0 ? appFor(p.pkg) : null;
+            cardApp[i] = p != null && (p.watchedAt != 0 || p.tile != null) && p.pkg != null ? appFor(p.pkg) : null;
             cardName[i] = cardMeta[i] = cardWhen[i] = null;
             if (p == null) continue;
             fitPaint.set(lCardTitle);
@@ -2976,6 +3108,18 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             if (p.meta != null && !p.meta.isEmpty()) {
                 fitPaint.set(lCardMeta);
                 cardMeta[i] = TextUtils.ellipsize(p.meta, fitPaint, bw, TextUtils.TruncateAt.END).toString();
+            }
+            for (int j = 0; j < 3; j++) jobKid[i][j] = null;
+            for (int j = 0; p.kids != null && j < p.kids.length() && j < 3; j++) {
+                JSONObject kid = p.kids.optJSONObject(j);
+                JSONArray jobs = kid == null ? null : kid.optJSONArray("jobs");
+                if (jobs == null) continue;
+                fitPaint.set(lJobKid);
+                jobKid[i][j] = TextUtils.ellipsize(kid.optString("name"), fitPaint, 110 * k, TextUtils.TruncateAt.END).toString();
+                jobKidColour[i][j] = colourOr(kid.optString("colour"), 0xFF2F7D6D);
+                jobAll[i][j] = Math.min(8, jobs.length());
+                jobDone[i][j] = 0;
+                for (int n = 0; n < jobAll[i][j]; n++) if (jobs.optJSONObject(n) != null && jobs.optJSONObject(n).optBoolean("done")) jobDone[i][j]++;
             }
             if (p.watchedAt != 0) {
                 cardWhen[i] = Watched.when(p.watchedAt);
@@ -3120,7 +3264,17 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         cell.set(-bw / 2, -bh / 2, bw / 2, bh / 2);
         Backdrop b = p.backdrop == null ? null : recs.backdrop(p);
         HomeApps.Item app = cardApp[i];
-        if (b != null && b.screen != null) {
+        Bitmap cam = p.camera == null ? null : Cameras.shot(p.camera, camWidth());
+        if (p.camera != null) {
+            // A camera: its latest picture, with a live light (grey while there's no picture).
+            fill.setColor(BEZEL);
+            c.drawRoundRect(cell, r0, r0, fill);
+            if (cam != null) roundImage(c, cam, cell, r0);
+            fill.setColor(cam != null ? 0xFFD85A30 : 0xFF55534B);
+            c.drawCircle(cell.left + 18 * k, cell.top + 18 * k, 6 * k, fill);
+        } else if ("jobs".equals(p.tile)) {
+            drawJobsTile(c, i, cell, r0);
+        } else if (b != null && b.screen != null) {
             roundImage(c, b.screen, cell, r0);
         } else if (app != null && (app.logo != null || app.tile != null)) {
             int[] style = TILE_STYLE.get(app.key);
@@ -3146,7 +3300,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             c.drawRoundRect(tmp, ch / 2, ch / 2, fill);
             c.drawText(cardWhen[i], tmp.left + 14 * k, tmp.centerY() + Ui.halfCap(lWhen), lWhen);
         }
-        if (f > 0.01f) {
+        if (f > 0.01f && p.camera == null && !"jobs".equals(p.tile)) {
             float pr = 29 * k, px = cell.right - 16 * k - pr, py = cell.bottom - 16 * k - pr;
             fill.setColor(Ui.alpha(0xFFFFFFFF, f));
             c.drawCircle(px, py, pr, fill);
@@ -3161,6 +3315,34 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         c.restore();
         if (cardName[i] != null) c.drawText(cardName[i], base.left, base.top + 268 * k, lCardTitle);
         if (cardMeta[i] != null) c.drawText(cardMeta[i], base.left, base.top + 304 * k, lCardMeta);
+    }
+
+    private static int colourOr(String hex, int fallback) {
+        try {
+            return android.graphics.Color.parseColor(hex);
+        } catch (RuntimeException e) {
+            return fallback;
+        }
+    }
+
+    /** The jobs tile: each kid's colour and name, then a dot per job, filled amber once it's done. */
+    private void drawJobsTile(Canvas c, int i, RectF cell, float r0) {
+        fill.setColor(0xFF2C2458);
+        c.drawRoundRect(cell, r0, r0, fill);
+        float y = cell.top + 40 * k;
+        for (int j = 0; j < 3; j++) {
+            if (jobKid[i][j] == null) continue;
+            fill.setColor(jobKidColour[i][j]);
+            c.drawCircle(cell.left + 30 * k, y, 8 * k, fill);
+            c.drawText(jobKid[i][j], cell.left + 48 * k, y + Ui.halfCap(lJobKid), lJobKid);
+            float x = cell.left + 178 * k;
+            fill.setColor(0xFFE8A33D);
+            for (int n = 0; n < jobAll[i][j]; n++, x += 22 * k) {
+                if (n < jobDone[i][j]) c.drawCircle(x, y, 7 * k, fill);
+                else c.drawCircle(x, y, 6 * k, jobRing);
+            }
+            y += 52 * k;
+        }
     }
 
     // MARK: - Tonight at home

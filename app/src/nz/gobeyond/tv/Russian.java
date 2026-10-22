@@ -260,6 +260,13 @@ final class Russian {
             case "Snow day": return "Снежный день";
             case "Game day": return "День игры";
             case "The beach": return "Пляж";
+            case "Pinned": return "Закреплённое";
+            case "App": return "Приложение";
+            case "Not on this TV": return "Нет на этом телевизоре";
+            case "Jobs today": return "Дела на сегодня";
+            case "No jobs today": return "Сегодня дел нет";
+            case "All done!": return "Всё сделано!";
+            case "Camera": return "Камера";
             case "Install the new version": return "Установить новую версию";
             case "Check for updates": return "Проверить обновления";
             case "Install updates by themselves": return "Устанавливать обновления самостоятельно";
@@ -381,6 +388,7 @@ final class Russian {
                     return "Вкл. · Рекомендаций из приложений телевизора: " + n + "; 3 новых каждый час.";
                 }
                 if (english.endsWith(" hours ago")) return english.substring(0, english.length() - 10) + " ч назад";
+                if (english.matches("\\d+ of \\d+ done")) return english.replace(" of ", " из ").replace(" done", " сделано");
                 if (english.endsWith(" to go. Tick them off in Beyond Family and the TV opens by itself.")) return english.substring(0, english.length() - 66) + " осталось. Отметьте в Beyond Family, и телевизор откроется сам.";
                 if (english.endsWith(" min ago")) return english.substring(0, english.length() - 8) + " мин назад";
                 if (english.endsWith(" h ago")) return english.substring(0, english.length() - 6) + " ч назад";

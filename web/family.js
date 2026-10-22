@@ -50,6 +50,8 @@ var Family = (function () {
     var was = linked();
     state = {};
     board = null;
+    widgets = [];
+    widgetsSig = '[]';
     save();
     clearTimeout(loopTimer);
     if (was && why) UI.toast(why);
@@ -61,6 +63,8 @@ var Family = (function () {
   var lastPeople = '';
   // The house noticeboard (only when the household turned it on): today, for the screensaver. Kept in memory only.
   var board = null;
+  // Tiles pinned to the home screen in Beyond Family: apps, shows, the kids' jobs, cameras on the home network.
+  var widgets = [], widgetsSig = '[]';
   // The household's pets and whether each still wants a meal, for the kids' "did they get fed?" (pets.js).
   var pets = null;
 
@@ -82,6 +86,12 @@ var Family = (function () {
     if (home) {
       state.home = {name: home.name};
       board = home.board || null;
+      var tilesNow = JSON.stringify(home.widgets || []);
+      if (tilesNow !== widgetsSig) {
+        widgetsSig = tilesNow;
+        widgets = home.widgets || [];
+        if (window.BeyondTV && BeyondTV.tiles) setTimeout(BeyondTV.tiles, 0);
+      }
       var hadPets = pets !== null;
       pets = home.pets || [];
       if (!hadPets && window.Pets) setTimeout(Pets.arrived, 0);
@@ -637,6 +647,7 @@ var Family = (function () {
     havePets: function () { return pets !== null; },
     petsFed: petsFed,
     board: function () { return linked() ? board : null; },
+    widgets: function () { return linked() ? widgets : []; },
     visit: visit,
     signOut: signOut,
     pushProfile: pushProfile,

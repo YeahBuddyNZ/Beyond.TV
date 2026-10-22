@@ -225,12 +225,15 @@
 
   function tabKinds() {
     var k = [];
+    // Pinned: the tiles the household chose in Beyond Family, first because somebody picked them on purpose.
+    if (window.Family && Family.widgets().length) k.push('pinned');
     if (Watched.list(1).length) k.push('watching');
     if (Data.hasKey() || Profiles.kid()) k.push('all', 'movie', 'tv');
     return k;
   }
 
   function tabName(kind) {
+    if (kind === 'pinned') return tr('Fixados', 'Pinned', 'Fijados');
     return kind === 'watching' ? tr('Continuar assistindo', 'Keep watching', 'Seguir viendo')
       : kind === 'movie' ? tr('Filmes', 'Movies', 'Películas') : kind === 'tv' ? tr('Séries', 'Shows', 'Series')
       : tr('Explorar', 'Explore', 'Explorar');
@@ -307,7 +310,7 @@
   function renderCards() {
     // Keep watching, or the picks: a kid watching gets good shows matched to what they're into, or a card asking.
     var kind = kinds[st.tab], pickKind = kind === 'all' ? null : kind;
-    var list = kind === 'watching' ? watchingCards() : kind ? KidPicks.cards(pickKind) || Data.picks(pickKind) : [];
+    var list = kind === 'pinned' ? pinnedCards() : kind === 'watching' ? watchingCards() : kind ? KidPicks.cards(pickKind) || Data.picks(pickKind) : [];
     var holder = $('cards');
     setClass(body, 'no-picks', !list.length);
     var same = list.length === cards.length;
@@ -315,13 +318,17 @@
     if (same && holder.children.length === list.length) return;
     cards = list;
     holder.innerHTML = '';
-    // Three little TV screens on stands, like the Beyond mark.
-    for (var c = 0; c < list.length && c < 3; c++) {
-      var p = list[c], card = el('div', 'card screen', holder);
-      card.style.left = (80 + c * 400) + 'px';
+    // Three little TV screens on stands, like the Beyond mark; six smaller ones for the pinned tiles.
+    // Five or six tiles go smaller, to stay clear of Tonight at home.
+    var most = kind === 'pinned' ? 6 : 3, small = kind === 'pinned' && list.length > 4;
+    camImgs = [];
+    for (var c = 0; c < list.length && c < most; c++) {
+      var p = list[c], card = el('div', 'card screen' + (p.tile ? ' pin' : '') + (small ? ' small' : ''), holder);
+      card.style.left = (80 + c * (small ? 200 : p.tile ? 290 : 400)) + 'px';
       var img = el('div', 'img', card);
       el('div', 'stand', card);
-      if (p.kid || p.ask) {
+      if (p.tile) drawTile(p, img);
+      else if (p.kid || p.ask) {
         setClass(card, 'kidpick', true);
         img.style.background = 'linear-gradient(135deg, ' + p.colour + ', #2C2458)';
         el('div', 'emoji', img, p.emoji);
@@ -337,13 +344,107 @@
       if (p.meta) el('div', 'meta', card, p.meta);
       hover(card, Z.CARDS, c);
     }
-    list = list.slice(0, 3);
+    list = list.slice(0, most);
     cards = list;
     st.card = Math.min(st.card, Math.max(0, list.length - 1));
     if (!list.length && st.zone === Z.CARDS) st.zone = Z.SHELF;
     backdrop(list.length && list[0].backdrop ? Data.image(list[0].backdrop, 'w300') : '');
     renderClock();
     updateFocus();
+  }
+
+  // MARK: - Pinned tiles (Beyond Family)
+
+  /** The household's tiles as cards: an app, a show on an app, the kids' jobs, a camera. An app this TV hasn't got is left off. */
+  function pinnedCards() {
+    var out = [], tiles = Family.widgets();
+    for (var i = 0; i < tiles.length; i++) {
+      var w = tiles[i], app = w.app ? appByShelf(w.app) : null;
+      if (w.kind === 'app' && app) out.push({id: 'pin:' + w.app, tile: w, app: app.id, title: app.title, meta: tr('App', 'App', 'App')});
+      else if (w.kind === 'show') out.push({id: 'pin:show:' + w.title, tile: w, app: app && app.id, title: w.title,
+        meta: app ? app.title : tr('Não está nesta TV', 'Not on this TV', 'No está en este TV')});
+      else if (w.kind === 'jobs') out.push({id: 'pin:jobs:' + JSON.stringify(w.kids || []), tile: w, title: tr('Tarefas de hoje', 'Jobs today', 'Tareas de hoy'),
+        meta: jobsLine(w.kids || [])});
+      else if (w.kind === 'camera' && w.url) out.push({id: 'pin:cam:' + w.url, tile: w, title: w.name, meta: tr('Câmera', 'Camera', 'Cámara')});
+    }
+    return out;
+  }
+
+  function appByShelf(name) {
+    for (var i = 0; i < apps.length; i++) if (shelfName(apps[i]) === name) return apps[i];
+    return null;
+  }
+
+  function jobsLine(kids) {
+    var done = 0, all = 0;
+    for (var i = 0; i < kids.length; i++) for (var j = 0; j < kids[i].jobs.length; j++) { all++; if (kids[i].jobs[j].done) done++; }
+    if (!all) return tr('Nenhuma tarefa hoje', 'No jobs today', 'Sin tareas hoy');
+    return done === all ? tr('Tudo feito!', 'All done!', '¡Todo hecho!') : done + tr(' de ', ' of ', ' de ') + all + tr(' feitas', ' done', ' hechas');
+  }
+
+  var camImgs = [], camTimer = 0;
+
+  /** A camera's picture, fresh: loaded first, then swapped in, so a slow camera never shows a broken picture. */
+  function camera(url, node) {
+    var fresh = url + (url.indexOf('?') < 0 ? '?' : '&') + 'bt=' + Date.now(), pic = new Image();
+    pic.onload = function () { node.style.backgroundImage = 'url("' + fresh + '")'; setClass(node, 'nocam', false); };
+    pic.onerror = function () { setClass(node, 'nocam', true); };
+    pic.src = fresh;
+  }
+
+  function drawTile(p, img) {
+    var w = p.tile, app = p.app ? appById(p.app) : null;
+    if ((w.kind === 'app' || w.kind === 'show') && app) { setClass(img, 'face', true); face(app, img, 26); }
+    else if (w.kind === 'show') img.style.background = '#2C2458';
+    else if (w.kind === 'jobs') {
+      setClass(img, 'jobs', true);
+      var kids = w.kids || [];
+      for (var k = 0; k < kids.length && k < 3; k++) {
+        var row = el('div', 'kid', img), dot = el('i', '', row);
+        dot.style.background = kids[k].colour || '#2F7D6D';
+        el('b', '', row, kids[k].name);
+        var ticks = el('span', '', row);
+        for (var j = 0; j < kids[k].jobs.length && j < 8; j++) el('em', kids[k].jobs[j].done ? 'done' : '', ticks);
+      }
+    } else if (w.kind === 'camera') {
+      setClass(img, 'cam', true);
+      el('div', 'live', img);
+      camImgs.push({url: w.url, node: img});
+      camera(w.url, img);
+    }
+  }
+
+  /** The cameras on the Pinned tab, every five seconds while it's on screen. */
+  function tickCameras() {
+    if (saverOn || kinds[st.tab] !== 'pinned') return;
+    for (var i = 0; i < camImgs.length; i++) camera(camImgs[i].url, camImgs[i].node);
+  }
+
+  /** A camera full screen, a fresh picture every two seconds, until Back. */
+  function openCamera(w) {
+    var timer = 0;
+    UI.open({cls: 'bt-camera', build: function (layer) {
+      var pic = UI.el('div', 'pic', layer);
+      UI.el('div', 'name', layer, w.name);
+      camera(w.url, pic);
+      clearInterval(timer);
+      timer = setInterval(function () { camera(w.url, pic); }, 2000);
+    }, closed: function () { clearInterval(timer); }});
+  }
+
+  /** Every kid's jobs for today, ticked or not. */
+  function openJobs(w) {
+    UI.open({cls: 'bt-jobs', build: function (layer) {
+      layer = UI.el('div', 'bt-box', layer);
+      var kids = w.kids || [];
+      UI.heading(layer, tr('Tarefas de hoje', 'Jobs today', 'Tareas de hoy'), jobsLine(kids));
+      var list = UI.el('div', 'bt-jobs-list all', layer);
+      for (var k = 0; k < kids.length; k++) {
+        var who = UI.el('div', 'bt-job-who', list, kids[k].name);
+        who.style.color = kids[k].colour || '#2F7D6D';
+        for (var j = 0; j < kids[k].jobs.length; j++) UI.el('div', 'bt-job' + (kids[k].jobs[j].done ? ' done' : ''), list, kids[k].jobs[j].title);
+      }
+    }});
   }
 
   function appById(id) {
@@ -862,6 +963,17 @@
         return;
       case Z.CARDS:
         var p = cards[st.card];
+        if (p && p.tile) {
+          var on = p.app ? appById(p.app) : null;
+          if (p.tile.kind === 'camera') openCamera(p.tile);
+          else if (p.tile.kind === 'jobs') openJobs(p.tile);
+          else if (on) {
+            remember(on, p.tile.kind === 'show' ? p.title : '');
+            if (p.tile.kind === 'show') toast(tr('Abrindo ', 'Opening ', 'Abriendo ') + on.title + tr('. Procure ', ': look for ', '. Busca ') + p.title);
+            launcher(on.id, on.title)();
+          } else toast(tr('Esse app não está nesta TV', "That app isn't on this TV", 'Esa app no está en este TV'));
+          return;
+        }
         if (p && p.watched) {
           var again = appById(p.watched.app);
           if (again) { remember(again, p.watched.title, p.watched.image); launcher(again.id, again.title)(); }
@@ -1366,7 +1478,9 @@
   }, 30000);
 
   // For the browser preview and tests.
-  window.BeyondTV = {state: st, move: move, activate: activate, back: back, showSaver: showSaver, hideSaver: hideSaver, toast: toast,
+  camTimer = setInterval(tickCameras, 5000);
+
+  window.BeyondTV = {state: st, tiles: function () { renderTop(); renderCards(); }, move: move, activate: activate, back: back, showSaver: showSaver, hideSaver: hideSaver, toast: toast,
     refresh: profileChosen, apps: function () { return apps; }, launch: function (id, name) { launcher(id, name)(); },
     key: key, home: reset, openShelf: openShelf};
 })();

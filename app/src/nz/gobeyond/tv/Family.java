@@ -118,6 +118,7 @@ final class Family {
         }
         lastPeople = "";
         board = null;
+        widgets = null;
         jobs = java.util.Collections.emptyMap();
         likes = java.util.Collections.emptyMap();
     }
@@ -303,6 +304,11 @@ final class Family {
 
     static JSONObject board() { return board; }
 
+    /** Tiles pinned to the home screen in Beyond Family (apps, shows, the kids' jobs, cameras). In memory only. */
+    private static volatile JSONArray widgets;
+
+    static JSONArray widgets() { return widgets; }
+
     /** Earn your screen: each kid's jobs still to do today (only when the household turned it on), by person id. In
      *  memory only, from every sync. */
     private static volatile java.util.Map<String, List<String>> jobs = java.util.Collections.emptyMap();
@@ -330,6 +336,7 @@ final class Family {
     static void apply(Context c, JSONObject home, JSONArray visitorsIn) {
         final JSONArray visitors = visitorsIn == null ? new JSONArray() : visitorsIn;
         board = home == null ? null : home.optJSONObject("board");
+        widgets = home == null ? null : home.optJSONArray("widgets");
         jobs = jobsOf(home == null ? null : home.optJSONArray("people"));
         likes = likesOf(home == null ? null : home.optJSONArray("people"));
         try {
