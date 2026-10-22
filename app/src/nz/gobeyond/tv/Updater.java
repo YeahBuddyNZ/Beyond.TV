@@ -21,8 +21,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Arrays;
@@ -39,6 +37,12 @@ final class Updater {
     private Updater() {}
 
     static final String RELEASES = "https://api.github.com/repos/YeahBuddyNZ/Beyond.TV/releases?per_page=20";
+    /**
+     * A second way to hear about updates: a small file CI keeps next to the newest APK in the "tv" release. It is a
+     * plain download (no API, no rate limit, no special headers), so if one way breaks the other still gets through.
+     */
+    static final String LATEST = "https://github.com/YeahBuddyNZ/Beyond.TV/releases/download/tv/latest.json";
+    private static final String DOWNLOADS = "https://github.com/YeahBuddyNZ/Beyond.TV/releases/download/android-";
     static final String ACTION_RESULT = "nz.gobeyond.tv.UPDATE_RESULT";
     /** How often to look: new versions reach TVs within a few hours. */
     private static final long EVERY = 6L * 60 * 60 * 1000;
@@ -149,26 +153,47 @@ final class Updater {
         long installed = versionCode(c.getPackageManager().getPackageInfo(c.getPackageName(), 0));
         if (apk(c).isFile() && readLong(stamp(c, "ready")) <= installed) apk(c).delete();   // installed meanwhile
 
-        JSONArray releases = new JSONArray(get(RELEASES));
         long best = 0;
         String url = null, digest = null;
-        for (int i = 0; i < releases.length(); i++) {
-            JSONObject r = releases.getJSONObject(i);
-            if (r.optBoolean("draft") || r.optBoolean("prerelease")) continue;
-            String tag = r.optString("tag_name", "");
-            if (!tag.startsWith("android-")) continue;
-            long code;
-            try { code = Long.parseLong(tag.substring(8)); } catch (NumberFormatException e) { continue; }
-            if (code <= best) continue;
-            JSONArray assets = r.optJSONArray("assets");
-            if (assets == null) continue;
-            for (int j = 0; j < assets.length(); j++) {
-                JSONObject a = assets.getJSONObject(j);
-                if (!"BeyondTV.apk".equals(a.optString("name"))) continue;
-                best = code;
-                url = a.optString("browser_download_url", null);
-                digest = a.optString("digest", null);   // "sha256:..." on newer GitHub
+        Exception viaReleases = null;
+        try {
+            JSONArray releases = new JSONArray(get(RELEASES));
+            for (int i = 0; i < releases.length(); i++) {
+                JSONObject r = releases.getJSONObject(i);
+                if (r.optBoolean("draft") || r.optBoolean("prerelease")) continue;
+                String tag = r.optString("tag_name", "");
+                if (!tag.startsWith("android-")) continue;
+                long code;
+                try { code = Long.parseLong(tag.substring(8)); } catch (NumberFormatException e) { continue; }
+                if (code <= best) continue;
+                JSONArray assets = r.optJSONArray("assets");
+                if (assets == null) continue;
+                for (int j = 0; j < assets.length(); j++) {
+                    JSONObject a = assets.getJSONObject(j);
+                    if (!"BeyondTV.apk".equals(a.optString("name"))) continue;
+                    best = code;
+                    url = a.optString("browser_download_url", null);
+                    digest = a.optString("digest", null);   // "sha256:..." on newer GitHub
+                }
             }
+        } catch (Exception e) {
+            viaReleases = e;
+        }
+        try {
+            JSONObject l = new JSONObject(Http.get(LATEST, null, 64 * 1024));
+            long code = l.optLong("code", 0);
+            String u = l.optString("url", "");
+            if (code > best && u.equals(DOWNLOADS + code + "/BeyondTV.apk")) {
+                best = code;
+                url = u;
+                String sha = l.optString("sha256", "");
+                digest = sha.isEmpty() ? null : "sha256:" + sha;
+            }
+            // One way failed and the other worked: worth knowing before both do.
+            if (viaReleases != null) Checkin.error(c, "update", "releases: " + viaReleases);
+        } catch (Exception e) {
+            if (viaReleases != null) throw viaReleases;
+            Checkin.error(c, "update", "latest.json: " + e);
         }
         if (url == null || best <= installed) {
             AppLog.w("update: up to date (" + installed + ")");
@@ -338,50 +363,16 @@ final class Updater {
         return Build.VERSION.SDK_INT >= 28 ? p.getLongVersionCode() : p.versionCode;
     }
 
-    // Every header goes on before getResponseCode: after it the connection is made and Android throws.
-    private static HttpURLConnection open(String url, String accept) throws IOException {
-        HttpURLConnection c = (HttpURLConnection) new URL(url).openConnection();
-        c.setConnectTimeout(10_000);
-        c.setReadTimeout(20_000);
-        c.setRequestProperty("User-Agent", "BeyondTV");
-        if (accept != null) c.setRequestProperty("Accept", accept);
-        c.setInstanceFollowRedirects(true);   // release files live on GitHub's download host
-        if (c.getResponseCode() != 200) {
-            c.disconnect();
-            throw new IOException("HTTP " + c.getResponseCode() + " from " + new URL(url).getHost());
-        }
-        return c;
-    }
-
     private static String get(String url) throws IOException {
-        HttpURLConnection c = open(url, "application/vnd.github+json");
-        try (InputStream in = c.getInputStream()) {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            copy(in, out, 2L * 1024 * 1024);
-            return out.toString(StandardCharsets.UTF_8.name());
-        } finally {
-            c.disconnect();
-        }
+        return Http.get(url, "application/vnd.github+json", 2L * 1024 * 1024);
     }
 
     private static void download(String url, File to) throws IOException {
-        HttpURLConnection c = open(url, null);
-        try (InputStream in = c.getInputStream(); OutputStream out = new FileOutputStream(to)) {
-            copy(in, out, MAX_BYTES);
-        } finally {
-            c.disconnect();
-        }
+        Http.download(url, to, MAX_BYTES);
     }
 
     private static void copy(InputStream in, OutputStream out, long max) throws IOException {
-        byte[] buffer = new byte[64 * 1024];
-        long total = 0;
-        int n;
-        while ((n = in.read(buffer)) > 0) {
-            total += n;
-            if (total > max) throw new IOException("too big");
-            out.write(buffer, 0, n);
-        }
+        Http.copy(in, out, max);
     }
 
     private static String sha256(File f) throws Exception {
