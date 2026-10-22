@@ -221,6 +221,8 @@
     if (!kid) list.push({icon: 'hdmi', label: tr('Entradas HDMI', 'HDMI Inputs', 'Entradas HDMI'), run: function () {
       st.zone = Z.SHELF; openDrawer(); st.drawer = 1 < drawerInputs ? 1 : 0; updateFocus();
     }});
+    // Bedtime breathing, in the evening: a night light that breathes, then fades to dark.
+    if (Data.isNight(Date.now())) list.push({icon: 'bedtime', label: tr('Respirar para dormir', 'Bedtime breathing', 'Respirar para dormir'), run: function () { Bedtime.start(15); }});
     list.push({icon: 'settings', label: tr('Ajustes', 'Settings', 'Ajustes'), run: function () { openSettings(); }});
     if (kid) list.push({icon: 'sparkles', label: tr('Do seu jeito', 'Make it yours', 'A tu manera'), run: makeItYours});
     if (Profiles.count() > 1 || window.Family) list.push({person: Profiles.current(), label: tr('Trocar perfil', 'Switch profile', 'Cambiar perfil'),

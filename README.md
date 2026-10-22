@@ -51,8 +51,9 @@ Free and open source, built in Aotearoa by [Beyond](https://gobeyond.co.nz). One
 6. Two homes, one show: done on LG and Samsung. The Beyond Family app starts a countdown on every TV in two linked homes, and reactions come from phones. Google TV once it pairs with Beyond Family.
 7. Earn your screen: done on LG and Samsung. Switched on in Beyond Family, a kid's apps wait until their jobs for today are ticked off. Google TV once it pairs with Beyond Family.
 8. The house noticeboard: done on LG and Samsung. Switched on in Beyond Family, the screensaver shows today's calendar, tea, birthdays and notes beside the clock. Google TV once it pairs with Beyond Family.
-9. A bedtime breathing night light, a fine day nudge that counts as green time, a dinner question answered from phones, and a te reo word of the day.
-10. Beyond™ TV for business: shop-window screens changed from the web, as a subscription. Free for homes, always.
+9. Bedtime breathing: done on LG and Samsung. A night light that breathes, slowing from six breaths a minute, then fades to dark. From the moon on the home screen in the evening, or from the Beyond Family app.
+10. A fine day nudge that counts as green time, a dinner question answered from phones, and a te reo word of the day.
+11. Beyond™ TV for business: shop-window screens changed from the web, as a subscription. Free for homes, always.
 
 Ideas welcome: press the four dots (*Talk to Beyond*) on the TV.
 
