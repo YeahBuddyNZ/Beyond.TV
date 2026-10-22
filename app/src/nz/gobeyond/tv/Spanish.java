@@ -108,6 +108,17 @@ final class Spanish {
             case "Couldn't check just now. It tries again by itself": return "No se pudo buscar ahora. Lo vuelve a intentar solo";
             case "Taking a short break. They'll be back by themselves.": return "Una pequeña pausa. Vuelven solas.";
             case "Updates come straight from Beyond, and only the real Beyond™ TV ever installs.": return "Las actualizaciones vienen directo de Beyond, y solo se instala el Beyond™ TV de verdad.";
+            case "Talk to Beyond": return "Habla con Beyond";
+            case "What would make Beyond™ TV better? Say it, or type it. We read every one.": return "¿Qué haría mejor Beyond™ TV? Dilo o escríbelo. Leemos todo.";
+            case "Or type it here": return "O escríbelo aquí";
+            case "Speak": return "Hablar";
+            case "Say it again": return "Decirlo otra vez";
+            case "Send to Beyond": return "Enviar a Beyond";
+            case "What would make Beyond™ TV better?": return "¿Qué haría mejor Beyond™ TV?";
+            case "This TV can't listen, so type it below.": return "Esta TV no puede escuchar; escríbelo abajo.";
+            case "Sending…": return "Enviando…";
+            case "Thank you! If we reply, it shows up here on your TV.": return "¡Gracias! Si respondemos, aparece aquí en tu TV.";
+            case "That didn't go. Check the internet and try again.": return "No se envió. Revisa internet e inténtalo de nuevo.";
             case "Updates": return "Actualizaciones";
             case "Updates, ": return "Actualizaciones, ";
             case "New version": return "Nueva versión";

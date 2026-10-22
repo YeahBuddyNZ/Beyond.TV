@@ -116,6 +116,17 @@ final class German {
             case "Couldn't check just now. It tries again by itself": return "Gerade nicht geprüft. Es versucht es von selbst wieder";
             case "Taking a short break. They'll be back by themselves.": return "Kurze Pause. Sie kommen von selbst wieder.";
             case "Updates come straight from Beyond, and only the real Beyond™ TV ever installs.": return "Updates kommen direkt von Beyond, und nur das echte Beyond™ TV wird installiert.";
+            case "Talk to Beyond": return "Mit Beyond reden";
+            case "What would make Beyond™ TV better? Say it, or type it. We read every one.": return "Was würde Beyond™ TV besser machen? Sag es oder tipp es. Wir lesen alles.";
+            case "Or type it here": return "Oder hier tippen";
+            case "Speak": return "Sprechen";
+            case "Say it again": return "Nochmal sagen";
+            case "Send to Beyond": return "An Beyond senden";
+            case "What would make Beyond™ TV better?": return "Was würde Beyond™ TV besser machen?";
+            case "This TV can't listen, so type it below.": return "Dieser Fernseher kann nicht zuhören, tipp es unten ein.";
+            case "Sending…": return "Wird gesendet…";
+            case "Thank you! If we reply, it shows up here on your TV.": return "Danke! Wenn wir antworten, erscheint es hier auf deinem Fernseher.";
+            case "That didn't go. Check the internet and try again.": return "Das ging nicht raus. Prüf das Internet und versuch es nochmal.";
             case "Updates": return "Updates";
             case "Updates, ": return "Updates, ";
             case "New version": return "Neue Version";
