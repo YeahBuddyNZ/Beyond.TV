@@ -29,6 +29,11 @@ before you do it, and let them do the taps on the TV.
 
 ## Installing it for someone
 
+**Without building:** `install.sh` (Mac, Linux) and `install.ps1` (Windows) install the ready-made build from the
+`tv` release (Auckland, no TMDB key) and find the TV by port 5555 on the local network; `docs/tv/` is the page the
+TV's Downloader app opens (`yeahbuddynz.github.io/Beyond.TV/tv`). CI keeps `tv` holding the newest signed APK. Build
+your own (below) when they want their city baked in or the picks.
+
 1. **Ask** for the TV's IP address and their city, if they didn't say.
 2. **Tools:** a JDK 17+, the Android SDK command-line tools (build-tools 34+, platform android-34) and adb. Check
    what's already there (`java -version`, `$ANDROID_HOME`, `adb version`) and install only what's missing.
