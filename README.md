@@ -54,7 +54,7 @@ Free and open source, built in Aotearoa by [Beyond](https://gobeyond.co.nz). One
 9. Bedtime breathing: done on LG and Samsung. A night light that breathes, slowing from six breaths a minute, then fades to dark. From the moon on the home screen in the evening, or from the Beyond Family app.
 10. Fine day nudge: done on LG and Samsung. On a mild, dry day the TV suggests going outside, and counts the time as green time in Beyond Family when you're back.
 11. Dinner question: done on LG and Samsung. One question on the TV from Beyond Family, answered from phones, and the answers revealed together.
-12. A te reo word of the day.
+12. Te reo word of the day: done on Google TV, LG and Samsung. A new kupu each day on the home screen, with what it means, and on the LG and Samsung screensaver how to say it. Settings can turn it off.
 13. Beyond™ TV for business (testing now): shop-window screens changed from the web, as a subscription. Open `/screen` on the TV, type its code into Beyond™ Spaces, and it plays your pictures, videos and web pages. Free for homes, always.
 
 Ideas welcome: press the four dots (*Talk to Beyond*) on the TV.

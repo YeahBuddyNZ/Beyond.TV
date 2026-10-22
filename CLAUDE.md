@@ -252,6 +252,9 @@ HDMI (Chromecast with Google TV, Google TV Streamer, onn 4K, NVIDIA Shield). Set
   it never touches the name, shelf, PIN or kid flag, and a Beyond Family refresh keeps what they picked.
   `tools/webapp.py` is what both builds share. Preview: `python3 webos/build.py --preview` (or `tizen/build.py`), then
   open `out/webos/index.html` in a browser (a stand-in lists sample apps).
+- Te reo word of the day: `web/kupu.js` and `Kupu.java` hold the same list and pick by the same local day, so every
+  TV in a house shows the same kupu. Change one, change both. On Android it leads the quotes row (`HomeView.kupuFor`,
+  measured once a day, never in the frame loop); *Te reo word of the day* in Home Settings turns it off.
 
 ## Always
 

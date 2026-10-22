@@ -117,7 +117,7 @@ public class SettingsActivity extends Activity {
         private static final int MAIN = 0, HOME_CHOICE = 1, HOME_SETTINGS = 2, REMOTE_KEYS = 3, PICKER = 4, SHELF_EDIT = 5, UPDATES = 6;
         /** The main list: Home Screen, Screensaver, Home Settings, Shelf, Remote Buttons, Updates, TV Settings. */
         private static final int MAIN_ROWS = 7, UPDATES_ROW = 5;
-        private static final float LIST_ROW_H = 68, LIST_ROW_GAP = 6;
+        private static final float LIST_ROW_H = 62, LIST_ROW_GAP = 5;
         private static final int PICK_VISIBLE = 9;
         private static final float LIST_X = 1000, LIST_R = 1824, LIST_TOP = 186, ROW_H = 74, ROW_GAP = 8, CHOICE_H = 104;
         private static final int AMBER = 0xFFFFC266, INK = 0xFF1C1C1E;
@@ -652,8 +652,8 @@ public class SettingsActivity extends Activity {
         // MARK: - Home Settings and Remote Buttons
 
         private static final String[] LANGUAGES = {"auto", "pt", "en", "es", "de", "ru"}, UNITS = {"auto", "C", "F"}, THEMES = {"auto", "light", "dark"};
-        /** Home Settings: language, temperature, theme, sounds, weather, city, quotes, help fix problems, then one row per coin. */
-        private static final int CITY_ROW = 5, HELP_ROW = 7, COIN_ROWS = 8;
+        /** Home Settings: language, temperature, theme, sounds, weather, city, quotes, te reo word, help fix problems, then one row per coin. */
+        private static final int CITY_ROW = 5, KUPU_ROW = 7, HELP_ROW = 8, COIN_ROWS = 9;
 
         private boolean dollar() {
             return "BRL".equalsIgnoreCase(Config.CURRENCY.trim());
@@ -668,6 +668,7 @@ public class SettingsActivity extends Activity {
             l.add(Ui.tr("Widget do clima", "Weather widget"));
             l.add(Ui.tr("Cidade", "City"));
             l.add(Ui.tr("Widget de cotações", "Quotes widget"));
+            l.add(Ui.tr("Palavra do dia em te reo Māori", "Te reo word of the day"));
             l.add(Ui.tr("Ajudar a corrigir problemas", "Help fix problems"));
             l.add("Bitcoin");
             l.add("Ethereum");
@@ -690,6 +691,7 @@ public class SettingsActivity extends Activity {
             v[4] = onOff(Prefs.weather());
             v[CITY_ROW] = !cityStatus.isEmpty() ? cityStatus : Prefs.city().isEmpty() ? "–" : Prefs.city();
             v[6] = onOff(Prefs.quotes());
+            v[KUPU_ROW] = onOff(Prefs.kupu());
             v[HELP_ROW] = onOff(Checkin.on(getContext()));
             // No quotes widget, nowhere to show prices: the coins read as off (and stay locked) until it is back on.
             for (int i = COIN_ROWS; i < v.length; i++) v[i] = onOff(Prefs.quotes() && Prefs.coin(i - COIN_ROWS));
@@ -767,6 +769,7 @@ public class SettingsActivity extends Activity {
                 case 4: Prefs.setWeather(!Prefs.weather()); break;
                 case CITY_ROW: return;
                 case 6: Prefs.setQuotes(!Prefs.quotes()); break;
+                case KUPU_ROW: Prefs.setKupu(!Prefs.kupu()); break;
                 case HELP_ROW: Checkin.setOn(getContext(), !Checkin.on(getContext())); invalidate(); return;
                 default:
                     if (!Prefs.quotes()) return;

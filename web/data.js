@@ -48,6 +48,7 @@ var Prefs = (function () {
     theme: function () { return pick('theme', 'auto'); },
     weather: function () { return pick('weather', true); },
     quotes: function () { return pick('quotes', CONFIG.showCrypto !== false); },
+    kupu: function () { return pick('kupu', true); },
     coin: function (i) { var c = pick('coins', null); return c ? c[i] !== false : true; },
     /** The shelf is each profile's own (Profiles), falling back to the TV's. */
     shelf: function () {
