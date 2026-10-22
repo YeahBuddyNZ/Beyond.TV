@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.RadialGradient;
 import android.graphics.RectF;
@@ -32,8 +31,8 @@ import java.util.concurrent.Executors;
 
 /**
  * Art mode, like a Samsung Frame: the screensaver shows paintings from the Art Institute of Chicago's public domain
- * collection (free, no key), each one framed on a deep plum mat with a thin dark frame and a soft shadow, with its
- * title, artist and date as the caption. Once a day a new set of up to 24 is picked from a theme (landscapes, the sea,
+ * collection (free, no key), each one as big as fits on a dark wall with a thin dark frame and a soft shadow, and
+ * nothing written on it, so it looks like a painting hanging there. Once a day a new set of up to 24 is picked from a theme (landscapes, the sea,
  * gardens, flowers...); each is downloaded once, framed once and kept on disk as a 16:9 picture, so the screensaver
  * treats it like any other photo. It speaks the same Recs.Pick and listener shape, so DreamView only swaps the source.
  */
@@ -47,7 +46,7 @@ final class Art {
     private static final int KEEP = 24;
     /** The framed picture's size: the screensaver's photo size (10% larger than the screen, for the slow zoom). */
     private static final int W = 2112, H = 1188;
-    private static final int MAT_TOP = 0xFF2A2340, MAT_BOTTOM = 0xFF17142A, FRAME = 0xFF0E0C14;
+    private static final int WALL_MIDDLE = 0xFF1E1B19, WALL_EDGE = 0xFF0B0A09, FRAME = 0xFF0A0908;
 
     private static Art instance;
     private final Context context;
@@ -257,7 +256,8 @@ final class Art {
     }
 
     private File file(Recs.Pick p) {
-        return new File(dir, p.id + ".jpg");
+        // "-wall": the paintings as hung on the dark wall (the plum mat ones are tidied away and drawn again).
+        return new File(dir, p.id + "-wall.jpg");
     }
 
     // MARK: - Framing
@@ -279,19 +279,17 @@ final class Art {
         try {
             Canvas c = new Canvas(out);
             Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG | Paint.DITHER_FLAG);
-            // The mat: deep plum, a touch lighter at the top, with a little violet light behind the painting.
-            paint.setShader(new LinearGradient(0, 0, 0, H, MAT_TOP, MAT_BOTTOM, Shader.TileMode.CLAMP));
-            c.drawRect(0, 0, W, H, paint);
-            paint.setShader(new RadialGradient(W / 2f, H * 0.45f, H * 0.75f, 0x406E3DDB, 0x006E3DDB, Shader.TileMode.CLAMP));
+            // The wall: dark, a touch warmer in the middle, like a gallery with the lights down.
+            paint.setShader(new RadialGradient(W / 2f, H / 2f, W * 0.75f, WALL_MIDDLE, WALL_EDGE, Shader.TileMode.CLAMP));
             c.drawRect(0, 0, W, H, paint);
             paint.setShader(null);
-            // The painting sits a little left of centre, clear of the clock in the top right corner, and never upscaled
-            // past 1.6x.
-            float boxW = W * 0.54f, boxH = H * 0.64f;
+            // The painting fills the screen as far as its shape allows (1840 × 1000 of a 1920 × 1080 screen), never
+            // upscaled past 1.6x. The whole picture is shown, so W × H is the screen.
+            float boxW = W * 1840f / 1920, boxH = H * 1000f / 1080;
             float scale = Math.min(Math.min(boxW / art.getWidth(), boxH / art.getHeight()), 1.6f * W / 1920f);
             float aw = art.getWidth() * scale, ah = art.getHeight() * scale;
-            float left = W * 0.43f - aw / 2f, top = (H - ah) / 2f - H * 0.02f;
-            float border = H * 0.012f;
+            float left = (W - aw) / 2f, top = (H - ah) / 2f;
+            float border = H * 0.004f;
             RectF frame = new RectF(left - border, top - border, left + aw + border, top + ah + border);
             // A soft shadow under the frame, as if it hangs a little off the wall.
             paint.setColor(0xFF000000);

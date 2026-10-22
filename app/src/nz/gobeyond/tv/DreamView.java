@@ -41,6 +41,8 @@ import java.util.concurrent.Executors;
  */
 final class DreamView extends View implements Choreographer.FrameCallback, HomeData.Listener, Recs.Listener {
     private static final long SHOW_MS = 30_000, FADE_MS = 3_000, FIRST_MS = 1_600;
+    /** A painting stays up long enough to look at. */
+    private static final long ART_SHOW_MS = 60_000;
     private static final float ZOOM = 0.1f;
     /** Photos 10% larger than the screen (the zoom goes up to 1.1 without upscaling). */
     private static final int PW = 2112, PH = 1188;
@@ -168,7 +170,7 @@ final class DreamView extends View implements Choreographer.FrameCallback, HomeD
         lastFrame = 0;
         failed.clear();
         artMode = Prefs.art();
-        fallback = showcase().isEmpty();
+        fallback = !artMode && showcase().isEmpty();
         data.addListener(this);
         recs.addListener(this);
         art.addListener(this);
@@ -316,7 +318,8 @@ final class DreamView extends View implements Choreographer.FrameCallback, HomeD
             float[] light = new float[2];
             try {
                 images = Backdrop.photo(file, PW, PH, light);
-                images[0] = Backdrop.gpu(withScrims(images[0], light[0], light[1]));
+                // A painting is already hung on its wall (Art.frame); nothing is written over it, so no scrims.
+                images[0] = Backdrop.gpu(artMode ? images[0] : withScrims(images[0], light[0], light[1]));
             } catch (Exception | OutOfMemoryError e) {
                 AppLog.w("screensaver: photo for “" + chosen.title + "”: " + e.getMessage());
             }
@@ -357,7 +360,7 @@ final class DreamView extends View implements Choreographer.FrameCallback, HomeD
             prepareNext();
             return;
         }
-        if (incoming == null && prepared != null && up >= current.startedAt + SHOW_MS) {
+        if (incoming == null && prepared != null && up >= current.startedAt + (artMode ? ART_SHOW_MS : SHOW_MS)) {
             incoming = prepared;
             prepared = null;
             incoming.startedAt = up;
@@ -390,6 +393,13 @@ final class DreamView extends View implements Choreographer.FrameCallback, HomeD
 
     /** Photo position and scale now: zoom from 1 to 1.1 (or back) and a pan toward a corner, never showing an edge. */
     private void place(Slide s, long up, float[] out) {
+        if (artMode) {
+            // Paintings hang still: the whole picture (wall included) fitted to the screen.
+            out[0] = 0;
+            out[1] = 0;
+            out[2] = (float) w / s.image.getWidth();
+            return;
+        }
         float u = Ui.clamp((up - s.startedAt) / (float) (SHOW_MS + FADE_MS));
         float f = s.zoomIn ? u : 1 - u;
         float z = 1 + ZOOM * f;
@@ -456,6 +466,8 @@ final class DreamView extends View implements Choreographer.FrameCallback, HomeD
             drawPhoto(canvas, incoming, placeB, e);
         }
 
+        // Art mode is only the painting: no clock, no date, no caption. Family messages still come over it.
+        if (artMode) return;
         if (chromeDirty) recordChrome();
         chrome.setAlpha(first);
         chrome.draw(canvas);

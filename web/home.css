@@ -751,14 +751,15 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .bt-layer.bt-sleep { background: #000; }
 .bt-layer.bt-sleep::before { display: none; }
 
-/* Art mode on the screensaver: the painting framed on a deep plum mat, like a Samsung Frame. */
+/* Art mode on the screensaver: the painting as big as the screen allows, on a dark wall, with nothing written on it. */
+#saver.gallery .brand, #saver.gallery .clock, #saver.gallery .shade, #saver.gallery .board { display: none; }
+#saver.gallery .photo { -webkit-transition: opacity 3s; transition: opacity 3s; }
 #saver .photo.art {
-  /* Right of the clock, so the corner glass never covers the painting. */
-  background: -webkit-radial-gradient(50% 45%, circle, rgba(110, 61, 219, 0.25), rgba(110, 61, 219, 0) 60%), -webkit-linear-gradient(top, #2A2340, #17142A);
-  background: radial-gradient(circle at 50% 45%, rgba(110, 61, 219, 0.25), rgba(110, 61, 219, 0) 60%), linear-gradient(#2A2340, #17142A);
+  background: -webkit-radial-gradient(50% 50%, circle, #1E1B19, #0B0A09 75%);
+  background: radial-gradient(circle at 50% 50%, #1E1B19, #0B0A09 75%);
 }
 #saver .photo.art .painting {
-  position: absolute; left: 61%; top: 47%; max-width: 1000px; max-height: 760px;
+  position: absolute; left: 50%; top: 50%; max-width: 1840px; max-height: 1000px;
   -webkit-transform: translate(-50%, -50%); transform: translate(-50%, -50%);
-  border: 13px solid #0E0C14; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.55), 0 8px 18px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 0 4px #0A0908, 0 30px 70px rgba(0, 0, 0, 0.7);
 }
