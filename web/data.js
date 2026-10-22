@@ -47,7 +47,8 @@ var Prefs = (function () {
     temperature: function () { return pick('temperature', CONFIG.temperature || 'auto'); },
     theme: function () { return pick('theme', 'auto'); },
     weather: function () { return pick('weather', true); },
-    quotes: function () { return pick('quotes', CONFIG.showCrypto !== false); },
+    // Crypto exists only in a build made with show_crypto=true; everywhere else it is gone, not just switched off.
+    quotes: function () { return CONFIG.showCrypto === true && pick('quotes', true); },
     kupu: function () { return pick('kupu', true); },
     /** The screensaver: 'art' (paintings, like a Samsung Frame), 'photos' (the picks' film photos) or 'auto'. */
     screensaver: function () { return pick('screensaver', 'auto'); },
