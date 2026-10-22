@@ -61,6 +61,8 @@ var Family = (function () {
   var lastPeople = '';
   // The house noticeboard (only when the household turned it on): today, for the screensaver. Kept in memory only.
   var board = null;
+  // The household's pets and whether each still wants a meal, for the kids' "did they get fed?" (pets.js).
+  var pets = null;
 
   /** One of Beyond Family's people, as a profile here. */
   function person(p, visitor) {
@@ -80,6 +82,9 @@ var Family = (function () {
     if (home) {
       state.home = {name: home.name};
       board = home.board || null;
+      var hadPets = pets !== null;
+      pets = home.pets || [];
+      if (!hadPets && window.Pets) setTimeout(Pets.arrived, 0);
     }
     var had = !!state.visiting;
     state.visiting = visitors.length > 0;
@@ -595,6 +600,19 @@ var Family = (function () {
     call('POST', '/tv/green', {memberIds: ids.slice(0, 12), minutes: Math.max(10, Math.min(360, minutes))}, function (err) { done(err); });
   }
 
+  // MARK: - The pets, fed
+
+  /** A kid said yes on the TV: these pets are fed. Beyond Family ticks them off with the kid's name. */
+  function petsFed(ids, member, done) {
+    if (!linked()) { done({status: 0}); return; }
+    call('POST', '/tv/pets/fed', {petIds: ids.slice(0, 8), memberId: member || undefined}, function (err) {
+      if (!err && pets) {
+        for (var i = 0; i < pets.length; i++) if (ids.indexOf(pets[i].id) >= 0) pets[i].due = false;
+      }
+      done(err);
+    });
+  }
+
   // MARK: - What's on, for the remote
 
   function now(app, title) {
@@ -615,6 +633,9 @@ var Family = (function () {
     hide: hide,
     togetherKey: togetherKey,
     green: green,
+    pets: function () { return linked() && pets ? pets : []; },
+    havePets: function () { return pets !== null; },
+    petsFed: petsFed,
     board: function () { return linked() ? board : null; },
     visit: visit,
     signOut: signOut,

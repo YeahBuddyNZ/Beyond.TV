@@ -699,6 +699,16 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .bt-outside .bt-sub { max-width: 1000px; margin: 18px auto 0; }
 .bt-outside .bt-buttons { margin-top: 60px; text-align: center; }
 
+/* MARK: - Have the pets been fed? */
+.bt-pets .bt-box { position: absolute; left: 0; right: 0; top: 200px; text-align: center; }
+.bt-pets .faces { margin-bottom: 44px; }
+.bt-pets .pet { display: inline-block; width: 190px; margin: 0 18px; vertical-align: top; }
+.bt-pets .pet .avatar { position: relative; margin: 0 auto; }
+.bt-pets .pet .name { margin-top: 16px; font-size: 30px; font-weight: 600; color: rgba(247, 246, 242, 0.85); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bt-pets .bt-heading { display: inline-block; }
+.bt-pets .bt-sub { max-width: 1000px; margin: 18px auto 0; }
+.bt-pets .bt-buttons { margin-top: 56px; text-align: center; }
+
 /* MARK: - The dinner question */
 .bt-dinner .bt-box { position: absolute; left: 120px; right: 120px; top: 110px; text-align: center; }
 .bt-dinner .bt-heading { display: inline-block; font-size: 34px; color: rgba(247, 246, 242, 0.75); }
