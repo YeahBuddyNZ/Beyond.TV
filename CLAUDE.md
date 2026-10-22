@@ -258,6 +258,8 @@ HDMI (Chromecast with Google TV, Google TV Streamer, onn 4K, NVIDIA Shield). Set
   The dinner question lives in `web/family.js` (`dinner`): `question` opens it, `question-answered` fills in faces (never the words), `question-reveal` shows the answers, `question-end` closes it.
   `web/myworld.js` is Make it yours: a kid restyles their own profile (buddy, colour, world, loves) with no PIN;
   it never touches the name, shelf, PIN or kid flag, and a Beyond Family refresh keeps what they picked.
+  `MyWorldActivity.java` is the same on Google TV (same buddies, colours and worlds: change one, change both); `HomeView`
+  draws the watcher's world instead of the sky, with the dark look, and `Family.pushLook` sends it to Beyond Family.
   `tools/webapp.py` is what both builds share. Preview: `python3 webos/build.py --preview` (or `tizen/build.py`), then
   open `out/webos/index.html` in a browser (a stand-in lists sample apps).
 - Beyond Family on Android (`Family.java`, `FamilyService.java`, `LinkActivity.java`, all in `:home`): the same

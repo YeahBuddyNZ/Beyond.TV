@@ -36,6 +36,10 @@ final class People {
         String emoji = "";
         int colour;
         boolean kid;
+        /** Make it yours: their world behind the home screen (MyWorldActivity.WORLDS id, empty for none), and the
+         *  things they love (KidPicks.LIKES ids). */
+        String world = "";
+        java.util.List<String> loves = new ArrayList<>();
         /** Signed in here from another home through Beyond Family. */
         boolean visitor;
 
@@ -67,6 +71,9 @@ final class People {
                 p.colour = o.optInt("colour", COLOURS[i % COLOURS.length]);
                 p.kid = o.optBoolean("kid");
                 p.emoji = o.optString("emoji");
+                p.world = o.optString("world");
+                JSONArray loves = o.optJSONArray("loves");
+                for (int j = 0; loves != null && j < loves.length(); j++) p.loves.add(loves.optString(j));
                 p.visitor = o.optBoolean("visitor");
                 out.add(p);
             }
@@ -88,6 +95,8 @@ final class People {
             for (Person p : people) {
                 JSONObject o = new JSONObject().put("id", p.id).put("name", p.name).put("colour", p.colour).put("kid", p.kid);
                 if (p.emoji != null && !p.emoji.isEmpty()) o.put("emoji", p.emoji);
+                if (p.world != null && !p.world.isEmpty()) o.put("world", p.world);
+                if (!p.loves.isEmpty()) o.put("loves", new JSONArray(p.loves));
                 if (p.visitor) o.put("visitor", true);
                 a.put(o);
             }
@@ -107,7 +116,8 @@ final class People {
         for (int i = 0; i < now.size(); i++) {
             Person a = now.get(i), b = people.get(i);
             if (!a.id.equals(b.id) || !a.name.equals(b.name) || a.colour != b.colour || a.kid != b.kid
-                    || !String.valueOf(a.emoji).equals(String.valueOf(b.emoji)) || a.visitor != b.visitor) return false;
+                    || !String.valueOf(a.emoji).equals(String.valueOf(b.emoji)) || a.visitor != b.visitor
+                    || !String.valueOf(a.world).equals(String.valueOf(b.world)) || !a.loves.equals(b.loves)) return false;
         }
         return true;
     }
