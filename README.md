@@ -47,6 +47,10 @@ Free and open source, built in Aotearoa by [Beyond](https://gobeyond.co.nz). One
 2. Plex built in: link with a code at plex.tv/link, then Continue Watching and Recently Added on the home screen.
 3. All your services as one: one "What's on" across every service you have, opening each title in its own app.
 4. Beyond Family: pair the TV with your household, a phone remote in the Beyond Family app, voice search for kids, and the family house game on the big screen.
+5. Picks for kids: interests set by a grown-up, gentle suggestions of something better to watch, and a parent code for the grown-up settings.
+6. Beyond™ TV for business: shop-window screens changed from the web, as a subscription. Free for homes, always.
+
+Ideas welcome: press the four dots (*Talk to Beyond*) on the TV.
 
 ## Install
 

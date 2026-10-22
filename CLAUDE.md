@@ -246,6 +246,9 @@ HDMI (Chromecast with Google TV, Google TV Streamer, onn 4K, NVIDIA Shield). Set
 
 ## Always
 
+- Every feature someone can see goes on the website (`docs/index.html`: *What it does now*, or *On the way* while it
+  is coming) and in the README's roadmap, in the same PR (Kyle's rule). Homes are free, always; business screens are
+  the paid product.
 - Never turn off an app that saved a Wi-Fi network: Android deletes its networks and Original can't bring them
   back (`wifiOwners` in `HomeMode`).
 - Never commit `config.properties`, `*.keystore` or any key.
