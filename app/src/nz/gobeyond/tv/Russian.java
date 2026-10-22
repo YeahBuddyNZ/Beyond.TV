@@ -216,6 +216,11 @@ final class Russian {
             case "Just one to go! Tick it off in Beyond Family and the TV opens by itself.": return "Осталось одно! Отметьте в Beyond Family, и телевизор откроется сам.";
             case "On it": return "Уже делаю";
             case "All done! Screens are open.": return "Всё сделано! Экран открыт.";
+            case "Dinner question": return "Вопрос за ужином";
+            case "Dinner question: ": return "Вопрос за ужином: ";
+            case "Answer in Beyond Family on your phone. The answers come up together.": return "Отвечайте в Beyond Family на телефоне. Ответы появятся вместе.";
+            case " answered the dinner question": return " ответил(а) на вопрос";
+            case "Close": return "Закрыть";
             case "Install the new version": return "Установить новую версию";
             case "Check for updates": return "Проверить обновления";
             case "Install updates by themselves": return "Устанавливать обновления самостоятельно";
