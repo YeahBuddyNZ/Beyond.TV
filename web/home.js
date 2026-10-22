@@ -176,7 +176,7 @@
     setClass($('quotes'), 'hide', st.zone === Z.TOP && st.top >= 3);
     list = $('cards').children;
     for (i = 0; i < list.length; i++) setClass(list[i], 'focus', st.zone === Z.CARDS && st.card === i);
-    list = $('tiles').children;
+    list = $('tiles').querySelectorAll('.tile');
     for (i = 0; i < list.length; i++) setClass(list[i], 'focus', st.zone === Z.SHELF && st.shelf === i);
     list = document.querySelectorAll('#drawer .key');
     for (i = 0; i < list.length; i++) setClass(list[i], 'focus', st.zone === Z.DRAWER && st.drawer === i);
@@ -348,27 +348,31 @@
   // MARK: - Shelf
 
   function renderShelf() {
-    var n = shelf.length, gap = 48, pad = 40;
-    // 16:9 tiles, as on Android: never taller than 126, and the glass keeps its bottom edge.
-    var tw = Math.min(126 * 16 / 9, (1760 - Math.max(0, n - 1) * gap) / Math.max(1, n)), th = tw * 9 / 16;
-    var width = n * tw + Math.max(0, n - 1) * gap, left = (1920 - width) / 2;
+    var n = shelf.length, gap = 52, pad = 32, nameH = 38, bottom = 1020;
+    // Square icons with the name under each, like an iPad (as on Android). The glass keeps its bottom edge.
+    var tw = Math.min(132, (1760 - Math.max(0, n - 1) * gap) / Math.max(1, n)), th = tw;
+    var width = n * tw + Math.max(0, n - 1) * gap, left = (1920 - width) / 2, top = bottom - th - nameH - 2 * pad;
     var platter = $('platter');
     platter.style.display = n ? '' : 'none';
     platter.style.left = (left - pad) + 'px';
     platter.style.width = (width + 2 * pad) + 'px';
-    platter.style.top = (814 + 126 - th) + 'px';
-    platter.style.height = (th + 2 * pad) + 'px';
+    platter.style.top = top + 'px';
+    platter.style.height = (bottom - top) + 'px';
     $('quotes').style.right = (1920 - left - width) + 'px';
     var tiles = $('tiles');
     tiles.innerHTML = '';
     for (var i = 0; i < n; i++) {
-      var t = el('div', 'tile', tiles);
-      t.style.left = (left + i * (tw + gap)) + 'px';
-      t.style.top = (854 + 126 - th) + 'px';
+      var t = el('div', 'tile', tiles), x = left + i * (tw + gap);
+      t.style.left = x + 'px';
+      t.style.top = (top + pad) + 'px';
       t.style.width = tw + 'px';
       t.style.height = th + 'px';
-      face(shelf[i], t, wordFit(shelf[i].title, tw, 30));
+      face(shelf[i], t, wordFit(shelf[i].title, tw, 26));
       hover(t, Z.SHELF, i);
+      var name = el('div', 'tile-name', tiles, shelf[i].title);
+      name.style.left = (x - gap / 2) + 'px';
+      name.style.width = (tw + gap) + 'px';
+      name.style.top = (top + pad + th + 12) + 'px';
     }
     st.shelf = Math.min(st.shelf, Math.max(0, n - 1));
   }
@@ -480,7 +484,7 @@
 
   function openDrawer() {
     if (!drawerItems.length) return;
-    var tiles = $('tiles').children;
+    var tiles = $('tiles').querySelectorAll('.tile');
     st.zone = Z.DRAWER;
     st.drawer = Math.min(drawerItems.length - 1, nearest(document.querySelectorAll('#drawer .key'), centerX(tiles[st.shelf])));
     updateFocus();
@@ -489,7 +493,7 @@
   function closeDrawer() {
     var keys = document.querySelectorAll('#drawer .key');
     st.zone = Z.SHELF;
-    if (shelf.length) st.shelf = nearest($('tiles').children, centerX(keys[st.drawer]));
+    if (shelf.length) st.shelf = nearest($('tiles').querySelectorAll('.tile'), centerX(keys[st.drawer]));
     updateFocus();
   }
 
@@ -756,7 +760,7 @@
   }
 
   function move(dx, dy) {
-    var tiles = $('tiles').children, cardNodes = $('cards').children;
+    var tiles = $('tiles').querySelectorAll('.tile'), cardNodes = $('cards').children;
     switch (st.zone) {
       case Z.SHELF:
         if (dx) st.shelf = Math.max(0, Math.min(shelf.length - 1, st.shelf + dx));

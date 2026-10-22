@@ -67,10 +67,11 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
     private static final float HERO_TITLE_W = 900;
     // Shelf: tiles with corners concentric with the glass (glass radius = tile radius + padding).
     // Shelf like the tvOS 27 Dock: icons in each brand's color, 48 apart, and the glass bar hugging them with 40 of
-    // padding (the focused icon grows 20% without touching its edge). The icons are 16:9, the shape of the apps' TV
-    // banners, so those are never stretched: up to 224 × 126, 178 × 100 with eight apps.
-    private static final float SHELF_PAD = 40, TILE_GAP = 48;
-    private static final float TILE_RADIUS = 22;
+    // padding (the focused icon grows 20% without touching its edge). The icons are square, like an iPad's home
+    // screen, with each app's name under it: up to 132 × 132, smaller only when they would not fit across.
+    private static final float SHELF_PAD = 32, TILE_GAP = 52;
+    private static final float TILE_RADIUS = 30;
+    private static final float L_TILE_SIDE = 132, L_TILE_NAME = 38, L_PLATTER_BOTTOM = 1020;
     // Tile focus (Apple TV style): it grows from the center and its shadow drops (it "rises" toward the viewer).
     private static final float FOCUS_GROW = 0.2f;
     // Corner capsule.
@@ -93,7 +94,6 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
     // The tab bar is a 68 px capsule; the cards sit on the 5-column grid (the wide one spans 3).
     private static final float L_TITLE_BASE = 130, L_TABBAR_TOP = 158, L_TABBAR_H = 68, L_CARDS_TOP = 262, L_CARD_H = 442;
     private static final float L_TALL_W = 320, L_CARD_GAP = 40, L_BUTTON = 68, L_BUTTON_GAP = 20, L_BUTTON_CY = 103;
-    private static final float L_PLATTER_TOP = 814, L_TILE_H = 126;
     private static final float L_DATE_BASE = 330, L_CLOCK_BASE = 540, L_WEATHER_BASE = 626, L_QUOTES_BASE = 694;
     private static final int L_INK = 0xFF22221F, L_DIM = 0xFF55534B, L_FAINT = 0xFF8A877D;
     private static final String[] TABS = {"Explorar", "Filmes", "Séries"};
@@ -154,12 +154,15 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
     private People.Person watcher;
     private String helloLine = "", watcherInitial = "";
     private final Paint personInk = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Paint lTileName;
+    private String[] tileNames = new String[0];   // each shelf app's name, cut to fit under its icon
     private Paint lTitle, lTab, lTabOn, lCardTitle, lCardMeta, lQuote, lTip, lDate, lClock, lWeather, lClockQuote;
 
     // Shelf
     private List<HomeApps.Item> shelf = new ArrayList<>();
     private Spring[] tileFocus = new Spring[0];
     private RectF[] tileRects = new RectF[0];
+    private final RectF banner = new RectF();
     private final Map<String, Bitmap> crispLogos = new HashMap<>();   // logos already sized for the focused tile
     /** Each app's tile like its Apple TV icon: brand colors (top, bottom) and logo (0 = as is, 1 = white, 2 = dark). */
     private static final Map<String, int[]> TILE_STYLE = new HashMap<>();
@@ -604,6 +607,9 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         lClock.setLetterSpacing(-0.01f);
         lWeather = Ui.text(Ui.medium, 34 * k, L_DIM);
         lClockQuote = Ui.numbers(Ui.medium, 28 * k, L_DIM);
+        lTileName = Ui.text(Ui.medium, 21 * k, L_DIM);
+        lTileName.setTextAlign(Paint.Align.CENTER);
+        tileNames = new String[0];
         buttonPaint = Ui.text(Ui.semibold, 29 * k, INK);
         capsuleText = Ui.numbers(Ui.medium, 29 * k, 0xF2FFFFFF);
         tipPaint = Ui.text(Ui.semibold, 25 * k, 0xF2FFFFFF);
@@ -1149,19 +1155,19 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         int n = shelf.size();
         float pad = SHELF_PAD * k, gap = TILE_GAP * k;
         float full = (CONTENT_R - MARGIN) * k;
-        // Tiles in the TV banners' own 16:9, so an app's art is never stretched; never taller than L_TILE_H. The glass
-        // keeps its bottom edge, so with more apps it only gets lower.
-        float tw = Math.min(L_TILE_H * 16f / 9 * k, (full - Math.max(0, n - 1) * gap) / Math.max(1, n));
-        float th = tw * 9f / 16;
+        // Square icons with the name under each, like an iPad. The glass keeps its bottom edge.
+        float tw = Math.min(L_TILE_SIDE * k, (full - Math.max(0, n - 1) * gap) / Math.max(1, n));
+        float th = tw;
         float width = n * tw + Math.max(0, n - 1) * gap, left = (w - width) / 2f;
-        float top = (L_PLATTER_TOP + L_TILE_H) * k - th;
-        platterRect.set(left - pad, top, left + width + pad, top + th + 2 * pad);
+        float bottom = L_PLATTER_BOTTOM * k, top = bottom - th - L_TILE_NAME * k - 2 * pad;
+        platterRect.set(left - pad, top, left + width + pad, bottom);
         float x = left, y = top + pad;
         for (int i = 0; i < n; i++) {
             tileRects[i].set(x, y, x + tw, y + th);
             x += tw + gap;
         }
         crispLogos.clear();
+        tileNames = new String[0];
     }
 
     /** Shelf layer: the glass bar and its shadow (it only changes with the background). */
@@ -1367,9 +1373,32 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             tileFill.setColor(0xFF161618);
             c.drawRoundRect(cell, r, r, tileFill);
             drawLogo(c, it, cell, s, 0);
-        } else {
-            if (it.tile != null) roundImage(c, it.tile, cell, r);
+        } else if (it.tile != null) {
+            // The app's own TV banner is 16:9: on a dark square, full width, so it is never stretched.
+            tileFill.setShader(null);
+            tileFill.setColor(0xFF161618);
+            c.drawRoundRect(cell, r, r, tileFill);
+            float bh2 = cell.width() * 9f / 16 / 2;
+            banner.set(cell.left, cell.centerY() - bh2, cell.right, cell.centerY() + bh2);
+            roundImage(c, it.tile, banner, r * 0.4f);
         }
+        drawTileName(c, i, cell.bottom, fc);
+    }
+
+    /** The app's name under its icon, like an iPad: soft at rest, full ink when focused (it moves down as it grows). */
+    private void drawTileName(Canvas c, int i, float iconBottom, float focus) {
+        if (lTileName == null) return;
+        if (tileNames.length != shelf.size()) {
+            tileNames = new String[shelf.size()];
+            float room = tileRects.length > 0 ? tileRects[0].width() + TILE_GAP * k * 0.8f : 100;
+            for (int j = 0; j < shelf.size(); j++) {
+                String name = shelf.get(j).label == null ? "" : shelf.get(j).label;
+                tileNames[j] = android.text.TextUtils.ellipsize(name, new TextPaint(lTileName), room,
+                        android.text.TextUtils.TruncateAt.END).toString();
+            }
+        }
+        lTileName.setColor(blend(tone(L_DIM, 0xB8FFFFFF), tone(L_INK, WHITE), focus));
+        c.drawText(tileNames[i], tileRects[i].centerX(), iconBottom + 28 * k, lTileName);
     }
 
     /**
@@ -1430,7 +1459,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         if (cached != null) return cached;
         float bw = tileRects[0].width() * (1 + FOCUS_GROW), bh = tileRects[0].height() * (1 + FOCUS_GROW);
         float lw = src.getWidth(), lh = src.getHeight();
-        float scale = (float) Math.sqrt(bw * bh * 0.085f / (lw * lh * Math.max(0.08f, it.logoInk))) * it.logoScale;
+        float scale = (float) Math.sqrt(bw * bh * 0.1f / (lw * lh * Math.max(0.08f, it.logoInk))) * it.logoScale;
         scale = Math.min(scale, Math.min(bw * 0.76f / lw, bh * 0.58f / lh));
         if (rest) scale /= 1 + FOCUS_GROW;
         Bitmap out = downscale(src, Math.round(lw * scale), Math.round(lh * scale));
