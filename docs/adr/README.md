@@ -23,3 +23,4 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0013](0013-settings-are-for-grown-ups.md) | Settings are for grown-ups |
 | [0014](0014-screensaver-from-the-home-screen.md) | The home screen starts the screensaver, and te reo is a language |
 | [0015](0015-quiz-night.md) | Quiz night |
+| [0016](0016-party-mode.md) | Party mode |

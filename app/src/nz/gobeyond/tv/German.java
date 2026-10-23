@@ -219,6 +219,9 @@ final class German {
             case "On it": return "Mach ich";
             case "All done! Screens are open.": return "Alles erledigt! Der Bildschirm ist frei.";
             case "Dinner question": return "Frage zum Abendessen";
+            case "Party time!": return "Partyzeit!";
+            case "Happy birthday": return "Alles Gute zum Geburtstag";
+            case "Any key to stop": return "Beliebige Taste zum Beenden";
             case "Quiz night": return "Quizabend";
             case "Quiz night: ": return "Quizabend: ";
             case "Final scores": return "Endstand";
