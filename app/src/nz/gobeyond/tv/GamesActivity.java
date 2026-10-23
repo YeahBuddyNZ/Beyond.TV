@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -67,8 +68,13 @@ public class GamesActivity extends Activity {
             final Runnable run = (Runnable) games[i][2];
             Button b = FeedbackActivity.button(this, Ui.emoji((String) games[i][0]) + "  " + games[i][1], k, i == 0);
             b.setOnClickListener(v -> run.run());
-            LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(Math.round(400 * k), Math.round(96 * k));
-            bp.leftMargin = bp.rightMargin = Math.round(11 * k);
+            // One line on every button: the longest names ("Bedtime breathing", German's "Atmen vor dem Schlafen")
+            // shrink a little rather than wrap.
+            b.setPadding(Math.round(24 * k), 0, Math.round(24 * k), 0);
+            b.setSingleLine(true);
+            b.setAutoSizeTextTypeUniformWithConfiguration(Math.round(20 * k), Math.round(30 * k), 1, TypedValue.COMPLEX_UNIT_PX);
+            LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(Math.round(444 * k), Math.round(96 * k));
+            bp.leftMargin = bp.rightMargin = Math.round(10 * k);
             row.addView(b, bp);
             if (first == null) first = b;
         }
