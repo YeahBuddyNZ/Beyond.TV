@@ -371,7 +371,7 @@ var Family = (function () {
     if (c.kind === 'party-end') { Party.stop(); return; }
     if (c.kind && c.kind.indexOf('question') === 0) { dinner(c); return; }
     if (c.kind && c.kind.indexOf('quiz') === 0) { quiz(c); return; }
-    if (hide()) { if (c.kind === 'key') return; }  // the first press puts a message away, like it would on the remote
+    if (c.kind === 'key' && shown) { if (c.key === 'ok') hide(); return; }  // a message waits for OK, from the phone too
     if (c.kind === 'key') {
       if (c.key === 'home') { UI.closeAll(); BeyondTV.home(); return; }
       if (c.key === 'back') { BeyondTV.key(TV.keys.back); return; }
@@ -424,22 +424,32 @@ var Family = (function () {
     } catch (e) {}
   }
 
-  /** A message over everything: icon, words, who it's from. Gone after 15 seconds or the next key press. */
+  /**
+   * A message over everything, big enough to read from the couch: icon, words, who it's from, and an OK button.
+   * It stays until somebody presses OK, so nobody can miss it (Kyle: "they have to accept to close"). ADR 0018.
+   */
   function say(text, tone, from) {
     hide(true);
     var t = TONES[tone] || TONES.info;
     var stage = document.getElementById('stage');
     var card = UI.el('div', 'bt-alert', stage);
-    card.style.borderColor = t.colour;
-    var icon = UI.el('div', 'bt-alert-icon', card, t.icon);
+    var box = UI.el('div', 'bt-alert-box', card);
+    var icon = UI.el('div', 'bt-alert-icon', box, t.icon);
     icon.style.background = t.colour;
-    var body = UI.el('div', 'bt-alert-body', card);
-    UI.el('div', 'bt-alert-text', body, text);
-    UI.el('div', 'bt-alert-from', body, (from ? tr('De ', 'From ', 'De ') + from + ' · ' : '') + tr('agora', 'just now', 'ahora'));
+    UI.el('div', 'bt-alert-text', box, text);
+    UI.el('div', 'bt-alert-from', box, (from ? tr('De ', 'From ', 'De ') + from + ' · ' : '') + tr('agora', 'just now', 'ahora'));
+    var ok = UI.button(UI.el('div', 'bt-buttons', box), tr('OK, entendi', 'OK, got it', 'OK, entendido'), 'check', 'primary focus');
+    ok.onclick = function () { hide(); };
     shown = card;
     setTimeout(function () { UI.setClass(card, 'on', true); }, 20);
     chime();
-    hideTimer = setTimeout(function () { hide(); }, 15000);
+  }
+
+  /** While a message is up, only OK puts it away; every other key waits. True when the key was for the message. */
+  function alertKey(k) {
+    if (!shown) return false;
+    if (k === TV.keys.ok) hide();
+    return true;
   }
 
   /** Puts the message away. True if there was one, so the key that did it does nothing else. */
@@ -729,6 +739,7 @@ var Family = (function () {
     manage: manage,
     say: say,
     hide: hide,
+    alertKey: alertKey,
     togetherKey: togetherKey,
     green: green,
     pets: function () { return linked() && pets ? pets : []; },

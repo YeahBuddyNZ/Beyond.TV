@@ -321,26 +321,26 @@
 .bt-buttons .bt-button { margin: 0 10px; }
 
 .bt-alert {
-  position: absolute; z-index: 90; top: 56px; right: 56px; width: 760px;
-  padding: 30px 36px 30px 30px;
-  border-radius: 32px;
-  border-left: 10px solid #2F7D6D;
-  background: rgba(28, 28, 25, 0.96);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), inset 0 0 0 2px rgba(247, 246, 242, 0.08);
-  color: #F7F6F2;
+  position: absolute; z-index: 90; left: 0; top: 0; width: 1920px; height: 1080px;
+  background: rgba(13, 12, 24, 0.95);
+  color: #F7F6F2; text-align: center;
   opacity: 0;
-  -webkit-transform: translate(0, -40px) scale(0.96); transform: translate(0, -40px) scale(0.96);
-  -webkit-transition: opacity 0.35s, -webkit-transform 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.2);
-  transition: opacity 0.35s, transform 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+  -webkit-transition: opacity 0.35s; transition: opacity 0.35s;
 }
-.bt-alert.on { opacity: 1; -webkit-transform: none; transform: none; }
+.bt-alert.on { opacity: 1; }
+.bt-alert-box {
+  position: absolute; left: 160px; right: 160px; top: 170px;
+  -webkit-transform: scale(0.94); transform: scale(0.94);
+  -webkit-transition: -webkit-transform 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.2); transition: transform 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+.bt-alert.on .bt-alert-box { -webkit-transform: none; transform: none; }
 .bt-alert-icon {
-  position: absolute; left: 30px; top: 30px; width: 84px; height: 84px; border-radius: 42px;
-  font-size: 44px; line-height: 84px; text-align: center;
+  width: 180px; height: 180px; margin: 0 auto 50px; border-radius: 90px;
+  font-size: 96px; line-height: 180px; text-align: center;
 }
-.bt-alert-body { margin-left: 112px; }
-.bt-alert-text { font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 44px; font-weight: 700; line-height: 1.15; }
-.bt-alert-from { margin-top: 10px; font-size: 24px; color: rgba(247, 246, 242, 0.55); }
+.bt-alert-text { font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 96px; font-weight: 700; line-height: 1.12; letter-spacing: -0.01em; }
+.bt-alert-from { margin-top: 26px; font-size: 34px; color: rgba(247, 246, 242, 0.65); }
+.bt-alert .bt-buttons { margin-top: 70px; }
 
 /* MARK: - Watching together (family.js): a countdown both homes share, and reactions drifting up. */
 

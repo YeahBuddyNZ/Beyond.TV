@@ -471,7 +471,11 @@ final class Family {
         switch (kind) {
             case "say":
                 final String text = cmd.optString("text"), tone = cmd.optString("tone", "info"), from = cmd.optString("from", "");
-                if (!text.isEmpty()) MAIN.post(() -> say(app, text, tone, from));
+                // Over another app, Android 10 and up wants Beyond TV allowed to show over apps: the TV's own ADB says so.
+                if (!text.isEmpty()) adb().post(() -> {
+                    allowOverApps(app);
+                    MAIN.post(() -> say(app, text, tone, from));
+                });
                 break;
             case "key":
                 final int code = keyCode(cmd.optString("key"));
@@ -656,11 +660,28 @@ final class Family {
         }
     }
 
-    /** Over the home screen when it's showing; over anything else as a long toast (another app has the screen). */
+    /**
+     * Full screen over whatever is on until somebody presses OK (SayActivity, ADR 0018). Where Android won't let a
+     * screen open over another app (10 and up, before the TV's ADB has allowed it), a long toast instead.
+     */
     private static void say(Context c, String text, String tone, String from) {
         chime();
-        if (screen != null && screen.say(text, toneColour(tone), toneIcon(tone), from)) return;
+        boolean canOpen = Build.VERSION.SDK_INT < 29 || screen != null || android.provider.Settings.canDrawOverlays(c);
+        if (canOpen) {
+            try {
+                c.startActivity(SayActivity.intent(c, text, toneColour(tone), toneIcon(tone), from));
+                return;
+            } catch (RuntimeException ignored) {
+                // falls through to the toast
+            }
+        }
         Toast.makeText(c, (from.isEmpty() ? "" : from + ": ") + text, Toast.LENGTH_LONG).show();
+    }
+
+    /** On the ADB thread: lets Beyond TV open a message over another app (Android 10 and up), once. */
+    private static void allowOverApps(Context c) {
+        if (Build.VERSION.SDK_INT < 29 || android.provider.Settings.canDrawOverlays(c)) return;
+        shell(c, "appops set " + c.getPackageName() + " SYSTEM_ALERT_WINDOW allow");
     }
 
     /** Two soft notes, like the LG and Samsung app's. */

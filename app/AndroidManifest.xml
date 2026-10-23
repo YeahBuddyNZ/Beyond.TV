@@ -12,6 +12,8 @@
     <!-- Beyond Family (once the TV is linked): waits for the phone remote and the family's messages while another
          app has the screen. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <!-- A Beyond Family message over YouTube or any other app (Android 10 and up), allowed through the TV's own ADB. -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <!-- Android 11+: without this list the app can't "see" the other apps (getLeanbackLaunchIntentForPackage
          returns null). The shelf and streaming apps, the live TV apps and, through the <intent>, every TV app
@@ -188,6 +190,17 @@
             android:process=":home"
             android:exported="false"
             android:excludeFromRecents="true"
+            android:screenOrientation="landscape"
+            android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|density|fontScale|locale|layoutDirection"
+            android:theme="@style/BeyondTV.Home" />
+
+        <!-- A message from Beyond Family, full screen until somebody presses OK. -->
+        <activity
+            android:name=".SayActivity"
+            android:process=":home"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTop"
             android:screenOrientation="landscape"
             android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|density|fontScale|locale|layoutDirection"
             android:theme="@style/BeyondTV.Home" />

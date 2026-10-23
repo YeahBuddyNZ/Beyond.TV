@@ -1417,7 +1417,7 @@
   function key(k) {
     if (poke()) return true;   // the first press only wakes the screen
     if (!UI.active() && Outside.back()) return true;   // back from outside on a fine day: welcome them
-    if (Family.hide()) return true;   // or puts a family message away
+    if (Family.alertKey(k)) return true;   // a family message waits for OK
     if (Family.togetherKey(k)) return true;   // OK on a watch-together countdown opens the app
     if (UI.active()) {
       if (k >= 37 && k <= 40 || k === TV.keys.ok || k === TV.keys.back || k === 27 || k === 8 || k >= 48 && k <= 57 || k >= 65 && k <= 90 || k === 32) {
