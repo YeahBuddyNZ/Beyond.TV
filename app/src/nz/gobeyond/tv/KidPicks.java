@@ -149,7 +149,7 @@ final class KidPicks {
             p.app = s[2];
             p.pkg = pkg;
             p.gentle = true;
-            p.emoji = why[1];
+            p.emoji = Ui.emoji(why[1]);
             p.colour = me.colour;
             p.meta = Ui.tr("Porque você gosta de ", "Because you love ", "Porque te gusta ")
                     + name(why) + " · " + Recs.serviceName(p);
