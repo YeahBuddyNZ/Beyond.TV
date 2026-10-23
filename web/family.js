@@ -367,6 +367,8 @@ var Family = (function () {
     if (c.kind === 'react') { react(c.emoji, c.from, c.colour); return; }
     if (c.kind === 'bedtime') { hide(); Bedtime.start(c.minutes); return; }
     if (c.kind === 'tidy') { hide(); Tidy.start(c.minutes); return; }
+    if (c.kind === 'party') { hide(); Party.start(c); return; }
+    if (c.kind === 'party-end') { Party.stop(); return; }
     if (c.kind && c.kind.indexOf('question') === 0) { dinner(c); return; }
     if (c.kind && c.kind.indexOf('quiz') === 0) { quiz(c); return; }
     if (hide()) { if (c.kind === 'key') return; }  // the first press puts a message away, like it would on the remote

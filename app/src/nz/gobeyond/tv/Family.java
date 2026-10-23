@@ -512,6 +512,20 @@ final class Family {
                     }
                 });
                 break;
+            case "party":
+                final String style = cmd.optString("style", "disco"), whose = cmd.optString("name", "");
+                final int partyFor = cmd.optInt("minutes", 30);
+                MAIN.post(() -> {
+                    try {
+                        PartyActivity.open(app, style, whose, partyFor);
+                    } catch (RuntimeException e) {
+                        say(app, Ui.tr("Hora da festa!", "Party time!", "¡Hora de la fiesta!"), "info", "");
+                    }
+                });
+                break;
+            case "party-end":
+                MAIN.post(PartyActivity::end);
+                break;
             case "question":
             case "question-answered":
             case "question-reveal":

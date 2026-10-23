@@ -692,6 +692,41 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 }
 .bt-bed .hold { position: absolute; left: 0; top: 0; width: 1px; height: 1px; }
 
+/* MARK: - Party mode */
+.bt-layer.bt-party { background: #0D0C18; cursor: none; overflow: hidden; }
+.bt-layer.bt-party::before { display: none; }
+.bt-party .sweep { position: absolute; left: 50%; top: 50%; width: 0; height: 0; }
+.bt-party .beam { position: absolute; left: -520px; top: -520px; width: 1040px; height: 1040px; border-radius: 50%; opacity: 0.6; }
+.bt-party .s0 { -webkit-animation: bt-sweep-a 11s ease-in-out infinite alternate; animation: bt-sweep-a 11s ease-in-out infinite alternate; }
+.bt-party .s1 { -webkit-animation: bt-sweep-b 13s ease-in-out infinite alternate; animation: bt-sweep-b 13s ease-in-out infinite alternate; }
+.bt-party .s2 { -webkit-animation: bt-sweep-c 9s ease-in-out infinite alternate; animation: bt-sweep-c 9s ease-in-out infinite alternate; }
+.bt-party .s3 { -webkit-animation: bt-sweep-b 15s ease-in-out -4s infinite alternate-reverse; animation: bt-sweep-b 15s ease-in-out -4s infinite alternate-reverse; }
+.bt-party .s4 { -webkit-animation: bt-sweep-a 12s ease-in-out -6s infinite alternate-reverse; animation: bt-sweep-a 12s ease-in-out -6s infinite alternate-reverse; }
+.bt-party .s5 { -webkit-animation: bt-sweep-c 14s ease-in-out -3s infinite alternate; animation: bt-sweep-c 14s ease-in-out -3s infinite alternate; }
+@-webkit-keyframes bt-sweep-a { 0% { -webkit-transform: translate(-760px, -380px); } 50% { -webkit-transform: translate(300px, 320px); } 100% { -webkit-transform: translate(760px, -300px); } }
+@keyframes bt-sweep-a { 0% { transform: translate(-760px, -380px); } 50% { transform: translate(300px, 320px); } 100% { transform: translate(760px, -300px); } }
+@-webkit-keyframes bt-sweep-b { 0% { -webkit-transform: translate(700px, 380px); } 50% { -webkit-transform: translate(-400px, -200px); } 100% { -webkit-transform: translate(-700px, 360px); } }
+@keyframes bt-sweep-b { 0% { transform: translate(700px, 380px); } 50% { transform: translate(-400px, -200px); } 100% { transform: translate(-700px, 360px); } }
+@-webkit-keyframes bt-sweep-c { 0% { -webkit-transform: translate(0, -420px); } 50% { -webkit-transform: translate(-600px, 200px); } 100% { -webkit-transform: translate(500px, 420px); } }
+@keyframes bt-sweep-c { 0% { transform: translate(0, -420px); } 50% { transform: translate(-600px, 200px); } 100% { transform: translate(500px, 420px); } }
+/* On the beat (0.5 s), once the dancing starts: every other light flares on alternate beats. */
+.bt-party.dancing .beam, .bt-party.dancing .words { -webkit-animation: bt-pulse 0.5s ease-out infinite; animation: bt-pulse 0.5s ease-out infinite; }
+.bt-party.dancing .beam.odd { -webkit-animation-duration: 1s; animation-duration: 1s; }
+@-webkit-keyframes bt-pulse { 0% { -webkit-transform: scale(1.18); opacity: 1; } 100% { -webkit-transform: scale(1); opacity: 0.6; } }
+@keyframes bt-pulse { 0% { transform: scale(1.18); opacity: 1; } 100% { transform: scale(1); opacity: 0.6; } }
+.bt-party .spark { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: #fff; opacity: 0; -webkit-animation: bt-twinkle 3s ease-in-out infinite; animation: bt-twinkle 3s ease-in-out infinite; }
+@-webkit-keyframes bt-twinkle { 0%, 100% { opacity: 0; } 50% { opacity: 0.9; } }
+@keyframes bt-twinkle { 0%, 100% { opacity: 0; } 50% { opacity: 0.9; } }
+.bt-party .words { position: absolute; left: 0; right: 0; top: 380px; text-align: center; color: #fff; text-shadow: 0 0 30px rgba(0, 0, 0, 0.6); }
+.bt-party.dancing .words { opacity: 1; -webkit-animation-name: bt-pulse-words; animation-name: bt-pulse-words; }
+@-webkit-keyframes bt-pulse-words { 0% { -webkit-transform: scale(1.05); } 100% { -webkit-transform: scale(1); } }
+@keyframes bt-pulse-words { 0% { transform: scale(1.05); } 100% { transform: scale(1); } }
+.bt-party .title { font-family: 'Sora', 'Inter', sans-serif; font-weight: 600; font-size: 96px; line-height: 1.1; }
+.bt-party .title.big { font-size: 120px; margin-top: 60px; }
+.bt-party .name { font-family: 'Sora', 'Inter', sans-serif; font-weight: 600; font-size: 150px; line-height: 1.1; margin-top: 30px; }
+.bt-party .hint { position: absolute; left: 0; right: 0; bottom: 70px; text-align: center; font-size: 30px; color: rgba(255, 255, 255, 0.6); -webkit-transition: opacity 1s; transition: opacity 1s; }
+.bt-party .hold { position: absolute; left: 0; top: 0; width: 1px; height: 1px; }
+
 /* MARK: - The fine day nudge */
 .bt-outside .bt-box { position: absolute; left: 0; right: 0; top: 250px; text-align: center; }
 .bt-outside .sun { font-size: 120px; line-height: 1; margin-bottom: 30px; color: #F2C27A; }
