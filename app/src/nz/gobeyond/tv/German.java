@@ -152,6 +152,7 @@ final class German {
             case "Done": return "Fertig";
             case "Name": return "Name";
             case "Kids' profile: ": return "Kinderprofil: ";
+            case "teen, with YouTube": return "Teenager, mit YouTube";
             case "on": return "an";
             case "off": return "aus";
             case "There needs to be at least one grown-up.": return "Es braucht mindestens einen Erwachsenen.";

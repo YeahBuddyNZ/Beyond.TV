@@ -151,6 +151,7 @@ final class Russian {
             case "Done": return "Готово";
             case "Name": return "Имя";
             case "Kids' profile: ": return "Детский профиль: ";
+            case "teen, with YouTube": return "подросток, с YouTube";
             case "on": return "вкл.";
             case "off": return "выкл.";
             case "There needs to be at least one grown-up.": return "Нужен хотя бы один взрослый.";

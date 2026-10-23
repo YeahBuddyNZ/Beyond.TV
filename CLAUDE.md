@@ -208,6 +208,9 @@ HDMI (Chromecast with Google TV, Google TV Streamer, onn 4K, NVIDIA Shield). Set
   preferences. A kids' profile gets the kids' apps on the shelf, family-friendly picks (`Recs.Pick.gentle`), no HDMI
   inputs or TV settings, and the grown-up PIN in front of Settings and of switching up. A change bumps `Prefs.version`,
   so the home screen recreates. Same rules as `web/profiles.js`; keep them in step.
+  A teen (`Person.teen`, always also `kid`, ADR 0019) is a kid of 13 or more: Beyond Family sends `teen` from the
+  birthday, and the only difference is the shelf (`People.teenApp`: the kids' apps plus YouTube and music). Same in
+  `web/profiles.js` (`Profiles.teen`, `teenApp`).
 - On-screen text: `Ui.tr("pt", "en")`, with the Spanish, German and Russian in `Spanish.java`, `German.java` and
   `Russian.java` (keyed by the English); text built at runtime uses `Ui.tr(pt, en, es)`, and its German and Russian
   come from those files too (patterns for the parts built at runtime). Add them all. Comments in English, short, only where the why

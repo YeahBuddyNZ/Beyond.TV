@@ -420,6 +420,7 @@ final class Family {
         person.name = p.optString("name", "?");
         person.colour = colour(p.optString("colour"), People.COLOURS[i % People.COLOURS.length]);
         person.kid = p.optBoolean("kid");
+        person.teen = person.kid && p.optBoolean("teen");
         JSONObject look = p.optJSONObject("profile");
         if (look != null) {
             person.colour = colour(look.optString("colour"), person.colour);

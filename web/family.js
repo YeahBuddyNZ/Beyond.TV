@@ -72,8 +72,9 @@ var Family = (function () {
   function person(p, visitor) {
     // jobs: Earn your screen, a kid's jobs still to do today (only there when the household turned it on).
     // likes: what a grown-up said a kid is into, which picks their shows (kidpicks.js).
+    // teen: a kid of 13 or more, worked out by Beyond Family from their birthday (only the yes or no comes here).
     // profile: their face, colour, world, loves and shelf, kept with them in Beyond Family.
-    return {id: 'bf-' + p.id, name: p.name, colour: p.colour || '#2F7D6D', kid: !!p.kid, family: p.id, jobs: p.jobs,
+    return {id: 'bf-' + p.id, name: p.name, colour: p.colour || '#2F7D6D', kid: !!p.kid, teen: !!(p.kid && p.teen), family: p.id, jobs: p.jobs,
       likes: p.likes, profile: p.profile, visitor: visitor || undefined};
   }
 

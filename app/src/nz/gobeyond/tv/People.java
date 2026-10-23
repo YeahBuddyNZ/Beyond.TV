@@ -29,6 +29,8 @@ final class People {
     /** Apps a kids' profile keeps on its shelf, by package. */
     private static final Pattern KID_APPS = Pattern.compile("youtube\\.tvkids|disney|netflix|plex|abc.*kids|tvnz|nick|cartoon|pbskids|kidoodle|sesame",
             Pattern.CASE_INSENSITIVE);
+    /** What a teen gets on top of the kids' apps: YouTube itself (13 is its own minimum age) and music. */
+    private static final Pattern TEEN_APPS = Pattern.compile("youtube|spotify|music|tidal|soundcloud", Pattern.CASE_INSENSITIVE);
 
     static final class Person {
         String id, name;
@@ -36,6 +38,8 @@ final class People {
         String emoji = "";
         int colour;
         boolean kid;
+        /** A kid of 13 or more (always also kid): Beyond Family works it out from their birthday and sends only this. */
+        boolean teen;
         /** Make it yours: their world behind the home screen (MyWorldActivity.WORLDS id, empty for none), and the
          *  things they love (KidPicks.LIKES ids). */
         String world = "";
@@ -70,6 +74,7 @@ final class People {
                 p.name = o.optString("name");
                 p.colour = o.optInt("colour", COLOURS[i % COLOURS.length]);
                 p.kid = o.optBoolean("kid");
+                p.teen = p.kid && o.optBoolean("teen");
                 p.emoji = o.optString("emoji");
                 p.world = o.optString("world");
                 JSONArray loves = o.optJSONArray("loves");
@@ -94,6 +99,7 @@ final class People {
             JSONArray a = new JSONArray();
             for (Person p : people) {
                 JSONObject o = new JSONObject().put("id", p.id).put("name", p.name).put("colour", p.colour).put("kid", p.kid);
+                if (p.kid && p.teen) o.put("teen", true);
                 if (p.emoji != null && !p.emoji.isEmpty()) o.put("emoji", p.emoji);
                 if (p.world != null && !p.world.isEmpty()) o.put("world", p.world);
                 if (!p.loves.isEmpty()) o.put("loves", new JSONArray(p.loves));
@@ -115,7 +121,7 @@ final class People {
         if (now.size() != people.size()) return false;
         for (int i = 0; i < now.size(); i++) {
             Person a = now.get(i), b = people.get(i);
-            if (!a.id.equals(b.id) || !a.name.equals(b.name) || a.colour != b.colour || a.kid != b.kid
+            if (!a.id.equals(b.id) || !a.name.equals(b.name) || a.colour != b.colour || a.kid != b.kid || a.teen != b.teen
                     || !String.valueOf(a.emoji).equals(String.valueOf(b.emoji)) || a.visitor != b.visitor
                     || !String.valueOf(a.world).equals(String.valueOf(b.world)) || !a.loves.equals(b.loves)) return false;
         }
@@ -162,6 +168,11 @@ final class People {
 
     static boolean kid(Context c) { return current(c).kid; }
 
+    static boolean teen(Context c) {
+        Person p = current(c);
+        return p.kid && p.teen;
+    }
+
     static boolean together(Context c) { return current(c).together(); }
 
     /** Family-friendly picks only: a kid watching, or the whole family together. */
@@ -190,4 +201,7 @@ final class People {
     // MARK: - The kids' shelf
 
     static boolean kidApp(String pkg) { return pkg != null && KID_APPS.matcher(pkg).find(); }
+
+    /** A teen's shelf: the kids' apps plus YouTube and music. */
+    static boolean teenApp(String pkg) { return kidApp(pkg) || pkg != null && TEEN_APPS.matcher(pkg).find(); }
 }

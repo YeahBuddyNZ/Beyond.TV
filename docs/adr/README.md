@@ -26,3 +26,4 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0016](0016-party-mode.md) | Party mode |
 | [0017](0017-party-from-the-remote.md) | Party from the remote |
 | [0018](0018-messages-wait-for-ok.md) | Messages from Beyond Family wait for OK |
+| [0019](0019-teen-profiles.md) | Teen profiles, from the birthday in Beyond Family |

@@ -148,9 +148,10 @@
         }
       }
       if (window.Profiles && Profiles.kid()) {
-        // A kids' profile starts with the kids' apps the TV has, in the same order.
-        out = out.filter(function (a) { return Profiles.kidApp(a); });
-        for (var k = 0; k < apps.length && out.length < MAX_SHELF; k++) if (Profiles.kidApp(apps[k]) && out.indexOf(apps[k]) < 0) out.push(apps[k]);
+        // A kids' profile starts with the kids' apps the TV has, in the same order. A teen gets YouTube and music too.
+        var fits = Profiles.teen() ? Profiles.teenApp : Profiles.kidApp;
+        out = out.filter(function (a) { return fits(a); });
+        for (var k = 0; k < apps.length && out.length < MAX_SHELF; k++) if (fits(apps[k]) && out.indexOf(apps[k]) < 0) out.push(apps[k]);
       }
       if (!out.length) out = apps.slice(0, MAX_SHELF);
     }
