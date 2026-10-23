@@ -1546,8 +1546,13 @@
   window.addEventListener('resize', fit);
   document.addEventListener('webOSRelaunch', reopened);   // LG: opened again while running
   window.addEventListener('appcontrol', reopened);        // Samsung: the same
+  var hiddenAt = 0;
   document.addEventListener('visibilitychange', function () {
-    if (document.hidden) { hideSaver(); return; }
+    if (document.hidden) { hideSaver(); hiddenAt = Date.now(); return; }
+    // Away for hours (the TV was off, most likely): ask who's watching again, as at switch-on.
+    var longAway = hiddenAt && Date.now() - hiddenAt > 2 * 3600000;
+    hiddenAt = 0;
+    if (longAway && Profiles.count() > 1) setTimeout(function () { Profiles.pick(false, profileChosen); }, 300);
     idleAt = Date.now();
     // Back from an app: what was just opened leads Keep watching.
     st.tab = 0;

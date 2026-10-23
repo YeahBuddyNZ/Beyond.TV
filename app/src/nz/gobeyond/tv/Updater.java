@@ -74,6 +74,14 @@ final class Updater {
         }
     }
 
+    /**
+     * The TV started up or woke from standby: looks for an update once the network is back, whenever it last looked.
+     * Most TVs sleep rather than switch off, so waking is when somebody is about to see the home screen.
+     */
+    static void onStart(Context c) {
+        ModeJob.schedule(c, ModeJob.UPDATE, "", 15_000);
+    }
+
     /** Settings > Updates > Check now: looks straight away. */
     static void checkSoon(Context c) {
         try {
