@@ -368,6 +368,7 @@ var Family = (function () {
     if (c.kind === 'bedtime') { hide(); Bedtime.start(c.minutes); return; }
     if (c.kind === 'tidy') { hide(); Tidy.start(c.minutes); return; }
     if (c.kind && c.kind.indexOf('question') === 0) { dinner(c); return; }
+    if (c.kind && c.kind.indexOf('quiz') === 0) { quiz(c); return; }
     if (hide()) { if (c.kind === 'key') return; }  // the first press puts a message away, like it would on the remote
     if (c.kind === 'key') {
       if (c.key === 'home') { UI.closeAll(); BeyondTV.home(); return; }
@@ -602,6 +603,89 @@ var Family = (function () {
       },
       closed: function () { askApi = null; }
     });
+  }
+
+  // MARK: - Quiz night
+
+  // Ten questions, one at a time; everyone buzzes in on their phones. The TV learns who's in (never what they picked),
+  // then the right answer and the scores when a grown-up reveals it, then the final scores.
+  var game = null, gameApi = null, LETTERS = ['A', 'B', 'C', 'D'];
+
+  function quiz(c) {
+    if (c.kind === 'quiz') {
+      game = {id: c.quiz, round: c.round, total: c.total, text: c.question, choices: c.choices || [], answered: [], answer: -1, right: [], scores: null, done: false};
+    } else if (!game || game.id !== c.quiz) {
+      return;
+    } else if (c.kind === 'quiz-answered') {
+      if (c.round !== game.round) return;
+      for (var i = 0; i < game.answered.length; i++) if (game.answered[i].name === c.name) return;
+      game.answered.push({name: c.name, colour: c.colour});
+    } else if (c.kind === 'quiz-reveal') {
+      if (c.round !== game.round) return;
+      game.answer = c.answer;
+      game.right = c.right || [];
+      game.scores = c.scores || [];
+    } else if (c.kind === 'quiz-end') {
+      game.done = true;
+      game.scores = c.scores || game.scores || [];
+      if (window.Chime) Chime.play();
+    }
+    if (gameApi) gameApi.rebuild();
+    else showQuiz();
+  }
+
+  function showQuiz() {
+    hide();
+    gameApi = UI.open({
+      cls: 'bt-dinner bt-quiz',
+      build: function (layer, a) {
+        if (!game) return;
+        var box = UI.el('div', 'bt-box', layer), i;
+        if (game.done) {
+          UI.heading(box, tr('Quiz da noite', 'Quiz night', 'Noche de quiz'));
+          UI.el('div', 'question', box, tr('Placar final', 'Final scores', 'Puntuación final'));
+          scoreRows(box, game.scores, true);
+        } else {
+          UI.heading(box, tr('Quiz da noite', 'Quiz night', 'Noche de quiz') + ' · ' + game.round + ' / ' + game.total);
+          UI.el('div', 'question', box, game.text);
+          var grid = UI.el('div', 'choices', box);
+          for (i = 0; i < game.choices.length; i++) {
+            var ch = UI.el('div', 'choice' + (game.answer < 0 ? '' : i === game.answer ? ' right' : ' wrong'), grid);
+            UI.el('b', '', ch, LETTERS[i]);
+            UI.el('span', '', ch, game.choices[i]);
+          }
+          if (game.answer < 0) {
+            UI.el('div', 'bt-sub', box, tr('Responda no Beyond Family. Vale o primeiro toque.',
+              'Buzz in on Beyond Family on your phone. The first tap counts.',
+              'Responde en Beyond Family. Cuenta el primer toque.'));
+            var faces = UI.el('div', 'faces', box);
+            for (i = 0; i < game.answered.length; i++) {
+              var face = UI.el('div', 'face', faces);
+              UI.avatar(game.answered[i], face, 96);
+              UI.el('div', 'name', face, game.answered[i].name);
+            }
+          } else {
+            var names = [];
+            for (i = 0; i < game.right.length; i++) names.push(game.right[i].name + (game.right[i].first ? ' ⚡' : ''));
+            UI.el('div', 'bt-sub', box, names.length ? tr('Acertaram: ', 'Got it: ', 'Acertaron: ') + names.join(', ')
+              : tr('Ninguém acertou essa.', 'Nobody got that one.', 'Nadie acertó esa.'));
+            scoreRows(box, game.scores, false);
+          }
+        }
+        a.add(UI.el('div', 'hold', layer), null, {first: true});
+      },
+      closed: function () { gameApi = null; if (game && game.done) game = null; }
+    });
+  }
+
+  function scoreRows(box, scores, final) {
+    var row = UI.el('div', 'scores' + (final ? ' final' : ''), box);
+    for (var i = 0; i < (scores || []).length; i++) {
+      var s = UI.el('div', 'score', row);
+      s.style.borderColor = scores[i].colour || '#2F7D6D';
+      UI.el('b', '', s, (final && i === 0 && scores[i].score > 0 ? '🏆 ' : '') + scores[i].name);
+      UI.el('span', '', s, String(scores[i].score));
+    }
   }
 
   // MARK: - Green time, after the fine day nudge

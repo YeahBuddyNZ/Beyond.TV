@@ -519,6 +519,13 @@ final class Family {
                 final JSONObject q = cmd;
                 MAIN.post(() -> DinnerActivity.command(app, q));
                 break;
+            case "quiz":
+            case "quiz-answered":
+            case "quiz-reveal":
+            case "quiz-end":
+                final JSONObject quiz = cmd;
+                MAIN.post(() -> QuizActivity.command(app, quiz));
+                break;
             default:
                 // Watching together and reactions are on LG and Samsung so far.
                 break;

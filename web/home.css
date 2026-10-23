@@ -730,6 +730,31 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .bt-dinner .answer span { display: block; font-size: 38px; line-height: 1.25; }
 .bt-dinner .hold { position: absolute; left: 0; top: 0; width: 1px; height: 1px; }
 
+/* MARK: - Quiz night (family.js): the dinner question's layout, with four choices and the scores */
+.bt-quiz .bt-box { top: 80px; }
+.bt-quiz .question { font-size: 64px; }
+.bt-quiz .choices { margin-top: 44px; font-size: 0; }
+.bt-quiz .choice {
+  display: inline-block; vertical-align: top; width: 760px; margin: 0 14px 22px; padding: 22px 30px; text-align: left;
+  border-radius: 28px; background: rgba(255, 255, 255, 0.12); -webkit-transition: opacity 0.5s, background-color 0.5s; transition: opacity 0.5s, background-color 0.5s;
+}
+.bt-quiz .choice b { display: inline-block; width: 64px; font-size: 40px; font-weight: 700; color: rgba(247, 246, 242, 0.6); }
+.bt-quiz .choice span { font-size: 42px; font-weight: 600; }
+.bt-quiz .choice.right { background: #2F7D6D; }
+.bt-quiz .choice.right b { color: #F7F6F2; }
+.bt-quiz .choice.wrong { opacity: 0.35; }
+.bt-quiz .faces { margin-top: 36px; }
+.bt-quiz .face { width: 150px; }
+.bt-quiz .scores { margin-top: 36px; font-size: 0; }
+.bt-quiz .score {
+  display: inline-block; vertical-align: top; min-width: 200px; margin: 0 12px 18px; padding: 16px 28px;
+  border-radius: 24px; border-left: 10px solid #2F7D6D; background: rgba(255, 255, 255, 0.1); text-align: left;
+}
+.bt-quiz .score b { display: block; font-size: 28px; font-weight: 600; color: rgba(247, 246, 242, 0.8); }
+.bt-quiz .score span { display: block; font-size: 52px; font-weight: 700; }
+.bt-quiz .scores.final { margin-top: 70px; }
+.bt-quiz .scores.final .score { min-width: 300px; }
+
 /* Kids' picks (kidpicks.js): a show matched to what they're into, drawn as a big emoji on their colour. */
 .card.kidpick .emoji {
   position: absolute;

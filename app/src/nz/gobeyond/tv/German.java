@@ -218,6 +218,12 @@ final class German {
             case "On it": return "Mach ich";
             case "All done! Screens are open.": return "Alles erledigt! Der Bildschirm ist frei.";
             case "Dinner question": return "Frage zum Abendessen";
+            case "Quiz night": return "Quizabend";
+            case "Quiz night: ": return "Quizabend: ";
+            case "Final scores": return "Endstand";
+            case "Buzz in on Beyond Family on your phone. The first tap counts.": return "Antworte in Beyond Family auf dem Handy. Der erste Tipp zählt.";
+            case "Got it: ": return "Richtig: ";
+            case "Nobody got that one.": return "Das wusste keiner.";
             case "Dinner question: ": return "Frage zum Abendessen: ";
             case "Answer in Beyond Family on your phone. The answers come up together.": return "Antwortet in Beyond Family auf dem Handy. Die Antworten erscheinen zusammen.";
             case " answered the dinner question": return " hat die Frage beantwortet";
