@@ -12,6 +12,7 @@ public class HomeReceiver extends BroadcastReceiver {
             HomeMode.bootCheck(context);
             Updater.maybeCheck(context);
             Updater.onStart(context);   // look for an update every time the TV starts
+            Tidy.schedule(context);      // alarms don't survive a restart
             FamilyService.start(context);   // linked to Beyond Family: the phone remote works from the start
         } else if (Intent.ACTION_MY_PACKAGE_REPLACED.equals(action)) {
             HomeMode.verify(context);   // app updated: complete Beyond TV mode if something is missing

@@ -86,6 +86,7 @@ var Family = (function () {
     if (home) {
       state.home = {name: home.name};
       board = home.board || null;
+      if (window.Tidy) Tidy.set(home.tidy);
       var tilesNow = JSON.stringify(home.widgets || []);
       if (tilesNow !== widgetsSig) {
         widgetsSig = tilesNow;
@@ -365,6 +366,7 @@ var Family = (function () {
     if (c.kind === 'together-end') { togetherEnd(c.session); return; }
     if (c.kind === 'react') { react(c.emoji, c.from, c.colour); return; }
     if (c.kind === 'bedtime') { hide(); Bedtime.start(c.minutes); return; }
+    if (c.kind === 'tidy') { hide(); Tidy.start(c.minutes); return; }
     if (c.kind && c.kind.indexOf('question') === 0) { dinner(c); return; }
     if (hide()) { if (c.kind === 'key') return; }  // the first press puts a message away, like it would on the remote
     if (c.kind === 'key') {

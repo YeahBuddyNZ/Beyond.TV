@@ -103,7 +103,7 @@ final class Russian {
             case "Automatic": return "Автоматически";
             case "Light": return "Светлая";
             case "Dark": return "Тёмная";
-            case "Navigation sounds": return "Звуки навигации";
+            case "Sounds": return "Звуки";
             case "Weather widget": return "Виджет погоды";
             // What TalkBack reads on the drawer's weather card (#47)
             case ". High ": return ". Максимум ";
@@ -219,6 +219,19 @@ final class Russian {
             case "Dinner question: ": return "Вопрос за ужином: ";
             case "Answer in Beyond Family on your phone. The answers come up together.": return "Отвечайте в Beyond Family на телефоне. Ответы появятся вместе.";
             case " answered the dinner question": return " ответил(а) на вопрос";
+            case "Tidy-up race!": return "Гонка уборки!";
+            case "Ready, set, go! When you're done, press OK on your face.": return "На старт, внимание, марш! Кто закончил, нажмите OK на своём лице.";
+            case "1st": return "1-й";
+            case "2nd": return "2-й";
+            case "3rd": return "3-й";
+            case "All tidy!": return "Всё убрано!";
+            case "Fastest tonight: ": return "Быстрее всех сегодня: ";
+            case "Well done!": return "Молодцы!";
+            case "Time's up!": return "Время вышло!";
+            case "Nearly there. A little more and it's done!": return "Почти. Ещё чуть-чуть, и готово!";
+            case "Well done, ": return "Молодцы, ";
+            case ". Everyone else, nearly there!": return ". Остальные, почти готово!";
+            case "Tidy-up time!": return "Пора убираться!";
             case "Close": return "Закрыть";
             case "Animals": return "Животные";
             case "Dinosaurs": return "Динозавры";

@@ -82,6 +82,11 @@ public class HomeActivity extends Activity implements Family.Screen {
             // Who's watching? When there's more than one person: whenever the TV comes on, and after a long break.
             boolean on = justOn;
             justOn = false;
+            if (Tidy.takeDue(this)) {
+                TidyActivity.open(this, Tidy.minutes(this));   // the tidy-up alarm woke the TV, or sent it home
+                return;
+            }
+            if (on) Chime.play();   // hello: the TV just came on
             if (People.count(this) > 1 && (on || System.currentTimeMillis() - People.chosenAt(this) > ASK_AGAIN_AFTER)) {
                 People.asked(this);
                 WhoActivity.open(this, null);
@@ -102,6 +107,8 @@ public class HomeActivity extends Activity implements Family.Screen {
     @Override protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         if (home != null) home.reset(true);
+        // Home pressed by the tidy-up alarm while the home screen was already up.
+        if (home != null && Tidy.takeDue(this)) TidyActivity.open(this, Tidy.minutes(this));
     }
 
     private final BroadcastReceiver woke = new BroadcastReceiver() {

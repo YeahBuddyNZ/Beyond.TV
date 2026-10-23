@@ -874,6 +874,8 @@
         step: function (d) { cycle('theme', ['auto', 'light', 'dark'], theme, d); checkNight(); }},
       {label: tr('Widget do clima', 'Weather widget', 'Widget del clima'), toggle: Prefs.weather(),
         step: function () { Prefs.set('weather', !Prefs.weather()); renderPanels(); }},
+      {label: tr('Sons', 'Sounds', 'Sonidos'), toggle: Prefs.sounds(),
+        step: function () { Prefs.set('sounds', !Prefs.sounds()); if (Prefs.sounds()) Chime.play(); }},
       {label: tr('Te reo maori', 'Te reo Māori', 'Te reo maorí'), toggle: Prefs.kupu(),
         step: function () { Prefs.set('kupu', !Prefs.kupu()); renderTop(); renderQuotes(); }},
       {label: tr('Protetor de tela', 'Screensaver', 'Salvapantallas'),
@@ -1552,6 +1554,7 @@
     // Away for hours (the TV was off, most likely): ask who's watching again, as at switch-on.
     var longAway = hiddenAt && Date.now() - hiddenAt > 2 * 3600000;
     hiddenAt = 0;
+    if (longAway) Chime.play();
     if (longAway && Profiles.count() > 1) setTimeout(function () { Profiles.pick(false, profileChosen); }, 300);
     idleAt = Date.now();
     // Back from an app: what was just opened leads Keep watching.
@@ -1573,6 +1576,7 @@
   I18N.set(Prefs.language());
   fit();
   renderTop();
+  Chime.play();   // hello
   loadApps(function () {
     renderAll();
     Data.refresh();

@@ -111,7 +111,7 @@ final class Sleep {
     }
 
     /** True while the screen is still on (dumpsys power says so on every Android TV we have tried). */
-    private static boolean awake(Adb adb) {
+    static boolean awake(Adb adb) {
         try {
             String s = adb.shell("dumpsys power | grep -E 'mWakefulness=|Display Power: state='");
             return s.contains("Awake") || s.contains("state=ON");
