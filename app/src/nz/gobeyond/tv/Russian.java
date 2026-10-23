@@ -217,6 +217,12 @@ final class Russian {
             case "On it": return "Уже делаю";
             case "All done! Screens are open.": return "Всё сделано! Экран открыт.";
             case "Dinner question": return "Вопрос за ужином";
+            case "Quiz night": return "Вечер викторины";
+            case "Quiz night: ": return "Вечер викторины: ";
+            case "Final scores": return "Итоговый счёт";
+            case "Buzz in on Beyond Family on your phone. The first tap counts.": return "Отвечайте в Beyond Family на телефоне. Считается первое нажатие.";
+            case "Got it: ": return "Правильно: ";
+            case "Nobody got that one.": return "Никто не угадал.";
             case "Dinner question: ": return "Вопрос за ужином: ";
             case "Answer in Beyond Family on your phone. The answers come up together.": return "Отвечайте в Beyond Family на телефоне. Ответы появятся вместе.";
             case " answered the dinner question": return " ответил(а) на вопрос";

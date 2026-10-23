@@ -22,3 +22,4 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0012](0012-tidy-up-race-and-start-chime.md) | The tidy-up race turns the TV on, and the TV says hello |
 | [0013](0013-settings-are-for-grown-ups.md) | Settings are for grown-ups |
 | [0014](0014-screensaver-from-the-home-screen.md) | The home screen starts the screensaver, and te reo is a language |
+| [0015](0015-quiz-night.md) | Quiz night |
