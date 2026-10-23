@@ -36,14 +36,15 @@ public class GamesActivity extends Activity {
         column.setOrientation(LinearLayout.VERTICAL);
         column.setGravity(Gravity.CENTER_HORIZONTAL);
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(Math.round(1400 * k), -2, Gravity.CENTER_HORIZONTAL);
-        lp.topMargin = Math.round(130 * k);
+        // Below the four dots the backdrop draws at the top (Breath.mark, down to about 220).
+        lp.topMargin = Math.round(250 * k);
         root.addView(column, lp);
 
         column.addView(FeedbackActivity.text(this, Ui.emoji("🎮") + " " + Ui.tr("Jogos", "Games", "Juegos"),
                 Ui.displaySemibold, 64 * k, 0xFFFFFFFF));
         TextView sub = FeedbackActivity.text(this, Ui.tr("O que vamos fazer?", "What shall we do?", "¿Qué hacemos?"),
                 Ui.regular, 32 * k, 0xCCFFFFFF);
-        sub.setPadding(0, Math.round(16 * k), 0, Math.round(48 * k));
+        sub.setPadding(0, Math.round(12 * k), 0, Math.round(44 * k));
         column.addView(sub);
 
         boolean linked = Family.linked(this);
@@ -60,20 +61,24 @@ public class GamesActivity extends Activity {
         for (int i = 0; i < games.length; i++) {
             if (i % 3 == 0) {
                 row = new LinearLayout(this);
-                row.setGravity(Gravity.CENTER_HORIZONTAL);
-                LinearLayout.LayoutParams rp = new LinearLayout.LayoutParams(-1, -2);
+                LinearLayout.LayoutParams rp = new LinearLayout.LayoutParams(-1, Math.round(96 * k));
                 rp.bottomMargin = Math.round(22 * k);
                 column.addView(row, rp);
             }
             final Runnable run = (Runnable) games[i][2];
             Button b = FeedbackActivity.button(this, Ui.emoji((String) games[i][0]) + "  " + games[i][1], k, i == 0);
             b.setOnClickListener(v -> run.run());
-            // One line on every button: the longest names ("Bedtime breathing", German's "Atmen vor dem Schlafen")
-            // shrink a little rather than wrap.
-            b.setPadding(Math.round(24 * k), 0, Math.round(24 * k), 0);
-            b.setSingleLine(true);
-            b.setAutoSizeTextTypeUniformWithConfiguration(Math.round(20 * k), Math.round(30 * k), 1, TypedValue.COMPLEX_UNIT_PX);
-            LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(Math.round(444 * k), Math.round(96 * k));
+            // An even grid: every button takes a third of the row and the full row height, and stays on one line.
+            // The longest names ("Bedtime breathing", German's "Atmen vor dem Schlafen") shrink a little rather than
+            // wrap; maxLines rather than singleLine, which autosizing ignores on Android 8.
+            b.setPadding(Math.round(20 * k), 0, Math.round(20 * k), 0);
+            b.setMinHeight(0);
+            b.setMinimumHeight(0);
+            b.setGravity(Gravity.CENTER);
+            b.setMaxLines(1);
+            b.setEllipsize(android.text.TextUtils.TruncateAt.END);
+            b.setAutoSizeTextTypeUniformWithConfiguration(Math.round(18 * k), Math.round(28 * k), 1, TypedValue.COMPLEX_UNIT_PX);
+            LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(0, -1, 1);
             bp.leftMargin = bp.rightMargin = Math.round(10 * k);
             row.addView(b, bp);
             if (first == null) first = b;
