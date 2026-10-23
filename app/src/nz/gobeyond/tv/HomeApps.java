@@ -172,9 +172,12 @@ final class HomeApps {
     /** The shelf's packages in order: the user's list (Settings > Shelf), or the built-in one. */
     static List<String> shelfPackages(Context c) {
         if (People.kid(c)) {
-            // A kids' profile: the kids' apps the TV has, the well-known ones first.
+            // A kids' profile: the kids' apps the TV has, the well-known ones first. A teen gets YouTube and music too.
+            boolean teen = People.teen(c);
             List<String> kids = new ArrayList<>();
-            for (String[] app : shelfCandidates(c)) if (kids.size() < MAX_SHELF && People.kidApp(app[0])) kids.add(app[0]);
+            for (String[] app : shelfCandidates(c)) {
+                if (kids.size() < MAX_SHELF && (teen ? People.teenApp(app[0]) : People.kidApp(app[0]))) kids.add(app[0]);
+            }
             if (!kids.isEmpty()) return kids;
         }
         List<String> custom = Prefs.shelf();

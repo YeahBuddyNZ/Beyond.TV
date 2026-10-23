@@ -141,6 +141,7 @@ final class Spanish {
             case "Done": return "Listo";
             case "Name": return "Nombre";
             case "Kids' profile: ": return "Perfil infantil: ";
+            case "teen, with YouTube": return "adolescente, con YouTube";
             case "on": return "sí";
             case "off": return "no";
             case "There needs to be at least one grown-up.": return "Hace falta al menos un adulto.";

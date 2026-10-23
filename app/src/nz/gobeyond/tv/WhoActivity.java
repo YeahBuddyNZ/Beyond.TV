@@ -230,6 +230,7 @@ public class WhoActivity extends Activity {
             p.name = person.name;
             p.colour = person.colour;
             p.kid = person.kid;
+            p.teen = person.teen;
             p.emoji = person.emoji;
             p.visitor = person.visitor;
         }
@@ -270,14 +271,17 @@ public class WhoActivity extends Activity {
         LinearLayout kidRow = row(c, 30);
         final Button kid = add(kidRow, "", false, null);
         Runnable kidLabel = () -> kid.setText((p.kid ? "★ " : "") + Ui.tr("Perfil infantil: ", "Kids' profile: ")
-                + (p.kid ? Ui.tr("sim", "on") : Ui.tr("não", "off")));
+                + (!p.kid ? Ui.tr("não", "off") : p.teen ? Ui.tr("adolescente, com YouTube", "teen, with YouTube") : Ui.tr("sim", "on")));
         kidLabel.run();
         kid.setOnClickListener(v -> {
             if (!p.kid && !isNew && !person.kid && grownUps(people) <= 1) {
                 note(Ui.tr("Precisa de pelo menos um adulto.", "There needs to be at least one grown-up."));
                 return;
             }
-            p.kid = !p.kid;
+            // Off, then kids, then teen (YouTube and music on the shelf), then off again.
+            if (!p.kid) p.kid = true;
+            else if (!p.teen) p.teen = true;
+            else p.kid = p.teen = false;
             kidLabel.run();
         });
 

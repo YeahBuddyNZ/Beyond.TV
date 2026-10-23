@@ -22,6 +22,8 @@ var Profiles = (function () {
 
   /** Apps a kids' profile starts with on its shelf, when the TV has them. */
   var KID_APPS = /youtube ?kids|disney|netflix|plex|abc ?kids|tvnz|nick|cartoon|pbs kids|kidoodle|sesame/i;
+  /** What a teen gets on top of the kids' apps: YouTube itself (13 is its own minimum age) and music. */
+  var TEEN_APPS = /youtube|spotify|music|tidal|soundcloud/i;
 
   function load(key, fallback) {
     try { var v = JSON.parse(localStorage.getItem(key)); return v === null || v === undefined ? fallback : v; } catch (e) { return fallback; }
@@ -286,11 +288,15 @@ var Profiles = (function () {
         }
         var actions = UI.el('div', 'bt-actions', box);
         var kid = UI.button(actions, '', null, 'toggle-row');
-        function kidLabel() { kid.lastChild.textContent = (p.kid ? '★ ' : '') + tr('Perfil infantil: ', "Kids' profile: ", 'Perfil infantil: ') + (p.kid ? tr('sim', 'on', 'sí') : tr('não', 'off', 'no')); }
+        function kidLabel() { kid.lastChild.textContent = (p.kid ? '★ ' : '') + tr('Perfil infantil: ', "Kids' profile: ", 'Perfil infantil: ') + (!p.kid ? tr('não', 'off', 'no') : p.teen ? tr('adolescente, com YouTube', 'teen, with YouTube', 'adolescente, con YouTube') : tr('sim', 'on', 'sí')); }
         kidLabel();
         api.add(kid, function () {
-          if (p.kid && grownUps().length <= 1 && !isNew && !person.kid) { UI.toast(tr('Precisa de pelo menos um adulto.', 'There needs to be at least one grown-up.', 'Hace falta al menos un adulto.')); return; }
-          p.kid = !p.kid; kidLabel(); repaint(); likesBtn.style.display = p.kid ? '' : 'none';
+          if (!p.kid && grownUps().length <= 1 && !isNew && !person.kid) { UI.toast(tr('Precisa de pelo menos um adulto.', 'There needs to be at least one grown-up.', 'Hace falta al menos un adulto.')); return; }
+          // Off, then kids, then teen (YouTube and music on the shelf), then off again.
+          if (!p.kid) p.kid = true;
+          else if (!p.teen) p.teen = true;
+          else { p.kid = false; p.teen = false; }
+          kidLabel(); repaint(); likesBtn.style.display = p.kid ? '' : 'none';
         });
         // What a kid is into, set by a grown-up (this is already behind the PIN): it picks the shows on their cards.
         var likesBtn = UI.button(actions, tr('Do que gosta', "What they're into", 'Lo que le gusta'), 'sparkles');
@@ -365,10 +371,13 @@ var Profiles = (function () {
     count: function () { return list.length; },
     current: current,
     kid: function () { return !!current().kid; },
+    teen: function () { return !!(current().kid && current().teen); },
     /** Family-friendly picks only: a kid watching, or the whole family together. */
     gentle: function () { return !!(current().kid || current().together); },
     together: function () { return !!current().together; },
     kidApp: function (app) { return KID_APPS.test(app.title || '') || KID_APPS.test(app.id || ''); },
+    /** A teen's shelf: the kids' apps plus YouTube and music. */
+    teenApp: function (app) { return KID_APPS.test(app.title || '') || KID_APPS.test(app.id || '') || TEEN_APPS.test(app.title || '') || TEEN_APPS.test(app.id || ''); },
     pick: pick,
     manage: function (done) { guard(tr('Gerenciar perfis', 'Manage profiles', 'Administrar perfiles'), function () { pick(true, done); }); },
     guard: guard,
