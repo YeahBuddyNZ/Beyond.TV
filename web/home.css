@@ -753,8 +753,8 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .bt-party-pick .cakes { margin-top: 24px; }
 .bt-party-pick .cakes .bt-button { margin-bottom: 20px; }
 .bt-games .cakes { max-width: 1500px; margin-left: auto; margin-right: auto; }
-/* One line on every games button, however long the name (Bedtime breathing, German, Russian). */
-.bt-games .cakes .bt-button { white-space: nowrap; }
+/* An even grid: every games button the same width, on one line, however long the name (Bedtime breathing, German, Russian). */
+.bt-games .cakes .bt-button { width: 440px; margin: 0 10px 20px; padding: 0 20px; box-sizing: border-box; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; vertical-align: top; }
 .bt-karaoke-pick .bt-box { top: 110px; }
 .bt-karaoke-pick .songs { max-width: 1700px; margin-left: auto; margin-right: auto; }
 .bt-karaoke-pick .songs .bt-button { margin-bottom: 16px; }
