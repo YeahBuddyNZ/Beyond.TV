@@ -3606,8 +3606,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         int n = tabCount();
         for (int i = 0; i < lightButtons.size(); i++) {
             RectF r = topRects[n + i];
-            float f = Ui.clamp(topFocus[n + i].value), s = 1 + 0.1f * f, rad = r.height() / 2 * s, half = r.width() / 2 * s;
-            cell.set(r.centerX() - half, r.centerY() - rad, r.centerX() + half, r.centerY() + rad);
+            float f = Ui.clamp(topFocus[n + i].value), s = 1 + 0.1f * f, rad = r.height() / 2 * s, across = r.width() / 2 * s;
+            cell.set(r.centerX() - across, r.centerY() - rad, r.centerX() + across, r.centerY() + rad);
             tmp.set(cell);
             tmp.offset(0, (6 + 8 * f) * k);
             shadow.setColor(Ui.alpha(0xFF000000, tone(0.1f, 0.3f) + tone(0.14f, 0.2f) * f));
