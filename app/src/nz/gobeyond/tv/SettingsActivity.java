@@ -46,9 +46,22 @@ import java.util.Set;
 public class SettingsActivity extends Activity {
     private SettingsView view;
     private DreamView preview;   // "Screensaver": the screensaver right here, without changing the system setting
+    private static long unlockedAt;   // the grown-up PIN was just typed (WhoActivity, same :home process)
+
+    static void unlock() {
+        unlockedAt = SystemClock.elapsedRealtime();
+    }
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Opened as a kid some other way (All Apps, the system's launcher): the grown-up PIN first.
+        boolean justUnlocked = unlockedAt != 0 && SystemClock.elapsedRealtime() - unlockedAt < 15_000;
+        unlockedAt = 0;
+        if (People.kid(this) && !justUnlocked) {
+            WhoActivity.open(this, WhoActivity.THEN_SETTINGS);
+            finish();
+            return;
+        }
         Watchdog.install(this);
         Ui.init(this);
         view = new SettingsView(this);

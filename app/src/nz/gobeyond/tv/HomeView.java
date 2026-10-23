@@ -542,7 +542,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         if (!kid) lightButtons.add(HomeApps.action(HomeApps.FEEDBACK, "feedback", Ui.tr("Fale com a Beyond", "Talk to Beyond"), "dots"));
         lightButtons.add(HomeApps.action(HomeApps.LIVE_TV, "live", Ui.tr("TV aberta", "Live TV"), "live_tv"));
         if (!kid) lightButtons.add(HomeApps.action(HomeApps.INPUTS, "inputs", Ui.tr("Entradas HDMI", "HDMI Inputs"), "hdmi"));
-        lightButtons.add(HomeApps.action(HomeApps.SETTINGS, "settings", Ui.tr("Configurações", "Settings"), "settings"));
+        if (!kid) lightButtons.add(HomeApps.action(HomeApps.SETTINGS, "settings", Ui.tr("Configurações", "Settings"), "settings"));
         // Who's watching: their face (Family wears the four dots). Opens the picker (WhoActivity).
         lightButtons.add(HomeApps.action(HomeApps.PEOPLE, "people", Ui.tr("Quem está assistindo?", "Who's watching?"), "person"));
     }
@@ -1649,7 +1649,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             for (HomeApps.Item it : list) if (it.kind == HomeApps.LIVE_TV) kept.add(it);
             list = kept;
         }
-        for (HomeApps.Item it : HomeApps.drawerShortcuts()) if (!People.kid(c) || it.kind != HomeApps.ANDROID_SETTINGS) list.add(it);
+        // Settings of either kind are for grown-ups: a kid switches to a grown-up first.
+        for (HomeApps.Item it : HomeApps.drawerShortcuts()) if (!People.kid(c)) list.add(it);
         return list;
     }
 
@@ -2476,8 +2477,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             BedtimeActivity.open(activity, 15);
             return;
         }
-        if ((it.kind == HomeApps.SETTINGS || it.kind == HomeApps.ANDROID_SETTINGS) && People.kid(activity) && People.hasPin(activity)) {
-            // A kids' profile: the grown-up PIN first.
+        if ((it.kind == HomeApps.SETTINGS || it.kind == HomeApps.ANDROID_SETTINGS) && People.kid(activity)) {
+            // A kids' profile: the grown-up PIN first, or with no PIN, a grown-up's profile.
             WhoActivity.open(activity, it.kind == HomeApps.SETTINGS ? WhoActivity.THEN_SETTINGS : WhoActivity.THEN_TV_SETTINGS);
             return;
         }
