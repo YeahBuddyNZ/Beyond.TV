@@ -38,6 +38,23 @@ final class Ui {
     private static final Rect BOUNDS = new Rect();
     private static final RectF OVAL = new RectF();
 
+    private static final HashMap<String, String> EMOJI = new HashMap<>();
+    private static final Paint GLYPHS = new Paint();
+
+    /** The emoji, or a simpler one when this TV's font hasn't got it (a Sony on Android 12 has no 🧱): never a "no glyph" box. */
+    static synchronized String emoji(String e) {
+        if (e == null || e.isEmpty()) return e;
+        String known = EMOJI.get(e);
+        if (known != null) return known;
+        String out = e;
+        try {
+            if (!GLYPHS.hasGlyph(e)) out = e.startsWith("🧱") ? "🔨" : e.startsWith("🪐") ? "🌍" : "⭐";
+        } catch (Exception ignored) {
+        }
+        EMOJI.put(e, out);
+        return out;
+    }
+
     static synchronized void init(Context c) {
         if (loaded) return;
         loaded = true;

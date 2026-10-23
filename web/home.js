@@ -1143,9 +1143,13 @@
         if (dx) {
           st.top = Math.max(0, Math.min(kinds.length - 1 + topButtons().length, st.top + dx));
           if (st.top < kinds.length) selectTab(st.top);   // as on Apple TV: focusing a tab selects it
+        } else if (dy > 0 && st.top >= kinds.length && kinds.length) {
+          st.top = st.tab;   // down from the buttons in the corner: back to the tabs
         } else if (dy > 0) {
           if (cards.length) { st.zone = Z.CARDS; st.card = Math.min(cards.length - 1, st.top < kinds.length ? 0 : cards.length - 1); }
           else st.zone = Z.SHELF;
+        } else if (st.top < kinds.length && topButtons().length) {
+          st.top = kinds.length;   // up from the tabs: the buttons in the corner
         }
         break;
       case Z.DRAWER:

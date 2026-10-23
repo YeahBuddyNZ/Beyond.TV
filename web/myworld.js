@@ -27,13 +27,13 @@ var MyWorld = (function () {
       name: function () { return tr('Floresta', 'The bush', 'El bosque'); }},
     {id: 'volcano', top: '#B8452A', bottom: '#2A0F0A', things: ['🌋', '🦖', '🔥', '🦕', '🪨', '🥚'],
       name: function () { return tr('Vulcão', 'Dino volcano', 'Volcán'); }},
-    {id: 'candy', top: '#E77BB0', bottom: '#7A4FD0', things: ['🍭', '🧁', '🍬', '🌈', '🍩', '🦄'],
+    {id: 'candy', top: '#A9417B', bottom: '#7A4FD0', things: ['🍭', '🧁', '🍬', '🌈', '🍩', '🦄'],
       name: function () { return tr('Doces', 'Candy land', 'Dulces'); }},
-    {id: 'snow', top: '#7FB2D9', bottom: '#2C4B6E', things: ['❄️', '⛄', '🐧', '🏔️', '🧣', '🐻'],
+    {id: 'snow', top: '#3F6F9C', bottom: '#2C4B6E', things: ['❄️', '⛄', '🐧', '🏔️', '🧣', '🐻'],
       name: function () { return tr('Neve', 'Snow day', 'Nieve'); }},
     {id: 'sport', top: '#3E9A4A', bottom: '#174A22', things: ['⚽', '🏉', '🏆', '🏀', '🥅', '🏏'],
       name: function () { return tr('Esporte', 'Game day', 'Deportes'); }},
-    {id: 'beach', top: '#F2B45A', bottom: '#2A8FB0', things: ['🏖️', '🐚', '🦀', '🌺', '🏄', '☀️'],
+    {id: 'beach', top: '#B5742A', bottom: '#2A8FB0', things: ['🏖️', '🐚', '🦀', '🌺', '🏄', '☀️'],
       name: function () { return tr('Praia', 'The beach', 'La playa'); }}
   ];
 

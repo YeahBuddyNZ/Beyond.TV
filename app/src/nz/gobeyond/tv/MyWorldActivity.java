@@ -61,10 +61,10 @@ public class MyWorldActivity extends Activity {
         new World("space", 0xFF1B1446, 0xFF05040F, new String[] {"🪐", "⭐", "🌙", "🚀", "☄️", "👽"}, "Espaço", "Outer space", "El espacio"),
         new World("forest", 0xFF2F7D6D, 0xFF123A2F, new String[] {"🌿", "🍄", "🦉", "🦔", "🌲", "🐞"}, "Floresta", "The bush", "El bosque"),
         new World("volcano", 0xFFB8452A, 0xFF2A0F0A, new String[] {"🌋", "🦖", "🔥", "🦕", "🪨", "🥚"}, "Vulcão", "Dino volcano", "Volcán"),
-        new World("candy", 0xFFE77BB0, 0xFF7A4FD0, new String[] {"🍭", "🧁", "🍬", "🌈", "🍩", "🦄"}, "Doces", "Candy land", "Dulces"),
-        new World("snow", 0xFF7FB2D9, 0xFF2C4B6E, new String[] {"❄️", "⛄", "🐧", "🏔️", "🧣", "🐻"}, "Neve", "Snow day", "Nieve"),
+        new World("candy", 0xFFA9417B, 0xFF7A4FD0, new String[] {"🍭", "🧁", "🍬", "🌈", "🍩", "🦄"}, "Doces", "Candy land", "Dulces"),
+        new World("snow", 0xFF3F6F9C, 0xFF2C4B6E, new String[] {"❄️", "⛄", "🐧", "🏔️", "🧣", "🐻"}, "Neve", "Snow day", "Nieve"),
         new World("sport", 0xFF3E9A4A, 0xFF174A22, new String[] {"⚽", "🏉", "🏆", "🏀", "🥅", "🏏"}, "Esporte", "Game day", "Deportes"),
-        new World("beach", 0xFFF2B45A, 0xFF2A8FB0, new String[] {"🏖️", "🐚", "🦀", "🌺", "🏄", "☀️"}, "Praia", "The beach", "La playa")
+        new World("beach", 0xFFB5742A, 0xFF2A8FB0, new String[] {"🏖️", "🐚", "🦀", "🌺", "🏄", "☀️"}, "Praia", "The beach", "La playa")
     };
 
     static World world(String id) {
@@ -82,10 +82,10 @@ public class MyWorldActivity extends Activity {
     /** The world's things with the loved things mixed in, so a dino kid's ocean still has a dinosaur in it. */
     static String[] things(World w, List<String> loves) {
         List<String> out = new ArrayList<>();
-        if (w != null) java.util.Collections.addAll(out, w.things);
+        if (w != null) for (String t : w.things) out.add(Ui.emoji(t));
         if (loves != null) {
             for (String id : loves) {
-                for (String[] l : KidPicks.LIKES) if (l[0].equals(id)) out.add(l[1]);
+                for (String[] l : KidPicks.LIKES) if (l[0].equals(id)) out.add(Ui.emoji(l[1]));
             }
         }
         return out.toArray(new String[0]);
@@ -267,15 +267,15 @@ public class MyWorldActivity extends Activity {
             final int at = i;
             TextView c;
             if (n == 0) {
-                c = choice(BUDDIES[i], 54);
+                c = choice(Ui.emoji(BUDDIES[i]), 54);
             } else if (n == 1) {
                 c = choice(emoji, 48);
             } else if (n == 2) {
                 World w = WORLDS[i];
-                c = choice(w.things[0] + " " + w.things[1] + " " + w.things[2] + "\n" + w.name(), 34);
+                c = choice(Ui.emoji(w.things[0]) + " " + Ui.emoji(w.things[1]) + " " + Ui.emoji(w.things[2]) + "\n" + w.name(), 34);
             } else {
                 String[] l = KidPicks.LIKES[i];
-                c = choice(l[1] + "\n" + Ui.tr(l[2], l[3], l[4]), 30);
+                c = choice(Ui.emoji(l[1]) + "\n" + Ui.tr(l[2], l[3], l[4]), 30);
             }
             c.setOnClickListener(v -> {
                 pick(n, at);
@@ -394,7 +394,7 @@ public class MyWorldActivity extends Activity {
         all.add("⭐");
         float cx = getResources().getDisplayMetrics().widthPixels / 2f, cy = 420 * k;
         for (int i = 0; i < 28; i++) {
-            TextView b = FeedbackActivity.text(this, all.get(i % all.size()), Ui.regular, 70 * k, 0xFFFFFFFF);
+            TextView b = FeedbackActivity.text(this, Ui.emoji(all.get(i % all.size())), Ui.regular, 70 * k, 0xFFFFFFFF);
             FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(Math.round(120 * k), Math.round(120 * k));
             lp.leftMargin = Math.round(cx - 60 * k);
             lp.topMargin = Math.round(cy - 60 * k);

@@ -3670,6 +3670,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
                     if (next == topIndex) return true;
                     topIndex = next;
                     if (topIndex < n) selectTab(topIndex);   // like Apple TV tabs: focusing a tab selects it
+                } else if (dy > 0 && topIndex >= n && n > 0) {
+                    topIndex = tab;     // down from the buttons in the corner: back to the tabs
                 } else if (dy > 0) {
                     if (cards.isEmpty()) {
                         zone = Z_SHELF;
@@ -3677,6 +3679,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
                         zone = Z_CARDS;
                         cardIndex = topIndex < n ? 0 : cards.size() - 1;
                     }
+                } else if (topIndex < n && !lightButtons.isEmpty()) {
+                    topIndex = n;       // up from the tabs: the buttons in the corner (Live TV, Settings, who's watching)
                 } else {
                     return true;
                 }
