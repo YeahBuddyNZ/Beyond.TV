@@ -257,7 +257,7 @@
     if (Data.isNight(Date.now())) list.push({icon: 'bedtime', label: tr('Respirar para dormir', 'Bedtime breathing', 'Respirar para dormir'), run: function () { Bedtime.start(15); }});
     if (!kid) list.push({icon: 'settings', label: tr('Ajustes', 'Settings', 'Ajustes'), run: function () { openSettings(); }});
     if (kid) list.push({icon: 'sparkles', label: tr('Do seu jeito', 'Make it yours', 'A tu manera'), run: makeItYours});
-    if (Profiles.count() > 1 || window.Family) list.push({person: Profiles.current(), label: tr('Trocar perfil', 'Switch profile', 'Cambiar perfil'),
+    if (Profiles.count() > 1 || window.Family) list.push({person: Profiles.current(), label: tr('Trocar quem está assistindo', 'Change who\'s watching', 'Cambiar quién mira'),
       run: function () { Profiles.pick(false, profileChosen); }});
     return list;
   }
@@ -281,11 +281,24 @@
     for (var b = 0; b < n; b++) {
       var r = el('button', 'round' + (b === n - 1 ? ' last' : '') + (defs[b].person ? ' me' : ''), buttons);
       r.style.left = (1772 - 88 * (n - 1 - b)) + 'px';
-      if (defs[b].person) UI.avatar(defs[b].person, r, 68);
-      else if (defs[b].dots) UI.dots(r);
+      if (defs[b].person) {
+        // A face alone meant nothing to a child: the face, then the name, as a pill.
+        UI.avatar(defs[b].person, r, 68);
+        var p = defs[b].person, who = p.together ? tr('Família', 'Family', 'Familia') : p.name || '';
+        el('span', 'who', r, who.length > 12 ? who.slice(0, 11) + '\u2026' : who);
+      } else if (defs[b].dots) UI.dots(r);
       else sym(defs[b].icon, r);
       el('div', 'tip', r, defs[b].label);
       hover(r, Z.TOP, kinds.length + b);
+    }
+    // The pill is wider than a circle: the buttons to its left move over to make room.
+    var me = buttons.querySelector('.round.me');
+    if (me) {
+      var extra = me.offsetWidth - 68, all = buttons.querySelectorAll('.round');
+      for (var j = 0; j < all.length; j++) {
+        if (all[j] === me) { all[j].style.left = (1772 - extra) + 'px'; continue; }
+        all[j].style.left = (parseInt(all[j].style.left, 10) - extra) + 'px';
+      }
     }
   }
 

@@ -187,7 +187,9 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
     /** Who's watching, read once (a change to the people recreates the home screen), and the title it gives. */
     private People.Person watcher;
     private String helloLine = "", watcherInitial = "";
-    private final Paint personInk = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint personInk = new Paint(Paint.ANTI_ALIAS_FLAG), personName = new Paint(Paint.ANTI_ALIAS_FLAG);
+    /** The name on the Who's watching button: a face alone meant nothing to a child, their name beside it does. */
+    private String watcherLabel = "";
     private Paint lTileName;
     private String[] tileNames = new String[0];   // each shelf app's name, cut to fit under its icon
     private Paint lPickEmoji, lJobKid;
@@ -535,6 +537,9 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         personInk.setTypeface(Ui.semibold);
         personInk.setColor(0xFFFFFFFF);
         personInk.setTextAlign(Paint.Align.CENTER);
+        personName.setTypeface(Ui.semibold);
+        String label = watcher.together() ? Ui.tr("Família", "Family", "Familia") : watcher.name == null ? "" : watcher.name;
+        watcherLabel = label.length() > 12 ? label.substring(0, 11) + "…" : label;
         boolean kid = watcher.kid;   // kids get fewer: no feedback, no HDMI inputs
         // Bedtime breathing, at night: a night light that breathes, then fades to dark.
         if (nightTarget) lightButtons.add(HomeApps.action(HomeApps.BEDTIME, "bedtime", Ui.tr("Respirar para dormir", "Bedtime breathing", "Respirar para dormir"), "bedtime"));
@@ -543,8 +548,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         lightButtons.add(HomeApps.action(HomeApps.LIVE_TV, "live", Ui.tr("TV aberta", "Live TV"), "live_tv"));
         if (!kid) lightButtons.add(HomeApps.action(HomeApps.INPUTS, "inputs", Ui.tr("Entradas HDMI", "HDMI Inputs"), "hdmi"));
         if (!kid) lightButtons.add(HomeApps.action(HomeApps.SETTINGS, "settings", Ui.tr("Configurações", "Settings"), "settings"));
-        // Who's watching: their face (Family wears the four dots). Opens the picker (WhoActivity).
-        lightButtons.add(HomeApps.action(HomeApps.PEOPLE, "people", Ui.tr("Quem está assistindo?", "Who's watching?"), "person"));
+        // Who's watching: their face and name (Family wears the four dots). Opens the picker (WhoActivity).
+        lightButtons.add(HomeApps.action(HomeApps.PEOPLE, "people", Ui.tr("Trocar quem está assistindo", "Change who's watching", "Cambiar quién mira"), "person"));
     }
 
     private static String[] tabs() {
@@ -2917,9 +2922,13 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             x = topRects[i].right + 4 * k;
         }
         float b = L_BUTTON * k, right = CONTENT_R * k, cy = L_BUTTON_CY * k;
+        personName.setTextSize(26 * k);
         for (int i = lightButtons.size() - 1; i >= 0; i--) {
-            topRects[n + i].set(right - b, cy - b / 2, right, cy + b / 2);
-            right -= b + L_BUTTON_GAP * k;
+            // Who's watching is a pill: the face, then the name.
+            float wide = "person".equals(lightButtons.get(i).symbol) && !watcherLabel.isEmpty()
+                    ? b + 10 * k + personName.measureText(watcherLabel) + 26 * k : b;
+            topRects[n + i].set(right - wide, cy - b / 2, right, cy + b / 2);
+            right -= wide + L_BUTTON_GAP * k;
         }
         // Three little TV screens on stands, like the Beyond mark.
         for (int i = 0; i < 3; i++) {
@@ -3597,8 +3606,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         int n = tabCount();
         for (int i = 0; i < lightButtons.size(); i++) {
             RectF r = topRects[n + i];
-            float f = Ui.clamp(topFocus[n + i].value), s = 1 + 0.1f * f, rad = r.width() / 2 * s;
-            cell.set(r.centerX() - rad, r.centerY() - rad, r.centerX() + rad, r.centerY() + rad);
+            float f = Ui.clamp(topFocus[n + i].value), s = 1 + 0.1f * f, rad = r.height() / 2 * s, half = r.width() / 2 * s;
+            cell.set(r.centerX() - half, r.centerY() - rad, r.centerX() + half, r.centerY() + rad);
             tmp.set(cell);
             tmp.offset(0, (6 + 8 * f) * k);
             shadow.setColor(Ui.alpha(0xFF000000, tone(0.1f, 0.3f) + tone(0.14f, 0.2f) * f));
@@ -3608,20 +3617,26 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             if (f > 0.01f) {
                 fill.setShader(null);
                 fill.setColor(Ui.alpha(0xFFFFFFFF, f));
-                c.drawCircle(cell.centerX(), cell.centerY(), rad, fill);
+                c.drawRoundRect(cell, rad, rad, fill);
             }
             if ("dots".equals(lightButtons.get(i).symbol)) {
                 Breath.mark(c, markPaint, cell.centerX(), cell.centerY(), 30 * k * s, -1, 10, 1);
             } else if ("person".equals(lightButtons.get(i).symbol)) {
-                // Their face: a disc in their colour with their initial; Family wears the four dots.
+                // Their face: a disc in their colour with their initial; Family wears the four dots. Then their name.
+                float fx = cell.left + rad;
                 fill.setShader(null);
                 fill.setColor(watcher.colour);
-                c.drawCircle(cell.centerX(), cell.centerY(), rad - 6 * k, fill);
+                c.drawCircle(fx, cell.centerY(), rad - 6 * k, fill);
                 if (watcher.together()) {
-                    Breath.mark(c, markPaint, cell.centerX(), cell.centerY(), 28 * k * s, -1, 10, 1);
+                    Breath.mark(c, markPaint, fx, cell.centerY(), 28 * k * s, -1, 10, 1);
                 } else {
                     personInk.setTextSize(30 * k * s);
-                    c.drawText(watcherInitial, cell.centerX(), cell.centerY() - (personInk.ascent() + personInk.descent()) / 2, personInk);
+                    c.drawText(watcherInitial, fx, cell.centerY() - (personInk.ascent() + personInk.descent()) / 2, personInk);
+                }
+                if (!watcherLabel.isEmpty()) {
+                    personName.setTextSize(26 * k * s);
+                    personName.setColor(blend(tone(L_INK, 0xEBFFFFFF), L_INK, f));
+                    c.drawText(watcherLabel, fx + rad + 10 * k * s, cell.centerY() - (personName.ascent() + personName.descent()) / 2, personName);
                 }
             } else {
                 Symbols.draw(getContext(), c, lightButtons.get(i).symbol, cell.centerX(), cell.centerY(), 27 * k * s,

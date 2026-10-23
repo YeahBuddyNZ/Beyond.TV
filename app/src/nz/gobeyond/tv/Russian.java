@@ -127,6 +127,7 @@ final class Russian {
             case "Couldn't check just now. It tries again by itself": return "Сейчас не удалось проверить. Попробует снова само";
             case "Taking a short break. They'll be back by themselves.": return "Небольшой перерыв. Скоро вернутся сами.";
             case "Updates come straight from Beyond, and only the real Beyond™ TV ever installs.": return "Обновления приходят прямо от Beyond, и устанавливается только настоящий Beyond™ TV.";
+            case "Change who's watching": return "Сменить, кто смотрит";
             case "Who's watching?": return "Кто смотрит?";
             case "Everyone together": return "Все вместе";
             case "Family": return "Семья";
