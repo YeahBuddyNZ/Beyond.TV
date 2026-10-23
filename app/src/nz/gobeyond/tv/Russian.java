@@ -219,6 +219,9 @@ final class Russian {
             case "On it": return "Уже делаю";
             case "All done! Screens are open.": return "Всё сделано! Экран открыт.";
             case "Dinner question": return "Вопрос за ужином";
+            case "What kind of party?": return "Какая будет вечеринка?";
+            case "Disco": return "Дискотека";
+            case "Or someone's birthday": return "Или чей-то день рождения";
             case "Party time!": return "Время вечеринки!";
             case "Happy birthday": return "С днём рождения";
             case "Any key to stop": return "Любая кнопка, чтобы остановить";
