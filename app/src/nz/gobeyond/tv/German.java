@@ -128,6 +128,7 @@ final class German {
             case "Couldn't check just now. It tries again by itself": return "Gerade nicht geprüft. Es versucht es von selbst wieder";
             case "Taking a short break. They'll be back by themselves.": return "Kurze Pause. Sie kommen von selbst wieder.";
             case "Updates come straight from Beyond, and only the real Beyond™ TV ever installs.": return "Updates kommen direkt von Beyond, und nur das echte Beyond™ TV wird installiert.";
+            case "Change who's watching": return "Ändern, wer zuschaut";
             case "Who's watching?": return "Wer schaut zu?";
             case "Everyone together": return "Alle zusammen";
             case "Family": return "Familie";

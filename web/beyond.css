@@ -102,7 +102,7 @@
 
 /* The current profile's face among the round buttons. */
 .round.me { background: none; box-shadow: none; }
-.round.me .avatar { position: absolute; left: 0; top: 0; }
+.round.me .avatar { position: relative; display: inline-block; vertical-align: top; }
 .round.me .avatar .kidtag { box-shadow: 0 0 0 2px #F7F6F2; }
 .round.me .avatar .kidtag::after { font-size: 11px; }
 .round.me.focus { background: none; }
