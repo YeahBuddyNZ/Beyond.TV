@@ -48,12 +48,15 @@ public class WhoActivity extends Activity {
         root.addView(new FeedbackActivity.Backdrop(this), new FrameLayout.LayoutParams(-1, -1));
         setContentView(root);
         String then = getIntent().getStringExtra(THEN);
-        if (then != null) askPin(Ui.tr("PIN de adulto", "Grown-up PIN"), this::openThen);
+        // Settings for a kid: the grown-up PIN, or with no PIN set, switching to a grown-up first.
+        if (then != null && !People.kid(this)) openThen();
+        else if (then != null && People.hasPin(this)) askPin(Ui.tr("PIN de adulto", "Grown-up PIN"), this::openThen);
         else pick();
     }
 
     private void openThen() {
         String then = getIntent().getStringExtra(THEN);
+        SettingsActivity.unlock();
         Intent i = THEN_TV_SETTINGS.equals(then) ? new Intent(Settings.ACTION_SETTINGS)
                 : new Intent().setComponent(new ComponentName(this, SettingsActivity.class));
         try {

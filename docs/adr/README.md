@@ -20,3 +20,4 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0010](0010-your-home-from-beyond-home.md) | Your home, from the Beyond Home box |
 | [0011](0011-look-for-updates-when-the-tv-starts.md) | When the TV comes on: an update check, and who's watching |
 | [0012](0012-tidy-up-race-and-start-chime.md) | The tidy-up race turns the TV on, and the TV says hello |
+| [0013](0013-settings-are-for-grown-ups.md) | Settings are for grown-ups |

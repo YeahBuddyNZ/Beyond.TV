@@ -44,7 +44,7 @@ Free and open source, built in Aotearoa by [Beyond](https://gobeyond.co.nz). One
 
 ## Roadmap
 
-1. Who's watching: done. Family first (everyone together, family-friendly picks), then a profile for each person, with kids' profiles behind a grown-up PIN. Asked every time the TV comes on.
+1. Who's watching: done. Family first (everyone together, family-friendly picks), then a profile for each person, with kids' profiles behind a grown-up PIN, and no settings at all for kids. Asked every time the TV comes on.
 2. Plex built in: link with a code at plex.tv/link, then Continue Watching and Recently Added on the home screen.
 3. All your services as one: one "What's on" across every service you have, opening each title in its own app.
 4. Beyond Family: pairing the TV with your household (a code typed into the app), the household's people as profiles, a phone remote and messages on the screen: done on Google TV, LG and Samsung. On Google TV in Beyond TV mode the remote works inside other apps too. Still to come: voice search for kids and the family house game on the big screen.

@@ -371,7 +371,7 @@ final class HomeApps {
         synchronized (HomeApps.class) {
             TILES.keySet().removeIf(k -> k.contains(".") && !seen.contains(k));
         }
-        items.add(special(c, SETTINGS, "beyondtv-settings", "Beyond™ TV", "sparkles"));
+        if (!People.kid(c)) items.add(special(c, SETTINGS, "beyondtv-settings", "Beyond™ TV", "sparkles"));
         return items;
     }
 

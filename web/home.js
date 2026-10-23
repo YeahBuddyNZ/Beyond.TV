@@ -255,7 +255,7 @@
     }});
     // Bedtime breathing, in the evening: a night light that breathes, then fades to dark.
     if (Data.isNight(Date.now())) list.push({icon: 'bedtime', label: tr('Respirar para dormir', 'Bedtime breathing', 'Respirar para dormir'), run: function () { Bedtime.start(15); }});
-    list.push({icon: 'settings', label: tr('Ajustes', 'Settings', 'Ajustes'), run: function () { openSettings(); }});
+    if (!kid) list.push({icon: 'settings', label: tr('Ajustes', 'Settings', 'Ajustes'), run: function () { openSettings(); }});
     if (kid) list.push({icon: 'sparkles', label: tr('Do seu jeito', 'Make it yours', 'A tu manera'), run: makeItYours});
     if (Profiles.count() > 1 || window.Family) list.push({person: Profiles.current(), label: tr('Trocar perfil', 'Switch profile', 'Cambiar perfil'),
       run: function () { Profiles.pick(false, profileChosen); }});
@@ -723,7 +723,7 @@
     drawerInputs = drawerItems.length;
     drawerItems.push({label: tr('Todos os Apps', 'All Apps', 'Todas las apps'), symbol: 'apps', run: openApps});
     drawerItems.push({label: tr('Timer de desligar', 'Sleep Timer', 'Temporizador'), symbol: 'bedtime', run: function () { toast(Sleep.press()); }});
-    drawerItems.push({label: tr('Ajustes do Início', 'Home Settings', 'Ajustes de inicio'), symbol: 'settings', run: openSettings});
+    if (!kid) drawerItems.push({label: tr('Ajustes do Início', 'Home Settings', 'Ajustes de inicio'), symbol: 'settings', run: openSettings});
     if (!kid) drawerItems.push({label: tr('Ajustes da TV', 'TV Settings', 'Ajustes del TV'), symbol: 'tv_settings', run: tvSettings});
     var n = drawerItems.length, gap = 18, groupGap = 56, groups = drawerInputs > 0 && drawerInputs < n ? 2 : 1;
     var tw = Math.min(230, (1760 - Math.max(0, n - groups) * gap - (groups - 1) * groupGap) / Math.max(1, n));
@@ -960,6 +960,8 @@
   }
 
   function openSettings() {
+    // Settings are for grown-ups: a kid with no PIN set switches to a grown-up first.
+    if (Profiles.kid() && !Profiles.hasPin()) { Profiles.pick(false, profileChosen); return; }
     Profiles.guard(tr('Ajustes do Início', 'Home Settings', 'Ajustes de inicio'), showSettings);
   }
 
