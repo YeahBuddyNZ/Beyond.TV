@@ -436,7 +436,11 @@ final class Family {
         return person;
     }
 
-    private static int colour(String hex, int fallback) {
+    private static String text(JSONObject o, String key) {
+        return o.isNull(key) ? "" : o.optString(key, "");
+    }
+
+    static int colour(String hex, int fallback) {
         try {
             return hex == null || hex.isEmpty() ? fallback : Color.parseColor(hex) | 0xFF000000;
         } catch (IllegalArgumentException e) {
@@ -526,6 +530,26 @@ final class Family {
                     } catch (RuntimeException e) {
                         say(app, Ui.tr("Hora da festa!", "Party time!", "¡Hora de la fiesta!"), "info", "");
                     }
+                });
+                break;
+            case "karaoke":
+                // A JSON null reads as "null" through optString on Android, so the missing ones are looked at first.
+                final String singer = text(cmd, "name"), song = text(cmd, "title"), by = text(cmd, "artist");
+                final int singerColour = colour(cmd.optString("colour"), Glow.VIOLET);
+                final String video = text(cmd, "videoId"), asked = text(cmd, "query"), query = asked.isEmpty() ? song + " karaoke" : asked;
+                JSONObject following = cmd.optJSONObject("next");
+                final String then = following == null ? "" : text(following, "name") + " · " + text(following, "title");
+                if (song.isEmpty()) break;
+                // Over YouTube (the last singer's song), Android 10 and up wants Beyond TV allowed to show over apps.
+                adb().post(() -> {
+                    allowOverApps(app);
+                    MAIN.post(() -> {
+                        try {
+                            app.startActivity(KaraokeActivity.intent(app, singer, singerColour, song, by, video, query, then));
+                        } catch (RuntimeException e) {
+                            KaraokeActivity.play(app, video, query);
+                        }
+                    });
                 });
                 break;
             case "party-end":

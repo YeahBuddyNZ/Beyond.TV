@@ -7,6 +7,12 @@ var I18N = (function () {
 
   var lang = 'en';
   var german = {
+    "Sing now": "Jetzt singen",
+    "You're up!": "Du bist dran!",
+    "After that: ": "Danach: ",
+    "Open YouTube to sing": "Öffne YouTube zum Singen",
+    "Search YouTube for: ": "Auf YouTube suchen: ",
+    "Back to stop": "Zurück zum Beenden",
     "Tidy-up race!": "Aufräum-Wettrennen!",
     "Ready, set, go! When you're done, press OK on your face.": "Auf die Plätze, fertig, los! Wer fertig ist, drückt OK auf sein Gesicht.",
     "1st": "1.",
@@ -285,10 +291,20 @@ var I18N = (function () {
     if (m) return 'H:' + m[1] + m[2] + 'T:' + m[3];
     m = /^The App Dock holds up to (\d+) apps\.$/.exec(en);
     if (m) return 'Ins App-Dock passen bis zu ' + m[1] + ' Apps.';
+    m = /^(.+)'s up!$/.exec(en);
+    if (m) return m[1] + ' ist dran!';
+    m = /^Starting in (\d+)$/.exec(en);
+    if (m) return 'Startet in ' + m[1];
     return en;
   }
 
   var russian = {
+    "Sing now": "Петь сейчас",
+    "You're up!": "Твоя очередь!",
+    "After that: ": "Потом: ",
+    "Open YouTube to sing": "Откройте YouTube, чтобы петь",
+    "Search YouTube for: ": "Найдите на YouTube: ",
+    "Back to stop": "Назад, чтобы остановить",
     "Tidy-up race!": "Гонка уборки!",
     "Ready, set, go! When you're done, press OK on your face.": "На старт, внимание, марш! Кто закончил, нажмите OK на своём лице.",
     "1st": "1-й",
@@ -571,6 +587,10 @@ var I18N = (function () {
     if (m) return m[1] + (m[2] === 'min' ? ' мин назад' : ' ч назад');
     m = /^The App Dock holds up to (\d+) apps\.$/.exec(en);
     if (m) return 'На панель приложений можно добавить не более ' + m[1] + ' приложений.';
+    m = /^(.+)'s up!$/.exec(en);
+    if (m) return 'Очередь: ' + m[1] + '!';
+    m = /^Starting in (\d+)$/.exec(en);
+    if (m) return 'Начало через ' + m[1];
     return en;
   }
 

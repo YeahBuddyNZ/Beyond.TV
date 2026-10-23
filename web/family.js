@@ -370,6 +370,7 @@ var Family = (function () {
     if (c.kind === 'tidy') { hide(); Tidy.start(c.minutes); return; }
     if (c.kind === 'party') { hide(); Party.start(c); return; }
     if (c.kind === 'party-end') { Party.stop(); return; }
+    if (c.kind === 'karaoke') { hide(); Party.stop(); Karaoke.start(c); return; }
     if (c.kind && c.kind.indexOf('question') === 0) { dinner(c); return; }
     if (c.kind && c.kind.indexOf('quiz') === 0) { quiz(c); return; }
     if (c.kind === 'key' && shown) { if (c.key === 'ok') hide(); return; }  // a message waits for OK, from the phone too

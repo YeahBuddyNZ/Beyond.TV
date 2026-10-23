@@ -737,6 +737,16 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .bt-outside .bt-buttons { margin-top: 60px; text-align: center; }
 
 .bt-party-pick .bt-sub.or { margin-top: 56px; }
+.bt-karaoke .bt-box { top: 170px; }
+.bt-karaoke .mic { width: 180px; height: 180px; line-height: 180px; margin: 0 auto 40px; border-radius: 90px; font-size: 96px; }
+.bt-karaoke .who { font-family: Sora, sans-serif; font-weight: 600; font-size: 110px; line-height: 1.1; color: #fff; }
+.bt-karaoke .bt-sub.song { font-size: 52px; margin-top: 20px; color: rgba(255,255,255,0.9); }
+.bt-karaoke .count { font-size: 36px; margin-top: 40px; color: rgba(255,255,255,0.65); }
+.bt-karaoke .bt-buttons { margin-top: 50px; }
+.bt-karaoke .after { font-size: 32px; margin-top: 40px; color: rgba(255,255,255,0.55); }
+.bt-karaoke-player { background: #000; }
+.bt-karaoke-player .video { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; border: 0; }
+.bt-karaoke-player .hint { position: absolute; right: 48px; top: 36px; font-size: 26px; color: rgba(255,255,255,0.7); opacity: 1; transition: opacity 1s; }
 .bt-party-pick .cakes { margin-top: 24px; }
 .bt-party-pick .cakes .bt-button { margin-bottom: 20px; }
 
