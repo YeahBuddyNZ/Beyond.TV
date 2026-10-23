@@ -285,6 +285,8 @@ public class MyWorldActivity extends Activity {
                 sky.set(world(worldId), things(world(worldId), loves));
                 v.animate().scaleX(1.12f).scaleY(1.12f).setDuration(110).withEndAction(
                         () -> v.animate().scaleX(1).scaleY(1).setDuration(160).start()).start();
+                // One answer per step, so OK moves on; the loves take as many as they like.
+                if (n < 3) v.postDelayed(() -> { if (step == n && !isFinishing()) show(n + 1); }, 320);
             });
             int h = n == 2 ? 190 : size;
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(Math.round(size * k), Math.round(h * k));
