@@ -8,7 +8,7 @@
 
 **One calm home screen for the whole whānau, on Google TV, LG and Samsung TVs.**
 
-Your streaming apps on one shelf, what's worth watching tonight, and no ads.<br>
+Your streaming apps in one App Dock, what's worth watching tonight, and no ads.<br>
 Free and open source, built in Aotearoa by [Beyond](https://gobeyond.co.nz). One button to undo.
 
 [Install](#install) · [LG TVs](#lg-tvs-webos) · [Samsung TVs](#samsung-tvs-tizen) · [Any TV](#any-tv) · [Change the code](#change-the-code) · [Roadmap](#roadmap)
@@ -21,7 +21,7 @@ Free and open source, built in Aotearoa by [Beyond](https://gobeyond.co.nz). One
 
 <table>
 <tr><td><img src="docs/screenshots/whos-watching.jpg" alt="Who's watching: Mum, Dad, and two kids' profiles with a unicorn and a dinosaur"></td>
-<td><img src="docs/screenshots/home-night.jpg" alt="The home screen at night: a big clock and the streaming apps on one shelf"></td></tr>
+<td><img src="docs/screenshots/home-night.jpg" alt="The home screen at night: a big clock and the streaming apps in one App Dock"></td></tr>
 <tr><td><img src="docs/screenshots/kids-home.jpg" alt="A kid's home screen in the world they chose, with only their apps"></td>
 <td><img src="docs/screenshots/plex.jpg" alt="Plex built in: Continue Watching with progress bars, and Recently Added"></td></tr>
 <tr><td><img src="docs/screenshots/make-it-yours-buddy.jpg" alt="Make it yours, step 1: a kid picks a buddy to be them on the TV"></td>
@@ -35,7 +35,7 @@ Free and open source, built in Aotearoa by [Beyond](https://gobeyond.co.nz). One
 - **Pinned tiles.** Pick up to six tiles in Beyond Family: an app, a show, the kids' jobs ticking off, a camera at home. Every TV opens on them.
 - **Make it yours.** Kids make it theirs on their own profile, with the remote, no grown-up needed: a buddy, a colour, a world that fills their home screen, and the things they love drifting through it. On Google TV, LG and Samsung (on Google TV from Who's watching).
 - **No ads.** No sponsored rows, banners or autoplaying promos.
-- **Your apps, front and centre.** Netflix, Neon, TVNZ+, Disney+, ThreeNow, Plex and the rest on one shelf, in the order you pick on the TV.
+- **Your apps, front and centre.** Netflix, Neon, TVNZ+, Disney+, ThreeNow, Plex and the rest in one App Dock, in the order you pick on the TV.
 - **Trending, not sponsored.** Fresh picks every hour from what's trending and the latest releases, only from apps you already have.
 - **Weather one press away.** Hour by hour, with sunrise and sunset.
 - **Light by day, dark by night.** It follows your city's real sunset.
@@ -55,17 +55,17 @@ Free and open source, built in Aotearoa by [Beyond](https://gobeyond.co.nz). One
 9. Bedtime breathing: done on Google TV, LG and Samsung. A night light that breathes, slowing from six breaths a minute, then fades to dark. From the moon on the home screen in the evening, or from the Beyond Family app.
 10. Fine day nudge: done on LG and Samsung. On a mild, dry day the TV suggests going outside, and counts the time as green time in Beyond Family when you're back.
 11. Dinner question: done on Google TV, LG and Samsung. One question on the TV from Beyond Family, answered from phones, and the answers revealed together.
-12. Te reo word of the day: done on Google TV, LG and Samsung. A new kupu each day on the home screen, with what it means, and on the LG and Samsung screensaver how to say it. *Te reo Māori* in Home Settings turns te reo off: the word of the day goes and "Kia ora" becomes "Hello".
+12. Te reo word of the day: done on Google TV, LG and Samsung. A new kupu each day on the home screen, with what it means, and on the LG and Samsung screensaver how to say it. Te reo is a choice under *Language* in Beyond™ TV Settings: *English and te reo Māori*, or plain *English*, where the word of the day goes and "Kia ora" becomes "Hello".
 13. Beyond™ TV for business (testing now): shop-window screens changed from the web, as a subscription. Open tv.beyondspaces.nz on the TV, type its code into Beyond™ Spaces, and it plays your pictures, videos and web pages. Free for homes, always.
 14. Your face on any TV: done on Google TV, LG and Samsung. Each person's face, colour, world, loves and shelf live with them in Beyond Family, so every TV at home shows them and a new TV brings them across. On somebody else's Beyond TV, Who's watching › Sign in with Beyond Family shows a code to type into your phone, and your own profile is there until you sign out. Google TV takes the face, colour, world and loves; the shelf follows.
-15. Sleep timer: done on Google TV, LG and Samsung. Sleep Timer in the menu under the shelf: each press picks 15, 30, 60 or 90 minutes, or off. A note a minute before, then the TV turns off (on Samsung, which lets no app turn it off, the screen goes dark until a key is pressed).
-16. Art mode: done on Google TV, LG and Samsung. Like a Samsung Frame, the screensaver shows paintings from the Art Institute of Chicago's public domain collection, filling the screen with no clock or words on it (family messages still show; only paintings about the screen's shape are picked, so little is cropped), a new set each day. Home Settings › Kind of art picks landscapes, the sea, gardens and flowers, mountains, impressionism, still life or Mixed (a different theme each day). On Mixed, in a season it shows our own art instead: Halloween (24/10 to 1/11) and a New Zealand summer Christmas (1/12 to 26/12), drawn by `tools/season_art.js` and listed in `docs/art/seasons.json`, so new pictures reach every TV without an update. On by itself when there is no TMDB key; Home Settings › Screensaver picks Art or Film photos.
+15. Sleep timer: done on Google TV, LG and Samsung. Sleep Timer in the menu under the App Dock: each press picks 15, 30, 60 or 90 minutes, or off. A note a minute before, then the TV turns off (on Samsung, which lets no app turn it off, the screen goes dark until a key is pressed).
+16. Art mode: done on Google TV, LG and Samsung. Like a Samsung Frame, the screensaver shows paintings from the Art Institute of Chicago's public domain collection, filling the screen with no clock or words on it (family messages still show; only paintings about the screen's shape are picked, so little is cropped), a new set each day. Beyond™ TV Settings › Kind of art picks landscapes, the sea, gardens and flowers, mountains, impressionism, still life or Mixed (a different theme each day). On Mixed, in a season it shows our own art instead: Halloween (24/10 to 1/11) and a New Zealand summer Christmas (1/12 to 26/12), drawn by `tools/season_art.js` and listed in `docs/art/seasons.json`, so new pictures reach every TV without an update. On by itself when there is no TMDB key; Beyond™ TV Settings › Screensaver picks Art or Film photos.
 17. Have the pets been fed?: done on LG and Samsung. When a kid picks their face and the household's pets in Beyond Family still want a meal, the TV asks. "Yes" ticks them fed in Beyond Family with the kid's name; "Not yet" sends them off and the TV asks again later. Google TV soon.
 18. A home screen of its own: done on LG, Samsung and Google TV. A "Kia ora" greeting with your name, Keep watching (what you last opened from Beyond, per profile, as little TV screens; Netflix doesn't share its own list, so it's what Beyond opened), and Tonight at home beside it: tea, birthdays, today's calendar, notes and the weather, with a Beyond Family badge and faces when linked.
 19. Your home: done on Google TV, LG and Samsung (Google TV shows the first three rooms). With a Beyond Home box (the Beyond Home app on a Home Assistant box) on the same network, the home screen gets a *Your home* tab: a card for each room, Moments like Movie night in one press, one remote for the room's sound and every light, heat pump, blind and plug on or off. Pair once with a code typed in the Beyond Home app (Settings, TVs). The TV only asks for named things; the box decides what that means and refuses anything off its list. On the way: energy (what the house is using now, how much the solar covers, the cheapest time to run the dishwasher), cameras with a password and live video, and your house as you drew it in Beyond Family.
 20. Pinned tiles: done on Google TV, LG and Samsung. Pick up to six tiles in Beyond Family and every TV at home opens on them: an app, a show you're all watching, the kids' jobs for today ticking off, or a camera on your home network (its picture every few seconds, full screen on OK). The camera's picture comes straight to the TV, never through Beyond Family. Google TV shows the first three; cameras with a password, and live video, come with Beyond Home.
 21. Tidy-up race: done on Google TV, LG and Samsung. Set a time in Beyond Family (TV › Tidy-up race), and every night the TV starts a countdown with everyone's face; whoever's done presses OK on theirs, first, second, third, then "All tidy!". Google TV turns itself on for it (through its own ADB, with the key it already allowed); LG and Samsung start it when the TV is on. From the remote in Beyond Family any time.
-22. The start chime: done on Google TV, LG and Samsung. Four soft notes, one for each of Beyond's dots, when the TV comes on and when the tidy-up race starts and ends. Home Settings › Sounds turns it off. The notes are in ADR 0012; `tools/make_chime.py` writes them as a WAV.
+22. The start chime: done on Google TV, LG and Samsung. Four soft notes, one for each of Beyond's dots, when the TV comes on and when the tidy-up race starts and ends. Beyond™ TV Settings › Sounds turns it off. The notes are in ADR 0012; `tools/make_chime.py` writes them as a WAV.
 23. Still to come for the family evening: quiz night (questions on the TV, everyone buzzes in from their phone), party mode (lights and music for a birthday or a disco night, with Beyond Home), and arcade games played with the remote.
 
 Ideas welcome: press the four dots (*Talk to Beyond*) on the TV.
@@ -99,7 +99,7 @@ The TV asks *Allow USB debugging?*: tick *Always allow* and press OK.
 
 ### Then, on the TV
 
-Open *Beyond™ TV* → *Home Screen* → *Beyond™ TV*, and allow debugging once more. Your city, the shelf and the profiles are in its settings. From then on it keeps itself up to date: when there's a new version the TV asks, and one OK installs it.
+Open *Beyond™ TV* → *Home Screen* → *Beyond™ TV*, and allow debugging once more. Your city, the App Dock and the profiles are in its settings. From then on it keeps itself up to date: when there's a new version the TV asks, and one OK installs it.
 
 These installs are the ready-made build: Auckland until you pick your city on the TV, and no trending picks (those need your own [TMDB key](#the-tmdb-key), so build it yourself below).
 
@@ -137,7 +137,7 @@ It builds your own copy with your city and your TMDB key, puts it on your TV, an
 
 ## LG TVs (webOS)
 
-The same home screen as an LG app: the picks, the glass shelf with your apps, the drawer with inputs, weather and prices, day and night, Home Settings and the shelf editor. It installs through LG's own Developer Mode, with nothing rooted or changed on the TV. LG's home screen stays where it is, and Beyond™ TV is one press of a number key away.
+The same home screen as an LG app: the picks, the glass App Dock with your apps, the drawer with inputs, weather and prices, day and night, Beyond™ TV Settings and the App Dock editor. It installs through LG's own Developer Mode, with nothing rooted or changed on the TV. LG's home screen stays where it is, and Beyond™ TV is one press of a number key away.
 
 You need an LG TV (webOS 3 or newer) and a computer on the same Wi-Fi, with Python 3.
 
@@ -159,7 +159,7 @@ Developer Mode lasts about 40 days: open the Developer Mode app now and then and
 
 ## Samsung TVs (Tizen)
 
-The same home screen as a Samsung app, with everything the LG one has: the picks, the shelf, the drawer with the inputs, the weather and the prices, day and night, and its own settings. It installs through Samsung's own Developer Mode, with nothing rooted or changed on the TV, and Samsung's home screen stays where it is.
+The same home screen as a Samsung app, with everything the LG one has: the picks, the App Dock, the drawer with the inputs, the weather and the prices, day and night, and its own settings. It installs through Samsung's own Developer Mode, with nothing rooted or changed on the TV, and Samsung's home screen stays where it is.
 
 You need a Samsung TV from 2017 or newer (Tizen 3+) and a computer on the same Wi-Fi.
 
@@ -167,12 +167,13 @@ You need a Samsung TV from 2017 or newer (Tizen 3+) and a computer on the same W
 2. **On your computer**, download [TizenBrew Installer](https://github.com/reisxd/TizenBrewInstaller/releases/latest), the community's installer for Samsung TVs, open it and connect to your TV.
 3. **Install from GitHub:** type `YeahBuddyNZ/Beyond.TV`. On 2023 and newer TVs it asks you to sign in to your Samsung account once, to sign the app for your TV.
 4. **Straight to it:** in the TV's settings, under Start Screen Options, turn on **Autorun Last App**: the TV turns on into Beyond™ TV.
+24. Screensaver after a few minutes: done on Google TV, LG and Samsung. When nobody has pressed anything on the home screen for 3 minutes, the screensaver comes on. *Screensaver after* in Beyond™ TV Settings picks 1, 3, 5, 10, 15 or 30 minutes. The TV's own screensaver and standby times stay as they were.
 
 This build takes your city from the TV's time zone. For your exact city and the trending picks, build it with your own `config.properties` and [TMDB key](#the-tmdb-key): open the folder in Claude Code and say *"Install Beyond™ TV on my Samsung TV at 192.168.1.50. I live in Auckland."* It sets up Samsung's tools, and on 2023 and newer TVs you sign in to your Samsung account in the browser to make the certificate. Your signed build installs with `python3 tizen/install.py 192.168.1.50`, which needs only Python: no Tizen Studio, and no Rosetta on Apple Silicon Macs.
 
 ## Settings
 
-The first values come from `config.properties`, created by the first build (Google TV, LG and Samsung use the same file). Most of them can also be changed on the TV, in *Beyond™ TV* → *Home Settings*, and the TV's choice wins:
+The first values come from `config.properties`, created by the first build (Google TV, LG and Samsung use the same file). Most of them can also be changed on the TV, in *Beyond™ TV* → *Beyond™ TV Settings*, and the TV's choice wins:
 
 | Key | What it does | Default |
 |---|---|---|
@@ -278,7 +279,7 @@ No accounts, no ads, no tracking. The app talks to TMDB, Open-Meteo (with the co
 
 **The daily check-in.** So we can fix a problem on one make of TV before anybody has to ask, once a day the TV tells Beyond (beyondfamily.app) a made-up id, its city rounded to about 10km, its make, model and Android or TV software version, the Beyond TV version, which home screen is on, how many times the home screen opened and crashed, and its last 20 error messages. Never what anybody watches, never an IP address kept, never a name or a household.
 
-**Linked to Beyond Family**, the TV learns the household's name and each person's first name, colour and whether they're a kid, plus the household's pets (name, kind and whether they've been fed today), what the household switched on (today's jobs, the noticeboard) and what a grown-up said each kid is into, for their picks. Each person's face, colour, world, what they love and their shelf (apps by name) are kept with them in Beyond Family, so they follow them to every TV they're on. Somebody signed in on a TV from another home brings only their own first name, colour and look; that TV learns nothing about their household, and they can sign out from the TV or their phone. What a kid is into stays on the TV otherwise. **Home Settings → Help fix problems** turns it off, and turning it off asks Beyond to delete everything it had for that TV. The code is [`Checkin.java`](app/src/nz/gobeyond/tv/Checkin.java) and [`web/checkin.js`](web/checkin.js).
+**Linked to Beyond Family**, the TV learns the household's name and each person's first name, colour and whether they're a kid, plus the household's pets (name, kind and whether they've been fed today), what the household switched on (today's jobs, the noticeboard) and what a grown-up said each kid is into, for their picks. Each person's face, colour, world, what they love and their shelf (apps by name) are kept with them in Beyond Family, so they follow them to every TV they're on. Somebody signed in on a TV from another home brings only their own first name, colour and look; that TV learns nothing about their household, and they can sign out from the TV or their phone. What a kid is into stays on the TV otherwise. **Beyond™ TV Settings → Help fix problems** turns it off, and turning it off asks Beyond to delete everything it had for that TV. The code is [`Checkin.java`](app/src/nz/gobeyond/tv/Checkin.java) and [`web/checkin.js`](web/checkin.js).
 
 ## Credits
 

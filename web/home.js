@@ -723,7 +723,7 @@
     drawerInputs = drawerItems.length;
     drawerItems.push({label: tr('Todos os Apps', 'All Apps', 'Todas las apps'), symbol: 'apps', run: openApps});
     drawerItems.push({label: tr('Timer de desligar', 'Sleep Timer', 'Temporizador'), symbol: 'bedtime', run: function () { toast(Sleep.press()); }});
-    if (!kid) drawerItems.push({label: tr('Ajustes do Início', 'Home Settings', 'Ajustes de inicio'), symbol: 'settings', run: openSettings});
+    if (!kid) drawerItems.push({label: tr('Ajustes do Beyond™ TV', 'Beyond™ TV Settings', 'Ajustes de Beyond™ TV'), symbol: 'settings', run: openSettings});
     if (!kid) drawerItems.push({label: tr('Ajustes da TV', 'TV Settings', 'Ajustes del TV'), symbol: 'tv_settings', run: tvSettings});
     var n = drawerItems.length, gap = 18, groupGap = 56, groups = drawerInputs > 0 && drawerInputs < n ? 2 : 1;
     var tw = Math.min(230, (1760 - Math.max(0, n - groups) * gap - (groups - 1) * groupGap) / Math.max(1, n));
@@ -860,14 +860,21 @@
     updateFocus();
   }
 
-  // MARK: - Home Settings
+  // MARK: - Beyond™ TV Settings
 
   function settingRows() {
     var lang = Prefs.language(), unit = Prefs.temperature(), theme = Prefs.theme();
     var auto = tr('Automático', 'Automatic', 'Automático'), on = tr('Ligado', 'On', 'Activado'), off = tr('Desligado', 'Off', 'Desactivado');
     var rows = [
-      {label: tr('Idioma', 'Language', 'Idioma'), value: lang === 'ru' ? 'Русский' : lang === 'de' ? 'Deutsch' : lang === 'pt' ? 'Português' : lang === 'en' ? 'English' : lang === 'es' ? 'Español' : auto,
-        step: function (d) { cycle('language', ['auto', 'de', 'en', 'es', 'pt', 'ru'], lang, d); I18N.set(Prefs.language()); renderAll(); }},
+      // Te reo Māori is a choice of language: English with the word of the day and "Kia ora" (Prefs.kupu).
+      {label: tr('Idioma', 'Language', 'Idioma'), value: LANG_NAMES[langChoice()] || auto,
+        step: function (d) {
+          var next = LANGS[(LANGS.indexOf(langChoice()) + (d || 1) + LANGS.length) % LANGS.length];
+          Prefs.set('language', next === 'mi' ? 'en' : next);
+          Prefs.set('kupu', next === 'mi' || next === 'auto');
+          I18N.set(Prefs.language());
+          renderAll();
+        }},
       {label: tr('Temperatura', 'Temperature', 'Temperatura'), value: unit === 'C' ? '°C' : unit === 'F' ? '°F' : auto,
         step: function (d) { cycle('temperature', ['auto', 'C', 'F'], unit, d); renderPanels(); }},
       {label: tr('Tema', 'Theme', 'Tema'), value: theme === 'light' ? tr('Claro', 'Light', 'Claro') : theme === 'dark' ? tr('Escuro', 'Dark', 'Oscuro') : auto,
@@ -876,8 +883,8 @@
         step: function () { Prefs.set('weather', !Prefs.weather()); renderPanels(); }},
       {label: tr('Sons', 'Sounds', 'Sonidos'), toggle: Prefs.sounds(),
         step: function () { Prefs.set('sounds', !Prefs.sounds()); if (Prefs.sounds()) Chime.play(); }},
-      {label: tr('Te reo maori', 'Te reo Māori', 'Te reo maorí'), toggle: Prefs.kupu(),
-        step: function () { Prefs.set('kupu', !Prefs.kupu()); renderTop(); renderQuotes(); }},
+      {label: tr('Protetor de tela após', 'Screensaver after', 'Salvapantallas tras'), value: Prefs.saverAfter() + ' min',
+        step: function (d) { cycle('saverAfter', SAVER_MINUTES, Prefs.saverAfter(), d); }},
       {label: tr('Protetor de tela', 'Screensaver', 'Salvapantallas'),
         value: Prefs.screensaver() === 'art' ? tr('Arte', 'Art', 'Arte') : Prefs.screensaver() === 'photos' ? tr('Fotos de filmes', 'Film photos', 'Fotos de películas')
           : Art.on() ? tr('Automático (arte)', 'Automatic (art)', 'Automático (arte)') : tr('Automático (fotos)', 'Automatic (photos)', 'Automático (fotos)'),
@@ -924,9 +931,17 @@
     }
     rows.push({label: tr('Perfis', 'Profiles', 'Perfiles'), value: '›', step: function (d) { if (d >= 0) { closeSheets(); Profiles.manage(function () { profileChosen(); }); } }});
     rows.push({label: tr('PIN de adulto', 'Grown-up PIN', 'PIN de adulto'), value: '›', step: function (d) { if (d >= 0) Profiles.setPin(); }});
-    rows.push({label: tr('Prateleira de ', 'Shelf for ', 'Estante de ') + Profiles.current().name, value: '›', step: function (d) { if (d >= 0) openShelfEdit(); }});
+    rows.push({label: tr('Dock de apps de ', 'App Dock for ', 'Dock de apps de ') + Profiles.current().name, value: '›', step: function (d) { if (d >= 0) openShelfEdit(); }});
     rows.push({label: tr('Ajustes da TV', 'TV Settings', 'Ajustes del TV'), value: '›', step: function (d) { if (d >= 0) tvSettings(); }});
     return rows;
+  }
+
+  var LANGS = ['auto', 'mi', 'en', 'de', 'es', 'pt', 'ru'], SAVER_MINUTES = [1, 3, 5, 10, 15, 30];
+  var LANG_NAMES = {mi: 'English and te reo Māori', en: 'English', de: 'Deutsch', es: 'Español', pt: 'Português', ru: 'Русский'};
+
+  function langChoice() {
+    var lang = Prefs.language();
+    return lang === 'en' && Prefs.kupu() ? 'mi' : lang;
   }
 
   function cycle(name, values, current, d) {
@@ -941,7 +956,7 @@
     box.innerHTML = '';
     var title = el('div', 'title', box);
     dots(title).style.marginRight = '18px';
-    title.appendChild(document.createTextNode(tr('Ajustes do Início', 'Home Settings', 'Ajustes de inicio')));
+    title.appendChild(document.createTextNode(tr('Ajustes do Beyond™ TV', 'Beyond™ TV Settings', 'Ajustes de Beyond™ TV')));
     var list = el('div', 'list', box), holder = el('div', 'rows', list);
     rowsNow = settingRows();
     list.style.height = Math.min(rowsNow.length, 7) * 78 + 'px';
@@ -962,7 +977,7 @@
   function openSettings() {
     // Settings are for grown-ups: a kid with no PIN set switches to a grown-up first.
     if (Profiles.kid() && !Profiles.hasPin()) { Profiles.pick(false, profileChosen); return; }
-    Profiles.guard(tr('Ajustes do Início', 'Home Settings', 'Ajustes de inicio'), showSettings);
+    Profiles.guard(tr('Ajustes do Beyond™ TV', 'Beyond™ TV Settings', 'Ajustes de Beyond™ TV'), showSettings);
   }
 
   function showSettings() {
@@ -997,7 +1012,7 @@
     box.innerHTML = '';
     var title = el('div', 'title', box);
     sym('apps', title);
-    title.appendChild(document.createTextNode(tr('Prateleira', 'Shelf', 'Estante')));
+    title.appendChild(document.createTextNode(tr('Dock de apps', 'App Dock', 'Dock de apps')));
     var list = el('div', 'list', box), holder = el('div', 'rows', list);
     list.style.height = Math.min(e.rows.length, 7) * 78 + 'px';
     for (var i = 0; i < e.rows.length; i++) {
@@ -1025,7 +1040,7 @@
     if (dx === 0) {
       if (at >= 0) ids.splice(at, 1);
       else if (ids.length < MAX_SHELF) ids.push(app.id);
-      else { toast(tr('A prateleira cabe até ' + MAX_SHELF + ' apps.', 'The shelf holds up to ' + MAX_SHELF + ' apps.', 'El estante tiene hasta ' + MAX_SHELF + ' apps.')); return; }
+      else { toast(tr('O dock cabe até ' + MAX_SHELF + ' apps.', 'The App Dock holds up to ' + MAX_SHELF + ' apps.', 'El dock tiene hasta ' + MAX_SHELF + ' apps.')); return; }
     } else {
       if (at < 0) return;
       var to = Math.max(0, Math.min(ids.length - 1, at + dx));
@@ -1226,7 +1241,7 @@
     checkNight();
   }
 
-  var saverOn = false, idleAt = Date.now(), saverIndex = 0, saverTimer = 0, SAVER_AFTER = 5 * 60000;
+  var saverOn = false, idleAt = Date.now(), saverIndex = 0, saverTimer = 0;
 
   function showSaver() {
     var art = Art.on();
@@ -1596,9 +1611,9 @@
     renderTonight();
     checkNight();
     Data.refresh();
-    if (!saverOn && !sheetOpen() && !UI.active() && Date.now() - idleAt > SAVER_AFTER) showSaver();
+    if (!saverOn && !sheetOpen() && !UI.active() && Date.now() - idleAt > Prefs.saverAfter() * 60000) showSaver();
     if (saverOn) tickSaverClock($('saver').querySelector('.clock'));
-  }, 30000);
+  }, 15000);
 
   // For the browser preview and tests.
   camTimer = setInterval(tickCameras, 5000);

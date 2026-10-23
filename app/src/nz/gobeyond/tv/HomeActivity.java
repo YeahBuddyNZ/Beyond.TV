@@ -30,6 +30,7 @@ public class HomeActivity extends Activity implements Family.Screen {
     private static final long ASK_AGAIN_AFTER = 4 * 3600_000L;
     private int prefsVersion = Prefs.version;   // settings changed while we were away: start over
     private boolean justOn = true;   // the TV started or woke: ask who's watching
+    private long pressedAt = android.os.SystemClock.elapsedRealtime();   // the last key, for the screensaver
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,6 +87,9 @@ public class HomeActivity extends Activity implements Family.Screen {
                 TidyActivity.open(this, Tidy.minutes(this));   // the tidy-up alarm woke the TV, or sent it home
                 return;
             }
+            pressedAt = android.os.SystemClock.elapsedRealtime();
+            handler.removeCallbacks(quiet);
+            handler.postDelayed(quiet, 15_000);
             if (on) Chime.play();   // hello: the TV just came on
             if (People.count(this) > 1 && (on || System.currentTimeMillis() - People.chosenAt(this) > ASK_AGAIN_AFTER)) {
                 People.asked(this);
@@ -95,6 +99,7 @@ public class HomeActivity extends Activity implements Family.Screen {
     }
 
     @Override protected void onPause() {
+        handler.removeCallbacks(quiet);
         if (Family.screen == this) Family.screen = null;
         Family.onChange = null;
         hideMessage();
@@ -131,7 +136,20 @@ public class HomeActivity extends Activity implements Family.Screen {
         if (level >= TRIM_MEMORY_COMPLETE) Recs.get(this).trim();
     }
 
+    /** Nobody has pressed anything for Prefs.saverAfter minutes: the screensaver. Only while the home screen shows. */
+    private final Runnable quiet = new Runnable() {
+        @Override public void run() {
+            long idle = android.os.SystemClock.elapsedRealtime() - pressedAt;
+            if (home != null && message == null && idle > Prefs.saverAfter() * 60_000L) {
+                SaverActivity.open(HomeActivity.this);
+                return;
+            }
+            handler.postDelayed(this, 15_000);
+        }
+    };
+
     @Override public boolean dispatchKeyEvent(KeyEvent event) {
+        pressedAt = android.os.SystemClock.elapsedRealtime();
         // The first press puts a message away, as on LG and Samsung.
         if (message != null) {
             if (event.getAction() == KeyEvent.ACTION_DOWN) hideMessage();

@@ -56,8 +56,10 @@ var Prefs = (function () {
     screensaver: function () { return pick('screensaver', 'auto'); },
     /** Which art the screensaver shows (Art.KINDS ids): 'mixed' changes theme every day. */
     artKind: function () { return pick('artKind', 'mixed'); },
+    /** Minutes of nobody pressing anything on the home screen before the screensaver comes on. */
+    saverAfter: function () { return pick('saverAfter', 3); },
     coin: function (i) { var c = pick('coins', null); return c ? c[i] !== false : true; },
-    /** The shelf is each profile's own (Profiles), falling back to the TV's. */
+    /** The App Dock (the shelf) is each profile's own (Profiles), falling back to the TV's. */
     shelf: function () {
       var own = window.Profiles && Profiles.own('shelf');
       return own || (window.Profiles && Profiles.kid() ? null : pick('shelf', null));

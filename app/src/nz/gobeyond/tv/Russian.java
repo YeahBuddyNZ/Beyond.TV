@@ -25,7 +25,7 @@ final class Russian {
             case "Automatic (art)": return "Автоматически (искусство)";
             case "Automatic (photos)": return "Автоматически (кадры)";
             case "ART": return "ИСКУССТВО";
-            case "Home Settings": return "Главный экран";
+            case "Beyond™ TV Settings": return "Настройки Beyond™ TV";
             case "TV Settings": return "Настройки ТВ";
             case "HDMI Inputs": return "Входы HDMI";
             case "Inputs": return "Входы";
@@ -57,6 +57,7 @@ final class Russian {
             case "Your TV's home screen and screensaver": return "Главный экран и заставка телевизора";
             case "Home Screen": return "Главный экран";
             case "Screensaver": return "Заставка";
+            case "Screensaver after": return "Заставка через";
             case "Preview": return "Предпросмотр";
             case "On the TV: tick “Always allow” and press OK.": return "На телевизоре отметьте «Всегда разрешать» и нажмите OK.";
             case "RECOMMENDATIONS": return "РЕКОМЕНДАЦИИ";
@@ -320,9 +321,9 @@ final class Russian {
             case "Once a day: your city, the TV's model and its errors. Never what you watch.": return "Раз в день: ваш город, модель телевизора и его ошибки. Никогда то, что вы смотрите.";
             case "On": return "Вкл.";
             case "Off": return "Выкл.";
-            case "Shelf": return "Избранные приложения";
-            case "on the shelf, place ": return "в избранном, позиция ";
-            case "not on the shelf": return "не в избранном";
+            case "App Dock": return "Панель приложений";
+            case "in the App Dock, place ": return "на панели, позиция ";
+            case "not in the App Dock": return "не на панели";
             case "Remote Buttons": return "Кнопки пульта";
             case "Netflix button": return "Кнопка Netflix";
             case "YouTube button": return "Кнопка YouTube";
