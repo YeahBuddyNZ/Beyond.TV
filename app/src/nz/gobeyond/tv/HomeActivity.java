@@ -1,7 +1,10 @@
 package nz.gobeyond.tv;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.TypedValue;
@@ -26,6 +29,7 @@ public class HomeActivity extends Activity implements Family.Screen {
     private View message;   // Beyond Family's message over the home screen, while it shows
     private static final long ASK_AGAIN_AFTER = 4 * 3600_000L;
     private int prefsVersion = Prefs.version;   // settings changed while we were away: start over
+    private boolean justOn = true;   // the TV started or woke: ask who's watching
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,6 +50,8 @@ public class HomeActivity extends Activity implements Family.Screen {
         Ui.init(this);
         home = new HomeView(this);
         setContentView(home);
+        // Waking from standby isn't a boot, so the boot notice never comes: look for an update then too.
+        registerReceiver(woke, new IntentFilter(Intent.ACTION_SCREEN_ON));
         getWindow().setBackgroundDrawable(null);
     }
 
@@ -73,8 +79,10 @@ public class HomeActivity extends Activity implements Family.Screen {
                     recreate();
                 }
             };
-            // Who's watching? When there's more than one person: the first time, and again after a long break.
-            if (People.count(this) > 1 && System.currentTimeMillis() - People.chosenAt(this) > ASK_AGAIN_AFTER) {
+            // Who's watching? When there's more than one person: whenever the TV comes on, and after a long break.
+            boolean on = justOn;
+            justOn = false;
+            if (People.count(this) > 1 && (on || System.currentTimeMillis() - People.chosenAt(this) > ASK_AGAIN_AFTER)) {
                 People.asked(this);
                 WhoActivity.open(this, null);
             }
@@ -96,8 +104,18 @@ public class HomeActivity extends Activity implements Family.Screen {
         if (home != null) home.reset(true);
     }
 
+    private final BroadcastReceiver woke = new BroadcastReceiver() {
+        @Override public void onReceive(Context c, Intent intent) {
+            Updater.onStart(c);
+            justOn = true;
+        }
+    };
+
     @Override protected void onDestroy() {
-        if (home != null) home.destroy();
+        if (home != null) {
+            home.destroy();
+            try { unregisterReceiver(woke); } catch (IllegalArgumentException ignored) {}
+        }
         super.onDestroy();
     }
 
