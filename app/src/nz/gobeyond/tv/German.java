@@ -224,6 +224,10 @@ final class German {
             case "What kind of party?": return "Was für eine Party?";
             case "Disco": return "Disco";
             case "Or someone's birthday": return "Oder jemandes Geburtstag";
+            case "Sing now": return "Jetzt singen";
+            case "You're up!": return "Du bist dran!";
+            case "After that: ": return "Danach: ";
+            case "Open YouTube to sing": return "Öffne YouTube zum Singen";
             case "OK, got it": return "OK, verstanden";
             case "Party time!": return "Partyzeit!";
             case "Happy birthday": return "Alles Gute zum Geburtstag";
@@ -391,6 +395,8 @@ final class German {
                     return "OK fügt hinzu oder entfernt (bis zu " + english.substring("OK adds or removes (up to ".length())
                             .replace("). ← → change the order.", "). ← → ändern die Reihenfolge.");
                 }
+                if (english.endsWith("'s up!")) return english.substring(0, english.length() - 6) + " ist dran!";
+                if (english.startsWith("Starting in ")) return "Startet in " + english.substring(12);
                 if (english.endsWith(" hours ago")) return "Vor " + english.substring(0, english.length() - 10) + " Stunden";
                 if (english.matches("\\d+ of \\d+ done")) return english.replace(" of ", " von ").replace(" done", " erledigt");
                 if (english.endsWith(" to go. Tick them off in Beyond Family and the TV opens by itself.")) return english.substring(0, english.length() - 66) + " noch. Hak sie in Beyond Family ab, dann geht der Fernseher von selbst auf.";

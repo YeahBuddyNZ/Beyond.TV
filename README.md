@@ -69,6 +69,7 @@ Free and open source, built in Aotearoa by [Beyond](https://gobeyond.co.nz). One
 23. Quiz night: done on Google TV, LG and Samsung. Ten family-friendly questions on the TV, four answers each; everyone buzzes in from their phone in Beyond Family, the first tap counts, right is two points and first right in gets one more. The answer and the scores come up when a grown-up says so, then the final scores. Still to come for the family evening: arcade games played with the remote.
 24. Party mode: done on Google TV, LG and Samsung. A disco or a birthday, from the Party button on the TV (no phone needed) or from Beyond Family: music the TV makes itself, coloured lights sweeping the screen on the beat, and for a birthday the tune, a cake and their name. With Beyond Home, the room's lights go bright and colourful, change with the music, and go back to warm white after.
 25. Teen profiles: done on Google TV, LG and Samsung. A kid of 13 or more gets YouTube and music on their shelf as well as the kids' apps, still behind the grown-up PIN. Beyond Family works it out from their birthday, so it happens by itself on the day; the TV only hears yes or no.
+26. Karaoke night: done on Google TV, LG and Samsung. Keep the songs your family loves in Beyond Family, queue up from your phones, and Next singer puts whoever's up on the TV, then plays the song's karaoke version from YouTube, words and all.
 
 Ideas welcome: press the four dots (*Talk to Beyond*) on the TV.
 

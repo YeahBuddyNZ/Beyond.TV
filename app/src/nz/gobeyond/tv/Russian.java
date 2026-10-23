@@ -223,6 +223,10 @@ final class Russian {
             case "What kind of party?": return "Какая будет вечеринка?";
             case "Disco": return "Дискотека";
             case "Or someone's birthday": return "Или чей-то день рождения";
+            case "Sing now": return "Петь сейчас";
+            case "You're up!": return "Твоя очередь!";
+            case "After that: ": return "Потом: ";
+            case "Open YouTube to sing": return "Откройте YouTube, чтобы петь";
             case "OK, got it": return "Хорошо, понятно";
             case "Party time!": return "Время вечеринки!";
             case "Happy birthday": return "С днём рождения";
@@ -441,6 +445,8 @@ final class Russian {
                     String n = english.substring(5, english.length() - " titles from the TV's apps, 3 new ones every hour.".length());
                     return "Вкл. · Рекомендаций из приложений телевизора: " + n + "; 3 новых каждый час.";
                 }
+                if (english.endsWith("'s up!")) return "Очередь: " + english.substring(0, english.length() - 6) + "!";
+                if (english.startsWith("Starting in ")) return "Начало через " + english.substring(12);
                 if (english.endsWith(" hours ago")) return english.substring(0, english.length() - 10) + " ч назад";
                 if (english.matches("\\d+ of \\d+ done")) return english.replace(" of ", " из ").replace(" done", " сделано");
                 if (english.endsWith(" to go. Tick them off in Beyond Family and the TV opens by itself.")) return english.substring(0, english.length() - 66) + " осталось. Отметьте в Beyond Family, и телевизор откроется сам.";
