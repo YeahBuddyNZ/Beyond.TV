@@ -93,8 +93,10 @@ var MyWorld = (function () {
       });
     }
 
-    /** A grid of big round choices; pick(value) runs on OK and the grid repaints. */
-    function grid(parent, api, items, cols, size, isOn, pick, render) {
+    /** A grid of big round choices; pick(value) runs on OK and the grid repaints. With next, one pick is the
+     *  answer, so OK moves on to the next step; without it (the loves) they can pick as many as they like. */
+    function grid(parent, api, items, cols, size, isOn, pick, render, next) {
+      var moving = false;
       var g = UI.el('div', 'mw-grid', parent);
       var gap = Math.round(size * 0.28);
       g.style.width = (cols * (size + gap)) + 'px';
@@ -112,6 +114,7 @@ var MyWorld = (function () {
             for (var j = 0; j < nodes.length; j++) UI.setClass(nodes[j], 'on', isOn(items[j]));
             pop(c);
             repaintHead();
+            if (next && !moving) { moving = true; setTimeout(next, 320); }
           }, {first: isOn(item) || (i === 0 && !anyOn())});
         })(items[i], i);
       }
@@ -132,7 +135,7 @@ var MyWorld = (function () {
         tr('Escolha seu parceiro. Ele é você na TV.', "Pick your buddy. They'll be you on the TV.", 'Elige a tu compañero. Serás tú en la TV.'),
         function (body, api) {
           grid(body, api, BUDDIES, 12, 104, function (e) { return p.emoji === e; }, function (e) { p.emoji = e; },
-            function (c, e) { UI.el('span', 'mw-emoji', c, e); });
+            function (c, e) { UI.el('span', 'mw-emoji', c, e); }, function () { go(n + 1); });
         });
     }
 
@@ -141,7 +144,8 @@ var MyWorld = (function () {
         tr('Sua cor aparece em tudo que é seu.', 'Your colour shows on everything that is yours.', 'Tu color sale en todo lo tuyo.'),
         function (body, api) {
           grid(body, api, COLOURS, 6, 150, function (c) { return p.colour === c; }, function (c) { p.colour = c; },
-            function (node, c) { node.style.background = c; UI.el('span', 'mw-emoji', node, p.emoji || ''); });
+            function (node, c) { node.style.background = c; UI.el('span', 'mw-emoji', node, p.emoji || ''); },
+            function () { go(n + 1); });
         });
     }
 
@@ -156,7 +160,7 @@ var MyWorld = (function () {
               node.style.background = 'linear-gradient(' + w.top + ', ' + w.bottom + ')';
               UI.el('span', 'mw-world-things', node, w.things.slice(0, 3).join(' '));
               UI.el('span', 'mw-world-name', node, w.name());
-            });
+            }, function () { go(n + 1); });
         });
     }
 
