@@ -162,8 +162,9 @@ public class WhoActivity extends Activity {
             add(foot, Ui.tr("Trazer a família do Beyond Family", "Bring in your family from Beyond Family"), false,
                     v -> guard(() -> LinkActivity.open(this)));
         }
-        // Your own face from Beyond Family, on this TV or anybody's.
-        add(foot, Ui.tr("Entrar com o Beyond Family", "Sign in with Beyond Family"), false, v -> {
+        // Your own face from Beyond Family, on this TV or anybody's. Linked, the family is already here: it's for visitors.
+        add(foot, Family.linked(this) ? Ui.tr("Visitando? Entre aqui", "Visiting? Sign in here")
+                : Ui.tr("Entrar com o Beyond Family", "Sign in with Beyond Family"), false, v -> {
             LinkActivity.visit(this);
             finish();
         });

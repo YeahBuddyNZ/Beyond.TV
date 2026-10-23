@@ -134,6 +134,7 @@ final class German {
             case "For the family": return "Für die Familie";
             case "For ": return "Für ";
             case "Sign in with Beyond Family": return "Mit Beyond Family anmelden";
+            case "Visiting? Sign in here": return "Zu Besuch? Hier anmelden";
             case "Sign in with your Beyond Family": return "Melde dich mit deinem Beyond Family an";
             case "Sign out of this TV": return "Von diesem Fernseher abmelden";
             case "On your phone, open Beyond Family › Family › TVs › On somebody else's TV, and type": return "Öffne auf dem Handy Beyond Family › Familie › Fernseher › Auf einem anderen Fernseher und tippe";

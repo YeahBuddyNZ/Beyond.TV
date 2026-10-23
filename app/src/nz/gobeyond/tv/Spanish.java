@@ -124,6 +124,7 @@ final class Spanish {
             case "For the family": return "Para la familia";
             case "For ": return "Para ";
             case "Sign in with Beyond Family": return "Entrar con Beyond Family";
+            case "Visiting? Sign in here": return "¿De visita? Entra aquí";
             case "Sign in with your Beyond Family": return "Entra con tu Beyond Family";
             case "Sign out of this TV": return "Cerrar sesión en este TV";
             case "On your phone, open Beyond Family › Family › TVs › On somebody else's TV, and type": return "En tu teléfono, abre Beyond Family › Familia › TVs › En el TV de otra persona, y escribe";
