@@ -51,6 +51,7 @@ var Family = (function () {
     state = {};
     board = null;
     songs = [];
+    playlists = [];
     widgets = [];
     widgetsSig = '[]';
     save();
@@ -70,6 +71,8 @@ var Family = (function () {
   var pets = null;
   /** The family's karaoke songs, for picking on the TV: [{id, title, artist, videoId}]. */
   var songs = [];
+  /** The family's karaoke playlists: [{id, name, items: [{songId, memberId}]}]. */
+  var playlists = [];
 
   /** One of Beyond Family's people, as a profile here. */
   function person(p, visitor) {
@@ -100,6 +103,7 @@ var Family = (function () {
       var hadPets = pets !== null;
       pets = home.pets || [];
       songs = home.songs || [];
+      if (!playlistBusy) playlists = home.playlists || [];
       if (!hadPets && window.Pets) setTimeout(Pets.arrived, 0);
     }
     var had = !!state.visiting;
@@ -375,6 +379,7 @@ var Family = (function () {
     if (c.kind === 'party') { hide(); Party.start(c); return; }
     if (c.kind === 'party-end') { Party.stop(); return; }
     if (c.kind === 'karaoke') { hide(); Party.stop(); Karaoke.start(c); return; }
+    if (c.kind === 'karaoke-set') { hide(); Party.stop(); Karaoke.play(c.turns || [], {name: c.playlist}); return; }
     if (c.kind && c.kind.indexOf('question') === 0) { dinner(c); return; }
     if (c.kind && c.kind.indexOf('quiz') === 0) { quiz(c); return; }
     if (c.kind === 'key' && shown) { if (c.key === 'ok') hide(); return; }  // a message waits for OK, from the phone too
@@ -738,10 +743,56 @@ var Family = (function () {
     });
   }
 
-  /** A song found on the TV goes on the family's list too. Best effort. */
-  function addSong(title) {
-    if (!linked() || !title) return;
-    call('POST', '/tv/karaoke/songs', {title: String(title).slice(0, 80), memberId: watcher()}, function () {});
+  /** A song found on the TV goes on the family's list too. done(song) with its id, or done(null). */
+  function addSong(title, artist, done) {
+    if (!linked() || !title) { if (done) done(null); return; }
+    call('POST', '/tv/karaoke/songs', {title: String(title).slice(0, 80), artist: artist ? String(artist).slice(0, 60) : undefined, memberId: watcher()},
+      function (err, json) {
+        var song = !err && json && json.song ? json.song : null;
+        if (song) songs.push(song);
+        if (done) done(song);
+      });
+  }
+
+  /** The best karaoke video for a song, from Beyond Family (Sing King and Lost Panda first). done(videoId or null). */
+  function findVideo(title, artist, done) {
+    if (!linked()) { done(null); return; }
+    call('POST', '/tv/karaoke/find', {title: String(title).slice(0, 80), artist: artist ? String(artist).slice(0, 60) : undefined}, function (err, json) {
+      done(!err && json && /^[A-Za-z0-9_-]{11}$/.test(json.videoId || '') ? json.videoId : null);
+    }, 8000);
+  }
+
+  /** Tonight's next singer from the queue, taken off it. done(turn or null). */
+  function nextTurn(done) {
+    if (!linked()) { done(null); return; }
+    call('POST', '/tv/karaoke/next', {}, function (err, json) { done(!err && json ? json.turn || null : null); });
+  }
+
+  // A save on its way: a sync arriving meanwhile must not put the old list back.
+  var playlistBusy = false;
+
+  /** Makes (no id) or saves a playlist. done(playlist or null). */
+  function savePlaylist(p, done) {
+    if (!linked()) { done(null); return; }
+    playlistBusy = true;
+    call(p.id ? 'PUT' : 'POST', '/tv/karaoke/playlists' + (p.id ? '/' + p.id : ''), {name: p.name, items: p.items}, function (err, json) {
+      playlistBusy = false;
+      var saved = !err && json ? json.playlist : null;
+      if (saved) {
+        var at = -1;
+        for (var i = 0; i < playlists.length; i++) if (playlists[i].id === saved.id) at = i;
+        if (at >= 0) playlists[at] = saved; else playlists.push(saved);
+      } else UI.toast(tr('Não deu certo. Tente de novo.', "That didn't work. Try again.", 'No funcionó. Inténtalo de nuevo.'));
+      done(saved);
+    });
+  }
+
+  function dropPlaylist(id, done) {
+    if (!linked()) { done(false); return; }
+    call('DELETE', '/tv/karaoke/playlists/' + id, undefined, function (err) {
+      if (!err) playlists = playlists.filter(function (p) { return p.id !== id; });
+      done(!err);
+    });
   }
 
   function scoreRows(box, scores, final) {
@@ -802,6 +853,11 @@ var Family = (function () {
     songs: function () { return linked() ? songs : []; },
     game: play,
     addSong: addSong,
+    findVideo: findVideo,
+    nextTurn: nextTurn,
+    playlists: function () { return linked() ? playlists : []; },
+    savePlaylist: savePlaylist,
+    dropPlaylist: dropPlaylist,
     board: function () { return linked() ? board : null; },
     widgets: function () { return linked() ? widgets : []; },
     visit: visit,

@@ -120,6 +120,7 @@ final class Family {
         board = null;
         widgets = null;
         songs = null;
+        playlists = null;
         jobs = java.util.Collections.emptyMap();
         likes = java.util.Collections.emptyMap();
     }
@@ -344,18 +345,132 @@ final class Family {
 
     /** A song found on the TV goes on the family's list too, so it shows on everybody's phone. Best effort. */
     static void addSong(Context c, String title, String artist) {
-        if (!linked(c)) return;
+        addSong(c, title, artist, null);
+    }
+
+    /** As above, then `done` on the main thread with the song ({id, title, artist, videoId}) or null. */
+    static void addSong(Context c, String title, String artist, java.util.function.Consumer<JSONObject> done) {
+        if (!linked(c)) {
+            if (done != null) done.accept(null);
+            return;
+        }
         final Context app = c.getApplicationContext();
         final String member = watcherMember(c);
         new Thread(() -> {
+            JSONObject song = null;
             try {
                 JSONObject body = new JSONObject().put("title", title);
                 if (artist != null && !artist.isEmpty()) body.put("artist", artist);
                 if (member != null) body.put("memberId", member);
-                call(app, "POST", "/tv/karaoke/songs", body, 15_000);
+                song = call(app, "POST", "/tv/karaoke/songs", body, 15_000).optJSONObject("song");
+                if (song != null) {
+                    JSONArray now = songs == null ? new JSONArray() : new JSONArray(songs.toString());
+                    songs = now.put(song);
+                }
             } catch (Throwable ignored) {
             }
+            final JSONObject s = song;
+            if (done != null) MAIN.post(() -> done.accept(s));
         }, "beyond-family-song").start();
+    }
+
+    /** The family's karaoke playlists: [{id, name, items: [{songId, memberId}]}]. In memory only. */
+    private static volatile JSONArray playlists;
+    // A save on its way: a sync arriving meanwhile must not put the old list back.
+    private static volatile boolean playlistBusy;
+
+    static JSONArray playlists() { return playlists; }
+
+    /** The best karaoke video for a song (Sing King and Lost Panda first), or null. `done` on the main thread. */
+    static void findVideo(Context c, String title, String artist, java.util.function.Consumer<String> done) {
+        if (!linked(c)) {
+            done.accept(null);
+            return;
+        }
+        final Context app = c.getApplicationContext();
+        new Thread(() -> {
+            String id = null;
+            try {
+                JSONObject body = new JSONObject().put("title", title);
+                if (artist != null && !artist.isEmpty()) body.put("artist", artist);
+                String found = text(call(app, "POST", "/tv/karaoke/find", body, 8_000), "videoId");
+                if (found.matches("[A-Za-z0-9_-]{11}")) id = found;
+            } catch (Throwable ignored) {
+            }
+            final String v = id;
+            MAIN.post(() -> done.accept(v));
+        }, "beyond-family-find").start();
+    }
+
+    /** Tonight's next singer from the queue, taken off it, or null. `done` on the main thread. */
+    static void nextTurn(Context c, java.util.function.Consumer<JSONObject> done) {
+        if (!linked(c)) {
+            done.accept(null);
+            return;
+        }
+        final Context app = c.getApplicationContext();
+        new Thread(() -> {
+            JSONObject turn = null;
+            try {
+                turn = call(app, "POST", "/tv/karaoke/next", new JSONObject(), 15_000).optJSONObject("turn");
+            } catch (Throwable ignored) {
+            }
+            final JSONObject t = turn;
+            MAIN.post(() -> done.accept(t));
+        }, "beyond-family-next").start();
+    }
+
+    /** Makes (no id) or saves a playlist. `done` on the main thread with the saved one, or null. */
+    static void savePlaylist(Context c, JSONObject list, java.util.function.Consumer<JSONObject> done) {
+        final Context app = c.getApplicationContext();
+        playlistBusy = true;
+        new Thread(() -> {
+            JSONObject saved = null;
+            try {
+                String id = list.optString("id", "");
+                JSONObject body = new JSONObject().put("name", list.optString("name")).put("items", list.optJSONArray("items"));
+                saved = call(app, id.isEmpty() ? "POST" : "PUT", "/tv/karaoke/playlists" + (id.isEmpty() ? "" : "/" + id), body, 15_000)
+                        .optJSONObject("playlist");
+                if (saved != null) {
+                    JSONArray now = new JSONArray();
+                    boolean put = false;
+                    JSONArray was = playlists == null ? new JSONArray() : playlists;
+                    for (int i = 0; i < was.length(); i++) {
+                        JSONObject p = was.optJSONObject(i);
+                        if (p != null && p.optString("id").equals(saved.optString("id"))) {
+                            now.put(saved);
+                            put = true;
+                        } else if (p != null) now.put(p);
+                    }
+                    if (!put) now.put(saved);
+                    playlists = now;
+                }
+            } catch (Throwable ignored) {
+            }
+            playlistBusy = false;
+            final JSONObject s = saved;
+            MAIN.post(() -> done.accept(s));
+        }, "beyond-family-playlist").start();
+    }
+
+    static void dropPlaylist(Context c, String id, java.util.function.Consumer<Boolean> done) {
+        final Context app = c.getApplicationContext();
+        new Thread(() -> {
+            boolean ok = false;
+            try {
+                call(app, "DELETE", "/tv/karaoke/playlists/" + id, null, 15_000);
+                JSONArray now = new JSONArray(), was = playlists == null ? new JSONArray() : playlists;
+                for (int i = 0; i < was.length(); i++) {
+                    JSONObject p = was.optJSONObject(i);
+                    if (p != null && !p.optString("id").equals(id)) now.put(p);
+                }
+                playlists = now;
+                ok = true;
+            } catch (Throwable ignored) {
+            }
+            final boolean o = ok;
+            MAIN.post(() -> done.accept(o));
+        }, "beyond-family-playlist").start();
     }
 
     /** Earn your screen: each kid's jobs still to do today (only when the household turned it on), by person id. In
@@ -388,6 +503,7 @@ final class Family {
         Tidy.apply(c, home == null ? null : home.optJSONObject("tidy"));
         widgets = home == null ? null : home.optJSONArray("widgets");
         songs = home == null ? null : home.optJSONArray("songs");
+        if (!playlistBusy) playlists = home == null ? null : home.optJSONArray("playlists");
         jobs = jobsOf(home == null ? null : home.optJSONArray("people"));
         likes = likesOf(home == null ? null : home.optJSONArray("people"));
         try {
@@ -590,7 +706,7 @@ final class Family {
                 JSONObject following = cmd.optJSONObject("next");
                 final String then = following == null ? "" : text(following, "name") + " · " + text(following, "title");
                 if (song.isEmpty()) break;
-                // Over YouTube (the last singer's song), Android 10 and up wants Beyond TV allowed to show over apps.
+                // Over whatever is on, Android 10 and up wants Beyond TV allowed to show over apps.
                 adb().post(() -> {
                     allowOverApps(app);
                     MAIN.post(() -> {
@@ -598,6 +714,21 @@ final class Family {
                             app.startActivity(KaraokeActivity.intent(app, singer, singerColour, song, by, video, query, then));
                         } catch (RuntimeException e) {
                             KaraokeActivity.play(app, video, query);
+                        }
+                    });
+                });
+                break;
+            case "karaoke-set":
+                // A playlist played from a phone: every song in turn, in Beyond TV's own player.
+                final JSONArray turns = cmd.optJSONArray("turns");
+                final String listName = text(cmd, "playlist");
+                if (turns == null || turns.length() == 0) break;
+                adb().post(() -> {
+                    allowOverApps(app);
+                    MAIN.post(() -> {
+                        try {
+                            app.startActivity(KaraokeActivity.night(app, turns, listName, false));
+                        } catch (RuntimeException ignored) {
                         }
                     });
                 });
