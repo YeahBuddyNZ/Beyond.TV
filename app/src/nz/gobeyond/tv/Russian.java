@@ -222,6 +222,7 @@ final class Russian {
             case "What kind of party?": return "Какая будет вечеринка?";
             case "Disco": return "Дискотека";
             case "Or someone's birthday": return "Или чей-то день рождения";
+            case "OK, got it": return "Хорошо, понятно";
             case "Party time!": return "Время вечеринки!";
             case "Happy birthday": return "С днём рождения";
             case "Any key to stop": return "Любая кнопка, чтобы остановить";

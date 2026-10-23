@@ -223,6 +223,7 @@ final class German {
             case "What kind of party?": return "Was für eine Party?";
             case "Disco": return "Disco";
             case "Or someone's birthday": return "Oder jemandes Geburtstag";
+            case "OK, got it": return "OK, verstanden";
             case "Party time!": return "Partyzeit!";
             case "Happy birthday": return "Alles Gute zum Geburtstag";
             case "Any key to stop": return "Beliebige Taste zum Beenden";

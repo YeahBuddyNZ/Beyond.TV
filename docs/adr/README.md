@@ -25,3 +25,4 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0015](0015-quiz-night.md) | Quiz night |
 | [0016](0016-party-mode.md) | Party mode |
 | [0017](0017-party-from-the-remote.md) | Party from the remote |
+| [0018](0018-messages-wait-for-ok.md) | Messages from Beyond Family wait for OK |
