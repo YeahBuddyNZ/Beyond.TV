@@ -29,7 +29,9 @@ public class HomeActivity extends Activity implements Family.Screen {
     private View message;   // Beyond Family's message over the home screen, while it shows
     private static final long ASK_AGAIN_AFTER = 4 * 3600_000L;
     private int prefsVersion = Prefs.version;   // settings changed while we were away: start over
-    private boolean justOn = true;   // the TV started or woke: ask who's watching
+    // The TV started or woke: ask who's watching. Static, so the home screen drawing itself again after a new
+    // profile is picked (recreate) doesn't count as the TV coming on and ask all over again.
+    private static boolean justOn = true;
     private long pressedAt = android.os.SystemClock.elapsedRealtime();   // the last key, for the screensaver
 
     @Override protected void onCreate(Bundle savedInstanceState) {

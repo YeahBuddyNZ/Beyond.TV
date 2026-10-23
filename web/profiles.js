@@ -208,7 +208,9 @@ var Profiles = (function () {
           api.add(m, function () { guard(tr('Gerenciar perfis', 'Manage profiles', 'Administrar perfiles'), function () { pick(true, function () { UI.top() && UI.top().rebuild(); }); }); });
           if (window.Family && Family.visit) {
             // Your own face and apps from Beyond Family, on this TV or anybody's.
-            var s = UI.button(foot, tr('Entrar com o Beyond Family', 'Sign in with Beyond Family', 'Entrar con Beyond Family'), 'sparkles');
+            // Linked, the family is already here: the button is for somebody visiting from another home.
+            var s = UI.button(foot, Family.linked() ? tr('Visitando? Entre aqui', 'Visiting? Sign in here', '¿De visita? Entra aquí')
+              : tr('Entrar com o Beyond Family', 'Sign in with Beyond Family', 'Entrar con Beyond Family'), 'sparkles');
             api.add(s, function () { Family.visit(function (p) { if (p) choose(p, api, done); }); });
           }
         }

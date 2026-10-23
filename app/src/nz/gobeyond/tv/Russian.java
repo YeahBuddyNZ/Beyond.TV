@@ -133,6 +133,7 @@ final class Russian {
             case "For the family": return "Для всей семьи";
             case "For ": return "Для ";
             case "Sign in with Beyond Family": return "Войти через Beyond Family";
+            case "Visiting? Sign in here": return "В гостях? Войдите здесь";
             case "Sign in with your Beyond Family": return "Войдите через свой Beyond Family";
             case "Sign out of this TV": return "Выйти на этом телевизоре";
             case "On your phone, open Beyond Family › Family › TVs › On somebody else's TV, and type": return "На телефоне откройте Beyond Family › Семья › Телевизоры › На чужом телевизоре и введите";
