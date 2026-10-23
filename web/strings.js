@@ -7,6 +7,20 @@ var I18N = (function () {
 
   var lang = 'en';
   var german = {
+    "Tidy-up race!": "Aufräum-Wettrennen!",
+    "Ready, set, go! When you're done, press OK on your face.": "Auf die Plätze, fertig, los! Wer fertig ist, drückt OK auf sein Gesicht.",
+    "1st": "1.",
+    "2nd": "2.",
+    "3rd": "3.",
+    "All tidy!": "Alles aufgeräumt!",
+    "Fastest tonight: ": "Am schnellsten heute: ",
+    "Well done!": "Gut gemacht!",
+    "Time's up!": "Die Zeit ist um!",
+    "Nearly there. A little more and it's done!": "Fast geschafft. Noch ein bisschen, dann ist es fertig!",
+    "Well done, ": "Gut gemacht, ",
+    ". Everyone else, nearly there!": ". Alle anderen: fast geschafft!",
+    "Sounds": "Töne",
+    "Close": "Schließen",
     "Pinned": "Angeheftet",
     "App": "App",
     "Not on this TV": "Nicht auf diesem Fernseher",
@@ -258,6 +272,20 @@ var I18N = (function () {
   }
 
   var russian = {
+    "Tidy-up race!": "Гонка уборки!",
+    "Ready, set, go! When you're done, press OK on your face.": "На старт, внимание, марш! Кто закончил, нажмите OK на своём лице.",
+    "1st": "1-й",
+    "2nd": "2-й",
+    "3rd": "3-й",
+    "All tidy!": "Всё убрано!",
+    "Fastest tonight: ": "Быстрее всех сегодня: ",
+    "Well done!": "Молодцы!",
+    "Time's up!": "Время вышло!",
+    "Nearly there. A little more and it's done!": "Почти. Ещё чуть-чуть, и готово!",
+    "Well done, ": "Молодцы, ",
+    ". Everyone else, nearly there!": ". Остальные, почти готово!",
+    "Sounds": "Звуки",
+    "Close": "Закрыть",
     "Pinned": "Закреплённое",
     "App": "Приложение",
     "Not on this TV": "Нет на этом телевизоре",

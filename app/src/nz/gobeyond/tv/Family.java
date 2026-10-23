@@ -336,6 +336,7 @@ final class Family {
     static void apply(Context c, JSONObject home, JSONArray visitorsIn) {
         final JSONArray visitors = visitorsIn == null ? new JSONArray() : visitorsIn;
         board = home == null ? null : home.optJSONObject("board");
+        Tidy.apply(c, home == null ? null : home.optJSONObject("tidy"));
         widgets = home == null ? null : home.optJSONArray("widgets");
         jobs = jobsOf(home == null ? null : home.optJSONArray("people"));
         likes = likesOf(home == null ? null : home.optJSONArray("people"));
@@ -498,6 +499,16 @@ final class Family {
                     } catch (RuntimeException e) {
                         // Android may not let us open a screen over another app: say it instead.
                         say(app, Ui.tr("Hora de dormir", "Time for bed", "Hora de dormir"), "bedtime", "");
+                    }
+                });
+                break;
+            case "tidy":
+                final int tidyFor = cmd.optInt("minutes", Tidy.minutes(app));
+                MAIN.post(() -> {
+                    try {
+                        TidyActivity.open(app, tidyFor);
+                    } catch (RuntimeException e) {
+                        say(app, Ui.tr("Hora de arrumar!", "Tidy-up time!", "¡A ordenar!"), "tidy", "");
                     }
                 });
                 break;

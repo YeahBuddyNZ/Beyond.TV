@@ -668,7 +668,7 @@ public class SettingsActivity extends Activity {
 
         private static final String[] LANGUAGES = {"auto", "pt", "en", "es", "de", "ru"}, UNITS = {"auto", "C", "F"}, THEMES = {"auto", "light", "dark"},
                 SAVERS = {"auto", "art", "photos"};
-        /** Home Settings: language, temperature, theme, sounds, weather, city, te reo word, screensaver, kind of art, help fix problems, then
+        /** Home Settings: language, temperature, theme, sounds (the remote's clicks and the start chime), weather, city, te reo word, screensaver, kind of art, help fix problems, then
          *  (only in a build with show_crypto=true) the quotes widget and one row per coin. */
         private static final int CITY_ROW = 5, KUPU_ROW = 6, SAVER_ROW = 7, ART_ROW = 8, HELP_ROW = 9, QUOTES_ROW = 10,
                 COIN_ROWS = 11;
@@ -682,7 +682,7 @@ public class SettingsActivity extends Activity {
             l.add(Ui.tr("Idioma", "Language"));
             l.add(Ui.tr("Temperatura", "Temperature"));
             l.add(Ui.tr("Tema", "Theme"));
-            l.add(Ui.tr("Sons de navegação", "Navigation sounds"));
+            l.add(Ui.tr("Sons", "Sounds"));
             l.add(Ui.tr("Widget do clima", "Weather widget"));
             l.add(Ui.tr("Cidade", "City"));
             l.add(Ui.tr("Te reo maori", "Te reo Māori", "Te reo maorí"));

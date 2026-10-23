@@ -104,7 +104,7 @@ final class German {
             case "Automatic": return "Automatisch";
             case "Light": return "Hell";
             case "Dark": return "Dunkel";
-            case "Navigation sounds": return "Navigationstöne";
+            case "Sounds": return "Töne";
             case "Weather widget": return "Wetter-Widget";
             // What TalkBack reads on the drawer's weather card (#47)
             case ". High ": return ". Höchstwert ";
@@ -220,6 +220,19 @@ final class German {
             case "Dinner question: ": return "Frage zum Abendessen: ";
             case "Answer in Beyond Family on your phone. The answers come up together.": return "Antwortet in Beyond Family auf dem Handy. Die Antworten erscheinen zusammen.";
             case " answered the dinner question": return " hat die Frage beantwortet";
+            case "Tidy-up race!": return "Aufräum-Wettrennen!";
+            case "Ready, set, go! When you're done, press OK on your face.": return "Auf die Plätze, fertig, los! Wer fertig ist, drückt OK auf sein Gesicht.";
+            case "1st": return "1.";
+            case "2nd": return "2.";
+            case "3rd": return "3.";
+            case "All tidy!": return "Alles aufgeräumt!";
+            case "Fastest tonight: ": return "Am schnellsten heute: ";
+            case "Well done!": return "Gut gemacht!";
+            case "Time's up!": return "Die Zeit ist um!";
+            case "Nearly there. A little more and it's done!": return "Fast geschafft. Noch ein bisschen, dann ist es fertig!";
+            case "Well done, ": return "Gut gemacht, ";
+            case ". Everyone else, nearly there!": return ". Alle anderen: fast geschafft!";
+            case "Tidy-up time!": return "Zeit zum Aufräumen!";
             case "Close": return "Schließen";
             case "Animals": return "Tiere";
             case "Dinosaurs": return "Dinosaurier";

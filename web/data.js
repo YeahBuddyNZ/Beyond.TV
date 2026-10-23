@@ -50,6 +50,8 @@ var Prefs = (function () {
     // Crypto exists only in a build made with show_crypto=true; everywhere else it is gone, not just switched off.
     quotes: function () { return CONFIG.showCrypto === true && pick('quotes', true); },
     kupu: function () { return pick('kupu', true); },
+    /** The start chime (and the tidy-up race's sounds). On unless they turn it off. */
+    sounds: function () { return pick('sounds', true); },
     /** The screensaver: 'art' (paintings, like a Samsung Frame), 'photos' (the picks' film photos) or 'auto'. */
     screensaver: function () { return pick('screensaver', 'auto'); },
     /** Which art the screensaver shows (Art.KINDS ids): 'mixed' changes theme every day. */
