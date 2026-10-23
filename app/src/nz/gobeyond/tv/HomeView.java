@@ -179,8 +179,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
     private List<Recs.Pick> cards = new ArrayList<>();
     // The tabs (up to four), then the round buttons (five today). Room to spare: one past the end would crash the home
     // screen, the way a 13th row crashed Home Settings.
-    private final Spring[] topFocus = new Spring[12];
-    private final RectF[] topRects = new RectF[12];
+    private final Spring[] topFocus = new Spring[20];   // tabs (up to 6) and corner buttons (up to 7): room to grow
+    private final RectF[] topRects = new RectF[20];
     private final Spring[] cardFocus = new Spring[3];
     private final RectF[] cardRects = new RectF[3];
     private final List<HomeApps.Item> lightButtons = new ArrayList<>();
@@ -547,6 +547,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         if (!kid) lightButtons.add(HomeApps.action(HomeApps.FEEDBACK, "feedback", Ui.tr("Fale com a Beyond", "Talk to Beyond"), "dots"));
         lightButtons.add(HomeApps.action(HomeApps.LIVE_TV, "live", Ui.tr("TV aberta", "Live TV"), "live_tv"));
         if (!kid) lightButtons.add(HomeApps.action(HomeApps.INPUTS, "inputs", Ui.tr("Entradas HDMI", "HDMI Inputs"), "hdmi"));
+        // Party mode, for anyone with the remote: no phone needed (PartyPickActivity).
+        lightButtons.add(HomeApps.action(HomeApps.PARTY, "party", Ui.tr("Hora da festa!", "Party time!", "¡Hora de la fiesta!"), "party"));
         if (!kid) lightButtons.add(HomeApps.action(HomeApps.SETTINGS, "settings", Ui.tr("Configurações", "Settings"), "settings"));
         // Who's watching: their face and name (Family wears the four dots). Opens the picker (WhoActivity).
         lightButtons.add(HomeApps.action(HomeApps.PEOPLE, "people", Ui.tr("Trocar quem está assistindo", "Change who's watching", "Cambiar quién mira"), "person"));
@@ -2480,6 +2482,10 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         }
         if (it.kind == HomeApps.BEDTIME) {
             BedtimeActivity.open(activity, 15);
+            return;
+        }
+        if (it.kind == HomeApps.PARTY) {
+            PartyPickActivity.open(activity);
             return;
         }
         if ((it.kind == HomeApps.SETTINGS || it.kind == HomeApps.ANDROID_SETTINGS) && People.kid(activity)) {

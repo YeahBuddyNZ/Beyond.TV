@@ -219,8 +219,40 @@ var Party = (function () {
     return api;
   }
 
+  /**
+   * Party mode from the remote, for whoever hasn't got a phone: the Party button on the home screen asks what kind (a
+   * disco, or the birthday of anyone on this TV) and starts it for 30 minutes. Same as PartyPickActivity.java.
+   */
+  function choose() {
+    UI.open({
+      cls: 'bt-outside bt-party-pick',
+      build: function (layer, a) {
+        var box = UI.el('div', 'bt-box', layer);
+        UI.el('div', 'sun', box, '🎉');
+        UI.heading(box, tr('Hora da festa!', 'Party time!', '¡Hora de la fiesta!'), tr('Que tipo de festa?', 'What kind of party?', '¿Qué tipo de fiesta?'));
+        var row = UI.el('div', 'bt-buttons', box);
+        a.add(UI.button(row, '🕺  ' + tr('Discoteca', 'Disco', 'Disco'), null, 'primary'), function () {
+          a.close();
+          start({style: 'disco', minutes: 30});
+        }, {first: true});
+        var people = Profiles.list(), names = [];
+        for (var i = 0; i < people.length; i++) if (people[i].name && !people[i].together) names.push(people[i].name);
+        if (!names.length) return;
+        UI.el('div', 'bt-sub or', box, tr('Ou o aniversário de alguém', "Or someone's birthday", 'O el cumpleaños de alguien'));
+        var cakes = UI.el('div', 'bt-buttons cakes', box);
+        for (var j = 0; j < names.length; j++) (function (name) {
+          a.add(UI.button(cakes, '🎂  ' + name), function () {
+            a.close();
+            start({style: 'birthday', name: name, minutes: 30});
+          });
+        })(names[j]);
+      }
+    });
+  }
+
   return {
     start: start,
+    choose: choose,
     on: function () { return !!open; },
     stop: function () { if (open) open.close(); }
   };

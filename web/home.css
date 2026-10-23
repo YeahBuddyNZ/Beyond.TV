@@ -736,6 +736,10 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .bt-outside .bt-sub { max-width: 1000px; margin: 18px auto 0; }
 .bt-outside .bt-buttons { margin-top: 60px; text-align: center; }
 
+.bt-party-pick .bt-sub.or { margin-top: 56px; }
+.bt-party-pick .cakes { margin-top: 24px; }
+.bt-party-pick .cakes .bt-button { margin-bottom: 20px; }
+
 /* MARK: - Have the pets been fed? */
 .bt-pets .bt-box { position: absolute; left: 0; right: 0; top: 200px; text-align: center; }
 .bt-pets .faces { margin-bottom: 44px; }

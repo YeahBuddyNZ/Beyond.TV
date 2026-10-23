@@ -65,6 +65,8 @@ final class HomeApps {
     static final int SLEEP = 10;
     /** Bedtime breathing: the moon at night (BedtimeActivity). */
     static final int BEDTIME = 11;
+    /** Party mode: asks disco or whose birthday (PartyPickActivity), then the party. */
+    static final int PARTY = 12;
     /** Image size of each card (16:9; on screen it shows up to ~330 px wide). */
     static final int TILE_W = 384, TILE_H = 216;
 
