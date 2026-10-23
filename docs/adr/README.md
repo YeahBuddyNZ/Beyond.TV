@@ -28,3 +28,4 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0018](0018-messages-wait-for-ok.md) | Messages from Beyond Family wait for OK |
 | [0019](0019-teen-profiles.md) | Teen profiles, from the birthday in Beyond Family |
 | [0020](0020-karaoke-night.md) | Karaoke night |
+| [0021](0021-games-start-from-the-tv.md) | Games start from the TV |

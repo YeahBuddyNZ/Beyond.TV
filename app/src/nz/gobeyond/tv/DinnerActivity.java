@@ -154,16 +154,41 @@ public class DinnerActivity extends Activity {
         body.setGravity(Gravity.CENTER_HORIZONTAL);
         column.addView(body, new LinearLayout.LayoutParams(-1, -2));
 
+        // Run from the remote (ADR 0021): show the answers, then finish. Phones only answer.
+        LinearLayout buttons = new LinearLayout(this);
+        buttons.setGravity(Gravity.CENTER);
+        reveal = FeedbackActivity.button(this, Ui.tr("Mostrar as respostas", "Show the answers", "Mostrar las respuestas"), k, true);
+        reveal.setOnClickListener(v -> step("reveal"));
+        end = FeedbackActivity.button(this, Ui.tr("Terminar", "Finish", "Terminar"), k, false);
+        end.setOnClickListener(v -> step("end"));
         Button ok = FeedbackActivity.button(this, Ui.tr("Fechar", "Close", "Cerrar"), k, false);
         ok.setOnClickListener(v -> finish());
-        LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(-2, Math.round(84 * k));
+        for (Button b : new Button[] {reveal, end, ok}) {
+            LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(-2, Math.round(84 * k));
+            bp.leftMargin = bp.rightMargin = Math.round(10 * k);
+            buttons.addView(b, bp);
+        }
+        LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(-2, -2);
         bp.topMargin = Math.round(44 * k);
-        column.addView(ok, bp);
+        column.addView(buttons, bp);
 
         setContentView(root);
         showing = this;
         fill();
-        ok.requestFocus();
+        (reveal.getVisibility() == View.VISIBLE ? reveal : ok).requestFocus();
+    }
+
+    private Button reveal, end;
+    private boolean busy;
+
+    /** Ask Beyond Family to reveal or finish; the screen changes when its command comes back. */
+    private void step(String action) {
+        if (busy || ask == null) return;
+        busy = true;
+        Family.game(this, "question", action, err -> {
+            busy = false;
+            if (err != null) Toast.makeText(this, err, Toast.LENGTH_SHORT).show();
+        });
     }
 
     @Override protected void onDestroy() {
@@ -178,6 +203,9 @@ public class DinnerActivity extends Activity {
         }
         question.setText(ask.text);
         body.removeAllViews();
+        boolean linked = Family.linked(this);
+        reveal.setVisibility(linked && ask.answers == null ? View.VISIBLE : View.GONE);
+        end.setVisibility(linked ? View.VISIBLE : View.GONE);
         if (ask.answers == null) {
             sub.setText(Ui.tr("Responda no Beyond Family, no seu celular. As respostas aparecem juntas.",
                     "Answer in Beyond Family on your phone. The answers come up together.",

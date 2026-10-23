@@ -93,6 +93,8 @@
   opacity: 0.72;
 }
 .bt-face .name { margin-top: 26px; font-size: 32px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: rgba(247, 246, 242, 0.75); }
+.bt-faces.rows .bt-face .name { margin-top: 12px; font-size: 24px; }
+.bt-faces.rows .bt-face .edit { margin-top: 2px; font-size: 18px; white-space: nowrap; }
 .bt-face .edit { margin-top: 6px; font-size: 22px; font-weight: 500; color: rgba(247, 246, 242, 0.5); }
 .bt-face.focus { opacity: 1; -webkit-transform: translateY(-14px) scale(1.12); transform: translateY(-14px) scale(1.12); }
 .bt-face.focus .avatar { box-shadow: 0 0 0 6px #121210, 0 0 0 11px #F7F6F2, 0 28px 60px rgba(0, 0, 0, 0.6); }

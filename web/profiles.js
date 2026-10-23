@@ -176,13 +176,22 @@ var Profiles = (function () {
         UI.el('span', '', hello, manage ? tr('Perfis', 'Profiles', 'Perfiles') : tr('Quem está assistindo?', "Who's watching?", '¿Quién está viendo?'));
         var row = UI.el('div', 'bt-faces', layer);
         var all = manage || list.length < 2 ? list.slice() : [find(FAMILY.id)].concat(list);
-        var n = all.length + (manage ? 1 : 0), size = n > 5 ? 170 : 200, gap = n > 5 ? 52 : 70;
-        var width = n * size + (n - 1) * gap, left = (1920 - width) / 2;
+        // Everyone on one screen: smaller faces for a big family, then two or three rows, never a scroll.
+        var n = all.length + (manage ? 1 : 0), rows = n <= 7 ? 1 : n <= 14 ? 2 : 3, across = Math.ceil(n / rows);
+        var size = rows === 3 ? 105 : rows === 2 ? 140 : n > 5 ? 170 : 200, gap = rows > 1 ? 44 : n > 5 ? 52 : 70;
+        var rowH = size + (rows === 3 ? 70 : 90), lastAcross = n - (rows - 1) * across;
+        if (rows > 1) { row.style.top = rows === 3 ? '320px' : '350px'; row.className += ' rows'; }
+        function spot(f, i) {
+          var r = Math.floor(i / across), inRow = r === rows - 1 ? lastAcross : across;
+          var left = (1920 - (inRow * size + (inRow - 1) * gap)) / 2;
+          f.style.left = (left + (i - r * across) * (size + gap)) + 'px';
+          f.style.top = (r * rowH) + 'px';
+          f.style.width = size + 'px';
+        }
         for (var i = 0; i < all.length; i++) {
           (function (p, i) {
             var f = UI.el('div', 'bt-face', row);
-            f.style.left = (left + i * (size + gap)) + 'px';
-            f.style.width = size + 'px';
+            spot(f, i);
             UI.avatar(p, f, size);
             UI.el('div', 'name', f, p.name);
             if (p.together) UI.el('div', 'edit', f, tr('Todos juntos', 'Everyone together', 'Todos juntos'));
@@ -195,8 +204,7 @@ var Profiles = (function () {
         }
         if (manage) {
           var add = UI.el('div', 'bt-face add', row);
-          add.style.left = (left + all.length * (size + gap)) + 'px';
-          add.style.width = size + 'px';
+          spot(add, all.length);
           var plus = UI.el('div', 'avatar plus', add);
           plus.style.width = plus.style.height = size + 'px';
           plus.style.borderRadius = (size / 2) + 'px';

@@ -18,7 +18,6 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -103,21 +102,33 @@ public class WhoActivity extends Activity {
         return b;
     }
 
-    /** A row of faces that scrolls sideways when there are many people. */
-    private LinearLayout faces(LinearLayout parent) {
-        HorizontalScrollView scroll = new HorizontalScrollView(this);
-        scroll.setHorizontalScrollBarEnabled(false);
-        scroll.setClipChildren(false);
-        scroll.setClipToPadding(false);
-        LinearLayout r = new LinearLayout(this);
-        r.setGravity(Gravity.CENTER);
-        r.setClipChildren(false);
-        r.setPadding(Math.round(60 * k), Math.round(70 * k), Math.round(60 * k), Math.round(30 * k));
-        scroll.addView(r, new FrameLayout.LayoutParams(-2, -2));
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-2, -2);
-        lp.gravity = Gravity.CENTER_HORIZONTAL;
-        parent.addView(scroll, lp);
-        return r;
+    /** Faces per row: one row while they fit at a readable size, then two or three rows, so nobody needs a scroll. */
+    static int perRow(int n) {
+        int rows = n <= 7 ? 1 : n <= 14 ? 2 : 3;
+        return (n + rows - 1) / rows;
+    }
+
+    /** How big each face is drawn: room to spare for a few, smaller so a whole row fits the 1800 px it has. */
+    static float fit(int n, float most) {
+        int across = perRow(n), rows = (n + across - 1) / Math.max(1, across);
+        float wide = 1800f / (across * 300f), tall = rows == 1 ? most : rows == 2 ? 0.72f : 0.5f;
+        return Math.max(0.45f, Math.min(most, Math.min(wide, tall)));
+    }
+
+    /** The faces in rows that fit the screen. Rows come back in order; fill each with up to perRow(n) faces. */
+    private LinearLayout[] faceRows(LinearLayout parent, int n, float big) {
+        int across = perRow(n), count = (n + across - 1) / Math.max(1, across);
+        LinearLayout[] rows = new LinearLayout[Math.max(1, count)];
+        for (int i = 0; i < rows.length; i++) {
+            LinearLayout r = new LinearLayout(this);
+            r.setGravity(Gravity.CENTER);
+            r.setClipChildren(false);
+            // Room above for a focused face to grow into.
+            r.setPadding(Math.round(60 * k), Math.round((i == 0 ? 70 : 24) * k * Math.max(big, 0.6f)), Math.round(60 * k), 0);
+            parent.addView(r, new LinearLayout.LayoutParams(-1, -2));
+            rows[i] = r;
+        }
+        return rows;
     }
 
     private Face face(LinearLayout row, People.Person p, String under, View.OnClickListener run) {
@@ -138,14 +149,16 @@ public class WhoActivity extends Activity {
 
     private void pick() {
         LinearLayout c = page(Ui.tr("Quem está assistindo?", "Who's watching?"), null);
-        LinearLayout row = faces(c);
         People.Person now = People.current(this);
         Face first = null;
         java.util.List<People.Person> choices = People.choices(this);
-        // A few faces get the room a few faces deserve; a full house keeps them at the size that fits a row.
-        float big = choices.size() <= 2 ? 1.35f : choices.size() <= 4 ? 1.15f : 1f;
-        for (People.Person p : choices) {
-            Face f = face(row, p, p.together() ? Ui.tr("Todos juntos", "Everyone together") : null, v -> choose(p), big);
+        // A few faces get the room a few faces deserve; a big family gets smaller faces, then rows, all on one screen.
+        int n = choices.size();
+        float big = fit(n, n <= 2 ? 1.35f : n <= 4 ? 1.15f : 1f);
+        LinearLayout[] rows = faceRows(c, n, big);
+        for (int i = 0; i < n; i++) {
+            People.Person p = choices.get(i);
+            Face f = face(rows[i / perRow(n)], p, p.together() ? Ui.tr("Todos juntos", "Everyone together") : null, v -> choose(p), big);
             if (p.id.equals(now.id)) first = f;
         }
         LinearLayout foot = row(c, 40);
@@ -199,17 +212,21 @@ public class WhoActivity extends Activity {
     private void manage() {
         LinearLayout c = page(Ui.tr("Pessoas", "People"), Ui.tr("Escolha alguém para mudar, ou adicione alguém.",
                 "Pick someone to change, or add someone."));
-        LinearLayout row = faces(c);
+        List<People.Person> list = People.list(this);
+        int n = list.size() + 1;
+        float big = fit(n, 1f);
+        LinearLayout[] rows = faceRows(c, n, big);
         Face first = null;
-        for (People.Person p : People.list(this)) {
-            Face f = face(row, p, Ui.tr("Editar", "Edit"), v -> edit(p));
+        for (int i = 0; i < list.size(); i++) {
+            People.Person p = list.get(i);
+            Face f = face(rows[i / perRow(n)], p, Ui.tr("Editar", "Edit"), v -> edit(p), big);
             if (first == null) first = f;
         }
         People.Person plus = new People.Person();
         plus.id = "+";
         plus.name = "+";
         plus.colour = 0x33FFFFFF;
-        face(row, plus, Ui.tr("Adicionar", "Add someone"), v -> edit(null));
+        face(rows[(n - 1) / perRow(n)], plus, Ui.tr("Adicionar", "Add someone"), v -> edit(null), big);
         LinearLayout foot = row(c, 40);
         add(foot, People.hasPin(this) ? Ui.tr("Mudar o PIN de adulto", "Change the grown-up PIN")
                 : Ui.tr("Criar um PIN de adulto", "Set a grown-up PIN"), false, v -> setPin());

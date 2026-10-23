@@ -547,8 +547,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         if (!kid) lightButtons.add(HomeApps.action(HomeApps.FEEDBACK, "feedback", Ui.tr("Fale com a Beyond", "Talk to Beyond"), "dots"));
         lightButtons.add(HomeApps.action(HomeApps.LIVE_TV, "live", Ui.tr("TV aberta", "Live TV"), "live_tv"));
         if (!kid) lightButtons.add(HomeApps.action(HomeApps.INPUTS, "inputs", Ui.tr("Entradas HDMI", "HDMI Inputs"), "hdmi"));
-        // Party mode, for anyone with the remote: no phone needed (PartyPickActivity).
-        lightButtons.add(HomeApps.action(HomeApps.PARTY, "party", Ui.tr("Hora da festa!", "Party time!", "¡Hora de la fiesta!"), "party"));
+        // Games, for anyone with the remote: karaoke, a party, quiz night and the rest, no phone needed (GamesActivity).
+        lightButtons.add(HomeApps.action(HomeApps.GAMES, "games", Ui.tr("Jogos", "Games", "Juegos"), "gamepad"));
         if (!kid) lightButtons.add(HomeApps.action(HomeApps.SETTINGS, "settings", Ui.tr("Configurações", "Settings"), "settings"));
         // Who's watching: their face and name (Family wears the four dots). Opens the picker (WhoActivity).
         lightButtons.add(HomeApps.action(HomeApps.PEOPLE, "people", Ui.tr("Trocar quem está assistindo", "Change who's watching", "Cambiar quién mira"), "person"));
@@ -2486,6 +2486,10 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         }
         if (it.kind == HomeApps.PARTY) {
             PartyPickActivity.open(activity);
+            return;
+        }
+        if (it.kind == HomeApps.GAMES) {
+            GamesActivity.open(activity);
             return;
         }
         if ((it.kind == HomeApps.SETTINGS || it.kind == HomeApps.ANDROID_SETTINGS) && People.kid(activity)) {

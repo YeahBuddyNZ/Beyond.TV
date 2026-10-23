@@ -149,16 +149,41 @@ public class QuizActivity extends Activity {
         sub.setPadding(0, Math.round(24 * k), 0, 0);
         column.addView(sub, new LinearLayout.LayoutParams(-1, -2));
 
+        // Run from the remote (ADR 0021): show the answer, the next question, finish. Phones only buzz in.
+        LinearLayout buttons = new LinearLayout(this);
+        buttons.setGravity(Gravity.CENTER);
+        act = FeedbackActivity.button(this, "", k, true);
+        act.setOnClickListener(v -> step(game != null && game.answer < 0 ? "reveal" : "next"));
+        end = FeedbackActivity.button(this, Ui.tr("Terminar o quiz", "Finish the quiz", "Terminar el quiz"), k, false);
+        end.setOnClickListener(v -> step("end"));
         Button ok = FeedbackActivity.button(this, Ui.tr("Fechar", "Close", "Cerrar"), k, false);
         ok.setOnClickListener(v -> finish());
-        LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(-2, Math.round(80 * k));
+        for (Button b : new Button[] {act, end, ok}) {
+            LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(-2, Math.round(80 * k));
+            bp.leftMargin = bp.rightMargin = Math.round(10 * k);
+            buttons.addView(b, bp);
+        }
+        LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(-2, -2);
         bp.topMargin = Math.round(30 * k);
-        column.addView(ok, bp);
+        column.addView(buttons, bp);
 
         setContentView(root);
         showing = this;
         fill();
-        ok.requestFocus();
+        (act.getVisibility() == View.VISIBLE ? act : ok).requestFocus();
+    }
+
+    private Button act, end;
+    private boolean busy;
+
+    /** Ask Beyond Family to move the quiz on; the screen changes when its command comes back. */
+    private void step(String action) {
+        if (busy || game == null) return;
+        busy = true;
+        Family.game(this, "quiz", action, err -> {
+            busy = false;
+            if (err != null) Toast.makeText(this, err, Toast.LENGTH_SHORT).show();
+        });
     }
 
     @Override protected void onDestroy() {
@@ -173,6 +198,12 @@ public class QuizActivity extends Activity {
             return;
         }
         body.removeAllViews();
+        boolean linked = Family.linked(this);
+        act.setVisibility(linked && !game.done ? View.VISIBLE : View.GONE);
+        end.setVisibility(linked && !game.done ? View.VISIBLE : View.GONE);
+        act.setText(game.answer < 0 ? Ui.tr("Mostrar a resposta", "Show the answer", "Mostrar la respuesta")
+                : game.round >= game.total ? Ui.tr("Ver o placar", "See the scores", "Ver la puntuación")
+                : Ui.tr("Próxima pergunta", "Next question", "Siguiente pregunta"));
         String name = Ui.tr("Quiz da noite", "Quiz night", "Noche de quiz");
         if (game.done) {
             title.setText("🏆  " + name);

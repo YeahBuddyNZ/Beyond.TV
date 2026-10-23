@@ -749,6 +749,12 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .bt-karaoke-player .hint { position: absolute; right: 48px; top: 36px; font-size: 26px; color: rgba(255,255,255,0.7); opacity: 1; transition: opacity 1s; }
 .bt-party-pick .cakes { margin-top: 24px; }
 .bt-party-pick .cakes .bt-button { margin-bottom: 20px; }
+.bt-games .cakes { max-width: 1500px; margin-left: auto; margin-right: auto; }
+.bt-karaoke-pick .bt-box { top: 110px; }
+.bt-karaoke-pick .songs { max-width: 1700px; margin-left: auto; margin-right: auto; }
+.bt-karaoke-pick .songs .bt-button { margin-bottom: 16px; }
+.bt-karaoke-pick .bt-keyboard { margin: 40px auto 0; }
+.bt-dinner .bt-buttons { margin-top: 40px; text-align: center; }
 
 /* MARK: - Have the pets been fed? */
 .bt-pets .bt-box { position: absolute; left: 0; right: 0; top: 200px; text-align: center; }

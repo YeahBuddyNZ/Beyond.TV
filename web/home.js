@@ -256,8 +256,8 @@
     }});
     // Bedtime breathing, in the evening: a night light that breathes, then fades to dark.
     if (Data.isNight(Date.now())) list.push({icon: 'bedtime', label: tr('Respirar para dormir', 'Bedtime breathing', 'Respirar para dormir'), run: function () { Bedtime.start(15); }});
-    // Party mode, for anyone with the remote: no phone needed.
-    list.push({icon: 'party', label: tr('Hora da festa!', 'Party time!', '¡Hora de la fiesta!'), run: function () { Party.choose(); }});
+    // Games, for anyone with the remote: karaoke, a party, quiz night and the rest, no phone needed (games.js).
+    list.push({icon: 'gamepad', label: tr('Jogos', 'Games', 'Juegos'), run: function () { Games.open(); }});
     if (!kid) list.push({icon: 'settings', label: tr('Ajustes', 'Settings', 'Ajustes'), run: function () { openSettings(); }});
     if (kid) list.push({icon: 'sparkles', label: tr('Do seu jeito', 'Make it yours', 'A tu manera'), run: makeItYours});
     if (Profiles.count() > 1 || window.Family) list.push({person: Profiles.current(), label: tr('Trocar quem está assistindo', 'Change who\'s watching', 'Cambiar quién mira'),
