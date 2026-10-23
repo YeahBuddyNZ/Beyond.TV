@@ -125,6 +125,14 @@ final class Prefs {
 
     static void setScreensaver(String v) { put("screensaver", v); }
 
+    /** Minutes of nobody pressing anything on the home screen before the screensaver comes on (SaverActivity). */
+    static int saverAfter() { return sp().getInt("saverAfter", 3); }
+
+    static void setSaverAfter(int minutes) {
+        sp().edit().putInt("saverAfter", minutes).apply();
+        version++;
+    }
+
     /** Which art the screensaver shows (Art.KINDS ids): "mixed" changes theme every day. */
     static String artKind() { return sp().getString("artKind", "mixed"); }
 

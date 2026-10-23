@@ -229,8 +229,8 @@ public class SettingsActivity extends Activity {
                                 : freeActive() ? "Beyond™ TV" : Ui.tr("Original", "Original");
                         return Ui.tr("Início, ", "Home Screen, ") + value;
                     }
-                    String[] names = {Ui.tr("Tela de Descanso, ver agora", "Screensaver, preview"), Ui.tr("Ajustes do Início", "Home Settings"),
-                            Ui.tr("Prateleira", "Shelf"), Ui.tr("Botões do Controle", "Remote Buttons"),
+                    String[] names = {Ui.tr("Tela de Descanso, ver agora", "Screensaver, preview"), Ui.tr("Ajustes do Beyond™ TV", "Beyond™ TV Settings"),
+                            Ui.tr("Dock de apps", "App Dock"), Ui.tr("Botões do Controle", "Remote Buttons"),
                             Ui.tr("Atualizações, ", "Updates, ") + Updater.status(getContext()),
                             "Beyond Family, " + (Family.linked(getContext()) ? Family.homeName(getContext()) : Ui.tr("Ligar", "Link")),
                             Ui.tr("Ajustes da TV", "TV Settings")};
@@ -263,8 +263,8 @@ public class SettingsActivity extends Activity {
                     if (at >= shelfRows.size()) return "";
                     String[] app = shelfRows.get(at);
                     int place = shelfOrder.indexOf(app[0]);
-                    return app[1] + ", " + (place >= 0 ? Ui.tr("na prateleira, posição ", "on the shelf, place ") + (place + 1)
-                            : Ui.tr("fora da prateleira", "not on the shelf"));
+                    return app[1] + ", " + (place >= 0 ? Ui.tr("no dock, posição ", "in the App Dock, place ") + (place + 1)
+                            : Ui.tr("fora do dock", "not in the App Dock"));
                 }
                 default:
                     return "";
@@ -402,7 +402,7 @@ public class SettingsActivity extends Activity {
             String busyText = busyText();
             String mode = freeActive() ? "Beyond™ TV" : Ui.tr("Original", "Original");
             String[] labels = {Ui.tr("Início", "Home Screen"), Ui.tr("Tela de Descanso", "Screensaver"),
-                    Ui.tr("Ajustes do Início", "Home Settings"), Ui.tr("Prateleira", "Shelf"),
+                    Ui.tr("Ajustes do Beyond™ TV", "Beyond™ TV Settings"), Ui.tr("Dock de apps", "App Dock"),
                     Ui.tr("Botões do Controle", "Remote Buttons"), Ui.tr("Atualizações", "Updates"), "Beyond Family",
                     Ui.tr("Ajustes da TV", "TV Settings")};
             String[] values = {working ? "" : mode, Ui.tr("Ver agora", "Preview"), "", "", "",
@@ -679,12 +679,19 @@ public class SettingsActivity extends Activity {
 
         // MARK: - Home Settings and Remote Buttons
 
-        private static final String[] LANGUAGES = {"auto", "pt", "en", "es", "de", "ru"}, UNITS = {"auto", "C", "F"}, THEMES = {"auto", "light", "dark"},
+        // Te reo Māori is a choice of language: "mi" is English with the word of the day and "Kia ora" (Prefs.kupu).
+        private static final String[] LANGUAGES = {"auto", "mi", "en", "de", "es", "pt", "ru"}, UNITS = {"auto", "C", "F"}, THEMES = {"auto", "light", "dark"},
                 SAVERS = {"auto", "art", "photos"};
-        /** Home Settings: language, temperature, theme, sounds (the remote's clicks and the start chime), weather, city, te reo word, screensaver, kind of art, help fix problems, then
+        private static final int[] SAVER_MINUTES = {1, 3, 5, 10, 15, 30};
+        /** Home Settings: language, temperature, theme, sounds (the remote's clicks and the start chime), weather, city, screensaver after, screensaver, kind of art, help fix problems, then
          *  (only in a build with show_crypto=true) the quotes widget and one row per coin. */
-        private static final int CITY_ROW = 5, KUPU_ROW = 6, SAVER_ROW = 7, ART_ROW = 8, HELP_ROW = 9, QUOTES_ROW = 10,
+        private static final int CITY_ROW = 5, SAVER_AFTER_ROW = 6, SAVER_ROW = 7, ART_ROW = 8, HELP_ROW = 9, QUOTES_ROW = 10,
                 COIN_ROWS = 11;
+
+        private static String languageChoice() {
+            String lang = Prefs.language();
+            return lang.equals("en") && Prefs.kupu() ? "mi" : lang;
+        }
 
         private boolean dollar() {
             return "BRL".equalsIgnoreCase(Config.CURRENCY.trim());
@@ -698,7 +705,7 @@ public class SettingsActivity extends Activity {
             l.add(Ui.tr("Sons", "Sounds"));
             l.add(Ui.tr("Widget do clima", "Weather widget"));
             l.add(Ui.tr("Cidade", "City"));
-            l.add(Ui.tr("Te reo maori", "Te reo Māori", "Te reo maorí"));
+            l.add(Ui.tr("Protetor de tela após", "Screensaver after"));
             l.add(Ui.tr("Protetor de tela", "Screensaver"));
             l.add(Ui.tr("Tipo de arte", "Kind of art"));
             l.add(Ui.tr("Ajudar a corrigir problemas", "Help fix problems"));
@@ -716,9 +723,9 @@ public class SettingsActivity extends Activity {
         private String[] settingValues() {
             String[] labels = settingLabels();
             String[] v = new String[labels.length];
-            String lang = Prefs.language();
-            v[0] = lang.equals("pt") ? "Português" : lang.equals("en") ? "English" : lang.equals("es") ? "Español"
-                    : lang.equals("de") ? "Deutsch" : lang.equals("ru") ? "Русский" : Ui.tr("Automático", "Automatic");
+            String lang = languageChoice();
+            v[0] = lang.equals("mi") ? "English and te reo Māori" : lang.equals("pt") ? "Português" : lang.equals("en") ? "English"
+                    : lang.equals("es") ? "Español" : lang.equals("de") ? "Deutsch" : lang.equals("ru") ? "Русский" : Ui.tr("Automático", "Automatic");
             String unit = Prefs.temperature();
             v[1] = unit.equals("C") ? "°C" : unit.equals("F") ? "°F" : Ui.tr("Automática", "Automatic");
             String theme = Prefs.theme();
@@ -726,7 +733,7 @@ public class SettingsActivity extends Activity {
             v[3] = onOff(Prefs.sounds());
             v[4] = onOff(Prefs.weather());
             v[CITY_ROW] = !cityStatus.isEmpty() ? cityStatus : Prefs.city().isEmpty() ? "–" : Prefs.city();
-            v[KUPU_ROW] = onOff(Prefs.kupu());
+            v[SAVER_AFTER_ROW] = Prefs.saverAfter() + " min";
             String saver = Prefs.screensaver();
             v[SAVER_ROW] = saver.equals("art") ? Ui.tr("Arte", "Art") : saver.equals("photos") ? Ui.tr("Fotos de filmes", "Film photos")
                     : Prefs.art() ? Ui.tr("Automático (arte)", "Automatic (art)") : Ui.tr("Automático (fotos)", "Automatic (photos)");
@@ -803,8 +810,10 @@ public class SettingsActivity extends Activity {
             }
             switch (focus) {
                 case 0: {
-                    int at = java.util.Arrays.asList(LANGUAGES).indexOf(Prefs.language());
-                    Prefs.setLanguage(LANGUAGES[(at + dir + LANGUAGES.length) % LANGUAGES.length]);
+                    int at = java.util.Arrays.asList(LANGUAGES).indexOf(languageChoice());
+                    String next = LANGUAGES[(at + dir + LANGUAGES.length) % LANGUAGES.length];
+                    Prefs.setKupu(next.equals("mi") || next.equals("auto"));
+                    Prefs.setLanguage(next.equals("mi") ? "en" : next);
                     break;
                 }
                 case 1: {
@@ -820,7 +829,12 @@ public class SettingsActivity extends Activity {
                 case 3: Prefs.setSounds(!Prefs.sounds()); break;
                 case 4: Prefs.setWeather(!Prefs.weather()); break;
                 case CITY_ROW: return;
-                case KUPU_ROW: Prefs.setKupu(!Prefs.kupu()); break;
+                case SAVER_AFTER_ROW: {
+                    int at = 0;
+                    for (int i = 0; i < SAVER_MINUTES.length; i++) if (SAVER_MINUTES[i] == Prefs.saverAfter()) at = i;
+                    Prefs.setSaverAfter(SAVER_MINUTES[(at + dir + SAVER_MINUTES.length) % SAVER_MINUTES.length]);
+                    break;
+                }
                 case SAVER_ROW: {
                     int at = java.util.Arrays.asList(SAVERS).indexOf(Prefs.screensaver());
                     Prefs.setScreensaver(SAVERS[(at + dir + SAVERS.length) % SAVERS.length]);
@@ -961,7 +975,7 @@ public class SettingsActivity extends Activity {
 
         private void drawShelfEditor(Canvas c) {
             Paint heading = Ui.text(Ui.displaySemibold, 34 * k, 0xFFFFFFFF);
-            c.drawText(Ui.tr("Prateleira", "Shelf"), LIST_X * k + 30 * k, (LIST_TOP - 24) * k, heading);
+            c.drawText(Ui.tr("Dock de apps", "App Dock"), LIST_X * k + 30 * k, (LIST_TOP - 24) * k, heading);
             int rows = rowCount();
             for (int i = 0; i < rows; i++) {
                 String[] app = shelfRows.get(pickScroll + i);
@@ -1036,7 +1050,7 @@ public class SettingsActivity extends Activity {
             String[] labels = keys ? keyLabels() : settingLabels();
             String[] values = keys ? keyValues() : settingValues();
             Paint heading = Ui.text(Ui.displaySemibold, 34 * k, 0xFFFFFFFF);
-            c.drawText(keys ? Ui.tr("Botões do Controle", "Remote Buttons") : Ui.tr("Ajustes do Início", "Home Settings"),
+            c.drawText(keys ? Ui.tr("Botões do Controle", "Remote Buttons") : Ui.tr("Ajustes do Beyond™ TV", "Beyond™ TV Settings"),
                     LIST_X * k + 30 * k, (LIST_TOP - 24) * k, heading);
             float pitch = listPitch();
             for (int i = 0; i < labels.length; i++) {

@@ -1,6 +1,6 @@
 /*
  * On-screen text in Portuguese, English, Spanish, German and Russian (the same copy as the Android app).
- * tr(pt, en, es): the text in the current language. The language follows the TV unless set in Home Settings.
+ * tr(pt, en, es): the text in the current language. The language follows the TV unless set in Beyond™ TV Settings.
  */
 var I18N = (function () {
   'use strict';
@@ -76,11 +76,12 @@ var I18N = (function () {
     "The TV turns off in ": "Der Fernseher geht aus in ",
     "The TV turns off in a minute. Sleep Timer in the menu stops it.": "Der Fernseher geht in einer Minute aus. Ausschalt-Timer im Menü hält ihn an.",
     "Screensaver": "Bildschirmschoner",
+    "Screensaver after": "Bildschirmschoner nach",
     "Art": "Kunst",
     "Film photos": "Filmfotos",
     "Automatic (art)": "Automatisch (Kunst)",
     "Automatic (photos)": "Automatisch (Fotos)",
-    "Home Settings": "Startbildschirm",
+    "Beyond™ TV Settings": "Beyond™ TV-Einstellungen",
     "TV Settings": "TV-Einstellungen",
     "HDMI Inputs": "HDMI-Eingänge",
     "Inputs": "Eingänge",
@@ -157,7 +158,8 @@ var I18N = (function () {
     "Off. Beyond forgets this TV.": "Aus. Beyond vergisst diesen Fernseher.",
     "On": "An",
     "Off": "Aus",
-    "Shelf": "Leiste",
+    "App Dock": "App-Dock",
+    "App Dock for ": "App-Dock für ",
     "On · ": "In der Leiste · ",
     "OK or the arrows change the value.": "OK oder die Pfeiltasten ändern den Wert.",
     "OK adds or removes · ← → change the order": "OK fügt hinzu oder entfernt · ← → verschieben",
@@ -266,8 +268,8 @@ var I18N = (function () {
     if (m) return m[1] + (m[1] === '1' ? ' Staffel' : ' Staffeln');
     m = /^H:(\S+)(\s+)L:(\S+)$/.exec(en);
     if (m) return 'H:' + m[1] + m[2] + 'T:' + m[3];
-    m = /^The shelf holds up to (\d+) apps\.$/.exec(en);
-    if (m) return 'In die Leiste passen bis zu ' + m[1] + ' Apps.';
+    m = /^The App Dock holds up to (\d+) apps\.$/.exec(en);
+    if (m) return 'Ins App-Dock passen bis zu ' + m[1] + ' Apps.';
     return en;
   }
 
@@ -341,11 +343,12 @@ var I18N = (function () {
     "The TV turns off in ": "Телевизор выключится через ",
     "The TV turns off in a minute. Sleep Timer in the menu stops it.": "Телевизор выключится через минуту. Таймер сна в меню остановит его.",
     "Screensaver": "Заставка",
+    "Screensaver after": "Заставка через",
     "Art": "Искусство",
     "Film photos": "Кадры из фильмов",
     "Automatic (art)": "Автоматически (искусство)",
     "Automatic (photos)": "Автоматически (кадры)",
-    "Home Settings": "Главный экран",
+    "Beyond™ TV Settings": "Настройки Beyond™ TV",
     "TV Settings": "Настройки ТВ",
     "HDMI Inputs": "Входы HDMI",
     "Inputs": "Входы",
@@ -422,7 +425,8 @@ var I18N = (function () {
     "Off. Beyond forgets this TV.": "Выключено. Beyond забудет этот телевизор.",
     "On": "Вкл.",
     "Off": "Выкл.",
-    "Shelf": "Избранные приложения",
+    "App Dock": "Панель приложений",
+    "App Dock for ": "Панель приложений: ",
     "OK or the arrows change the value.": "Нажмите OK или стрелки, чтобы изменить значение.",
     "Explore": "Обзор",
     "Movies": "Фильмы",
@@ -535,8 +539,8 @@ var I18N = (function () {
     if (m) return m[1] + ' ч назад';
     m = /^(\d+) (min|h) ago$/.exec(en);
     if (m) return m[1] + (m[2] === 'min' ? ' мин назад' : ' ч назад');
-    m = /^The shelf holds up to (\d+) apps\.$/.exec(en);
-    if (m) return 'В избранное можно добавить не более ' + m[1] + ' приложений.';
+    m = /^The App Dock holds up to (\d+) apps\.$/.exec(en);
+    if (m) return 'На панель приложений можно добавить не более ' + m[1] + ' приложений.';
     return en;
   }
 

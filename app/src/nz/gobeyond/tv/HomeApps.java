@@ -234,7 +234,7 @@ final class HomeApps {
         List<Item> items = new ArrayList<>();
         items.add(shortcut(ALL_APPS, "all", Ui.tr("Todos os Apps", "All Apps"), "apps"));
         items.add(shortcut(SLEEP, "sleep", Ui.tr("Timer de desligar", "Sleep Timer"), "bedtime"));
-        items.add(shortcut(SETTINGS, "settings", Ui.tr("Ajustes do Início", "Home Settings"), "settings"));
+        items.add(shortcut(SETTINGS, "settings", Ui.tr("Ajustes do Beyond™ TV", "Beyond™ TV Settings"), "settings"));
         items.add(shortcut(ANDROID_SETTINGS, "tv-settings", Ui.tr("Ajustes da TV", "TV Settings"), "tv_settings"));
         return items;
     }

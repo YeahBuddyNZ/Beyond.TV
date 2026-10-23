@@ -17,7 +17,7 @@ final class Spanish {
             case "Automatic (art)": return "Automático (arte)";
             case "Automatic (photos)": return "Automático (fotos)";
             case "ART": return "ARTE";
-            case "Home Settings": return "Ajustes de inicio";
+            case "Beyond™ TV Settings": return "Ajustes de Beyond™ TV";
             case "TV Settings": return "Ajustes del TV";
             case "HDMI Inputs": return "Entradas HDMI";
             case "Inputs": return "Entradas";
@@ -48,6 +48,7 @@ final class Spanish {
             case "Your TV's home screen and screensaver": return "Pantalla de inicio y protector de pantalla del TV";
             case "Home Screen": return "Pantalla de inicio";
             case "Screensaver": return "Protector de pantalla";
+            case "Screensaver after": return "Protector de pantalla tras";
             case "Preview": return "Ver ahora";
             case "On the TV: tick “Always allow” and press OK.": return "En el TV: marca “Permitir siempre” y presiona OK.";
             case "RECOMMENDATIONS": return "RECOMENDACIONES";
@@ -195,9 +196,9 @@ final class Spanish {
             case "Once a day: your city, the TV's model and its errors. Never what you watch.": return "Una vez al día: tu ciudad, el modelo de la TV y sus errores. Nunca lo que ves.";
             case "On": return "Activado";
             case "Off": return "Desactivado";
-            case "Shelf": return "Estante";
-            case "on the shelf, place ": return "en el estante, posición ";
-            case "not on the shelf": return "fuera del estante";
+            case "App Dock": return "Dock de apps";
+            case "in the App Dock, place ": return "en el dock, posición ";
+            case "not in the App Dock": return "fuera del dock";
             case "Remote Buttons": return "Botones del control";
             case "Netflix button": return "Botón Netflix";
             case "YouTube button": return "Botón YouTube";
