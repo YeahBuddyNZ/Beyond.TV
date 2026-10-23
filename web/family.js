@@ -50,6 +50,7 @@ var Family = (function () {
     var was = linked();
     state = {};
     board = null;
+    songs = [];
     widgets = [];
     widgetsSig = '[]';
     save();
@@ -67,6 +68,8 @@ var Family = (function () {
   var widgets = [], widgetsSig = '[]';
   // The household's pets and whether each still wants a meal, for the kids' "did they get fed?" (pets.js).
   var pets = null;
+  /** The family's karaoke songs, for picking on the TV: [{id, title, artist, videoId}]. */
+  var songs = [];
 
   /** One of Beyond Family's people, as a profile here. */
   function person(p, visitor) {
@@ -96,6 +99,7 @@ var Family = (function () {
       }
       var hadPets = pets !== null;
       pets = home.pets || [];
+      songs = home.songs || [];
       if (!hadPets && window.Pets) setTimeout(Pets.arrived, 0);
     }
     var had = !!state.visiting;
@@ -613,7 +617,17 @@ var Family = (function () {
             UI.el('div', 'name', face, ask.answered[f].name);
           }
         }
-        a.add(UI.el('div', 'hold', layer), null, {first: true});
+        // Run from the remote (ADR 0021): show the answers, then finish. Phones only answer.
+        var row = UI.el('div', 'bt-buttons', box), first = true;
+        if (linked() && !ask.answers) {
+          a.add(UI.button(row, tr('Mostrar as respostas', 'Show the answers', 'Mostrar las respuestas'), null, 'primary'), function () { play('question', 'reveal'); }, {first: true});
+          first = false;
+        }
+        if (linked()) {
+          a.add(UI.button(row, tr('Terminar', 'Finish', 'Terminar')), function () { play('question', 'end'); }, {first: first});
+          first = false;
+        }
+        a.add(UI.button(row, tr('Fechar', 'Close', 'Cerrar')), function () { a.close(); }, {first: first});
       },
       closed: function () { askApi = null; }
     });
@@ -686,10 +700,48 @@ var Family = (function () {
             scoreRows(box, game.scores, false);
           }
         }
-        a.add(UI.el('div', 'hold', layer), null, {first: true});
+        // Run from the remote (ADR 0021): show the answer, the next question, finish. Phones only buzz in.
+        var row = UI.el('div', 'bt-buttons', box), on = linked() && !game.done;
+        if (on) {
+          a.add(UI.button(row, game.answer < 0 ? tr('Mostrar a resposta', 'Show the answer', 'Mostrar la respuesta')
+            : game.round >= game.total ? tr('Ver o placar', 'See the scores', 'Ver la puntuación')
+            : tr('Próxima pergunta', 'Next question', 'Siguiente pregunta'), null, 'primary'),
+            function () { step(game.answer < 0 ? 'reveal' : 'next'); }, {first: true});
+          a.add(UI.button(row, tr('Terminar o quiz', 'Finish the quiz', 'Terminar el quiz')), function () { step('end'); });
+        }
+        a.add(UI.button(row, tr('Fechar', 'Close', 'Cerrar')), function () { a.close(); }, {first: !on});
       },
       closed: function () { gameApi = null; if (game && game.done) game = null; }
     });
+  }
+
+  function step(action) { play('quiz', action); }
+
+  // MARK: - Games started from the TV (ADR 0021)
+
+  /** Who's watching, as Beyond Family knows them, or nothing for Family or somebody only on this TV. */
+  function watcher() {
+    var p = window.Profiles && Profiles.current();
+    return p && p.family && !p.together ? String(p.family) : undefined;
+  }
+
+  var gameBusy = false;
+
+  /** Starts or moves on quiz night or the dinner question; Beyond Family sends the same commands a phone would. */
+  function play(kind, action, done) {
+    if (gameBusy) return;
+    gameBusy = true;
+    call('POST', '/tv/' + kind, {action: action, memberId: watcher()}, function (err) {
+      gameBusy = false;
+      if (err) UI.toast(tr('Não deu certo. Tente de novo.', "That didn't work. Try again.", 'No funcionó. Inténtalo de nuevo.'));
+      if (done) done(err);
+    });
+  }
+
+  /** A song found on the TV goes on the family's list too. Best effort. */
+  function addSong(title) {
+    if (!linked() || !title) return;
+    call('POST', '/tv/karaoke/songs', {title: String(title).slice(0, 80), memberId: watcher()}, function () {});
   }
 
   function scoreRows(box, scores, final) {
@@ -747,6 +799,9 @@ var Family = (function () {
     pets: function () { return linked() && pets ? pets : []; },
     havePets: function () { return pets !== null; },
     petsFed: petsFed,
+    songs: function () { return linked() ? songs : []; },
+    game: play,
+    addSong: addSong,
     board: function () { return linked() ? board : null; },
     widgets: function () { return linked() ? widgets : []; },
     visit: visit,

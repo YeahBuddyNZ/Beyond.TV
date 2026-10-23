@@ -119,6 +119,7 @@ final class Family {
         lastPeople = "";
         board = null;
         widgets = null;
+        songs = null;
         jobs = java.util.Collections.emptyMap();
         likes = java.util.Collections.emptyMap();
     }
@@ -309,6 +310,54 @@ final class Family {
 
     static JSONArray widgets() { return widgets; }
 
+    /** The family's karaoke songs from Beyond Family: title, artist and a YouTube video id when known. In memory only. */
+    private static volatile JSONArray songs;
+
+    static JSONArray songs() { return songs; }
+
+    /** Whoever is watching, as their Beyond Family member id, or null (Family, or somebody only on this TV). */
+    static String watcherMember(Context c) {
+        return People.current(c).member();
+    }
+
+    /**
+     * A game started or moved on from the remote (quiz or question: start, reveal, next, end). Beyond Family sends the
+     * same commands a phone would, so every TV at home follows. Calls `done` on the main thread with null, or what
+     * went wrong in words.
+     */
+    static void game(Context c, String kind, String action, java.util.function.Consumer<String> done) {
+        final Context app = c.getApplicationContext();
+        final String member = watcherMember(c);
+        new Thread(() -> {
+            String error = null;
+            try {
+                JSONObject body = new JSONObject().put("action", action);
+                if (member != null) body.put("memberId", member);
+                call(app, "POST", "/tv/" + kind, body, 15_000);
+            } catch (Throwable t) {
+                error = Ui.tr("Não deu certo. Tente de novo.", "That didn't work. Try again.", "No funcionó. Inténtalo de nuevo.");
+            }
+            final String e = error;
+            if (done != null) MAIN.post(() -> done.accept(e));
+        }, "beyond-family-game").start();
+    }
+
+    /** A song found on the TV goes on the family's list too, so it shows on everybody's phone. Best effort. */
+    static void addSong(Context c, String title, String artist) {
+        if (!linked(c)) return;
+        final Context app = c.getApplicationContext();
+        final String member = watcherMember(c);
+        new Thread(() -> {
+            try {
+                JSONObject body = new JSONObject().put("title", title);
+                if (artist != null && !artist.isEmpty()) body.put("artist", artist);
+                if (member != null) body.put("memberId", member);
+                call(app, "POST", "/tv/karaoke/songs", body, 15_000);
+            } catch (Throwable ignored) {
+            }
+        }, "beyond-family-song").start();
+    }
+
     /** Earn your screen: each kid's jobs still to do today (only when the household turned it on), by person id. In
      *  memory only, from every sync. */
     private static volatile java.util.Map<String, List<String>> jobs = java.util.Collections.emptyMap();
@@ -338,6 +387,7 @@ final class Family {
         board = home == null ? null : home.optJSONObject("board");
         Tidy.apply(c, home == null ? null : home.optJSONObject("tidy"));
         widgets = home == null ? null : home.optJSONArray("widgets");
+        songs = home == null ? null : home.optJSONArray("songs");
         jobs = jobsOf(home == null ? null : home.optJSONArray("people"));
         likes = likesOf(home == null ? null : home.optJSONArray("people"));
         try {

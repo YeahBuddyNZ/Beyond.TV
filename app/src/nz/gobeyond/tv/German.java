@@ -232,6 +232,27 @@ final class German {
             case "Party time!": return "Partyzeit!";
             case "Happy birthday": return "Alles Gute zum Geburtstag";
             case "Any key to stop": return "Beliebige Taste zum Beenden";
+            case "Everybody knows these": return "Die kennt jeder";
+            case "Find another song": return "Anderes Lied suchen";
+            case "Finish": return "Beenden";
+            case "Finish the quiz": return "Quiz beenden";
+            case "Karaoke": return "Karaoke";
+            case "Karaoke night": return "Karaoke-Abend";
+            case "Next question": return "Nächste Frage";
+            case "Party": return "Party";
+            case "Say or type the song and who sings it": return "Sag oder tippe das Lied und wer es singt";
+            case "See the scores": return "Punkte ansehen";
+            case "Show the answer": return "Antwort zeigen";
+            case "Show the answers": return "Antworten zeigen";
+            case "Sing it": return "Singen";
+            case "The family's songs": return "Die Lieder der Familie";
+            case "Tidy-up race": return "Aufräum-Wettrennen";
+            case "What are we singing?": return "Was singen wir?";
+            case "What shall we do?": return "Was machen wir?";
+            case "Who's singing?": return "Wer singt?";
+            case "e.g. Royals Lorde": return "z. B. Royals Lorde";
+            case "Link Beyond Family first, in Settings.": return "Verbinde zuerst Beyond Family, in den Einstellungen.";
+            case "Quiz night and the dinner question need Beyond Family, because everyone answers on their phone. Link it in Settings.": return "Quizabend und die Frage zum Abendessen brauchen Beyond Family, weil alle am Handy antworten. Verbinde es in den Einstellungen.";
             case "Quiz night": return "Quizabend";
             case "Quiz night: ": return "Quizabend: ";
             case "Final scores": return "Endstand";
@@ -395,6 +416,7 @@ final class German {
                     return "OK fügt hinzu oder entfernt (bis zu " + english.substring("OK adds or removes (up to ".length())
                             .replace("). ← → change the order.", "). ← → ändern die Reihenfolge.");
                 }
+                if (english.startsWith("What's ") && english.endsWith(" singing?")) return "Was singt " + english.substring(7, english.length() - 9) + "?";
                 if (english.endsWith("'s up!")) return english.substring(0, english.length() - 6) + " ist dran!";
                 if (english.startsWith("Starting in ")) return "Startet in " + english.substring(12);
                 if (english.endsWith(" hours ago")) return "Vor " + english.substring(0, english.length() - 10) + " Stunden";

@@ -231,6 +231,27 @@ final class Russian {
             case "Party time!": return "Время вечеринки!";
             case "Happy birthday": return "С днём рождения";
             case "Any key to stop": return "Любая кнопка, чтобы остановить";
+            case "Everybody knows these": return "Их знают все";
+            case "Find another song": return "Найти другую песню";
+            case "Finish": return "Закончить";
+            case "Finish the quiz": return "Закончить викторину";
+            case "Karaoke": return "Караоке";
+            case "Karaoke night": return "Вечер караоке";
+            case "Next question": return "Следующий вопрос";
+            case "Party": return "Вечеринка";
+            case "Say or type the song and who sings it": return "Скажите или введите песню и исполнителя";
+            case "See the scores": return "Посмотреть очки";
+            case "Show the answer": return "Показать ответ";
+            case "Show the answers": return "Показать ответы";
+            case "Sing it": return "Петь";
+            case "The family's songs": return "Песни семьи";
+            case "Tidy-up race": return "Гонка уборки";
+            case "What are we singing?": return "Что поём?";
+            case "What shall we do?": return "Чем займёмся?";
+            case "Who's singing?": return "Кто поёт?";
+            case "e.g. Royals Lorde": return "напр. Royals Lorde";
+            case "Link Beyond Family first, in Settings.": return "Сначала подключите Beyond Family в настройках.";
+            case "Quiz night and the dinner question need Beyond Family, because everyone answers on their phone. Link it in Settings.": return "Для викторины и вопроса за ужином нужен Beyond Family: все отвечают с телефона. Подключите его в настройках.";
             case "Quiz night": return "Вечер викторины";
             case "Quiz night: ": return "Вечер викторины: ";
             case "Final scores": return "Итоговый счёт";
@@ -445,6 +466,7 @@ final class Russian {
                     String n = english.substring(5, english.length() - " titles from the TV's apps, 3 new ones every hour.".length());
                     return "Вкл. · Рекомендаций из приложений телевизора: " + n + "; 3 новых каждый час.";
                 }
+                if (english.startsWith("What's ") && english.endsWith(" singing?")) return "Что поёт " + english.substring(7, english.length() - 9) + "?";
                 if (english.endsWith("'s up!")) return "Очередь: " + english.substring(0, english.length() - 6) + "!";
                 if (english.startsWith("Starting in ")) return "Начало через " + english.substring(12);
                 if (english.endsWith(" hours ago")) return english.substring(0, english.length() - 10) + " ч назад";

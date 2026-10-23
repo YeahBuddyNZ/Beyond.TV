@@ -7,6 +7,25 @@ var I18N = (function () {
 
   var lang = 'en';
   var german = {
+    "What shall we do?": "Was machen wir?",
+    "Karaoke": "Karaoke",
+    "Party": "Party",
+    "Tidy-up race": "Aufräum-Wettrennen",
+    "Karaoke night": "Karaoke-Abend",
+    "Who's singing?": "Wer singt?",
+    "What are we singing?": "Was singen wir?",
+    "Find another song": "Anderes Lied suchen",
+    "Say or type the song and who sings it": "Sag oder tippe das Lied und wer es singt",
+    "e.g. Royals Lorde": "z. B. Royals Lorde",
+    "Sing it": "Singen",
+    "Show the answers": "Antworten zeigen",
+    "Finish": "Beenden",
+    "Show the answer": "Antwort zeigen",
+    "See the scores": "Punkte ansehen",
+    "Next question": "Nächste Frage",
+    "Finish the quiz": "Quiz beenden",
+    "Link Beyond Family first, in Settings.": "Verbinde zuerst Beyond Family, in den Einstellungen.",
+    "Quiz night and the dinner question need Beyond Family, because everyone answers on their phone. Link it in Settings.": "Quizabend und die Frage zum Abendessen brauchen Beyond Family, weil alle am Handy antworten. Verbinde es in den Einstellungen.",
     "Sing now": "Jetzt singen",
     "You're up!": "Du bist dran!",
     "After that: ": "Danach: ",
@@ -291,6 +310,8 @@ var I18N = (function () {
     if (m) return 'H:' + m[1] + m[2] + 'T:' + m[3];
     m = /^The App Dock holds up to (\d+) apps\.$/.exec(en);
     if (m) return 'Ins App-Dock passen bis zu ' + m[1] + ' Apps.';
+    m = /^What's (.+) singing\?$/.exec(en);
+    if (m) return 'Was singt ' + m[1] + '?';
     m = /^(.+)'s up!$/.exec(en);
     if (m) return m[1] + ' ist dran!';
     m = /^Starting in (\d+)$/.exec(en);
@@ -299,6 +320,25 @@ var I18N = (function () {
   }
 
   var russian = {
+    "What shall we do?": "Чем займёмся?",
+    "Karaoke": "Караоке",
+    "Party": "Вечеринка",
+    "Tidy-up race": "Гонка уборки",
+    "Karaoke night": "Вечер караоке",
+    "Who's singing?": "Кто поёт?",
+    "What are we singing?": "Что поём?",
+    "Find another song": "Найти другую песню",
+    "Say or type the song and who sings it": "Скажите или введите песню и исполнителя",
+    "e.g. Royals Lorde": "напр. Royals Lorde",
+    "Sing it": "Петь",
+    "Show the answers": "Показать ответы",
+    "Finish": "Закончить",
+    "Show the answer": "Показать ответ",
+    "See the scores": "Посмотреть очки",
+    "Next question": "Следующий вопрос",
+    "Finish the quiz": "Закончить викторину",
+    "Link Beyond Family first, in Settings.": "Сначала подключите Beyond Family в настройках.",
+    "Quiz night and the dinner question need Beyond Family, because everyone answers on their phone. Link it in Settings.": "Для викторины и вопроса за ужином нужен Beyond Family: все отвечают с телефона. Подключите его в настройках.",
     "Sing now": "Петь сейчас",
     "You're up!": "Твоя очередь!",
     "After that: ": "Потом: ",
@@ -587,6 +627,8 @@ var I18N = (function () {
     if (m) return m[1] + (m[2] === 'min' ? ' мин назад' : ' ч назад');
     m = /^The App Dock holds up to (\d+) apps\.$/.exec(en);
     if (m) return 'На панель приложений можно добавить не более ' + m[1] + ' приложений.';
+    m = /^What's (.+) singing\?$/.exec(en);
+    if (m) return 'Что поёт ' + m[1] + '?';
     m = /^(.+)'s up!$/.exec(en);
     if (m) return 'Очередь: ' + m[1] + '!';
     m = /^Starting in (\d+)$/.exec(en);
