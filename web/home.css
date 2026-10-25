@@ -1043,3 +1043,23 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .bt-tidy .bt-button.close { visibility: hidden; }
 .bt-tidy .bt-button.close.on { visibility: visible; }
 .bt-tidy .clock.party { font-size: 150px; line-height: 220px; }
+
+/* MARK: - Tonight's sky (sky.js): the chart on the left, the moon and what's up on the right. */
+.bt-layer.bt-sky { background: #05071A; }
+.bt-layer.bt-sky::before { opacity: 0.45; }
+.bt-sky .chart { position: absolute; left: 40px; top: 20px; width: 1000px; height: 1000px; }
+.bt-sky .side { position: absolute; left: 1100px; top: 90px; width: 760px; }
+.bt-sky .moon { margin-top: 40px; height: 200px; }
+.bt-sky .moon .face { float: left; width: 200px; height: 200px; }
+.bt-sky .moon .words { margin-left: 240px; padding-top: 52px; }
+.bt-sky .moon .name { font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 44px; font-weight: 700; }
+.bt-sky .moon .lit { margin-top: 8px; font-size: 28px; color: rgba(247, 246, 242, 0.62); }
+.bt-sky .rows { margin: 34px 0 34px; }
+.bt-sky .row { height: 50px; line-height: 50px; font-size: 28px; border-bottom: 1px solid rgba(247, 246, 242, 0.08); }
+.bt-sky .row .label { color: rgba(247, 246, 242, 0.62); }
+.bt-sky .row .value { float: right; font-weight: 600; }
+.bt-sky .star { height: 46px; line-height: 46px; font-size: 28px; }
+.bt-sky .star b { font-weight: 600; margin-right: 18px; }
+.bt-sky .star span { color: rgba(247, 246, 242, 0.62); }
+.bt-sky .hints { position: absolute; left: 1100px; top: 1000px; font-size: 24px; color: rgba(247, 246, 242, 0.45); }
+.bt-sky .hold { position: absolute; left: 0; top: 0; width: 1px; height: 1px; }

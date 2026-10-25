@@ -34,6 +34,7 @@ Free and open source, built in Aotearoa by [Beyond](https://gobeyond.co.nz). One
 
 - **Pinned tiles.** Pick up to six tiles in Beyond Family: an app, a show, the kids' jobs ticking off, a camera at home. Every TV opens on them.
 - **Make it yours.** Kids make it theirs on their own profile, with the remote, no grown-up needed: a buddy, a colour, a world that fills their home screen, and the things they love drifting through it. On Google TV, LG and Samsung (on Google TV from Who's watching).
+- **Tonight's sky.** Press the star for a star chart of the sky over your house, with the Southern Cross, Matariki and the moon's phase, moonrise and next full moon. Worked out on the TV, no internet.
 - **No ads.** No sponsored rows, banners or autoplaying promos.
 - **Your apps, front and centre.** Netflix, Neon, TVNZ+, Disney+, ThreeNow, Plex and the rest in one App Dock, in the order you pick on the TV.
 - **Trending, not sponsored.** Fresh picks every hour from what's trending and the latest releases, only from apps you already have.
@@ -72,6 +73,7 @@ Free and open source, built in Aotearoa by [Beyond](https://gobeyond.co.nz). One
 26. Karaoke night: done on Google TV, LG and Samsung. Keep the songs your family loves in Beyond Family, queue up from your phones, and Next singer puts whoever's up on the TV, then plays the song's karaoke version from YouTube, words and all.
 27. Games on the TV: done on Google TV, LG and Samsung. A Games button on the home screen holds karaoke, a party, quiz night, the dinner question, the tidy-up race and bedtime breathing, all started from the remote. Pick who's singing and a song right on the TV, and run the quiz from the couch: show the answer, next question, finish. Who's watching fits a big family on one screen.
 28. Karaoke playlists: done on Google TV, LG and Samsung. Every song plays inside Beyond TV's own player and the night goes from one singer to the next by itself. Build and save playlists (songs and who sings each) with the remote or on your phone, and songs find their best karaoke version, Sing King and Lost Panda first.
+29. Tonight's sky: done on Google TV, LG and Samsung. The star button on the home screen opens a star chart of the sky over the house (the Southern Cross, Matariki, the brightest stars and the constellations) beside the moon: its phase as it looks from here, moonrise and moonset, and the next full and new moon. Left and right move it an hour. Worked out on the TV, no internet. Planets next. ADR 0023.
 
 Ideas welcome: press the four dots (*Talk to Beyond*) on the TV.
 

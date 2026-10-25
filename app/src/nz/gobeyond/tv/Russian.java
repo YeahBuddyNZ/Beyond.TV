@@ -473,6 +473,27 @@ final class Russian {
             case "Now watching: ": return "Сейчас смотрит: ";
             case "That app isn't on this TV": return "Этого приложения нет на телевизоре";
             case "Listening for the family's remote and messages": return "Ждёт пульт и сообщения семьи";
+            case "Tonight's sky": return "Небо сегодня ночью";
+            case "Now": return "Сейчас";
+            case "lit": return "освещено";
+            case "Moon": return "Луна";
+            case "Moonrise": return "Восход луны";
+            case "Moonset": return "Заход луны";
+            case "Sunset": return "Закат";
+            case "Sunrise": return "Восход";
+            case "Bright stars": return "Яркие звёзды";
+            case "Pleiades": return "Плеяды";
+            case "Southern Cross": return "Южный Крест";
+            case "◀ ▶ an hour at a time  ·  OK for now": return "◀ ▶ на час вперёд или назад  ·  OK: сейчас";
+            case "New moon": return "Новолуние";
+            case "Waxing crescent": return "Растущий серп";
+            case "First quarter": return "Первая четверть";
+            case "Waxing gibbous": return "Растущая луна";
+            case "Full moon": return "Полнолуние";
+            case "Waning gibbous": return "Убывающая луна";
+            case "Last quarter": return "Последняя четверть";
+            case "Waning crescent": return "Убывающий серп";
+            case "The star button, up the top": return "Кнопка со звездой, наверху";
             default:
                 // Notices are saved in the language in use when they were generated.
                 String[] prefixes = {"Couldn't check Beyond™ TV: ", "Couldn't turn on Beyond™ TV: ",

@@ -430,6 +430,27 @@ final class German {
             case "Now watching: ": return "Jetzt schaut: ";
             case "That app isn't on this TV": return "Diese App ist nicht auf diesem Fernseher";
             case "Listening for the family's remote and messages": return "Wartet auf die Fernbedienung und Nachrichten der Familie";
+            case "Tonight's sky": return "Der Himmel heute Nacht";
+            case "Now": return "Jetzt";
+            case "lit": return "beleuchtet";
+            case "Moon": return "Mond";
+            case "Moonrise": return "Mondaufgang";
+            case "Moonset": return "Monduntergang";
+            case "Sunset": return "Sonnenuntergang";
+            case "Sunrise": return "Sonnenaufgang";
+            case "Bright stars": return "Helle Sterne";
+            case "Pleiades": return "Plejaden";
+            case "Southern Cross": return "Kreuz des Südens";
+            case "◀ ▶ an hour at a time  ·  OK for now": return "◀ ▶ eine Stunde weiter  ·  OK für jetzt";
+            case "New moon": return "Neumond";
+            case "Waxing crescent": return "Zunehmende Sichel";
+            case "First quarter": return "Erstes Viertel";
+            case "Waxing gibbous": return "Zunehmender Mond";
+            case "Full moon": return "Vollmond";
+            case "Waning gibbous": return "Abnehmender Mond";
+            case "Last quarter": return "Letztes Viertel";
+            case "Waning crescent": return "Abnehmende Sichel";
+            case "The star button, up the top": return "Der Stern-Knopf, oben";
             default:
                 if (english.startsWith("Beyond™ TV is on: new home screen and screensaver, ")) {
                     return "Beyond™ TV ist an: neuer Startbildschirm und Bildschirmschoner, "

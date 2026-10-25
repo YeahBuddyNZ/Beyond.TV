@@ -184,6 +184,16 @@
             android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|density|fontScale|locale|layoutDirection"
             android:theme="@style/BeyondTV.Home" />
 
+        <!-- Tonight's sky: a star chart for where the TV is, and the moon. -->
+        <activity
+            android:name=".SkyActivity"
+            android:process=":home"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:screenOrientation="landscape"
+            android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|density|fontScale|locale|layoutDirection"
+            android:theme="@style/BeyondTV.Home" />
+
         <!-- Games from the remote: karaoke, party, quiz night, the dinner question, the tidy race, bedtime. -->
         <activity
             android:name=".GamesActivity"

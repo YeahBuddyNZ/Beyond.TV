@@ -69,6 +69,8 @@ final class HomeApps {
     static final int PARTY = 12;
     /** Games: every game and family activity, started from the remote (GamesActivity, ADR 0021). */
     static final int GAMES = 13;
+    /** Tonight's sky: a star chart for here and the moon (SkyActivity, ADR 0023). */
+    static final int SKY = 14;
     /** Image size of each card (16:9; on screen it shows up to ~330 px wide). */
     static final int TILE_W = 384, TILE_H = 216;
 
