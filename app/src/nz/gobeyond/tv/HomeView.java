@@ -549,6 +549,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         if (!kid) lightButtons.add(HomeApps.action(HomeApps.INPUTS, "inputs", Ui.tr("Entradas HDMI", "HDMI Inputs"), "hdmi"));
         // Games, for anyone with the remote: karaoke, a party, quiz night and the rest, no phone needed (GamesActivity).
         lightButtons.add(HomeApps.action(HomeApps.GAMES, "games", Ui.tr("Jogos", "Games", "Juegos"), "gamepad"));
+        // Tonight's sky: a star chart for here and the moon (SkyActivity). For everyone, kids included.
+        lightButtons.add(HomeApps.action(HomeApps.SKY, "sky", Ui.tr("Céu de hoje à noite", "Tonight's sky", "El cielo de esta noche"), "star"));
         if (!kid) lightButtons.add(HomeApps.action(HomeApps.SETTINGS, "settings", Ui.tr("Configurações", "Settings"), "settings"));
         // Who's watching: their face and name (Family wears the four dots). Opens the picker (WhoActivity).
         lightButtons.add(HomeApps.action(HomeApps.PEOPLE, "people", Ui.tr("Trocar quem está assistindo", "Change who's watching", "Cambiar quién mira"), "person"));
@@ -2492,6 +2494,10 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             GamesActivity.open(activity);
             return;
         }
+        if (it.kind == HomeApps.SKY) {
+            SkyActivity.open(activity);
+            return;
+        }
         if ((it.kind == HomeApps.SETTINGS || it.kind == HomeApps.ANDROID_SETTINGS) && People.kid(activity)) {
             // A kids' profile: the grown-up PIN first, or with no PIN, a grown-up's profile.
             WhoActivity.open(activity, it.kind == HomeApps.SETTINGS ? WhoActivity.THEN_SETTINGS : WhoActivity.THEN_TV_SETTINGS);
@@ -3469,6 +3475,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
                     : Ui.tr("Máx. ", "High ", "Máx. ") + HomeData.degrees(wx.max) + "  " + Ui.tr("Mín. ", "Low ", "Mín. ") + HomeData.degrees(wx.min);
             rows.add(new String[] {"", HomeData.degrees(wx.temp) + ", " + condition(wx), more, Symbols.weather(wx.code, wx.isDay)});
         }
+        if (nightTarget) rows.add(SkyActivity.moonRow());
         if (nightTarget) {
             rows.add(new String[] {"🌙", Ui.tr("Respirar para dormir", "Bedtime breathing", "Respirar para dormir"),
                     Ui.tr("No botão da lua, lá em cima", "The moon button, up the top", "En el botón de la luna, arriba"), ""});

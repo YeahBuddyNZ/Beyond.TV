@@ -72,6 +72,7 @@ Free and open source, built in Aotearoa by [Beyond](https://gobeyond.co.nz). One
 26. Karaoke night: done on Google TV, LG and Samsung. Keep the songs your family loves in Beyond Family, queue up from your phones, and Next singer puts whoever's up on the TV, then plays the song's karaoke version from YouTube, words and all.
 27. Games on the TV: done on Google TV, LG and Samsung. A Games button on the home screen holds karaoke, a party, quiz night, the dinner question, the tidy-up race and bedtime breathing, all started from the remote. Pick who's singing and a song right on the TV, and run the quiz from the couch: show the answer, next question, finish. Who's watching fits a big family on one screen.
 28. Karaoke playlists: done on Google TV, LG and Samsung. Every song plays inside Beyond TV's own player and the night goes from one singer to the next by itself. Build and save playlists (songs and who sings each) with the remote or on your phone, and songs find their best karaoke version, Sing King and Lost Panda first.
+29. Tonight's sky: done on Google TV, LG and Samsung. The star button on the home screen opens a star chart of the sky over the house (the Southern Cross, Matariki, the brightest stars and the constellations) beside the moon: its phase as it looks from here, moonrise and moonset, and the next full and new moon. Left and right move it an hour. Worked out on the TV, no internet. Planets next. ADR 0023.
 
 Ideas welcome: press the four dots (*Talk to Beyond*) on the TV.
 

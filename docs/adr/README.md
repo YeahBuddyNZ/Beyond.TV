@@ -30,3 +30,4 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0020](0020-karaoke-night.md) | Karaoke night |
 | [0021](0021-games-start-from-the-tv.md) | Games start from the TV |
 | [0022](0022-karaoke-in-our-own-player.md) | Karaoke plays in our own player, with playlists |
+| [0023](0023-tonights-sky.md) | Tonight's sky: a star chart and the moon |
