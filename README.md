@@ -34,6 +34,7 @@ Free and open source, built in Aotearoa by [Beyond](https://gobeyond.co.nz). One
 
 - **Pinned tiles.** Pick up to six tiles in Beyond Family: an app, a show, the kids' jobs ticking off, a camera at home. Every TV opens on them.
 - **Make it yours.** Kids make it theirs on their own profile, with the remote, no grown-up needed: a buddy, a colour, a world that fills their home screen, and the things they love drifting through it. On Google TV, LG and Samsung (on Google TV from Who's watching).
+- **Tonight's sky.** Press the star for a star chart of the sky over your house, with the Southern Cross, Matariki and the moon's phase, moonrise and next full moon. Worked out on the TV, no internet.
 - **No ads.** No sponsored rows, banners or autoplaying promos.
 - **Your apps, front and centre.** Netflix, Neon, TVNZ+, Disney+, ThreeNow, Plex and the rest in one App Dock, in the order you pick on the TV.
 - **Trending, not sponsored.** Fresh picks every hour from what's trending and the latest releases, only from apps you already have.
