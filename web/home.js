@@ -258,6 +258,8 @@
     if (Data.isNight(Date.now())) list.push({icon: 'bedtime', label: tr('Respirar para dormir', 'Bedtime breathing', 'Respirar para dormir'), run: function () { Bedtime.start(15); }});
     // Games, for anyone with the remote: karaoke, a party, quiz night and the rest, no phone needed (games.js).
     list.push({icon: 'gamepad', label: tr('Jogos', 'Games', 'Juegos'), run: function () { Games.open(); }});
+    // Tonight's sky: a star chart for here and the moon (sky.js). For everyone, kids included.
+    list.push({icon: 'star', label: tr('Céu de hoje à noite', 'Tonight\'s sky', 'El cielo de esta noche'), run: function () { Sky.open(); }});
     if (!kid) list.push({icon: 'settings', label: tr('Ajustes', 'Settings', 'Ajustes'), run: function () { openSettings(); }});
     if (kid) list.push({icon: 'sparkles', label: tr('Do seu jeito', 'Make it yours', 'A tu manera'), run: makeItYours});
     if (Profiles.count() > 1 || window.Family) list.push({person: Profiles.current(), label: tr('Trocar quem está assistindo', 'Change who\'s watching', 'Cambiar quién mira'),
@@ -676,6 +678,11 @@
       rows.push([null, Data.degrees(w.temp) + ', ' + Data.condition(w.code, w.isDay).toLowerCase(),
         (I18N.lang === 'en' ? 'High ' + Data.degrees(w.max) + ', low ' + Data.degrees(w.min) : tr('Máx. ', 'High ', 'Máx. ') + Data.degrees(w.max) + '  ' + tr('Mín. ', 'Low ', 'Mín. ') + Data.degrees(w.min)),
         Data.symbol(w.code, w.isDay)]);
+    }
+    if (night) {
+      var mo = Sky.moon();
+      rows.push([mo.emoji, mo.name + ', ' + Math.round(mo.lit * 100) + '% ' + tr('iluminada', 'lit', 'iluminada'),
+        tr('O botão da estrela, lá em cima', 'The star button, up the top', 'El botón de la estrella, arriba')]);
     }
     if (night) rows.push(['🌙', tr('Respirar para dormir', 'Bedtime breathing', 'Respirar para dormir'), tr('No botão da lua, lá em cima', 'The moon button, up the top', 'En el botón de la luna, arriba')]);
     if (!linked && !kid) rows.push(['✨', tr('Conecte o Beyond Family', 'Link Beyond Family', 'Conecta Beyond Family'), tr('E os planos da casa aparecem aqui', "And your home's plans show up here", 'Y los planes de casa aparecen aquí')]);
