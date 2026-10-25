@@ -210,6 +210,8 @@ final class Russian {
             case "Happy birthday, ": return "С днём рождения, ";
             case "Tea tonight": return "Ужин сегодня";
             case "All day": return "Весь день";
+            case "Board and card games": return "Настольные и карточные игры";
+            case "The games need Android System WebView.": return "Для игр нужен Android System WebView.";
             case "Bedtime breathing": return "Дыхание перед сном";
             case "Breathe in": return "Вдох";
             case "Breathe out": return "Выдох";

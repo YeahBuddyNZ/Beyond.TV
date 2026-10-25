@@ -75,6 +75,8 @@ Free and open source, built in Aotearoa by [Beyond](https://gobeyond.co.nz). One
 28. Karaoke playlists: done on Google TV, LG and Samsung. Every song plays inside Beyond TV's own player and the night goes from one singer to the next by itself. Build and save playlists (songs and who sings each) with the remote or on your phone, and songs find their best karaoke version, Sing King and Lost Panda first.
 29. Tonight's sky: done on Google TV, LG and Samsung. The star button on the home screen opens a star chart of the sky over the house (the Southern Cross, Matariki, the brightest stars and the constellations) beside the moon: its phase as it looks from here, moonrise and moonset, and the next full and new moon. Left and right move it an hour. Worked out on the TV, no internet. Planets next. ADR 0023.
 
+30. Board and card games: done on Google TV, LG and Samsung (Games › Board and card games). Pick who's playing, then Ludo, Sheep, Penguin, Volcano (our own slap game: say the word, turn the card, slap OK when they match) or Snap, against robots named after our birds. The dice are fair and the robots never cheat. Each person's robots grow with them, a little smarter every time they win, so a game stays close and the robots in three months are tougher than today's. At the end, a debrief with real tips from the game just played ("with a 4 you could have sent Kea home") and a robot that's a good sport whether it won or lost. Levels stay on the TV, never sent anywhere. ADR 0024. Next: Go Fish and a colours-and-numbers card game.
+
 Ideas welcome: press the four dots (*Talk to Beyond*) on the TV.
 
 ## Install
@@ -282,7 +284,7 @@ The website is in [`docs/`](docs): plain HTML and CSS on GitHub Pages.
 
 ## Privacy
 
-No accounts, no ads, no tracking. The app talks to TMDB, Open-Meteo (with the coordinates you set, or your time zone's main city), Binance only when `show_crypto=true`, Watchmode only when you set a `watchmode_key`, the Art Institute of Chicago (for the paintings) and this project's own website (for the seasonal art) when the screensaver is in Art mode, and Beyond Family only when you link the TV to it. Your settings stay on your computer and your TV.
+No accounts, no ads, no tracking. The app talks to TMDB, Open-Meteo (with the coordinates you set, or your time zone's main city), Binance only when `show_crypto=true`, Watchmode only when you set a `watchmode_key`, the Art Institute of Chicago (for the paintings) and this project's own website (for the seasonal art) when the screensaver is in Art mode, and Beyond Family only when you link the TV to it. Your settings stay on your computer and your TV. The board and card games keep each person's robot level and best scores on the TV only; they are never sent anywhere.
 
 **The daily check-in.** So we can fix a problem on one make of TV before anybody has to ask, once a day the TV tells Beyond (beyondfamily.app) a made-up id, its city rounded to about 10km, its make, model and Android or TV software version, the Beyond TV version, which home screen is on, how many times the home screen opened and crashed, and its last 20 error messages. Never what anybody watches, never an IP address kept, never a name or a household.
 

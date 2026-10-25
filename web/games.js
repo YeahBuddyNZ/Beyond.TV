@@ -1,7 +1,8 @@
 /*
  * Games, from the remote (ADR 0021): every game and family activity starts here on the TV, no phone needed. Karaoke,
- * a party, quiz night, the dinner question, the tidy-up race and bedtime breathing. Quiz night and the dinner question
- * need Beyond Family, because everyone answers on their phones. Same as GamesActivity.java. Plain ES5.
+ * board and card games against the robots (table.js), a party, quiz night, the dinner question, the tidy-up race and
+ * bedtime breathing. Quiz night and the dinner question need Beyond Family, because everyone answers on their phones.
+ * Same as GamesActivity.java. Plain ES5.
  */
 var Games = (function () {
   'use strict';
@@ -18,6 +19,7 @@ var Games = (function () {
         var row = UI.el('div', 'bt-buttons cakes', box);
         var games = [
           ['🎤', tr('Karaokê', 'Karaoke', 'Karaoke'), function () { a.close(); Karaoke.choose(); }],
+          ['🎲', tr('Jogos de tabuleiro e cartas', 'Board and card games', 'Juegos de mesa y cartas'), function () { a.close(); Table.open(); }],
           ['🎉', tr('Festa', 'Party', 'Fiesta'), function () { a.close(); Party.choose(); }],
           ['🏆', tr('Quiz da noite', 'Quiz night', 'Noche de quiz'), function () { family('quiz', a); }],
           ['🍽', tr('Pergunta do jantar', 'Dinner question', 'Pregunta de la cena'), function () { family('question', a); }],
