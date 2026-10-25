@@ -211,6 +211,8 @@ final class German {
             case "Happy birthday, ": return "Alles Gute zum Geburtstag, ";
             case "Tea tonight": return "Heute zum Abendessen";
             case "All day": return "Ganztägig";
+            case "Board and card games": return "Brett- und Kartenspiele";
+            case "The games need Android System WebView.": return "Die Spiele brauchen Android System WebView.";
             case "Bedtime breathing": return "Atmen vor dem Schlafen";
             case "Breathe in": return "Einatmen";
             case "Breathe out": return "Ausatmen";
