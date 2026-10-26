@@ -167,6 +167,9 @@ final class German {
             case "That's not it. Try again.": return "Das ist sie nicht. Versuch es noch einmal.";
             case "Me": return "Ich";
             case "Talk to Beyond": return "Mit Beyond reden";
+            case "Ask Beyond": return "Frag Beyond";
+            case "Notes": return "Notizen";
+            case "This needs Android System WebView.": return "Dafür braucht es Android System WebView.";
             case "What would make Beyond™ TV better? Say it, or type it. We read every one.": return "Was würde Beyond™ TV besser machen? Sag es oder tipp es. Wir lesen alles.";
             case "Or type it here": return "Oder hier tippen";
             case "Speak": return "Sprechen";

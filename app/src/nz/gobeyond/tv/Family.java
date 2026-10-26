@@ -120,6 +120,7 @@ final class Family {
         board = null;
         widgets = null;
         songs = null;
+        notes = null;
         playlists = null;
         jobs = java.util.Collections.emptyMap();
         likes = java.util.Collections.emptyMap();
@@ -316,6 +317,12 @@ final class Family {
 
     static JSONArray songs() { return songs; }
 
+    /** Notes left on the TV from a phone (ADR 0025): newest first, the ones still up, ink and all. In memory only. */
+    private static volatile JSONArray notes;
+    private static volatile String notesSeen = "";
+
+    static JSONArray notes() { return notes; }
+
     /** Whoever is watching, as their Beyond Family member id, or null (Family, or somebody only on this TV). */
     static String watcherMember(Context c) {
         return People.current(c).member();
@@ -503,6 +510,13 @@ final class Family {
         Tidy.apply(c, home == null ? null : home.optJSONObject("tidy"));
         widgets = home == null ? null : home.optJSONArray("widgets");
         songs = home == null ? null : home.optJSONArray("songs");
+        notes = home == null ? null : home.optJSONArray("notes");
+        // The home screen's note button comes and goes with them.
+        String seen = notes == null ? "" : notes.toString();
+        if (!seen.equals(notesSeen)) {
+            notesSeen = seen;
+            MAIN.post(Family::changed);
+        }
         if (!playlistBusy) playlists = home == null ? null : home.optJSONArray("playlists");
         jobs = jobsOf(home == null ? null : home.optJSONArray("people"));
         likes = likesOf(home == null ? null : home.optJSONArray("people"));
@@ -733,6 +747,32 @@ final class Family {
                     });
                 });
                 break;
+            case "note":
+                // A note arrived from a phone: big for a moment, only while the home screen is in front. Over another app
+                // it waits on the home screen (ADR 0025): a note never takes over what's on.
+                MAIN.post(() -> {
+                    if (screen == null || notes == null || notes.length() == 0) return;
+                    try {
+                        Chime.play();
+                        AskActivity.open(app, AskActivity.NOTES, "", "");
+                    } catch (RuntimeException ignored) {
+                    }
+                });
+                break;
+            case "ask":
+                // Asked from a phone in Beyond Family: the TV asks it with its own apps, and the answer comes up here.
+                final String question = text(cmd, "text"), asker = text(cmd, "from");
+                if (question.isEmpty()) break;
+                adb().post(() -> {
+                    allowOverApps(app);
+                    MAIN.post(() -> {
+                        try {
+                            AskActivity.open(app, AskActivity.ASK, question, asker);
+                        } catch (RuntimeException ignored) {
+                        }
+                    });
+                });
+                break;
             case "party-end":
                 MAIN.post(PartyActivity::end);
                 break;
@@ -922,7 +962,7 @@ final class Family {
 
     // MARK: - Pieces
 
-    private static byte[] readAll(InputStream in) throws IOException {
+    static byte[] readAll(InputStream in) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         byte[] buf = new byte[8192];
         for (int n; (n = in.read(buf)) > 0; ) out.write(buf, 0, n);

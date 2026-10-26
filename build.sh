@@ -67,9 +67,10 @@ EOF
 
 # --- Build
 # The board and card games are the web app's own files, played in TableActivity's WebView (ADR 0024): one set of
-# rules and one robot for every TV.
+# rules and one robot for every TV. Ask Beyond and the notes from a phone are too (AskActivity, ADR 0025).
 rm -rf out/assets && mkdir -p out/assets && cp -R app/assets/. out/assets/
-for f in table.html table-host.js table.js ludo.js snap.js strings.js ui.js home.css beyond.css table.css; do
+for f in table.html table-host.js table.js ludo.js snap.js strings.js ui.js home.css beyond.css table.css \
+    ask.html ask-host.js ask.js notes.js; do
   cp "web/$f" out/assets/
 done
 "$BT/aapt2" compile --dir app/res -o out/res.zip

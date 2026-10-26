@@ -544,6 +544,16 @@ var Data = (function () {
     showcase: all,
     image: function (path, size) { return path ? 'https://image.tmdb.org/t/p/' + (size || 'w1280') + path : ''; },
 
+    /** A title's backdrop off TMDB, for Ask Beyond's cards: done(path or ''). Nothing without a key. */
+    backdropFor: function (title, year, show, done) {
+      if (!KEY) { done(''); return; }
+      tmdb('/search/' + (show ? 'tv' : 'movie') + '?query=' + encodeURIComponent(title) + '&include_adult=false'
+          + (year ? (show ? '&first_air_date_year=' : '&year=') + year : ''), function (err, res) {
+        var r = !err && res && res.results && res.results[0];
+        done(r ? r.backdrop_path || r.poster_path || '' : '');
+      });
+    },
+
     /** Night at the location: from sunset to sunrise (the last forecast; without one, 6:00 and 18:00). */
     isNight: function (at) {
       var theme = Prefs.theme();

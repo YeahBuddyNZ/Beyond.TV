@@ -54,6 +54,7 @@ var Family = (function () {
     playlists = [];
     widgets = [];
     widgetsSig = '[]';
+    if (window.Notes) Notes.set([]);
     save();
     clearTimeout(loopTimer);
     if (was && why) UI.toast(why);
@@ -93,6 +94,7 @@ var Family = (function () {
     if (home) {
       state.home = {name: home.name};
       board = home.board || null;
+      if (window.Notes) Notes.set(home.notes);
       if (window.Tidy) Tidy.set(home.tidy);
       var tilesNow = JSON.stringify(home.widgets || []);
       if (tilesNow !== widgetsSig) {
@@ -371,6 +373,10 @@ var Family = (function () {
 
   function run(c) {
     if (c.kind === 'say') { say(c.text, c.tone, c.from); return; }
+    // A note arrived or came down: its state came with this sync, this is only the moment, to pop it in (ADR 0025).
+    if (c.kind === 'note') { if (c.id && window.Notes) Notes.arrived(c.id); return; }
+    // A question from a phone: this TV asks it with its own apps, and the answer shows here.
+    if (c.kind === 'ask') { hide(); if (window.Ask) Ask.open(c.text, c.from); return; }
     if (c.kind === 'together') { together(c); return; }
     if (c.kind === 'together-end') { togetherEnd(c.session); return; }
     if (c.kind === 'react') { react(c.emoji, c.from, c.colour); return; }
@@ -401,6 +407,25 @@ var Family = (function () {
     if (c.kind === 'profile') {
       if (Profiles.use('bf-' + c.memberId)) UI.toast(tr('Agora: ', 'Now watching: ', 'Ahora: ') + Profiles.current().name);
     }
+  }
+
+  // MARK: - Ask Beyond and notes (ADR 0025)
+
+  /** Ask Beyond: the question and this TV's app names, and who's watching so a kid gets a kid's answer. Nothing is kept. */
+  function askBeyond(text, apps, together, done) {
+    if (!linked()) { done({status: 403}); return; }
+    call('POST', '/tv/ask', {ask: String(text).slice(0, 200), apps: (apps || []).slice(0, 40), memberId: watcher(), together: together || undefined},
+      function (err, json) { done(err, json); }, 40000);
+  }
+
+  /** A heart for a note: whoever wrote it hears about it on their phone. */
+  function noteHeart(id, done) {
+    call('POST', '/tv/notes/' + id + '/heart', {memberId: watcher()}, function (err) { done(err); });
+  }
+
+  /** Takes a note down, on every TV. */
+  function noteDown(id, done) {
+    call('POST', '/tv/notes/' + id + '/down', {}, function (err) { done(err); });
   }
 
   // MARK: - Messages on the screen
@@ -863,6 +888,9 @@ var Family = (function () {
     visit: visit,
     signOut: signOut,
     pushProfile: pushProfile,
-    now: now
+    now: now,
+    ask: askBeyond,
+    noteHeart: noteHeart,
+    noteDown: noteDown
   };
 })();

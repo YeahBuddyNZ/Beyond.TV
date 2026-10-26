@@ -80,6 +80,8 @@ public class HomeActivity extends Activity implements Family.Screen {
                 if (prefsVersion != Prefs.version) {
                     prefsVersion = Prefs.version;
                     recreate();
+                } else if (home != null) {
+                    home.notesChanged();
                 }
             };
             // Who's watching? When there's more than one person: whenever the TV comes on, and after a long break.

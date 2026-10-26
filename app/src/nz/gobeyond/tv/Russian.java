@@ -166,6 +166,9 @@ final class Russian {
             case "That's not it. Try again.": return "Не тот. Попробуйте ещё раз.";
             case "Me": return "Я";
             case "Talk to Beyond": return "Написать в Beyond";
+            case "Ask Beyond": return "Спросить Beyond";
+            case "Notes": return "Записки";
+            case "This needs Android System WebView.": return "Для этого нужен Android System WebView.";
             case "What would make Beyond™ TV better? Say it, or type it. We read every one.": return "Что сделает Beyond™ TV лучше? Скажите или напишите. Мы читаем всё.";
             case "Or type it here": return "Или напишите здесь";
             case "Speak": return "Сказать";
