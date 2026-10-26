@@ -400,6 +400,12 @@ var Family = (function () {
       if (KEYS[c.key]) BeyondTV.key(KEYS[c.key]);
       return;
     }
+    if (c.kind === 'wake') {
+      // Turned on from a phone (ADR 0026). A web app can't switch an LG or Samsung on, but when it's already on
+      // it opens what was asked for, the same as launch.
+      if (c.app && !BeyondTV.openShelf(c.app)) UI.toast(tr('Esse app não está nesta TV', "That app isn't on this TV", 'Esa app no está en este TV'));
+      return;
+    }
     if (c.kind === 'launch') {
       if (!BeyondTV.openShelf(c.app)) UI.toast(tr('Esse app não está nesta TV', "That app isn't on this TV", 'Esa app no está en este TV'));
       return;
