@@ -670,6 +670,14 @@ final class Family {
                 final String id = cmd.optString("app");
                 adb().post(() -> launch(app, id));
                 break;
+            case "wake":
+                // Turned on from a phone (ADR 0026): the TV's own ADB wakes the screen, then opens what was asked for.
+                final String openAfter = text(cmd, "app");
+                adb().post(() -> {
+                    wake(app);
+                    if (!openAfter.isEmpty()) launch(app, openAfter);
+                });
+                break;
             case "profile":
                 final String member = "bf-" + cmd.optString("memberId");
                 MAIN.post(() -> {
@@ -843,6 +851,19 @@ final class Family {
             }
         }
         return false;
+    }
+
+    /** On the ADB thread. Wakes the screen when it's dark, the same way the tidy-up race does (Tidy.Receiver). */
+    private static void wake(Context c) {
+        Adb a = openAdb(c);
+        if (a == null || Sleep.awake(a)) return;
+        try {
+            shell(c, "input keyevent 224");   // wake up
+            Thread.sleep(2500);
+            if (!Sleep.awake(a)) shell(c, "input keyevent 26");   // TVs that only know power
+            Thread.sleep(3000);
+        } catch (InterruptedException ignored) {
+        }
     }
 
     /** On the ADB thread. Through ADB it works in any app; without it, only on Beyond TV's own screens. */
