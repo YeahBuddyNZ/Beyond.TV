@@ -246,8 +246,12 @@
   /** The round buttons at the top right: Live TV, HDMI Inputs, Settings and whoever's watching (kids get fewer). */
   function topButtons() {
     var kid = Profiles.kid(), list = [];
-    // Talk to Beyond: the four dots, breathing. Feedback, typed on the remote (talkToBeyond).
-    if (!kid) list.push({dots: true, label: tr('Fale com a Beyond', 'Talk to Beyond', 'Habla con Beyond'), run: talkToBeyond});
+    // Ask Beyond: the four dots, breathing. Linked to Beyond Family it's the assistant, kids included (ask.js, ADR 0025),
+    // with Talk to Beyond inside it; without, the dots are feedback, typed on the remote (talkToBeyond).
+    if (Family.linked()) list.push({dots: true, label: tr('Pergunte à Beyond', 'Ask Beyond', 'Pregúntale a Beyond'), run: function () { Ask.open(); }});
+    else if (!kid) list.push({dots: true, label: tr('Fale com a Beyond', 'Talk to Beyond', 'Habla con Beyond'), run: talkToBeyond});
+    // Notes from the family, when there are any up: opens them big (notes.js).
+    if (Notes.count()) list.push({emoji: '\uD83D\uDCDD', label: tr('Bilhetes', 'Notes', 'Notas'), run: function () { Notes.open(); }});
     list.push({icon: 'live_tv', label: tr('TV aberta', 'Live TV', 'TV en vivo'), run: function () {
       var live = liveTV(); if (live) launcher(live.id, tr('TV aberta', 'Live TV', 'TV en vivo'))();
     }});
@@ -292,6 +296,7 @@
         var p = defs[b].person, who = p.together ? tr('Família', 'Family', 'Familia') : p.name || '';
         el('span', 'who', r, who.length > 12 ? who.slice(0, 11) + '\u2026' : who);
       } else if (defs[b].dots) UI.dots(r);
+      else if (defs[b].emoji) el('span', 'emo', r, defs[b].emoji);
       else sym(defs[b].icon, r);
       el('div', 'tip', r, defs[b].label);
       hover(r, Z.TOP, kinds.length + b);
@@ -686,7 +691,8 @@
     }
     if (night) rows.push(['🌙', tr('Respirar para dormir', 'Bedtime breathing', 'Respirar para dormir'), tr('No botão da lua, lá em cima', 'The moon button, up the top', 'En el botón de la luna, arriba')]);
     if (!linked && !kid) rows.push(['✨', tr('Conecte o Beyond Family', 'Link Beyond Family', 'Conecta Beyond Family'), tr('E os planos da casa aparecem aqui', "And your home's plans show up here", 'Y los planes de casa aparecen aquí')]);
-    var room = linked ? 3 : 4;
+    // A note up takes the space under the card, so the card keeps to one line (renderNotes).
+    var room = Notes.count() ? 1 : linked ? 3 : 4;
     for (var r = 0; r < rows.length && r < room; r++) {
       var row = el('div', 'row', box), icon = el('div', 'icon', row);
       if (rows[r][0]) icon.textContent = rows[r][0];
@@ -696,6 +702,18 @@
       if (rows[r][2]) el('div', 'more', text, rows[r][2]);
     }
     setClass(box, 'on', rows.length > 0 || linked);
+    renderNotes();
+  }
+
+  /** The newest note, in the space under Today at home and over the shelf (notes.js draws it). */
+  function renderNotes() {
+    var box = $('notes'), tonight = $('tonight');
+    if (!box) return;
+    var top = hasClass(tonight, 'on') ? tonight.offsetTop + tonight.offsetHeight + 22 : 296;
+    var height = Math.min(260, $('platter').offsetTop - 26 - top);
+    box.style.top = top + 'px';
+    if (height < 150) { Notes.card(box, 0); setClass(box, 'on', false); return; }
+    Notes.card(box, height);
   }
 
   // MARK: - Shelf
@@ -1456,6 +1474,24 @@
     }
     return false;
   }
+
+  /** The names of the apps to watch things on: the shelf, then every known service on this TV. For Ask Beyond. */
+  function watchApps() {
+    var out = [], i;
+    function add(a) { if (a && a.title && out.indexOf(a.title) < 0) out.push(a.title); }
+    for (i = 0; i < shelf.length; i++) add(shelf[i]);
+    // A kid's answer only ever points at a kid's own shelf.
+    if (!Profiles.kid()) for (i = 0; i < apps.length; i++) if (shelfKey(apps[i])) add(apps[i]);
+    return out.slice(0, 40);
+  }
+
+  /** Opens an app by the name Ask Beyond was given. False when it isn't on this TV. */
+  function openApp(title) {
+    var t = String(title || '').toLowerCase();
+    for (var i = 0; i < apps.length; i++) if (apps[i].title.toLowerCase() === t) { launcher(apps[i].id, apps[i].title)(); return true; }
+    return false;
+  }
+
   document.addEventListener('mousemove', function () { poke(); });
 
   // MARK: - Start
@@ -1647,5 +1683,6 @@
 
   window.BeyondTV = {state: st, tiles: function () { renderTop(); renderCards(); }, move: move, activate: activate, back: back, showSaver: showSaver, hideSaver: hideSaver, toast: toast,
     refresh: profileChosen, apps: function () { return apps; }, launch: function (id, name) { launcher(id, name)(); },
-    key: key, home: reset, openShelf: openShelf};
+    key: key, home: reset, openShelf: openShelf, watchApps: watchApps, openApp: openApp, talk: talkToBeyond, renderNotes: renderNotes,
+    notes: function () { renderTop(); renderTonight(); updateFocus(); }};
 })();

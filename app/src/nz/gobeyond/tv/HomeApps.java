@@ -71,6 +71,8 @@ final class HomeApps {
     static final int GAMES = 13;
     /** Tonight's sky: a star chart for here and the moon (SkyActivity, ADR 0023). */
     static final int SKY = 14;
+    /** Ask Beyond (the four dots when linked to Beyond Family) and the notes from a phone (ADR 0025). */
+    static final int ASK = 15, NOTES = 16;
     /** Image size of each card (16:9; on screen it shows up to ~330 px wide). */
     static final int TILE_W = 384, TILE_H = 216;
 

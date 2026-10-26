@@ -523,6 +523,27 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         motionDirty = true;
     }
 
+    private void rebuildLightButtons() {
+        makeLightButtons();
+        layoutLight();
+        int top = tabCount() + lightButtons.size();
+        if (zone == Z_TOP && topIndex >= top) topIndex = Math.max(0, top - 1);
+    }
+
+    private boolean notesShown;
+
+    /** Beyond Family's notes came or went (Family.onChange): the note button follows them. */
+    void notesChanged() {
+        if (notesShown == hasNotes()) return;
+        rebuildLightButtons();
+        invalidateAll();
+    }
+
+    private static boolean hasNotes() {
+        org.json.JSONArray n = Family.notes();
+        return n != null && n.length() > 0;
+    }
+
     /** The three corner buttons, with their names in the current language. */
     private void makeLightButtons() {
         lightButtons.clear();
@@ -543,8 +564,13 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         boolean kid = watcher.kid;   // kids get fewer: no feedback, no HDMI inputs
         // Bedtime breathing, at night: a night light that breathes, then fades to dark.
         if (nightTarget) lightButtons.add(HomeApps.action(HomeApps.BEDTIME, "bedtime", Ui.tr("Respirar para dormir", "Bedtime breathing", "Respirar para dormir"), "bedtime"));
-        // Talk to Beyond: the four dots, breathing. Feedback, spoken or typed (FeedbackActivity).
-        if (!kid) lightButtons.add(HomeApps.action(HomeApps.FEEDBACK, "feedback", Ui.tr("Fale com a Beyond", "Talk to Beyond"), "dots"));
+        // Notes left from a phone in Beyond Family (ADR 0025): the button is there while any are up, and opens them big.
+        notesShown = hasNotes();
+        if (notesShown) lightButtons.add(HomeApps.action(HomeApps.NOTES, "notes", Ui.tr("Bilhetes", "Notes", "Notas"), "bell"));
+        // The four dots, breathing. Linked to Beyond Family: Ask Beyond, for everyone (AskActivity). Otherwise Talk to
+        // Beyond: feedback, spoken or typed (FeedbackActivity), not for kids.
+        if (Family.linked(getContext())) lightButtons.add(HomeApps.action(HomeApps.ASK, "ask", Ui.tr("Pergunte à Beyond", "Ask Beyond", "Pregúntale a Beyond"), "dots"));
+        else if (!kid) lightButtons.add(HomeApps.action(HomeApps.FEEDBACK, "feedback", Ui.tr("Fale com a Beyond", "Talk to Beyond"), "dots"));
         lightButtons.add(HomeApps.action(HomeApps.LIVE_TV, "live", Ui.tr("TV aberta", "Live TV"), "live_tv"));
         if (!kid) lightButtons.add(HomeApps.action(HomeApps.INPUTS, "inputs", Ui.tr("Entradas HDMI", "HDMI Inputs"), "hdmi"));
         // Games, for anyone with the remote: karaoke, a party, quiz night and the rest, no phone needed (GamesActivity).
@@ -1018,10 +1044,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         if (want != nightTarget) {
             nightTarget = want;
             // The moon button comes at night and goes in the morning.
-            makeLightButtons();
-            layoutLight();
-            int top = tabCount() + lightButtons.size();
-            if (zone == Z_TOP && topIndex >= top) topIndex = Math.max(0, top - 1);
+            rebuildLightButtons();
         }
         want = want || world != null;
         if (want == darkTarget) return;
@@ -2471,6 +2494,14 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         }
         if (it.kind == HomeApps.FEEDBACK) {
             FeedbackActivity.open(activity);
+            return;
+        }
+        if (it.kind == HomeApps.ASK) {
+            AskActivity.open(activity, AskActivity.ASK, "", "");
+            return;
+        }
+        if (it.kind == HomeApps.NOTES) {
+            AskActivity.open(activity, AskActivity.NOTES, "", "");
             return;
         }
         if (it.kind == HomeApps.SLEEP) {
