@@ -15,6 +15,9 @@ final class Russian {
         switch (english) {
             case "Live TV": return "Телеканалы";
             case "All Apps": return "Приложения";
+            case "Found your music. It's on the home screen now, up in the corner.": return "Ваша музыка найдена. Она теперь в углу главного экрана.";
+            case "Your music isn't answering right now. Is the computer it's on switched on?": return "Ваша музыка сейчас не отвечает. Компьютер, на котором она хранится, включён?";
+            case "Couldn't open your music.": return "Не удалось открыть вашу музыку.";
             case "Settings": return "Настройки";
             case "Sleep Timer": return "Таймер сна";
             case "Sleep timer off.": return "Таймер сна выключен.";

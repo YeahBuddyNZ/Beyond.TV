@@ -67,6 +67,16 @@ final class HomeHub {
 
     static String code() { return code == null ? "" : code; }
 
+    /** The box's address on the home network ("192.168.1.20") once found, else null: Music looks there too. */
+    static String host() {
+        if (!found || base == null) return null;
+        try {
+            return new java.net.URL(base).getHost();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     static JSONArray rooms() { return rooms == null ? new JSONArray() : rooms; }
 
     static JSONObject room(String roomId) {

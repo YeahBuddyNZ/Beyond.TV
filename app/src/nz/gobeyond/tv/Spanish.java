@@ -8,6 +8,7 @@ final class Spanish {
         switch (english) {
             case "Live TV": return "TV en vivo";
             case "All Apps": return "Todas las apps";
+            case "Music": return "Música";
             case "Settings": return "Ajustes";
             case "Sleep Timer": return "Temporizador";
             case "Sleep timer off.": return "Temporizador apagado.";

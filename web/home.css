@@ -1063,3 +1063,8 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .bt-sky .star span { color: rgba(247, 246, 242, 0.62); }
 .bt-sky .hints { position: absolute; left: 1100px; top: 1000px; font-size: 24px; color: rgba(247, 246, 242, 0.45); }
 .bt-sky .hold { position: absolute; left: 0; top: 0; width: 1px; height: 1px; }
+
+/* The family's own music (music.js): Beyond Music's TV screens, full screen. */
+.bt-layer.bt-music { background: #0D0C18; }
+.bt-layer.bt-music::before { display: none; }
+.bt-music iframe { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; border: 0; background: #0D0C18; }

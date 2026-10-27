@@ -73,6 +73,8 @@ final class HomeApps {
     static final int SKY = 14;
     /** Ask Beyond (the four dots when linked to Beyond Family) and the notes from a phone (ADR 0025). */
     static final int ASK = 15, NOTES = 16;
+    /** The family's own music, once Beyond Music answers on the home network (MusicActivity, ADR 0027). */
+    static final int MUSIC = 17;
     /** Image size of each card (16:9; on screen it shows up to ~330 px wide). */
     static final int TILE_W = 384, TILE_H = 216;
 
@@ -217,6 +219,7 @@ final class HomeApps {
             items.add(shortcut(LIVE_TV, "live", Ui.tr("TV ao Vivo", "Live TV"), "tv"));
         }
         items.addAll(inputs(c));
+        if (Music.found()) items.add(shortcut(MUSIC, "music", Ui.tr("Música", "Music"), "music"));
         items.add(shortcut(ALL_APPS, "all", Ui.tr("Todos os Apps", "All Apps"), "apps"));
         return items;
     }

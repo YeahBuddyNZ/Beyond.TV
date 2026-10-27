@@ -73,6 +73,8 @@
   var SHELF = [
     ['netflix', /^netflix$/, /netflix/i, ['#0A0A0A', '#000000']],
     ['youtube', /youtube/, /^youtube$/i, ['#1C1C1E', '#09090A']],
+    // The family's own music (music.js), once Beyond Music answers on the house network
+    ['music', /^beyond:music$/, /$^/, ['#6E3DDB', '#2C2458']],
     // New Zealand's own, matched by name (their app ids differ by TV maker)
     ['neon', /neon/, /^neon$/i, ['#2B1036', '#12061A']],
     ['tvnz', /tvnz/, /tvnz/i, ['#3A1C8C', '#1A0B47']],
@@ -1106,6 +1108,7 @@
       if (jobsFirst()) return;
       // Plex opens Beyond TV's own Plex screen: Continue Watching, the libraries and the player, right here.
       if (/plex/i.test(name || '') || /plex|cdp-30/i.test(id || '')) { Plex.open(); Family.now('Plex'); return; }
+      if (id === Music.app.id) { Music.open(); return; }
       TV.launch(id, null, function (ok) {
         if (!ok) toast(tr('Não deu para abrir ', "Couldn't open ", 'No se pudo abrir ') + (name || id));
         else Family.now(name || id);
@@ -1581,9 +1584,18 @@
     updateFocus();
   }
 
+  /** The family's music turned up (or went away): Music joins the shelf, and the first time the TV says so. */
+  function musicChanged() {
+    var first = Music.firstTime(), chosen = Prefs.shelf(), name = shelfName(Music.app);
+    if (first && chosen && chosen.indexOf(name) < 0) Prefs.set('shelf', chosen.slice(0, 2).concat([name], chosen.slice(2)));
+    loadApps(function () { renderShelf(); renderDrawer(); updateFocus(); });
+    if (first) toast(tr('Achamos a sua música. Está nos apps da tela inicial.', "Found your music. It's on the home screen now, with your apps.",
+      'Encontramos tu música. Está con tus apps en la pantalla de inicio.'));
+  }
+
   function loadApps(done) {
     TV.apps(function (list) {
-      apps = list;
+      apps = window.Music && Music.found() ? [Music.app].concat(list) : list;
       Data.setApps(apps);
       pickShelf();
       TV.inputs(function (list2) {
@@ -1664,6 +1676,7 @@
   });
   Checkin.start();
   if (window.HomeHub) HomeHub.start(homeChanged);
+  if (window.Music) Music.start(musicChanged);
   // Beyond's answers to this TV's feedback, if it ever gave any: when the home screen opens, then now and then.
   function hearBeyond() { Checkin.hear(function (text) { toast('Beyond: ' + text); }); }
   hearBeyond();

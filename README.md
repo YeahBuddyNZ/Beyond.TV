@@ -79,6 +79,7 @@ Free and open source, built in Aotearoa by [Beyond](https://gobeyond.co.nz). One
 
 31. Notes on the TV and Ask Beyond: done on Google TV, LG and Samsung. Draw a note with your finger in Beyond Family (or type one), and it sits on the TV's home screen like a note on the fridge until it runs out or somebody takes it down; a heart pressed on the TV comes back to the phone. On a TV linked to Beyond Family the four dots become *Ask Beyond*: say what you're in the mood for ("rom-coms for date night") on the TV or from your phone, and an orb thinks it over, then puts up to four picks on the screen, each opening in an app you have. Kids get kids' answers. ADR 0025. Next: asking out loud from the TV's own remote.
 32. Turn it on from your phone: done on Google TV. *Turn on* on the remote in Beyond Family wakes the TV through its own ADB. It reaches a TV that stays on the network in standby (Sony: *Remote start* on). Switching LG and Samsung on is coming with Beyond Home. Next: Play music, with Beyond Music. ADR 0026.
+33. Your own music: done on Google TV, LG and Samsung. When Beyond Music is running on the house network (on a Mac, a Raspberry Pi or the Beyond Home box), the TV finds it by itself and Music shows up with your apps (on Google TV, up in the corner). Your albums, the CDs you copied in and New Zealand radio, all on the remote; Back comes home. Nothing about what you play leaves the house. ADR 0027.
 
 Ideas welcome: press the four dots on the TV (*Talk to Beyond*, or *Ask Beyond* when it's linked to Beyond Family).
 

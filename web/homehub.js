@@ -158,6 +158,8 @@ var HomeHub = (function () {
     /** 'none' (no box on this network), 'found' (not paired), 'waiting' (code on screen), 'paired'. */
     status: function () { return !found ? 'none' : rooms ? 'paired' : state.id ? 'waiting' : 'found'; },
     code: function () { return state.code || ''; },
-    rooms: function () { return rooms || []; }
+    rooms: function () { return rooms || []; },
+    /** The box's name or address once found ("homeassistant.local"), else null: Music looks there too. */
+    host: function () { return found && state.base ? state.base.replace(/^https?:\/\//, '').replace(/:\d+$/, '') : null; }
   };
 })();
