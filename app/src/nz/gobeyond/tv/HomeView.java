@@ -392,6 +392,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             checkNight(true);
             updatePicks();      // three new ones every hour
             HomeHub.start(getContext());   // a Beyond Home box switched on later is found (it asks at most every ten minutes)
+            Music.start(getContext());     // and the family's music (at most every five minutes)
             handler.postDelayed(this, 15_000);
         }
     };
@@ -463,6 +464,13 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         HomeHub.onChange = () -> { if (running) { updateCards(); cardWords(); invalidateAll(); } };
         HomeHub.start(getContext());
         HomeHub.pace(false);
+        Music.onChange = () -> {
+            if (!running) return;
+            reload();
+            if (Music.firstTime()) showToast(Ui.tr("Achamos a sua música. Está no canto da tela inicial.",
+                    "Found your music. It's on the home screen now, up in the corner.", "Encontramos tu música. Está en la esquina de la pantalla de inicio."));
+        };
+        Music.start(getContext());
         checkNotices();
         reload();
         updatePalette();
@@ -488,6 +496,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         handler.removeCallbacks(camTick);
         HomeHub.stop();
         HomeHub.onChange = null;
+        Music.onChange = null;
         handler.removeCallbacks(reloadSoon);
         data.removeListener(this);
         recs.removeListener(this);
@@ -2527,6 +2536,10 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         }
         if (it.kind == HomeApps.SKY) {
             SkyActivity.open(activity);
+            return;
+        }
+        if (it.kind == HomeApps.MUSIC) {
+            MusicActivity.open(activity);
             return;
         }
         if ((it.kind == HomeApps.SETTINGS || it.kind == HomeApps.ANDROID_SETTINGS) && People.kid(activity)) {

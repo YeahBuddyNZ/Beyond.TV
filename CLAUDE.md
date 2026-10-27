@@ -268,6 +268,12 @@ HDMI (Chromecast with Google TV, Google TV Streamer, onn 4K, NVIDIA Shield). Set
   `web/tidy.js` is the tidy-up race (`home.tidy` from `/tv/sync`: `{at, minutes, wake}`, or a `tidy` command): a countdown and the kids' faces, OK on yours when done. On Google TV it's `Tidy.java` (the nightly alarm, which wakes the TV through its own ADB; settings kept in `files/tidy.json`) and `TidyActivity.java`. ADR 0012.
   `web/chime.js` and `Chime.java` are the start chime, the same four notes (ADR 0012; change one, change both, and `tools/make_chime.py`). Played when the TV comes on and at the race's start and end, only while Home Settings › Sounds is on.
   `web/kidpicks.js` is Picks for kids: for a kid watching, the cards are a hand-picked list of each service's own shows matched to `likes` (a grown-up's, from Beyond Family or the profile editor behind the PIN) and `loves` (the kid's own), or one "What do you like to watch?" card; now and then, back from an app, it suggests one. No TMDB needed. Its like ids match Beyond Family's `TV_LIKES`. `KidPicks.java` holds the same lists for Google TV (likes from `Family.likes`): change one, change both.
+  `web/music.js` is the family's own music (ADR 0027): Beyond Music (`/api/hello` on port 8097, `{app: "beyond-music"}`)
+  found at the address it had last, `beyond-music.local` or the Beyond Home box joins the shelf as Music and opens its
+  own TV screens in an iframe; Back at its first screen comes as a `postMessage`. On Google TV it's `Music.java`
+  (asks `beyond-music.local` itself, `Mdns.java`), a Music button in the corner, and `MusicActivity`'s WebView, which
+  reaches the server only through `MusicRelay` on 127.0.0.1 (the one cleartext address in
+  `res/xml/network_security_config.xml`). Tested by `tests/MusicTest.java`.
   `web/homehub.js` is Your home: it finds the family's Beyond Home box (`/tv/hi` on port 8098: the address it found
   last, `homeassistant.local`, `homeassistant`, or `homeHub` in the config), pairs by a code typed in the Beyond Home
   app (Settings, TVs), then reads `/tv/snapshot` (every 4 seconds while the tab shows, every minute otherwise) and asks

@@ -7,6 +7,9 @@ var I18N = (function () {
 
   var lang = 'en';
   var german = {
+    // The family's own music (music.js)
+    "Found your music. It's on the home screen now, with your apps.": "Deine Musik ist gefunden. Sie ist jetzt bei deinen Apps auf dem Startbildschirm.",
+    "Your music isn't answering right now. Is the computer it's on switched on?": "Deine Musik antwortet gerade nicht. Ist der Computer, auf dem sie liegt, eingeschaltet?",
     // Ask Beyond and notes on the TV (ask.js, notes.js)
     "just now": "gerade eben",
     " min ago": " Min. her",
@@ -498,6 +501,9 @@ var I18N = (function () {
   }
 
   var russian = {
+    // The family's own music (music.js)
+    "Found your music. It's on the home screen now, with your apps.": "Ваша музыка найдена. Она теперь на главном экране, рядом с приложениями.",
+    "Your music isn't answering right now. Is the computer it's on switched on?": "Ваша музыка сейчас не отвечает. Компьютер, на котором она хранится, включён?",
     // Ask Beyond and notes on the TV (ask.js, notes.js)
     "just now": "только что",
     " min ago": " мин назад",

@@ -38,6 +38,13 @@ jobs:
           mkdir -p out/test
           javac -d out/test app/src/nz/gobeyond/tv/Http.java tests/UpdaterHttpTest.java
           java -cp out/test nz.gobeyond.tv.UpdaterHttpTest
+      - name: Music
+        # Finding beyond-music.local and the relay the music screen plays through (ADR 0027).
+        run: |
+          mkdir -p out/music-test
+          javac -d out/music-test app/src/nz/gobeyond/tv/Mdns.java app/src/nz/gobeyond/tv/MusicRelay.java \
+            app/src/nz/gobeyond/tv/LocalHttp.java tests/MusicTest.java
+          java -cp out/music-test nz.gobeyond.tv.MusicTest
       - name: Signing key
         env:
           KEYSTORE: ${{ secrets.ANDROID_KEYSTORE }}

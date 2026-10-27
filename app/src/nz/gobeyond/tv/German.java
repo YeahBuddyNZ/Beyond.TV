@@ -8,6 +8,9 @@ final class German {
         switch (english) {
             case "Live TV": return "Live-TV";
             case "All Apps": return "Alle Apps";
+            case "Found your music. It's on the home screen now, up in the corner.": return "Deine Musik ist gefunden. Sie ist jetzt oben in der Ecke des Startbildschirms.";
+            case "Your music isn't answering right now. Is the computer it's on switched on?": return "Deine Musik antwortet gerade nicht. Ist der Computer, auf dem sie liegt, eingeschaltet?";
+            case "Couldn't open your music.": return "Deine Musik ließ sich nicht öffnen.";
             case "Settings": return "Einstellungen";
             case "Sleep Timer": return "Ausschalt-Timer";
             case "Sleep timer off.": return "Ausschalt-Timer aus.";

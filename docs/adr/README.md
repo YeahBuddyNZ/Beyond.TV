@@ -34,3 +34,4 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0024](0024-board-and-card-games-with-robots.md) | Board and card games, against robots that grow with you |
 | [0025](0025-notes-and-ask-beyond.md) | Notes on the TV and Ask Beyond |
 | [0026](0026-turn-on-from-a-phone.md) | Turn the TV on from a phone |
+| [0027](0027-music-from-the-house.md) | The family's own music on the TV |
