@@ -2,6 +2,8 @@
  * The TV's side of the web home screen: its apps, opening one, its inputs, its settings, the Back key, its time zone.
  *  - LG webOS: the TV's service bus (Luna), the same calls LG's launcher makes.
  *  - Samsung Tizen: Tizen's web APIs (tizen.application for the apps, tizen.tvwindow for the inputs).
+ *  - Samsung Orsay (2011 to 2015 TVs, like a 2014 H6300): Samsung's Common API. It can't list or open other apps,
+ *    so the shelf has one tile that goes back to Smart Hub, where they are. Its remote sends its own key codes.
  *  - A desktop browser: a stand-in with sample apps, so the screen can be previewed and tested on a computer.
  * Plain ES5: older TVs run a Chromium from 2015-2017 (webOS 3 and 4, Tizen 3).
  */
@@ -10,6 +12,8 @@ var TV = (function () {
 
   var webos = typeof window.PalmServiceBridge !== 'undefined';
   var samsung = !webos && typeof window.tizen !== 'undefined' && !!window.tizen.application;
+  var ua = navigator.userAgent || '';
+  var orsay = !webos && !samsung && (typeof window.Common !== 'undefined' || /Maple|SmartHub/.test(ua));
   var calls = [];   // a bridge is collected if nothing holds it before its reply arrives
 
   /** One Luna call; done(result) with null on failure. */
@@ -265,16 +269,41 @@ var TV = (function () {
     }
   }
 
+  // MARK: - Samsung Orsay
+
+  // Samsung's Common API (loaded by the Orsay package's index.html from $MANAGER_WIDGET): the app tells Smart Hub
+  // it has loaded, and goes back to Smart Hub with Return on the first screen.
+  var widget = null;
+  if (orsay) {
+    try { widget = new window.Common.API.Widget(); } catch (e) {}
+    try { if (widget) widget.sendReadyEvent(); } catch (e) {}
+  }
+
+  // The Orsay remote's codes for the arrows, OK and Return (TVKeyValue.js), turned into the ones the rest uses.
+  var ORSAY_KEYS = {4: 37, 29460: 38, 5: 39, 29461: 40, 29443: 13, 88: 461};
+
+  // The one tile Orsay gets: Smart Hub, where the TV's own apps are.
+  var SMART_HUB = 'orsay:smarthub';
+
+  function orsayHub(done) {
+    try { if (widget) widget.sendReturnEvent(); } catch (e) {}
+    if (done) done(!!widget);
+  }
+
   // MARK: - The TV, whichever it is
 
   /** The TV's make, model and software version, for the daily check-in: {brand, model, os}, never anything else. */
   function info(done) {
-    var ua = navigator.userAgent || '';
     if (samsung) {
       var model = '';
       try { model = window.tizen.systeminfo.getCapability('http://tizen.org/system/model_name') || ''; } catch (e) {}
       var t = /Tizen ?([0-9.]+)/.exec(ua);
       done({brand: 'Samsung', model: model, os: t ? t[1] : ''});
+      return;
+    }
+    if (orsay) {
+      var y = /SmartTV\+?(\d{4})/.exec(ua);
+      done({brand: 'Samsung', model: '', os: 'Orsay' + (y ? ' ' + y[1] : '')});
       return;
     }
     if (!webos) { done({brand: '', model: '', os: ''}); return; }
@@ -284,7 +313,7 @@ var TV = (function () {
   }
 
   return {
-    name: webos ? 'webos' : samsung ? 'tizen' : 'browser',
+    name: webos ? 'webos' : samsung ? 'tizen' : orsay ? 'orsay' : 'browser',
     info: info,
 
     /** Turns the TV off (the sleep timer). LG only, through the remote control API, which asks once; done(ok). */
@@ -296,6 +325,7 @@ var TV = (function () {
     /** Installed apps, as the TV's launcher lists them: [{id, title, icon, color}]. */
     apps: function (done) {
       if (samsung) { samsungApps(done); return; }
+      if (orsay) { done([{id: SMART_HUB, title: 'Smart Hub', icon: '', color: '#1428A0'}]); return; }
       if (!webos) {
         done(SAMPLE.map(function (s) { return {id: s[0], title: s[1], icon: '', color: s[2]}; }));
         return;
@@ -335,6 +365,11 @@ var TV = (function () {
         else samsungLaunch(id, done);
         return;
       }
+      if (orsay) {
+        if (id === SMART_HUB) orsayHub(done);
+        else if (done) setTimeout(function () { done(false); }, 0);
+        return;
+      }
       if (!webos) {
         if (done) setTimeout(function () { done(true); }, 0);
         return;
@@ -347,6 +382,7 @@ var TV = (function () {
     /** The antenna and HDMI inputs; `connected` when the TV says a device is on (when it tells). */
     inputs: function (done) {
       if (samsung) { samsungInputs(done); return; }
+      if (orsay) { done([]); return; }   // the remote's Source button does it there
       var list = INPUTS.map(function (x) { return {id: x.id, key: x.key, label: x.label, symbol: x.symbol, connected: true}; });
       if (!webos) {
         list[2].connected = false;
@@ -375,6 +411,7 @@ var TV = (function () {
     /** The TV's own settings; done(ok). */
     settings: function (done) {
       if (samsung) samsungSettings(done);
+      else if (orsay) orsayHub(done);   // the TV's menu opens with the remote's Menu button; Smart Hub is the way out
       else this.launch('com.palm.app.settings', null, done);
     },
 
@@ -384,6 +421,7 @@ var TV = (function () {
         try { window.tizen.application.getCurrentApplication().hide(); } catch (e) {}
         return;
       }
+      if (orsay) { orsayHub(); return; }
       if (window.PalmSystem && window.PalmSystem.platformBack) window.PalmSystem.platformBack();
     },
 
@@ -396,11 +434,15 @@ var TV = (function () {
     },
 
     /** In a desktop browser (the preview and the website's demo), not on a TV. */
-    browser: !webos && !samsung,
+    browser: !webos && !samsung && !orsay,
     webos: webos,
     samsung: samsung,
+    orsay: orsay,
 
-    /** Key codes: the arrows, OK and the TV's Back (LG 461, Samsung 10009). */
-    keys: {left: 37, up: 38, right: 39, down: 40, ok: 13, back: samsung ? 10009 : 461}
+    /** Key codes: the arrows, OK and the TV's Back (LG and Orsay 461, Tizen 10009). */
+    keys: {left: 37, up: 38, right: 39, down: 40, ok: 13, back: samsung ? 10009 : 461},
+
+    /** A key code from the remote as the rest of the app knows it (Orsay's remote sends its own). */
+    code: function (k) { return orsay && ORSAY_KEYS[k] ? ORSAY_KEYS[k] : k; }
   };
 })();

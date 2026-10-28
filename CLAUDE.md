@@ -133,6 +133,18 @@ screen stays. Two ways:
 8. **Tell them:** *Autorun Last App* in the TV's settings (under Start Screen Options; where it is changes by year)
    makes the TV turn on into Beyond TV.
 
+## Installing it on an older Samsung TV (Orsay, 2011 to 2015)
+
+Samsung TVs before 2016 (a 2014 UA40H6300, say) run Orsay: no Tizen, no TizenBrew. ADR 0028. Smart Hub stays.
+
+1. **Build:** `python3 orsay/build.py` (or `--generic`) must end with `Built BeyondTV-orsay.zip`.
+2. **Serve:** `sudo python3 orsay/serve.py` (port 80 is what the TV asks; `--ip` if it guesses wrong). It answers only
+   `/widgetlist.xml` and `/Widget/BeyondTV.zip`.
+3. **On the TV** (they do it): Smart Hub, Samsung Account, sign in as `develop` (password `sso1029dev!` on firmware
+   that asks), hold OK on an app, *IP Setting* = the computer's IP, hold OK again, *Start User App Sync*.
+4. **Tell them:** one Smart Hub tile instead of the app list, no inputs, and https may fail on old certificates.
+   Not yet run on a real Orsay TV: say so.
+
 ## Releases
 
 TizenBrew Installer takes the first `.wgt` of the latest GitHub release, so every release carries
@@ -289,6 +301,7 @@ HDMI (Chromecast with Google TV, Google TV Streamer, onn 4K, NVIDIA Shield). Set
   it never touches the name, shelf, PIN or kid flag, and a Beyond Family refresh keeps what they picked.
   `MyWorldActivity.java` is the same on Google TV (same buddies, colours and worlds: change one, change both); `HomeView`
   draws the watcher's world instead of the sky, with the dark look, and `Family.pushLook` sends it to Beyond Family.
+  Orsay (Samsung 2011 to 2015, ADR 0028) is the same `web/`, packed by `orsay/build.py`: `TV.orsay`, the remote's codes through `TV.code`, one Smart Hub tile, check-in as `tizen` with OS `Orsay <year>`; tested by `node tests/orsay.test.js`.
   `tools/webapp.py` is what both builds share. Preview: `python3 webos/build.py --preview` (or `tizen/build.py`), then
   open `out/webos/index.html` in a browser (a stand-in lists sample apps).
 - Beyond Family on Android (`Family.java`, `FamilyService.java`, `LinkActivity.java`, all in `:home`): the same

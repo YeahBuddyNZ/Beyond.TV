@@ -110,7 +110,7 @@ var HomeHub = (function () {
   /** Says hello to the box and shows the code to type in the app. */
   function pair(done) {
     if (!state.base) { done(false); return; }
-    var kind = window.TV && TV.name, name = kind === 'webos' ? 'LG TV' : kind === 'tizen' ? 'Samsung TV' : 'TV';
+    var kind = window.TV && TV.name, name = kind === 'webos' ? 'LG TV' : kind === 'tizen' || kind === 'orsay' ? 'Samsung TV' : 'TV';
     call(state.base, 'POST', '/tv/hello', {name: name}, function (err, json) {
       if (err || !json || !json.id) { done(false); return; }
       state = {base: state.base, id: json.id, secret: json.secret, code: json.code};

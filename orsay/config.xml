@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widget>
+    <cpname>Beyond</cpname>
+    <ver>1.0.0</ver>
+    <mgrver></mgrver>
+    <fullwidget>y</fullwidget>
+    <type>user</type>
+    <srcctl>y</srcctl>
+    <ticker>n</ticker>
+    <childlock>n</childlock>
+    <audiomute>n</audiomute>
+    <videomute>n</videomute>
+    <dcont>y</dcont>
+    <network>y</network>
+    <apptype>13</apptype>
+    <width>1920</width>
+    <height>1080</height>
+    <widgetname>Beyond TV</widgetname>
+    <description>A fast, ad-free home screen.</description>
+    <ThumbIcon>icon_thumb.png</ThumbIcon>
+    <BigThumbIcon>icon_bigthumb.png</BigThumbIcon>
+    <ListIcon>icon_list.png</ListIcon>
+    <BigListIcon>icon_biglist.png</BigListIcon>
+    <category>lifestyle</category>
+    <author>
+        <name>Beyond</name>
+        <link>https://gobeyond.co.nz</link>
+    </author>
+</widget>
