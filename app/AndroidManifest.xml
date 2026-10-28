@@ -258,6 +258,16 @@
             android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|density|fontScale|locale|layoutDirection"
             android:theme="@style/BeyondTV.Home" />
 
+        <!-- Have the pets been fed? Asked of a kid who just picked their face. -->
+        <activity
+            android:name=".PetsActivity"
+            android:process=":home"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:screenOrientation="landscape"
+            android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|density|fontScale|locale|layoutDirection"
+            android:theme="@style/BeyondTV.Home" />
+
         <!-- The family's own music: Beyond Music's TV screens, full screen (ADR 0027). -->
         <activity
             android:name=".MusicActivity"

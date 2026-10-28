@@ -128,14 +128,15 @@ public class MyWorldActivity extends Activity {
         c.startActivity(new Intent(c, MyWorldActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
 
-    /** A kid who hasn't made it theirs yet is asked once, the first time they pick their face. */
-    static void offer(Context c, People.Person p) {
-        if (p == null || !p.kid || p.together()) return;
+    /** A kid who hasn't made it theirs yet is asked once, the first time they pick their face. True when it opened. */
+    static boolean offer(Context c, People.Person p) {
+        if (p == null || !p.kid || p.together()) return false;
         android.content.SharedPreferences sp = c.getSharedPreferences("people", Context.MODE_PRIVATE);
         java.util.Set<String> seen = new java.util.HashSet<>(sp.getStringSet(OFFERED, new java.util.HashSet<>()));
-        if (!seen.add(p.id) || !p.world.isEmpty()) return;
+        if (!seen.add(p.id) || !p.world.isEmpty()) return false;
         sp.edit().putStringSet(OFFERED, seen).apply();
         open(c);
+        return true;
     }
 
     private float k;

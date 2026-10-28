@@ -502,6 +502,19 @@ final class Russian {
             case "Last quarter": return "Последняя четверть";
             case "Waning crescent": return "Убывающий серп";
             case "The star button, up the top": return "Кнопка со звездой, наверху";
+            // Have the pets been fed? (PetsActivity)
+            case " and ": return " и ";
+            case "Did ": return "Покормили ";
+            case " get fed today?": return " сегодня?";
+            case "Hey ": return "Привет, ";
+            case ", Beyond Family will know too.": return "! Beyond Family тоже узнает.";
+            case "Yes, they're fed": return "Да, покормили";
+            case "Not yet": return "Ещё нет";
+            case "Off you go! ": return "Беги! ";
+            case " would love some food.": return " ждут еду.";
+            case "Couldn't tell Beyond Family just now.": return "Сейчас не получилось сообщить Beyond Family.";
+            case "Thanks, ": return "Спасибо, ";
+            case "! It's ticked off in Beyond Family.": return "! Отмечено в Beyond Family.";
             default:
                 // Notices are saved in the language in use when they were generated.
                 String[] prefixes = {"Couldn't check Beyond™ TV: ", "Couldn't turn on Beyond™ TV: ",

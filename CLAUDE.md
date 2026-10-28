@@ -294,7 +294,7 @@ HDMI (Chromecast with Google TV, Google TV Streamer, onn 4K, NVIDIA Shield). Set
   On Google TV it's `HomeHub.java` (also finds the box by Home Assistant's `_home-assistant._tcp` announcement),
   `RoomActivity.java` and the `home` tab in `HomeView` (first three rooms). Plain http to the home network goes through
   `LocalHttp.java` (the cameras use it too), never the system's http stack, so cleartext stays off.
-  `web/pets.js` asks a kid who just picked their face whether the household's pets got fed (`pets` in `/tv/sync`, each with `due` worked out by Beyond Family); "Yes" posts `/tv/pets/fed` with the kid's member id, "Not yet" asks again after 30 minutes.
+  `web/pets.js` asks a kid who just picked their face whether the household's pets got fed (`pets` in `/tv/sync`, each with `due` worked out by Beyond Family); "Yes" posts `/tv/pets/fed` with the kid's member id, "Not yet" asks again after 30 minutes. On Google TV it's `PetsActivity.java` (from `WhoActivity.choose`, after Make it yours; pets in `Family.petsDue`): change one, change both.
   `web/outside.js` is the fine day nudge: once a day on a mild, dry day, coming back from an app suggests going outside, and the next key press 10+ minutes later offers to count it as green time (`POST /tv/green`).
   The dinner question lives in `web/family.js` (`dinner`): `question` opens it, `question-answered` fills in faces (never the words), `question-reveal` shows the answers, `question-end` closes it.
   `web/myworld.js` is Make it yours: a kid restyles their own profile (buddy, colour, world, loves) with no PIN;
