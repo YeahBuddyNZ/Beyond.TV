@@ -124,6 +124,7 @@ final class Family {
         playlists = null;
         jobs = java.util.Collections.emptyMap();
         likes = java.util.Collections.emptyMap();
+        pets = null;
     }
 
     // MARK: - Talking to Beyond Family
@@ -497,6 +498,47 @@ final class Family {
         return left == null ? java.util.Collections.<String>emptyList() : left;
     }
 
+    /** The household's living pets from Beyond Family ({id, name, face, colour, due}), or null before the first sync. */
+    private static volatile JSONArray pets;
+
+    static boolean havePets() { return pets != null; }
+
+    /** The pets still wanting a meal (Beyond Family works out `due`: one from the morning, the rest from 3pm). */
+    static List<JSONObject> petsDue() {
+        List<JSONObject> due = new ArrayList<>();
+        JSONArray all = pets;
+        for (int i = 0; all != null && i < all.length(); i++) {
+            JSONObject p = all.optJSONObject(i);
+            if (p != null && p.optBoolean("due") && !p.optString("id").isEmpty()) due.add(p);
+        }
+        return due;
+    }
+
+    /**
+     * A kid said the pets are fed: Beyond Family ticks them off in its feeding record, with the kid's name. Calls
+     * `done` on the main thread with null, or what went wrong in words.
+     */
+    static void petsFed(Context c, List<JSONObject> fed, String member, java.util.function.Consumer<String> done) {
+        final Context app = c.getApplicationContext();
+        new Thread(() -> {
+            String error = null;
+            try {
+                JSONArray ids = new JSONArray();
+                for (JSONObject p : fed) ids.put(p.optString("id"));
+                JSONObject body = new JSONObject().put("petIds", ids);
+                if (member != null) body.put("memberId", member);
+                call(app, "POST", "/tv/pets/fed", body, 15_000);
+                // Not asked about again before the next sync says otherwise.
+                for (JSONObject p : fed) p.put("due", false);
+            } catch (Throwable t) {
+                error = Ui.tr("Não deu para avisar o Beyond Family agora.", "Couldn't tell Beyond Family just now.",
+                        "No se pudo avisar a Beyond Family ahora.");
+            }
+            final String e = error;
+            if (done != null) MAIN.post(() -> done.accept(e));
+        }, "beyond-family-pets").start();
+    }
+
     static void apply(Context c, JSONObject home) { apply(c, home, null); }
 
     /**
@@ -520,6 +562,8 @@ final class Family {
         if (!playlistBusy) playlists = home == null ? null : home.optJSONArray("playlists");
         jobs = jobsOf(home == null ? null : home.optJSONArray("people"));
         likes = likesOf(home == null ? null : home.optJSONArray("people"));
+        pets = home == null ? null : home.optJSONArray("pets");
+        if (pets != null) MAIN.post(() -> PetsActivity.arrived(c.getApplicationContext()));
         try {
             JSONObject s = state(c);
             JSONObject was = s.optJSONObject("home");

@@ -188,7 +188,8 @@ public class WhoActivity extends Activity {
         People.Person now = People.current(this);
         Runnable go = () -> {
             People.use(this, p.id);
-            MyWorldActivity.offer(this, p);   // a kid's first time: make it yours
+            // A kid's first time: make it yours. Otherwise, have the pets been fed?
+            if (!MyWorldActivity.offer(this, p)) PetsActivity.offer(this, p);
             finish();
         };
         // A kid moving to Family or a grown-up needs the PIN; anyone moving to a kid's profile doesn't.

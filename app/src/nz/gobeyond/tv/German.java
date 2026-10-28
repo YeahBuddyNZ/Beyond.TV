@@ -459,6 +459,19 @@ final class German {
             case "Last quarter": return "Letztes Viertel";
             case "Waning crescent": return "Abnehmende Sichel";
             case "The star button, up the top": return "Der Stern-Knopf, oben";
+            // Have the pets been fed? (PetsActivity)
+            case " and ": return " und ";
+            case "Did ": return "Haben ";
+            case " get fed today?": return " heute schon Futter bekommen?";
+            case "Hey ": return "Hallo ";
+            case ", Beyond Family will know too.": return ", Beyond Family erfährt es auch.";
+            case "Yes, they're fed": return "Ja, sie haben gefressen";
+            case "Not yet": return "Noch nicht";
+            case "Off you go! ": return "Los geht's! ";
+            case " would love some food.": return " hätten gern ihr Fressen.";
+            case "Couldn't tell Beyond Family just now.": return "Beyond Family ließ sich gerade nicht erreichen.";
+            case "Thanks, ": return "Danke, ";
+            case "! It's ticked off in Beyond Family.": return "! Es ist in Beyond Family abgehakt.";
             default:
                 if (english.startsWith("Beyond™ TV is on: new home screen and screensaver, ")) {
                     return "Beyond™ TV ist an: neuer Startbildschirm und Bildschirmschoner, "
