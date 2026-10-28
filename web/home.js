@@ -1466,7 +1466,7 @@
   }
 
   document.addEventListener('keydown', function (e) {
-    if (key(e.keyCode)) e.preventDefault();
+    if (key(TV.code(e.keyCode))) e.preventDefault();
   });
 
   /** Opens a shelf app by its key ("netflix", "plex"), for Beyond Family's remote. False if this TV hasn't got it. */

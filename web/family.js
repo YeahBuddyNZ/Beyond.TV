@@ -172,7 +172,7 @@ var Family = (function () {
       });
     }
     function hello() {
-      var name = TV.samsung ? 'Samsung TV' : TV.webos ? 'LG TV' : 'TV';
+      var name = TV.samsung || TV.orsay ? 'Samsung TV' : TV.webos ? 'LG TV' : 'TV';
       call('POST', '/tv/hello', {name: name}, function (err, res) {
         if (closed) return;
         if (err) { failed(); return; }
@@ -239,7 +239,7 @@ var Family = (function () {
     function hello() {
       show('');
       note(tr('Falando com o Beyond Family…', 'Talking to Beyond Family…', 'Hablando con Beyond Family…'));
-      var name = TV.samsung ? 'Samsung TV' : TV.webos ? 'LG TV' : 'TV';
+      var name = TV.samsung || TV.orsay ? 'Samsung TV' : TV.webos ? 'LG TV' : 'TV';
       var fresh = !state.id;
       var go = function (err, res) {
         if (closed) return;
