@@ -39,3 +39,4 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0029](0029-tidy-race-counts-up.md) | The tidy-up race counts up |
 | [0030](0030-whos-tidying.md) | Who's tidying? before the race |
 | [0031](0031-snap-sound-pace.md) | Snap: sound, an easier pace and more snaps |
+| [0032](0032-silly-games.md) | Silly games: party games with one remote |

@@ -29,8 +29,11 @@ import java.nio.charset.StandardCharsets;
  * stay in files/table.json on this TV and are never sent anywhere.
  */
 public class TableActivity extends Activity {
-    static void open(Context c) {
-        c.startActivity(new Intent(c, TableActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+    static void open(Context c) { open(c, null); }
+
+    /** start: "silly" opens the silly games (web/laughs.js) rather than the board and card games. */
+    static void open(Context c, String start) {
+        c.startActivity(new Intent(c, TableActivity.class).putExtra("start", start).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
 
     private static final String FILE = "table.json";
@@ -87,6 +90,12 @@ public class TableActivity extends Activity {
         }
 
         @JavascriptInterface public String language() { return Ui.language; }
+
+        /** Which games to open: "silly" for the silly games, otherwise the board and card games. */
+        @JavascriptInterface public String start() {
+            String s = getIntent().getStringExtra("start");
+            return s == null ? "" : s;
+        }
 
         /** A kid watching with a grown-up PIN set: grown-up things (Start fresh) wait for a grown-up. */
         @JavascriptInterface public boolean locked() { return People.kid(TableActivity.this) && People.hasPin(TableActivity.this); }

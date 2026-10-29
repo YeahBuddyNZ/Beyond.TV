@@ -1,4 +1,5 @@
-// The rules of the board and card games (web/ludo.js, web/snap.js, web/table.js), without a screen:
+// The rules of the board and card games (web/ludo.js, web/snap.js, web/table.js) and the silly games' lines
+// (web/laughs.js), without a screen:
 // node tests/table-games.test.js
 'use strict';
 var fs = require('fs');
@@ -13,7 +14,7 @@ var sandbox = {
   UI: {}, Math: Math, Date: Date, JSON: JSON, console: console
 };
 vm.createContext(sandbox);
-['sfx.js', 'table.js', 'ludo.js', 'snap.js'].forEach(function (f) {
+['sfx.js', 'table.js', 'ludo.js', 'snap.js', 'laughs.js'].forEach(function (f) {
   // Top-level `var X = ...` in a script becomes a property of the context.
   vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'web', f), 'utf8'), sandbox, {filename: f});
 });
@@ -105,6 +106,19 @@ check('the level stays between 1 and 10', peak <= 10 && after >= 1);
 var guest = {id: 'guest', guest: true};
 Table.learn(guest, 'snap', 1);
 check('guests are never kept', !JSON.parse(store['bt.table']).people.guest);
+
+// Silly games: every line in all five languages, no dashes, and nothing grown-up when a kid is playing.
+var Laughs = sandbox.Laughs;
+function lines(list) { var out = []; list.forEach(function (t) { if (typeof t[0] === 'string') out.push(t); else out.push(t[0], t[1]); }); return out; }
+var all = lines(Laughs.LIKELY).concat(lines(Laughs.LIKELY_GROWN), lines(Laughs.RATHER), lines(Laughs.RATHER_GROWN), lines(Laughs.DARES), lines(Laughs.DARES_GROWN));
+check('every silly line is in five languages', all.every(function (t) { return t.length === 5 && t.every(function (x) { return typeof x === 'string' && x.length > 1; }); }));
+check('no dashes in the silly lines', all.every(function (t) { return t.join(' ').indexOf('\u2014') < 0; }));
+check('lots of silly lines', Laughs.LIKELY.length >= 40 && Laughs.RATHER.length >= 25 && Laughs.DARES.length >= 30);
+var withKid = Laughs.deck([{id: 'a'}, {id: 'k', kid: true}], Laughs.LIKELY, Laughs.LIKELY_GROWN);
+check('a kid playing gets the family set only', withKid.length === Laughs.LIKELY.length && withKid.every(function (t) { return Laughs.LIKELY_GROWN.indexOf(t) < 0; }));
+var grown = Laughs.deck([{id: 'a'}, {id: 'b'}], Laughs.DARES, Laughs.DARES_GROWN);
+check('grown-ups get the extras too', grown.length === Laughs.DARES.length + Laughs.DARES_GROWN.length);
+check('only guests counts as maybe kids', Laughs.deck([{id: 'g', guest: true}], Laughs.RATHER, Laughs.RATHER_GROWN).length === Laughs.RATHER.length);
 
 console.log(passed + ' passed, ' + failed + ' failed');
 process.exit(failed ? 1 : 0);
