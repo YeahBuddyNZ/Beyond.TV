@@ -24,9 +24,9 @@ import java.util.List;
 /**
  * The tidy-up race: a big clock counting up from 0:00, and everyone's face. Whoever is done grabs the remote and presses
  * OK on their face: first, second, third, with their time. When everybody's done the TV says who was fastest. Kyle
- * (29/10/2026): a count up, not a count down, so nobody runs out of time. Left open an hour, it closes. Same as
- * web/tidy.js. Opened by the nightly alarm (Tidy), a "tidy" command from Beyond Family, or the home screen when the
- * alarm couldn't open it itself.
+ * (29/10/2026): a count up, not a count down, so nobody runs out of time. Left open an hour, it closes. First, with
+ * more than one face, Who's tidying?: everyone ticked, OK takes someone out, then Go. Same as web/tidy.js. Opened by
+ * the nightly alarm (Tidy), a "tidy" command from Beyond Family, or the home screen when the alarm couldn't open it.
  */
 public class TidyActivity extends Activity {
     private static final String MINUTES = "minutes";
@@ -42,10 +42,10 @@ public class TidyActivity extends Activity {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private float k;
     private long started;
-    private boolean over;
+    private boolean over, picking;
     private TextView clock, title, sub;
     private LinearLayout faces;
-    private Button close;
+    private Button close, go;
     private ToneGenerator tone;
     private final List<Racer> racers = new ArrayList<>();
     private final List<Racer> order = new ArrayList<>();
@@ -53,6 +53,7 @@ public class TidyActivity extends Activity {
     private static final class Racer {
         People.Person person;
         TextView place;
+        boolean out;
         View face;
     }
 
@@ -94,6 +95,14 @@ public class TidyActivity extends Activity {
         faces.setGravity(Gravity.CENTER);
         column.addView(faces, new LinearLayout.LayoutParams(-1, -2));
         for (People.Person p : racing(this)) faces.addView(face(p));
+        picking = racers.size() > 1;
+
+        LinearLayout.LayoutParams gp = new LinearLayout.LayoutParams(-2, Math.round(84 * k));
+        gp.topMargin = Math.round(50 * k);
+        go = FeedbackActivity.button(this, Ui.tr("Vai!", "Go!", "¡Ya!"), k, true);
+        go.setOnClickListener(v -> go());
+        go.setVisibility(picking ? View.VISIBLE : View.GONE);
+        column.addView(go, gp);
 
         close = FeedbackActivity.button(this, Ui.tr("Fechar", "Close", "Cerrar"), k, false);
         close.setOnClickListener(v -> finish());
@@ -104,12 +113,47 @@ public class TidyActivity extends Activity {
 
         setContentView(root);
         if (faces.getChildCount() > 0) faces.getChildAt(0).requestFocus();
-        Chime.play();
         try {
             if (Prefs.sounds()) tone = new ToneGenerator(AudioManager.STREAM_MUSIC, 60);
         } catch (RuntimeException ignored) {
             // No sound to be had: the race works without it.
         }
+        if (picking) {
+            title.setText(Ui.tr("Quem vai arrumar?", "Who's tidying?", "¿Quién ordena?"));
+            sub.setText(Ui.tr("Tire quem não vai, depois aperte Vai!", "Untick anyone who's out, then press Go!",
+                    "Quita a quien no juegue y pulsa ¡Ya!"));
+            clock.setText(time(0));
+            clock.setAlpha(0.35f);
+            for (Racer r : racers) r.place.setText("✓");
+            handler.postDelayed(this::finish, LONGEST);   // nobody pressed Go
+        } else {
+            Chime.play();
+            tick.run();
+        }
+    }
+
+    /** Who's tidying is settled: the ones still ticked race, and the clock starts. */
+    private void go() {
+        if (!picking) return;
+        List<Racer> in = new ArrayList<>();
+        for (Racer r : racers) if (!r.out) in.add(r);
+        if (in.isEmpty()) return;
+        handler.removeCallbacksAndMessages(null);
+        for (Racer r : racers) {
+            if (r.out) faces.removeView(r.face);
+            else r.place.setText(" ");
+        }
+        racers.clear();
+        racers.addAll(in);
+        picking = false;
+        title.setText(Ui.tr("Corrida da arrumação!", "Tidy-up race!", "¡Carrera de ordenar!"));
+        sub.setText(Ui.tr("Prontos, já! Quem terminar, aperte OK no seu rosto.",
+                "Ready, set, go! When you're done, press OK on your face.", "¡Preparados, listos, ya! Cuando termines, pulsa OK en tu cara."));
+        clock.setAlpha(1f);
+        go.setVisibility(View.GONE);
+        racers.get(0).face.requestFocus();
+        started = SystemClock.uptimeMillis();
+        Chime.play();
         tick.run();
     }
 
@@ -178,7 +222,15 @@ public class TidyActivity extends Activity {
         r.place = FeedbackActivity.text(this, " ", Ui.semibold, 30 * k, EMBER);
         f.addView(r.place);
         r.face = f;
-        f.setOnClickListener(v -> done(r));
+        f.setOnClickListener(v -> {
+            if (!picking) {
+                done(r);
+                return;
+            }
+            r.out = !r.out;
+            r.place.setText(r.out ? " " : "✓");
+            f.setAlpha(r.out ? 0.4f : 1f);
+        });
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-2, -2);
         lp.leftMargin = lp.rightMargin = Math.round(14 * k);
         f.setLayoutParams(lp);

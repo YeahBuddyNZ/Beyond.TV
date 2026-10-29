@@ -1,7 +1,8 @@
 /*
  * The tidy-up race: a big clock counting up from 0:00 and everyone's face. Whoever is done grabs the remote and presses
  * OK on their face: first, second, third, with their time. When everybody's done the TV says who was fastest. A count
- * up, not a count down (Kyle, 29/10/2026), so nobody runs out of time; left open an hour, it closes.
+ * up, not a count down (Kyle, 29/10/2026), so nobody runs out of time; left open an hour, it closes. First, with more
+ * than one face, Who's tidying?: everyone ticked, OK takes someone out, then Go.
  *
  * Every night at the time a grown-up set in Beyond Family (TV > Tidy-up race), if Beyond TV is open then; or straight
  * away from the remote in Beyond Family. On LG and Samsung the app can't switch the TV on by itself, so it starts only
@@ -30,15 +31,30 @@ var Tidy = (function () {
   function start(minutes) {
     if (open) open.close();
     // The minutes from Beyond Family no longer set an end: the clock counts up.
-    var started = Date.now(), timer = 0, over = false, order = [], people = racing();
-    var clock, title, sub, close, api;
+    var everyone = racing(), out = {}, picking = everyone.length > 1, people = everyone;
+    var started = Date.now(), timer = 0, over = false, order = [];
+    var clock, title, sub, close, firstFace, api;
 
     function tick() {
-      if (over) return;
+      if (over || picking) return;
       var gone = Date.now() - started;
       clock.textContent = time(gone);
       if (gone >= LONGEST) { api.close(); return; }   // forgotten: nobody is racing any more
       timer = setTimeout(tick, 250);
+    }
+
+    // Who's tidying: everyone starts ticked, OK on a face takes them out (or back in), then Go.
+    function go() {
+      var chosen = everyone.filter(function (p, i) { return !out[i]; });
+      if (!chosen.length) return;
+      clearTimeout(timer);
+      people = chosen;
+      picking = false;
+      started = Date.now();
+      api.rebuild();
+      api.focusNode(firstFace);
+      Chime.play();
+      tick();
     }
 
     function done(p, node, place) {
@@ -69,29 +85,36 @@ var Tidy = (function () {
       cls: 'bt-tidy',
       build: function (layer, a) {
         var box = UI.el('div', 'bt-box', layer);
-        title = UI.el('div', 'bt-heading', box, tr('Corrida da arrumação!', 'Tidy-up race!', '¡Carrera de ordenar!'));
-        clock = UI.el('div', 'clock', box);
-        sub = UI.el('div', 'bt-sub', box, tr('Prontos, já! Quem terminar, aperte OK no seu rosto.',
+        title = UI.el('div', 'bt-heading', box, picking ? tr('Quem vai arrumar?', "Who's tidying?", '¿Quién ordena?')
+          : tr('Corrida da arrumação!', 'Tidy-up race!', '¡Carrera de ordenar!'));
+        clock = UI.el('div', 'clock' + (picking ? ' waiting' : ''), box, '0:00');
+        sub = UI.el('div', 'bt-sub', box, picking ? tr('Tire quem não vai, depois aperte Vai!', "Untick anyone who's out, then press Go!",
+          'Quita a quien no juegue y pulsa ¡Ya!') : tr('Prontos, já! Quem terminar, aperte OK no seu rosto.',
           "Ready, set, go! When you're done, press OK on your face.", '¡Preparados, listos, ya! Cuando termines, pulsa OK en tu cara.'));
-        var row = UI.el('div', 'faces', box);
-        for (var i = 0; i < people.length; i++) {
+        var row = UI.el('div', 'faces', box), list = picking ? everyone : people;
+        for (var i = 0; i < list.length; i++) {
           (function (p, i) {
-            var f = UI.el('div', 'racer', row);
+            var f = UI.el('div', 'racer' + (picking && out[i] ? ' out' : ''), row);
             UI.avatar(p, f, 150);
             UI.el('div', 'name', f, p.name);
-            var place = UI.el('div', 'place', f, ' ');
-            a.add(f, function () { done(p, f, place); }, {first: i === 0});
-          })(people[i], i);
+            var place = UI.el('div', 'place', f, picking && !out[i] ? '✓' : ' ');
+            if (i === 0) firstFace = f;
+            a.add(f, picking ? function () { out[i] = !out[i]; a.rebuild(); } : function () { done(p, f, place); }, {first: i === 0});
+          })(list[i], i);
         }
         var buttons = UI.el('div', 'bt-buttons', box);
-        close = UI.button(buttons, tr('Fechar', 'Close', 'Cerrar'), null, 'close');
-        a.add(close, function () { a.close(); });
+        if (picking) {
+          a.add(UI.button(buttons, tr('Vai!', 'Go!', '¡Ya!'), null, 'primary'), go);
+        } else {
+          close = UI.button(buttons, tr('Fechar', 'Close', 'Cerrar'), null, 'close');
+          a.add(close, function () { a.close(); });
+        }
       },
       closed: function () { clearTimeout(timer); open = null; }
     });
     open = api;
-    Chime.play();
-    tick();
+    if (!picking) { Chime.play(); tick(); }
+    else timer = setTimeout(function () { if (open === api) api.close(); }, LONGEST);
     return api;
   }
 

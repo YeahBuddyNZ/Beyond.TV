@@ -298,6 +298,9 @@ final class German {
             case "Answer in Beyond Family on your phone. The answers come up together.": return "Antwortet in Beyond Family auf dem Handy. Die Antworten erscheinen zusammen.";
             case " answered the dinner question": return " hat die Frage beantwortet";
             case "Tidy-up race!": return "Aufräum-Wettrennen!";
+            case "Go!": return "Los!";
+            case "Untick anyone who's out, then press Go!": return "Nimm raus, wer nicht mitmacht, dann drück Los!";
+            case "Who's tidying?": return "Wer räumt auf?";
             case "Ready, set, go! When you're done, press OK on your face.": return "Auf die Plätze, fertig, los! Wer fertig ist, drückt OK auf sein Gesicht.";
             case "1st": return "1.";
             case "2nd": return "2.";
