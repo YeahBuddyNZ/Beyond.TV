@@ -171,6 +171,8 @@ var Table = (function () {
   var GAMES = [
     {id: 'ludo', icon: '🎲', name: function () { return 'Ludo'; },
       about: function () { return tr('Seis para sair, dê a volta e chegue em casa.', 'Roll a six to get out, race round, get home.', 'Saca un seis para salir, da la vuelta y llega a casa.'); }},
+    {id: 'chess', icon: '\u265E', name: function () { return tr('Xadrez', 'Chess', 'Ajedrez'); },
+      about: function () { return tr('Dê xeque-mate no rei. Contra um robô, ou dois no mesmo controle.', 'Checkmate the king. Against a robot, or two of you on one remote.', 'Jaque mate al rey. Contra un robot, o dos con un mando.'); }},
     {id: 'chant', icon: '🐑', name: function () { return tr('Ovelha, Pinguim, Vulcão', 'Sheep, Penguin, Volcano', 'Oveja, Pingüino, Volcán'); },
       about: function () { return tr('Diga a palavra, vire a carta: se combinar, aperte OK!', 'Say the word, flip the card: if they match, slap OK!', 'Di la palabra, voltea la carta: si coinciden, ¡pulsa OK!'); }},
     {id: 'snap', icon: '🃏', name: function () { return 'Snap'; },
@@ -206,33 +208,54 @@ var Table = (function () {
     });
   }
 
-  /** Robots and, for Ludo, a quick or a full game. */
+  /** Robots and, for Ludo, a quick or a full game; for chess, who has White. */
   function setup(g) {
-    var humans = g.id === 'ludo' ? chosen.slice() : chosen.slice(0, 1);
+    var chess = g.id === 'chess';
+    var humans = g.id === 'ludo' ? chosen.slice() : chosen.slice(0, chess ? 2 : 1);
     var max = g.id === 'ludo' ? 4 - humans.length : 3;
-    // Ludo: one robot, or none when there are already four. Snap games: two robots to slap against.
-    var robots = g.id === 'ludo' ? Math.min(max, 1) : 2;
-    var quick = true;
+    // Ludo: a robot only for someone playing alone (more can be added). Snap games: two robots to slap against.
+    // Chess: a robot for one person, none for two.
+    var robots = g.id === 'ludo' ? (humans.length > 1 ? 0 : 1) : chess ? 2 - humans.length : 2;
+    var quick = true, white = 0;
     UI.open({
       cls: 'bt-table bt-table-setup',
       build: function (layer, api) {
         var box = UI.el('div', 'bt-box', layer);
         UI.el('div', 'sun', box, g.icon);
         UI.heading(box, g.name(), g.about());
-        if (g.id !== 'ludo' && chosen.length > 1) UI.el('div', 'bt-sub', box, say(
+        if (chess && chosen.length > 2) UI.el('div', 'bt-sub', box, say(
+          'Xadrez é para dois: jogam {n} e {m}.', 'Chess is for two: {n} and {m} play.', 'El ajedrez es para dos: juegan {n} y {m}.',
+          nameOf(humans[0]), nameOf(humans[1])));
+        if (!chess && g.id !== 'ludo' && chosen.length > 1) UI.el('div', 'bt-sub', box, say(
           'Um controle, um jogador por vez: {n} começa. Revezem depois!',
           'One remote, one player at a time: {n} goes first. Take turns after!',
           'Un mando, un jugador a la vez: empieza {n}. ¡Luego os turnáis!', nameOf(humans[0])));
         var rows = UI.el('div', 'tg-setup', box);
-        var line = UI.el('div', 'tg-choice', rows);
-        UI.el('span', 'label', line, tr('Robôs', 'Robots', 'Robots'));
-        var value = UI.el('span', 'value', line, '◀  ' + robots + '  ▶');
+        if (chess) {
+          var side = UI.el('div', 'tg-choice', rows);
+          UI.el('span', 'label', side, humans.length > 1 ? tr('Brancas', 'White', 'Blancas') : tr('Você joga de', 'You play', 'Juegas con'));
+          var sideValue = UI.el('span', 'value', side, '');
+          var paintSide = function () {
+            sideValue.textContent = '◀  ' + (humans.length > 1 ? nameOf(humans[white]) :
+              white ? tr('Pretas', 'Black', 'Negras') : tr('Brancas', 'White', 'Blancas')) + '  ▶';
+          };
+          paintSide();
+          var swap = function () { white = 1 - white; paintSide(); };
+          api.add(side, swap, {left: swap, right: swap});
+          UI.el('div', 'bt-sub', box, tr('As brancas começam.', 'White goes first.', 'Las blancas empiezan.'));
+        }
+        var line = chess ? null : UI.el('div', 'tg-choice', rows);
+        var value = null;
+        if (line) {
+          UI.el('span', 'label', line, tr('Robôs', 'Robots', 'Robots'));
+          value = UI.el('span', 'value', line, '◀  ' + robots + '  ▶');
+        }
         function change(d) {
           var min = humans.length > 1 ? 0 : 1;
           robots = Math.max(min, Math.min(max, robots + d));
           value.textContent = '◀  ' + robots + '  ▶';
         }
-        api.add(line, function () { change(robots >= max ? -max : 1); }, {left: function () { change(-1); }, right: function () { change(1); }});
+        if (line) api.add(line, function () { change(robots >= max ? -max : 1); }, {left: function () { change(-1); }, right: function () { change(1); }});
         var kind = null;
         if (g.id === 'ludo') {
           var line2 = UI.el('div', 'tg-choice', rows);
@@ -246,7 +269,7 @@ var Table = (function () {
         }
         var buttons = UI.el('div', 'bt-buttons', box);
         api.add(UI.button(buttons, tr('Jogar', 'Play', 'Jugar'), null, 'primary'), function () {
-          var spec = {game: g.id, humans: humans, robots: robots, tokens: quick ? 2 : 4};
+          var spec = {game: g.id, humans: humans, robots: robots, tokens: quick ? 2 : 4, white: white};
           api.close();
           play(spec);
         }, {first: true});
@@ -262,8 +285,11 @@ var Table = (function () {
       var robot = ROBOTS[r];
       players.push({id: robot.id, name: robot.name, colour: robot.colour, emoji: '🤖', robot: true, level: level});
     }
+    // Chess: the first player has White.
+    if (spec.game === 'chess' && spec.white) players.reverse();
     var opts = {players: players, level: level, tokens: spec.tokens, chant: spec.game === 'chant', again: function () { play(spec); }};
     if (spec.game === 'ludo') Ludo.start(opts);
+    else if (spec.game === 'chess') Chess.start(opts);
     else Snap.start(opts);
   }
 
@@ -309,7 +335,7 @@ var Table = (function () {
 
   /**
    * Shows how it went and learns from it. result: {game, order: players best first, tips: {id: [text]},
-   * praise: {id: [text]}, extra: {id: {...saved with the record}}, again()}.
+   * praise: {id: [text]}, extra: {id: {...saved with the record}}, again(), draw: why it was a draw, or ''}.
    */
   function debrief(result) {
     var n = result.order.length;
@@ -317,7 +343,7 @@ var Table = (function () {
     for (var i = 0; i < n; i++) {
       var p = result.order[i];
       if (p.robot) continue;
-      var score = n > 1 ? (n - 1 - i) / (n - 1) : 1;
+      var score = result.draw ? 0.5 : n > 1 ? (n - 1 - i) / (n - 1) : 1;
       var learnt = learn(p, result.game, score, result.extra && result.extra[p.id]);
       rows.push({person: p, place: i, learnt: learnt});
     }
@@ -327,10 +353,12 @@ var Table = (function () {
       back: function () { return false; },
       build: function (layer, api) {
         var top = UI.el('div', 'tg-top', layer);
-        UI.heading(top, winner.robot ? say('{n} ganhou', '{n} won', 'Ganó {n}', winner.name) : say('{n} ganhou!', '{n} won!', '¡Ganó {n}!', nameOf(winner)));
+        if (result.draw) UI.heading(top, tr('Empate!', 'A draw!', '¡Empate!'));
+        else UI.heading(top, winner.robot ? say('{n} ganhou', '{n} won', 'Ganó {n}', winner.name) : say('{n} ganhou!', '{n} won!', '¡Ganó {n}!', nameOf(winner)));
         var someone = rows.length ? rows[0].person : null;
-        var line = winner.robot ? pickLine(GOOD_GAME_LOSE, someone ? nameOf(someone) : '') : pickLine(GOOD_GAME_WIN, nameOf(winner));
-        UI.el('div', 'bt-sub robot', top, '🤖 ' + line);
+        var line = result.draw ? result.draw :
+          winner.robot ? pickLine(GOOD_GAME_LOSE, someone ? nameOf(someone) : '') : pickLine(GOOD_GAME_WIN, nameOf(winner));
+        UI.el('div', 'bt-sub robot', top, (result.draw ? '' : '🤖 ') + line);
         var cards = UI.el('div', 'tg-debrief', layer);
         for (var r = 0; r < rows.length; r++) {
           var row = rows[r], p2 = row.person;
@@ -339,7 +367,7 @@ var Table = (function () {
           UI.avatar(p2.guest ? {name: '+', colour: p2.colour} : p2, head, 84);
           var who = UI.el('div', 'who', head);
           UI.el('div', 'name', who, nameOf(p2));
-          UI.el('div', 'place', who, place(row.place, n));
+          UI.el('div', 'place', who, result.draw ? tr('Empate', 'Draw', 'Empate') : place(row.place, n));
           var praise = (result.praise && result.praise[p2.id]) || [];
           for (var j = 0; j < praise.length && j < 2; j++) UI.el('div', 'praise', card, '★ ' + praise[j]);
           var tips = (result.tips && result.tips[p2.id]) || [];

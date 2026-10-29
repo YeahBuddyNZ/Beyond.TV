@@ -24,7 +24,7 @@
 /* Which game */
 .tg-games { position: absolute; left: 0; right: 0; top: 320px; text-align: center; white-space: nowrap; }
 .tg-game {
-  display: inline-block; vertical-align: top; width: 460px; height: 400px; margin: 0 20px; padding: 40px 34px;
+  display: inline-block; vertical-align: top; width: 420px; height: 400px; margin: 0 14px; padding: 40px 34px;
   box-sizing: border-box; border-radius: 36px; background: rgba(247, 246, 242, 0.08); text-align: left; white-space: normal;
   -webkit-transition: -webkit-transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.2); transition: transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.2);
 }
@@ -190,3 +190,32 @@
 .lf-dare .lf-prompt { font-size: 66px; }
 .lf-awards .tg-card { min-height: 300px; }
 .lf-awards .tg-card .praise { font-size: 24px; line-height: 1.3; }
+
+/* Chess (ADR 0033): 120px squares in the same place as the Ludo board. Only transform and opacity animate. */
+.ch-board { position: absolute; left: 100px; top: 60px; width: 960px; height: 960px; border-radius: 20px; overflow: hidden; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45); }
+.ch-sq { position: absolute; width: 120px; height: 120px; }
+.ch-sq.light { background: #EDE8DA; }
+.ch-sq.dark { background: #7FA89B; }
+.ch-sq .file, .ch-sq .rank { position: absolute; font-size: 20px; font-weight: 700; color: rgba(34, 34, 31, 0.45); }
+.ch-sq .file { right: 8px; bottom: 4px; }
+.ch-sq .rank { left: 8px; top: 4px; }
+.ch-sq.last { box-shadow: inset 0 0 0 200px rgba(232, 163, 61, 0.38); }
+.ch-sq.picked { box-shadow: inset 0 0 0 200px rgba(47, 125, 109, 0.55); }
+.ch-sq.check { box-shadow: inset 0 0 40px 24px rgba(216, 90, 48, 0.85); }
+.ch-marks, .ch-pieces { position: absolute; left: 0; top: 0; width: 960px; height: 960px; }
+.ch-dot { position: absolute; left: 0; top: 0; width: 120px; height: 120px; }
+.ch-dot:after { content: ''; position: absolute; left: 44px; top: 44px; width: 32px; height: 32px; border-radius: 16px; background: rgba(34, 34, 31, 0.35); }
+.ch-dot.take:after { left: 8px; top: 8px; width: 92px; height: 92px; border-radius: 52px; background: none; border: 6px solid rgba(34, 34, 31, 0.35); }
+.ch-piece {
+  position: absolute; left: 0; top: 0; width: 120px; height: 120px; line-height: 120px; text-align: center; font-size: 96px;
+  font-family: 'DejaVu Sans', 'Noto Sans Symbols2', 'Noto Sans Symbols', 'Segoe UI Symbol', 'Arial Unicode MS', sans-serif;
+}
+.ch-piece.w { color: #FFFFFF; text-shadow: 0 0 2px #22221F, 0 0 2px #22221F, 0 2px 3px #22221F, 0 4px 8px rgba(0, 0, 0, 0.35); }
+.ch-piece.b { color: #22221F; text-shadow: 0 0 2px rgba(247, 246, 242, 0.7), 0 4px 8px rgba(0, 0, 0, 0.3); }
+.ch-piece.moving { z-index: 2; -webkit-transition: -webkit-transform 0.3s ease-in-out; transition: transform 0.3s ease-in-out; }
+.ch-piece.gone { opacity: 0; -webkit-transition: opacity 0.3s; transition: opacity 0.3s; }
+.ch-cursor { position: absolute; left: 0; top: 0; width: 120px; height: 120px; box-sizing: border-box; border: 8px solid #2F7D6D; border-radius: 12px; opacity: 0; box-shadow: 0 0 0 3px #FFF, inset 0 0 0 3px #FFF; -webkit-transition: -webkit-transform 0.12s ease-out; transition: transform 0.12s ease-out; }
+.ch-cursor.on { opacity: 1; }
+.lu-player .chip.w { background: #FFFFFF; }
+.lu-player .chip.b { background: #22221F; }
+.ch-taken { font-family: 'DejaVu Sans', 'Noto Sans Symbols2', 'Segoe UI Symbol', sans-serif; font-size: 30px; letter-spacing: -2px; }

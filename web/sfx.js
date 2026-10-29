@@ -39,6 +39,8 @@ var Sfx = (function () {
       else if (kind === 'home') { beep(523, 0, 0.12, 'sine', 0.14); beep(659, 0.1, 0.12, 'sine', 0.14); beep(784, 0.2, 0.25, 'sine', 0.14); }
       else if (kind === 'capture') { beep(600, 0, 0.25, 'square', 0.08, 150); }
       else if (kind === 'point') beep(880, 0, 0.08, 'square', 0.08);
+      else if (kind === 'place') { beep(240, 0, 0.07, 'triangle', 0.16, 140); beep(1200, 0, 0.02, 'square', 0.03); }
+      else if (kind === 'check') { beep(988, 0, 0.09, 'square', 0.07); beep(988, 0.13, 0.09, 'square', 0.07); }
       else if (kind === 'lose') { beep(392, 0, 0.2, 'triangle', 0.12); beep(330, 0.18, 0.2, 'triangle', 0.12); beep(262, 0.36, 0.4, 'triangle', 0.12); }
       else if (kind === 'win') { var n = [523, 659, 784, 1047]; for (var i = 0; i < n.length; i++) beep(n[i], i * 0.12, 0.3, 'triangle', 0.14); }
     } catch (e) {}
