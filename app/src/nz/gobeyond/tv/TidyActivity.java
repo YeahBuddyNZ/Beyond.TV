@@ -22,14 +22,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The tidy-up race: a big clock counting down, and everyone's face. Whoever is done grabs the remote and presses OK on
- * their face: first, second, third. When everybody's done, or the time is up, the TV says so, kindly. Same as
+ * The tidy-up race: a big clock counting up from 0:00, and everyone's face. Whoever is done grabs the remote and presses
+ * OK on their face: first, second, third, with their time. When everybody's done the TV says who was fastest. Kyle
+ * (29/10/2026): a count up, not a count down, so nobody runs out of time. Left open an hour, it closes. Same as
  * web/tidy.js. Opened by the nightly alarm (Tidy), a "tidy" command from Beyond Family, or the home screen when the
  * alarm couldn't open it itself.
  */
 public class TidyActivity extends Activity {
     private static final String MINUTES = "minutes";
     private static final int EMBER = 0xFFE8A33D;
+    /** Nobody pressed anything for an hour: the race was forgotten, so it ends. */
+    private static final long LONGEST = 60 * 60_000L;
 
     static void open(Context c, int minutes) {
         c.startActivity(new Intent(c, TidyActivity.class).putExtra(MINUTES, minutes)
@@ -38,7 +41,7 @@ public class TidyActivity extends Activity {
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private float k;
-    private long ends;
+    private long started;
     private boolean over;
     private TextView clock, title, sub;
     private LinearLayout faces;
@@ -60,8 +63,8 @@ public class TidyActivity extends Activity {
         Tidy.clearDue(this);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         k = getResources().getDisplayMetrics().widthPixels / 1920f;
-        int minutes = Math.max(1, Math.min(30, getIntent().getIntExtra(MINUTES, 10)));
-        ends = SystemClock.uptimeMillis() + minutes * 60_000L;
+        // The minutes from Beyond Family no longer set an end: the clock counts up.
+        started = SystemClock.uptimeMillis();
 
         FrameLayout root = new FrameLayout(this);
         root.addView(new FeedbackActivity.Backdrop(this), new FrameLayout.LayoutParams(-1, -1));
@@ -72,7 +75,8 @@ public class TidyActivity extends Activity {
         lp.topMargin = Math.round(90 * k);
         root.addView(column, lp);
 
-        title = FeedbackActivity.text(this, "🧺  " + Ui.tr("Corrida da arrumação!", "Tidy-up race!", "¡Carrera de ordenar!"),
+        // No basket emoji: Android 8's font has none and drew a box.
+        title = FeedbackActivity.text(this, Ui.tr("Corrida da arrumação!", "Tidy-up race!", "¡Carrera de ordenar!"),
                 Ui.displaySemibold, 56 * k, 0xFFFFFFFF);
         title.setGravity(Gravity.CENTER);
         column.addView(title, new LinearLayout.LayoutParams(-1, -2));
@@ -139,12 +143,10 @@ public class TidyActivity extends Activity {
     private final Runnable tick = new Runnable() {
         @Override public void run() {
             if (over) return;
-            long left = Math.max(0, ends - SystemClock.uptimeMillis());
-            long s = (left + 999) / 1000;
-            clock.setText(String.format(java.util.Locale.ROOT, "%d:%02d", s / 60, s % 60));
-            clock.setTextColor(s <= 60 ? EMBER : 0xFFFFFFFF);
-            if (left == 0) {
-                end(false);
+            long gone = SystemClock.uptimeMillis() - started;
+            clock.setText(time(gone));
+            if (gone >= LONGEST) {
+                finish();   // forgotten: nobody is racing any more
                 return;
             }
             handler.postDelayed(this, 250);
@@ -188,14 +190,15 @@ public class TidyActivity extends Activity {
         if (over || order.contains(r)) return;
         order.add(r);
         int n = order.size();
-        r.place.setText(n == 1 ? "🏆 " + Ui.tr("1º", "1st", "1º") : n == 2 ? Ui.tr("2º", "2nd", "2º") : n == 3 ? Ui.tr("3º", "3rd", "3º")
-                : "✓ " + Ui.tr("Pronto", "Done", "Listo"));
+        String at = time(SystemClock.uptimeMillis() - started);
+        r.place.setText((n == 1 ? "🏆 " + Ui.tr("1º", "1st", "1º") : n == 2 ? Ui.tr("2º", "2nd", "2º") : n == 3 ? Ui.tr("3º", "3rd", "3º")
+                : "✓") + "  " + at);
         r.face.setAlpha(0.85f);
         r.face.animate().scaleX(1.12f).scaleY(1.12f).setDuration(160).withEndAction(() ->
                 r.face.animate().scaleX(1).scaleY(1).setDuration(220).start()).start();
         beep(ToneGenerator.TONE_PROP_ACK, 250);
         if (order.size() == racers.size()) {
-            end(true);
+            end();
             return;
         }
         // On to the next face still tidying.
@@ -207,30 +210,27 @@ public class TidyActivity extends Activity {
         }
     }
 
-    private void end(boolean everyone) {
+    /** Everybody's done. */
+    private void end() {
         if (over) return;
         over = true;
         handler.removeCallbacks(tick);
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         Chime.play();
-        if (everyone) {
-            clock.setText("🎉");
-            title.setText(Ui.tr("Tudo arrumado!", "All tidy!", "¡Todo ordenado!"));
-            sub.setText(racers.size() > 1 ? Ui.tr("Mais rápido: ", "Fastest tonight: ", "El más rápido: ") + order.get(0).person.name
-                    : Ui.tr("Muito bem!", "Well done!", "¡Muy bien!"));
-        } else {
-            clock.setText("0:00");
-            title.setText(Ui.tr("Acabou o tempo!", "Time's up!", "¡Se acabó el tiempo!"));
-            StringBuilder names = new StringBuilder();
-            for (Racer r : order) names.append(names.length() == 0 ? "" : ", ").append(r.person.name);
-            sub.setText(order.isEmpty() ? Ui.tr("Quase lá. Mais um pouquinho e pronto!", "Nearly there. A little more and it's done!",
-                    "Casi. ¡Un poco más y listo!")
-                    : Ui.tr("Muito bem, ", "Well done, ", "¡Muy bien, ") + names + Ui.tr(". Os outros, quase lá!", ". Everyone else, nearly there!",
-                    ". ¡Los demás, casi!"));
-        }
+        clock.setText("🎉");
+        title.setText(Ui.tr("Tudo arrumado!", "All tidy!", "¡Todo ordenado!"));
+        sub.setText(racers.size() > 1 ? Ui.tr("Mais rápido: ", "Fastest tonight: ", "El más rápido: ") + order.get(0).person.name
+                : Ui.tr("Muito bem!", "Well done!", "¡Muy bien!"));
         close.setVisibility(View.VISIBLE);
         close.requestFocus();
         handler.postDelayed(this::finish, 90_000);
+    }
+
+    /** 2:31, or 1:02:05 past the hour. */
+    static String time(long ms) {
+        long s = Math.max(0, ms) / 1000;
+        return s >= 3600 ? String.format(java.util.Locale.ROOT, "%d:%02d:%02d", s / 3600, s / 60 % 60, s % 60)
+                : String.format(java.util.Locale.ROOT, "%d:%02d", s / 60, s % 60);
     }
 
     private void beep(int which, int ms) {
