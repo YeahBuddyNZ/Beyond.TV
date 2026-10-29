@@ -1036,6 +1036,8 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .bt-tidy .racer.focus { -webkit-transform: translateY(-10px) scale(1.08); transform: translateY(-10px) scale(1.08); }
 .bt-tidy .racer.focus .avatar { box-shadow: 0 0 0 6px #121210, 0 0 0 11px #F7F6F2; }
 .bt-tidy .racer.done { opacity: 0.85; }
+.bt-tidy .racer.out { opacity: 0.4; }
+.bt-tidy .clock.waiting { opacity: 0.35; }
 .bt-tidy .racer .name { margin-top: 16px; font-size: 32px; font-weight: 600; color: #F7F6F2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bt-tidy .racer .place { margin-top: 6px; height: 40px; font-size: 30px; font-weight: 600; color: #E8A33D; }
 .bt-tidy .bt-buttons { margin-top: 40px; text-align: center; }
