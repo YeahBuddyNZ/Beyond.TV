@@ -139,3 +139,51 @@
 .tg-kind { position: absolute; left: 0; right: 0; top: 862px; text-align: center; font-size: 26px; color: rgba(247, 246, 242, 0.65); }
 .bt-buttons.tg-again { position: absolute; left: 0; right: 0; top: 930px; text-align: center; }
 .lu-cell .arrow { display: inline-block; color: rgba(255, 255, 255, 0.85); }
+
+/* Silly games (laughs.js) */
+.lf-top { position: absolute; left: 120px; right: 120px; top: 90px; text-align: center; }
+.lf-round { font-size: 24px; font-weight: 600; color: rgba(247, 246, 242, 0.55); }
+.lf-lead { margin-top: 14px; font-size: 40px; font-weight: 600; color: #F2C27A; }
+.lf-prompt { margin: 22px auto 0; max-width: 1500px; font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 76px; font-weight: 800; line-height: 1.12; letter-spacing: -0.02em; }
+.lf-prompt.small { font-size: 56px; color: rgba(247, 246, 242, 0.8); }
+.lf-faces { height: 260px; }
+.lf-faces .tg-face.lf-dim { opacity: 0.35; }
+.lf-faces .tg-face.lf-won, .lf-faces .tg-face.lf-spin { opacity: 1; -webkit-transform: translateY(-20px) scale(1.18); transform: translateY(-20px) scale(1.18); }
+.lf-faces .tg-face.lf-won .avatar, .lf-faces .tg-face.lf-spin .avatar { box-shadow: 0 0 0 6px #121210, 0 0 0 12px #E8A33D, 0 28px 60px rgba(0, 0, 0, 0.6); }
+.lf-badge { margin-top: 4px; font-size: 22px; font-weight: 700; color: #E8A33D; }
+.lf-foot { position: absolute; left: 0; right: 0; top: 800px; text-align: center; }
+.lf-foot .bt-sub { margin-bottom: 26px; }
+.lf-foot .bt-button { margin: 0 12px; }
+.lf-quip { margin-bottom: 30px; font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 44px; font-weight: 700; color: #F2C27A; }
+.lf-count {
+  position: absolute; left: 0; right: 0; top: 820px; text-align: center; font-family: 'Sora', 'Inter', Arial, sans-serif;
+  font-size: 150px; font-weight: 800; line-height: 1; color: #E8A33D;
+  -webkit-animation: lf-pop 0.5s ease-out; animation: lf-pop 0.5s ease-out;
+}
+@-webkit-keyframes lf-pop { 0% { opacity: 0; -webkit-transform: scale(2); } 60% { opacity: 1; -webkit-transform: scale(0.92); } 100% { -webkit-transform: none; } }
+@keyframes lf-pop { 0% { opacity: 0; transform: scale(2); } 60% { opacity: 1; transform: scale(0.92); } 100% { transform: none; } }
+
+/* Would you rather: two big cards, one each side of the room */
+.lf-rather .lf-top { top: 110px; }
+.lf-rather .lf-lead { font-size: 56px; }
+.lf-sides { position: absolute; left: 0; right: 0; top: 260px; height: 480px; text-align: center; white-space: nowrap; }
+.lf-side {
+  position: relative; display: inline-block; vertical-align: top; width: 700px; height: 460px; margin: 0 70px; padding: 50px 50px 0;
+  box-sizing: border-box; border-radius: 40px; background: rgba(247, 246, 242, 0.08); white-space: normal;
+  -webkit-transition: -webkit-transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.2), opacity 0.25s; transition: transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.2), opacity 0.25s;
+}
+.lf-side .arrow { font-size: 60px; color: #9E7BFF; }
+.lf-side .text { margin-top: 30px; font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 58px; font-weight: 800; line-height: 1.12; }
+.lf-side.focus { background: #F7F6F2; color: #22221F; -webkit-transform: scale(1.05); transform: scale(1.05); box-shadow: 0 0 0 5px #2F7D6D, 0 24px 50px rgba(0, 0, 0, 0.5); }
+.lf-side.lf-won { background: #E8A33D; color: #22221F; -webkit-transform: scale(1.06); transform: scale(1.06); }
+.lf-side.lf-won .arrow, .lf-side.focus .arrow { color: #22221F; }
+.lf-side.lf-dim { opacity: 0.3; }
+.lf-or { position: absolute; left: 0; right: 0; top: 190px; font-size: 40px; font-weight: 700; color: rgba(247, 246, 242, 0.6); }
+
+/* Spin for a dare: the 15 second bar shrinks from the right */
+.lf-timer { width: 900px; height: 16px; margin: 0 auto 34px; border-radius: 8px; background: rgba(247, 246, 242, 0.12); overflow: hidden; }
+.lf-timer i { display: block; height: 16px; border-radius: 8px; background: #E8A33D; -webkit-transform-origin: 0 0; transform-origin: 0 0; }
+.lf-timer i.go { -webkit-transform: scaleX(0); transform: scaleX(0); -webkit-transition: -webkit-transform 15s linear; transition: transform 15s linear; }
+.lf-dare .lf-prompt { font-size: 66px; }
+.lf-awards .tg-card { min-height: 300px; }
+.lf-awards .tg-card .praise { font-size: 24px; line-height: 1.3; }
