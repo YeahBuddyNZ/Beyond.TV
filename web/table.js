@@ -137,6 +137,11 @@ var Table = (function () {
         var size = everyone.length > 6 ? 130 : 160;
         var gap = everyone.length > 6 ? 40 : 60;
         var width = everyone.length * size + (everyone.length - 1) * gap;
+        if (width > 1720) {   // a big family: smaller faces, never off the edge
+          var k = 1720 / width;
+          size = Math.floor(size * k); gap = Math.floor(gap * k);
+          width = everyone.length * size + (everyone.length - 1) * gap;
+        }
         for (var i = 0; i < everyone.length; i++) {
           (function (p, x) {
             var f = UI.el('div', 'bt-face tg-face' + (isChosen(p) ? ' on' : ''), row);

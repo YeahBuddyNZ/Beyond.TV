@@ -54,6 +54,11 @@ public class TableActivity extends Activity {
         WebSettings ws = web.getSettings();
         ws.setJavaScriptEnabled(true);
         ws.setDomStorageEnabled(true);
+        // The page is drawn on a 1920 x 1080 stage (its viewport tag): without these the WebView lays it out at the
+        // screen's width in dp (960 on a 1080p TV), so everything came out twice the size and ran off the right.
+        ws.setUseWideViewPort(true);
+        ws.setLoadWithOverviewMode(true);
+        ws.setTextZoom(100);
         web.setFocusable(false);
         web.addJavascriptInterface(new Bridge(), "BeyondTable");
         setContentView(web);
