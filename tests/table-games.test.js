@@ -1,4 +1,4 @@
-// The rules of the board and card games (web/ludo.js, web/snap.js, web/table.js) and the silly games' lines
+// The rules of the board and card games (web/ludo.js, web/chess.js, web/snap.js, web/table.js) and the silly games' lines
 // (web/laughs.js), without a screen:
 // node tests/table-games.test.js
 'use strict';
@@ -14,11 +14,11 @@ var sandbox = {
   UI: {}, Math: Math, Date: Date, JSON: JSON, console: console
 };
 vm.createContext(sandbox);
-['sfx.js', 'table.js', 'ludo.js', 'snap.js', 'laughs.js'].forEach(function (f) {
+['sfx.js', 'table.js', 'ludo.js', 'chess.js', 'snap.js', 'laughs.js'].forEach(function (f) {
   // Top-level `var X = ...` in a script becomes a property of the context.
   vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'web', f), 'utf8'), sandbox, {filename: f});
 });
-var Ludo = sandbox.Ludo.rules, Snap = sandbox.Snap.rules, Table = sandbox.Table;
+var Chess = sandbox.Chess.rules, Ludo = sandbox.Ludo.rules, Snap = sandbox.Snap.rules, Table = sandbox.Table;
 
 var failed = 0, passed = 0;
 function check(name, ok) {
@@ -119,6 +119,67 @@ check('a kid playing gets the family set only', withKid.length === Laughs.LIKELY
 var grown = Laughs.deck([{id: 'a'}, {id: 'b'}], Laughs.DARES, Laughs.DARES_GROWN);
 check('grown-ups get the extras too', grown.length === Laughs.DARES.length + Laughs.DARES_GROWN.length);
 check('only guests counts as maybe kids', Laughs.deck([{id: 'g', guest: true}], Laughs.RATHER, Laughs.RATHER_GROWN).length === Laughs.RATHER.length);
+
+// Chess: counting every move a few deep from known positions catches any rule that's wrong (castling, en passant,
+// pins, checks). Pawns here always become queens, so these positions have no pawn about to reach the end.
+function perft(st, d) {
+  if (!d) return 1;
+  var ms = Chess.legal(st), n = 0;
+  for (var i = 0; i < ms.length; i++) { var u = Chess.make(st, ms[i]); n += perft(st, d - 1); Chess.unmake(st, ms[i], u); }
+  return n;
+}
+check('chess: 20 first moves, 8,902 three deep', Chess.legal(Chess.newGame()).length === 20 && perft(Chess.newGame(), 3) === 8902);
+var kiwi = 'r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1';
+check('chess: a busy middle game counts right', perft(Chess.fromFen(kiwi), 2) === 2039);
+check('chess: an end game with en passant and pins counts right', perft(Chess.fromFen('8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1'), 3) === 2812);
+var cs = Chess.fromFen(kiwi);
+var unmoved = JSON.stringify(cs.b);
+perft(cs, 2);
+check('chess: trying moves puts the board back', JSON.stringify(cs.b) === unmoved && cs.turn === 'w' && cs.castle === 'KQkq');
+
+function playAll(st, list) {
+  list.forEach(function (w) {
+    var m = Chess.legal(st).filter(function (x) { return Chess.name(x.from) + Chess.name(x.to) === w; })[0];
+    if (!m) throw new Error('not legal: ' + w);
+    Chess.play(st, m);
+  });
+  return st;
+}
+var fool = playAll(Chess.newGame(), ['f2f3', 'e7e5', 'g2g4', 'd8h4']);
+check('chess: fool\'s mate is checkmate', Chess.status(fool) === 'mate');
+check('chess: a king with no move and no check is stalemate', Chess.status(Chess.fromFen('7k/5Q2/6K1/8/8/8/8/8 b - - 0 1')) === 'stalemate');
+check('chess: king against king is a draw', Chess.status(Chess.fromFen('8/8/4k3/8/8/3K4/8/8 w - - 0 1')) === 'material');
+var rep = playAll(Chess.newGame(), ['g1f3', 'g8f6', 'f3g1', 'f6g8', 'g1f3', 'g8f6', 'f3g1', 'f6g8']);
+check('chess: the same position three times is a draw', Chess.status(rep) === 'repeat');
+var fresh = playAll(Chess.newGame(), ['e2e4', 'e7e5', 'g1f3', 'b8c6']);
+check('chess: different positions are not a repeat', Chess.status(fresh) === '' && Object.keys(fresh.seen).length === 5);
+var ep = playAll(Chess.newGame(), ['e2e4', 'a7a6', 'e4e5', 'd7d5']);
+var epMove = Chess.legal(ep).filter(function (x) { return x.ep; })[0];
+check('chess: en passant takes the pawn beside', epMove && Chess.name(epMove.to) === 'd6' && (Chess.play(ep, epMove), ep.b[Chess.sq('d5')] === ''));
+var castle = Chess.fromFen('r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1');
+check('chess: castling both ways', Chess.legal(castle).filter(function (x) { return x.castle; }).length === 2);
+function castles(fen) { return Chess.legal(Chess.fromFen(fen)).filter(function (x) { return x.castle; }).map(function (x) { return x.castle; }).join(''); }
+check('chess: no castling out of check', castles('r3k2r/8/8/8/8/8/4r3/R3K2R w KQkq - 0 1') === '');
+check('chess: no castling through check', castles('r3k2r/8/8/8/8/8/5r2/R3K2R w KQkq - 0 1') === 'Q');
+var queen = Chess.legal(Chess.fromFen('8/P6k/8/8/8/8/8/K7 w - - 0 1')).filter(function (x) { return x.promo; });
+check('chess: a pawn at the end becomes a queen', queen.length === 1 && queen[0].promo === 'Q');
+
+// Chess robots: the top level always takes a mate in one and a free queen; the bottom looks only one move ahead.
+function noRandom() { return 0.99; }
+var mateIn1 = Chess.fromFen('6k1/5ppp/8/8/8/8/8/R5K1 w - - 0 1');
+var m1 = Chess.robotPick(mateIn1, 10, noRandom);
+check('chess: the top robot finds mate in one', Chess.name(m1.from) + Chess.name(m1.to) === 'a1a8');
+var freeQueen = Chess.fromFen('4k3/8/8/3q4/8/8/8/3RK3 w - - 0 1');
+var fq = Chess.robotPick(freeQueen, 10, noRandom);
+check('chess: the top robot takes a free queen', Chess.name(fq.to) === 'd5');
+check('chess: robots look further as the level goes up', Chess.depthFor(1) === 1 && Chess.depthFor(4) === 2 && Chess.depthFor(9) === 3);
+var slips = 0;
+for (var sl = 0; sl < 40; sl++) {
+  var rolls = sl % 2 ? [0.1, 0.9] : [0.99, 0];
+  var pick = Chess.robotPick(Chess.fromFen('4k3/8/8/3q4/8/8/8/3RK3 w - - 0 1'), 1, function () { return rolls.shift(); });
+  if (Chess.name(pick.to) !== 'd5') slips++;
+}
+check('chess: the bottom robot slips sometimes', slips > 0 && slips < 40);
 
 console.log(passed + ' passed, ' + failed + ' failed');
 process.exit(failed ? 1 : 0);

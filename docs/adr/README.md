@@ -40,3 +40,4 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0030](0030-whos-tidying.md) | Who's tidying? before the race |
 | [0031](0031-snap-sound-pace.md) | Snap: sound, an easier pace and more snaps |
 | [0032](0032-silly-games.md) | Silly games: party games with one remote |
+| [0033](0033-chess.md) | Chess, and Ludo without robots for a group |
