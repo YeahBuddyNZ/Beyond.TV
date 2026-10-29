@@ -137,6 +137,9 @@ screen stays. Two ways:
 
 Samsung TVs before 2016 (a 2014 UA40H6300, say) run Orsay: no Tizen, no TizenBrew. ADR 0028. Smart Hub stays.
 
+0. **Without building:** `install-orsay.sh` (Mac, Linux; Perl serves, so no Python needed) and `install-orsay.ps1`
+   (Windows; a TcpListener, so no admin) download `BeyondTV-orsay.zip` from the `tv` release (CI puts it there,
+   `--generic`) and serve it on port 80 with the TV steps printed. Build your own (below) for their city or picks.
 1. **Build:** `python3 orsay/build.py` (or `--generic`) must end with `Built BeyondTV-orsay.zip`.
 2. **Serve:** `sudo python3 orsay/serve.py` (port 80 is what the TV asks; `--ip` if it guesses wrong). It answers only
    `/widgetlist.xml` and `/Widget/BeyondTV.zip`.
