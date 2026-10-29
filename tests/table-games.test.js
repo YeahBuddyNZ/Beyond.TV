@@ -13,7 +13,7 @@ var sandbox = {
   UI: {}, Math: Math, Date: Date, JSON: JSON, console: console
 };
 vm.createContext(sandbox);
-['table.js', 'ludo.js', 'snap.js'].forEach(function (f) {
+['sfx.js', 'table.js', 'ludo.js', 'snap.js'].forEach(function (f) {
   // Top-level `var X = ...` in a script becomes a property of the context.
   vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'web', f), 'utf8'), sandbox, {filename: f});
 });
@@ -77,6 +77,16 @@ var cards = Snap.deck(true);
 check('the chant deck has ten of each of five', cards.length === 50 && cards.filter(function (c) { return c === 3; }).length === 10);
 var hands = Snap.deal([1, 2, 3], cards);
 check('dealt evenly', hands[0].length === 17 && hands[2].length === 16);
+var round = Snap.deal([1, 2, 3], [10, 11, 12, 13], 2);
+check('dealt from the first to turn, so the pile follows the deck', round[2][0] === 10 && round[0][0] === 11 && round[1][0] === 12 && round[2][1] === 13);
+var pairs = 0, snaps = 0;
+for (var d = 0; d < 200; d++) {
+  var sd = Snap.deck(false);
+  for (var c = 1; c < sd.length; c++) if (sd[c] === sd[c - 1]) pairs++;
+  snaps += sd.length - 1;
+}
+check('snap comes round often: about one card in four', pairs / snaps > 0.25 && pairs / snaps < 0.4);
+check('slower than before, slower still at level 1', Snap.pace(10) >= 1700 && Snap.pace(1) > Snap.pace(10));
 
 // Levels: a win pushes the robots up, a loss eases them off, never far below the best.
 var talia = {id: 'p9', name: 'Talia', kid: true};

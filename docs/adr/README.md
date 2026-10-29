@@ -38,3 +38,4 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0028](0028-older-samsung-tvs-orsay.md) | Older Samsung TVs (Orsay, 2011 to 2015) |
 | [0029](0029-tidy-race-counts-up.md) | The tidy-up race counts up |
 | [0030](0030-whos-tidying.md) | Who's tidying? before the race |
+| [0031](0031-snap-sound-pace.md) | Snap: sound, an easier pace and more snaps |

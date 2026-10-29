@@ -8,7 +8,8 @@
  *
  * Cards turn by themselves, one player after another; the first to run out who then makes the next slap in time wins.
  * Robots react in a time that comes from the level (table.js), sometimes miss, and now and then slap too soon, like
- * people do. Plain ES5.
+ * people do. Every turn, slap and pile has its own little sound, made on the TV (Kyle, 29/10/2026: sound, slower, and
+ * more snaps). In Snap about one card in four is the same as the one before it, so a match comes round often. Plain ES5.
  */
 var Snap = (function () {
   'use strict';
@@ -27,24 +28,31 @@ var Snap = (function () {
   function reaction(level, random) { return (1500 - 105 * level) * (0.8 + 0.4 * (random || Math.random)()); }
   function missChance(level) { return Math.max(0.02, 0.25 - 0.023 * level); }
   function tooSoonChance(level) { return Math.max(0, 0.05 - 0.005 * level); }
-  function pace(level) { return 1700 - 70 * level; }
+  function pace(level) { return 2600 - 90 * level; }
+  /** How often a Snap card repeats the one before it (the rest are random, so a few more pairs turn up by chance). */
+  var REPEAT = 0.22;
 
   // MARK: - The cards
 
-  function deck(chant) {
+  function deck(chant, random) {
+    random = random || Math.random;
     var out = [], kinds = chant ? CHANT.length : PICTURES.length, each = chant ? 10 : 6;
     for (var k = 0; k < kinds; k++) for (var n = 0; n < each; n++) out.push(k);
     for (var i = out.length - 1; i > 0; i--) {
-      var j = Math.floor(Math.random() * (i + 1));
+      var j = Math.floor(random() * (i + 1));
       var t = out[i]; out[i] = out[j]; out[j] = t;
     }
+    // Snap: dealt in turn order (deal), so a card that repeats the one before it lands on it as a match.
+    if (!chant) for (var c = 1; c < out.length; c++) if (random() < REPEAT) out[c] = out[c - 1];
     return out;
   }
 
-  function deal(players, cards) {
+  /** Round the table from seat first, the order the cards are turned, so the deck's order is the pile's. */
+  function deal(players, cards, first) {
     var hands = [];
+    first = first || 0;
     for (var p = 0; p < players.length; p++) hands.push([]);
-    for (var i = 0; i < cards.length; i++) hands[i % players.length].push(cards[i]);
+    for (var i = 0; i < cards.length; i++) hands[(first + i) % players.length].push(cards[i]);
     return hands;
   }
 
@@ -69,10 +77,10 @@ var Snap = (function () {
   var g = null;
 
   function start(opts) {
-    var players = [], hands = deal(opts.players, deck(opts.chant));
-    for (var i = 0; i < opts.players.length; i++) players.push({who: opts.players[i], hand: hands[i]});
     var me = 0;
-    for (var h = 0; h < players.length; h++) if (!players[h].who.robot) { me = h; break; }
+    for (var h = 0; h < opts.players.length; h++) if (!opts.players[h].robot) { me = h; break; }
+    var players = [], hands = deal(opts.players, deck(opts.chant), me);
+    for (var i = 0; i < opts.players.length; i++) players.push({who: opts.players[i], hand: hands[i]});
     g = {opts: opts, chant: !!opts.chant, level: opts.level, players: players, me: me, pile: [], flips: 0, turn: me,
       window: null, quiet: 0, timers: [], nodes: {}, firstOut: -1,
       stats: {matches: 0, hits: 0, misses: 0, tooSoon: 0, times: []}};
@@ -88,7 +96,7 @@ var Snap = (function () {
       closed: function () { stop(); }
     });
     tell(tr('Prepare-se… aperte OK quando combinar!', 'Get ready… press OK on a match!', 'Prepárate… ¡pulsa OK cuando coincidan!'));
-    later(1800, flip);
+    later(2500, flip);
   }
 
   function later(ms, fn) {
@@ -186,6 +194,7 @@ var Snap = (function () {
     setTimeout(function () { if (g) UI.setClass(g.nodes.card, 'turned', true); }, 20);
     tell(Table.say('{n} virou uma carta', '{n} turned a card', '{n} volteó una carta', name(pl)));
     var match = isMatch(g.chant, card, word, under);
+    Sfx.play(match ? 'match' : 'flip');
     g.turn = (g.turn + 1) % g.players.length;
     if (match) open();
     else {
@@ -207,7 +216,7 @@ var Snap = (function () {
       if (Math.random() < missChance(g.level)) continue;
       (function (pi) { later(reaction(g.level), function () { slap(pi); }); })(i);
     }
-    later(2600, close);
+    later(3200, close);
   }
 
   function slap(pi) {
@@ -218,6 +227,7 @@ var Snap = (function () {
     w.slaps.push({pi: pi, ms: ms});
     var s = g.nodes.seats[pi];
     s.slap.textContent = '✋ ' + w.slaps.length;
+    Sfx.play(g.players[pi].who.robot ? 'robot' : 'slap');
     UI.setClass(s.seat, 'slapped', true);
     if (!g.players[pi].who.robot) { g.stats.hits++; g.stats.times.push(ms); }
     if (w.slaps.length === g.players.length) later(350, close);
@@ -240,7 +250,7 @@ var Snap = (function () {
     take(lose, Table.say('{n} foi o último: fica com a pilha.', '{n} was last: takes the pile.', '{n} fue el último: se lleva el montón.', name(g.players[lose])));
     g.window = null;
     g.quiet = Date.now() + 400;
-    later(1700, flip);
+    later(2200, flip);
   }
 
   function take(pi, text) {
@@ -250,6 +260,7 @@ var Snap = (function () {
     g.nodes.word.textContent = '';
     paint();
     tell(text);
+    Sfx.play('pile');
   }
 
   /** Now and then a robot slaps when it shouldn't, as people do: it takes the pile. */
@@ -261,6 +272,7 @@ var Snap = (function () {
           later(500 + Math.random() * 400, function () {
             if (g.window || !g.pile.length) return;
             g.nodes.seats[pi].slap.textContent = '✋';
+            Sfx.play('oops');
             take(pi, Table.say('Opa! {n} bateu sem combinar: fica com a pilha.', 'Oops! {n} slapped with no match: takes the pile.', '¡Uy! {n} golpeó sin coincidencia: se lleva el montón.', name(g.players[pi])));
           });
         })(i);
@@ -272,6 +284,7 @@ var Snap = (function () {
   function finish(pi) {
     if (!g) return;
     var winner = g.players[pi];
+    if (!winner.who.robot) Sfx.play('win');
     var others = g.players.filter(function (p) { return p !== winner; }).sort(function (a, b) { return a.hand.length - b.hand.length; });
     var order = [winner].concat(others).map(function (p) { return p.who; });
     var st = g.stats, me = g.players[g.me].who;
@@ -318,6 +331,7 @@ var Snap = (function () {
     if (g.pile.length) {
       g.stats.tooSoon++;
       g.nodes.seats[g.me].slap.textContent = '✋';
+      Sfx.play('oops');
       take(g.me, tr('Opa, não combinou: você fica com a pilha.', 'Oops, no match: you take the pile.', 'Uy, no coincide: te llevas el montón.'));
       g.quiet = Date.now() + 600;
     }
