@@ -184,6 +184,9 @@
 .lf-timer { width: 900px; height: 16px; margin: 0 auto 34px; border-radius: 8px; background: rgba(247, 246, 242, 0.12); overflow: hidden; }
 .lf-timer i { display: block; height: 16px; border-radius: 8px; background: #E8A33D; -webkit-transform-origin: 0 0; transform-origin: 0 0; }
 .lf-timer i.go { -webkit-transform: scaleX(0); transform: scaleX(0); -webkit-transition: -webkit-transform 15s linear; transition: transform 15s linear; }
+.lf-think { width: 600px; height: 12px; }
+.lf-think i { height: 12px; background: #9E7BFF; }
+.lf-think i.go { -webkit-transition-duration: 6s; transition-duration: 6s; }
 .lf-dare .lf-prompt { font-size: 66px; }
 .lf-awards .tg-card { min-height: 300px; }
 .lf-awards .tg-card .praise { font-size: 24px; line-height: 1.3; }

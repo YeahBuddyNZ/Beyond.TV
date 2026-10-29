@@ -1,7 +1,7 @@
 /*
- * Silly games (ADR 0032): party games for a room full of people, played with one remote. Who's most likely to…? (count
- * to three, everyone points, OK on whoever got the most fingers), Would you rather? (everyone goes to a side of the
- * room) and Spin for a dare. Nothing to sign in to, no phones, nothing kept after the game. With a kid playing, only
+ * Silly games (ADR 0032): party games for a room full of people, played with one remote. Who's most likely to…? (a
+ * moment to think, then it counts to three by itself, everyone points, OK on whoever got the most fingers), Would you
+ * rather? (the same, and everyone goes to a side of the room) and Spin for a dare. Nothing to sign in to, no phones, nothing kept after the game. With a kid playing, only
  * the family set; the grown-ups' extras come in when everyone playing is a grown-up. Every line is clean either way.
  * The lines are in all five languages here (pt, en, es, de, ru), because they are the game rather than the screen
  * around it. Google TV runs this same file in TableActivity's WebView. Plain ES5.
@@ -335,6 +335,24 @@ var Laughs = (function () {
     game = null;
   }
 
+  var THINK = 6000;
+
+  /**
+   * A few seconds to think, shown as a bar running down, then the countdown starts by itself: choosing is the only
+   * press. Skipping or leaving first means the round moved on, so nothing starts.
+   */
+  function thinkThen(api, last) {
+    var round = game.round;
+    later(THINK, function () {
+      if (game.phase === 'ask' && game.round === round) countdown(api, last, function () { game.phase = 'pick'; redraw(api); });
+    });
+  }
+  function thinkBar(foot) {
+    var bar = UI.el('div', 'lf-timer lf-think', foot);
+    var fill = UI.el('i', '', bar);
+    setTimeout(function () { UI.setClass(fill, 'go', true); }, 50);
+  }
+
   /** A three, two, one countdown on screen, then go(). */
   function countdown(api, last, go) {
     var n = 3;
@@ -407,10 +425,8 @@ var Laughs = (function () {
         var foot = UI.el('div', 'lf-foot', layer);
         if (game.phase === 'ask') {
           UI.el('div', 'bt-sub', foot, tr('Pensem bem… sem apontar ainda!', 'Have a think… no pointing yet!', 'Pensadlo bien… ¡sin señalar todavía!'));
-          api.add(primary(UI.button(foot, tr('3, 2, 1, apontem!', '3, 2, 1, point!', '¡3, 2, 1, señalad!'), null, 'primary')), function () {
-            countdown(api, tr('Apontem!', 'Point!', '¡Señalad!'), function () { game.phase = 'pick'; redraw(api); });
-          }, {first: true});
-          api.add(UI.button(foot, tr('Pular', 'Skip this one', 'Saltar')), function () { next(api); });
+          thinkBar(foot);
+          api.add(primary(UI.button(foot, tr('Pular', 'Skip this one', 'Saltar'))), function () { next(api); }, {first: true});
         } else if (game.phase === 'count') {
           UI.el('div', 'lf-count', layer, game.count);
         } else if (picking) {
@@ -429,6 +445,7 @@ var Laughs = (function () {
       back: function () { return !!(game && game.phase === 'count'); },
       closed: ended
     });
+    thinkThen(UI.top(), tr('Apontem!', 'Point!', '¡Señalad!'));
   }
 
   function caught(api, p, t) {
@@ -533,10 +550,8 @@ var Laughs = (function () {
         var foot = UI.el('div', 'lf-foot', layer);
         if (game.phase === 'ask') {
           UI.el('div', 'bt-sub', foot, tr('Esquerda ou direita? Cada um vai para um lado da sala!', 'Left or right? Everyone go to that side of the room!', '¿Izquierda o derecha? ¡Cada uno a ese lado de la sala!'));
-          api.add(primary(UI.button(foot, tr('3, 2, 1, já!', '3, 2, 1, go!', '¡3, 2, 1, ya!'), null, 'primary')), function () {
-            countdown(api, tr('Já!', 'Go!', '¡Ya!'), function () { game.phase = 'pick'; redraw(api); });
-          }, {first: true});
-          api.add(UI.button(foot, tr('Outra', 'Another one', 'Otra')), function () { another(api); });
+          thinkBar(foot);
+          api.add(primary(UI.button(foot, tr('Outra', 'Another one', 'Otra'))), function () { another(api); }, {first: true});
         } else if (game.phase === 'count') {
           UI.el('div', 'lf-count', layer, game.count);
         } else if (game.phase === 'pick') {
@@ -550,6 +565,7 @@ var Laughs = (function () {
       back: function () { return !!(game && game.phase === 'count'); },
       closed: ended
     });
+    thinkThen(UI.top(), tr('Já!', 'Go!', '¡Ya!'));
   }
 
   function another(api) {
