@@ -372,19 +372,43 @@ var Ludo = (function () {
     }
   }
 
+  /**
+   * The throw: the die flies in from up and to the right (never over the board), tumbling, bounces three times, lower
+   * each time, and lands with a little squash. Only transform animates (old TVs). Each frame shows a random face; the last one is the roll.
+   */
+  var FRAMES = 16;
+  function throwAt(d, k) {
+    var t = k / FRAMES, left = 1 - t;
+    var x = 300 * Math.pow(left, 1.6);
+    var y = -220 * Math.abs(Math.cos(t * 3 * Math.PI)) * left * left;
+    var turn = 720 * left * left;
+    var tf = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px) rotate(' + turn.toFixed(1) + 'deg)';
+    d.style.webkitTransform = d.style.transform = tf;
+  }
+  function bounced(k) { return Math.abs(Math.cos(k / FRAMES * 3 * Math.PI)) < Math.abs(Math.cos((k - 1) / FRAMES * 3 * Math.PI)) &&
+    Math.abs(Math.cos(k / FRAMES * 3 * Math.PI)) < Math.abs(Math.cos((k + 1) / FRAMES * 3 * Math.PI)); }
+
   function roll() {
     if (!g) return;
     g.phase = 'busy';
-    var spins = 0;
+    var d = g.nodes.die, k = 0;
+    UI.setClass(d, 'landed', false);
+    UI.setClass(d, 'flying', true);
+    throwAt(d, 0);
     var spin = function () {
       if (!g) return;
+      k++;
       g.die = 1 + Math.floor(Math.random() * 6);
       drawDie(g.die);
+      if (k === 1 || bounced(k)) Sfx.play('dice');
+      if (k < FRAMES) { throwAt(d, k); later(55, spin); return; }
+      d.style.webkitTransform = d.style.transform = '';
+      UI.setClass(d, 'flying', false);
+      UI.setClass(d, 'landed', true);
       Sfx.play('dice');
-      if (++spins < 7) { later(60, spin); return; }
-      rolled();
+      later(260, rolled);
     };
-    spin();
+    later(30, spin);
   }
 
   function rolled() {

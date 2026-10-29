@@ -13,6 +13,8 @@ eight pictures shuffled, a match came round about one card in eight, so most of 
   taking the pile, a slap too soon, and a little tune when a person wins; Ludo gets the dice, each hop, a six, a
   token home, a catch, and a win or a loss. All in `web/sfx.js`, which the arcade will use too. Quiet when Home
   Settings › Sounds is off.
+- **A thrown die** in Ludo: it tumbles in, bounces three times and lands with a squash, a face each frame and the
+  last one the roll. Only transform animates, for the older TVs.
 - **Slower**: a card every 2.5 seconds at level 1 down to 1.7 at level 10 (was 1.6 to 1.0), 3.2 seconds to slap a
   match (was 2.6), and a longer breath after the pile is taken.
 - **More snaps**: after the shuffle, each Snap card has a 22% chance of being the same as the one before it, and the
