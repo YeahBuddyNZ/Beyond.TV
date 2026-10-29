@@ -77,6 +77,11 @@
 .lu-player .count { float: right; font-weight: 500; color: rgba(247, 246, 242, 0.7); }
 .lu-player.turn { opacity: 1; background: rgba(247, 246, 242, 0.16); }
 .lu-die { position: relative; width: 192px; height: 192px; margin-top: 44px; border-radius: 36px; background: #F7F6F2; border: 8px solid #2F7D6D; box-sizing: content-box; }
+/* The throw (ludo.js roll): each frame's position is set from script and eased between, then a squash on landing. */
+.lu-die.flying { -webkit-transition: -webkit-transform 0.055s linear; transition: transform 0.055s linear; box-shadow: 0 30px 40px rgba(0, 0, 0, 0.35); }
+.lu-die.landed { -webkit-animation: lu-land 0.26s ease-out; animation: lu-land 0.26s ease-out; }
+@-webkit-keyframes lu-land { 0% { -webkit-transform: scale(1.12, 0.86); } 55% { -webkit-transform: scale(0.96, 1.05); } 100% { -webkit-transform: none; } }
+@keyframes lu-land { 0% { transform: scale(1.12, 0.86); } 55% { transform: scale(0.96, 1.05); } 100% { transform: none; } }
 .lu-die i { position: absolute; width: 40px; height: 40px; margin: 4px; border-radius: 20px; background: #22221F; }
 .lu-die .q { display: block; text-align: center; line-height: 192px; font-size: 96px; font-weight: 700; color: rgba(34, 34, 31, 0.25); }
 .lu-say { margin-top: 40px; min-height: 88px; font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 38px; font-weight: 700; line-height: 1.2; }
