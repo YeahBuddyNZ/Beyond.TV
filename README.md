@@ -188,10 +188,18 @@ This build takes your city from the TV's time zone. For your exact city and the 
 
 Samsung TVs from before 2016 (like a 2014 H6300) run Orsay rather than Tizen. Beyond™ TV runs there too, as an app you open from Smart Hub, installed from a computer on the same Wi-Fi. Smart Hub stays the home screen. Orsay doesn't let an app open other apps, so the shelf has one **Smart Hub** tile that takes you back there; the picks, weather, games and Beyond Family all work.
 
-1. **On your computer**, in this folder: `python3 orsay/build.py` (add `--generic` to skip `config.properties`), then `sudo python3 orsay/serve.py`. It prints your computer's IP address.
+1. **On your computer**, on the same Wi-Fi, run one line. On a Mac or Linux, in Terminal:
+
+   ```bash
+   curl -fsSL https://raw.githubusercontent.com/YeahBuddyNZ/Beyond.TV/main/install-orsay.sh | bash
+   ```
+
+   On Windows, in PowerShell: `irm https://raw.githubusercontent.com/YeahBuddyNZ/Beyond.TV/main/install-orsay.ps1 | iex`
+
+   Nothing to build or install: it downloads Beyond™ TV, prints your computer's IP address and waits for the TV. (With your own `config.properties` and city: `python3 orsay/build.py`, then `sudo python3 orsay/serve.py`.)
 2. **On the TV**, open Smart Hub, choose **Samsung Account** (the red A button or the menu) and sign in as `develop` (if it asks for a password, `sso1029dev!`).
 3. Hold **OK** on any app in Smart Hub, choose **IP Setting** and type the IP address from step 1.
-4. Hold **OK** again, choose **Start User App Sync**. Beyond™ TV appears in Smart Hub. Stop the server with Ctrl+C.
+4. Hold **OK** again, choose **Start User App Sync**. Beyond™ TV appears in Smart Hub. Press Ctrl+C on the computer.
 
 Not yet tried on a real Orsay TV. A 2014 TV may not trust today's web certificates, so Beyond Family and the weather may not load there.
 

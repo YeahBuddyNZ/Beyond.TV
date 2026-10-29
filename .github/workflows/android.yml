@@ -85,3 +85,6 @@ jobs:
           printf '{"code":%s,"name":"%s","url":"https://github.com/YeahBuddyNZ/Beyond.TV/releases/download/android-%s/BeyondTV.apk","sha256":"%s"}\n' \
             "$BTV_VERSION_CODE" "$BTV_VERSION_NAME" "$BTV_VERSION_CODE" "$(sha256sum BeyondTV.apk | cut -d' ' -f1)" > latest.json
           gh release upload tv latest.json --clobber
+          # Older Samsung TVs (Orsay, ADR 0028): install-orsay.sh and install-orsay.ps1 fetch this.
+          python3 orsay/build.py --generic
+          gh release upload tv BeyondTV-orsay.zip --clobber
