@@ -380,6 +380,7 @@ var Ludo = (function () {
       if (!g) return;
       g.die = 1 + Math.floor(Math.random() * 6);
       drawDie(g.die);
+      Sfx.play('dice');
       if (++spins < 7) { later(60, spin); return; }
       rolled();
     };
@@ -467,6 +468,7 @@ var Ludo = (function () {
       hop++;
       pl.tokens[ti] = from < 0 ? 0 : from + hop;
       paint();
+      Sfx.play('hop');
       if (hop < steps) { later(170, step); return; }
       pl.tokens[ti] = from;
       var out = move(s, pi, ti, die);
@@ -487,13 +489,16 @@ var Ludo = (function () {
           '{n} sent one of your tokens home. Tokens on a star can\'t be caught.',
           '{n} mandó una ficha tuya a casa. Las fichas en una estrella no pueden ser atrapadas.', nameOf(pl))});
       }
+      Sfx.play('capture');
       tell(Table.say('{n} mandou {m} para casa!', '{n} sent {m} home!', '¡{n} mandó a {m} a casa!', nameOf(pl), nameOf(victim)));
     } else if (out.home) {
       if (!pl.who.robot) g.best[pl.who.id].home++;
+      Sfx.play('home');
       tell(Table.say('{n} chegou em casa com uma peça!', '{n} got a token home!', '¡{n} llevó una ficha a casa!', nameOf(pl)));
     }
     if (done(pl)) { later(900, finish); return; }
     if (out.again) {
+      if (!out.captured && !out.home) Sfx.play('six');
       if (!out.captured && !out.home) tell(Table.say('Seis! {n} joga de novo.', 'A six! {n} rolls again.', '¡Seis! {n} tira otra vez.', nameOf(pl)));
       later(out.captured || out.home ? 1100 : 800, turn);
       return;
@@ -513,6 +518,7 @@ var Ludo = (function () {
     s.over = true;
     var order = s.players.slice().sort(function (a, b) { return progress(b) - progress(a); });
     var winner = s.players[s.turn];
+    Sfx.play(winner.who.robot ? 'lose' : 'win');
     order = [winner].concat(order.filter(function (p) { return p !== winner; }));
     var tips = {}, praise = {};
     for (var i = 0; i < s.players.length; i++) {
