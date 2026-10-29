@@ -1029,7 +1029,6 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .bt-tidy .bt-box { position: absolute; left: 0; right: 0; top: 80px; text-align: center; }
 .bt-tidy .bt-heading { display: inline-block; }
 .bt-tidy .clock { margin-top: 6px; font-family: 'Sora', sans-serif; font-size: 200px; font-weight: 600; line-height: 1.1; color: #F7F6F2; }
-.bt-tidy .clock.late { color: #E8A33D; }
 .bt-tidy .bt-sub { max-width: 1200px; margin: 0 auto 46px; }
 .bt-tidy .racer { display: inline-block; width: 200px; margin: 0 14px; padding: 18px 0; border-radius: 32px; vertical-align: top;
   -webkit-transition: -webkit-transform 0.2s ease; transition: transform 0.2s ease; }

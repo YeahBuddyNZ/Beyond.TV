@@ -1,6 +1,7 @@
 /*
- * The tidy-up race: a big clock counting down and everyone's face. Whoever is done grabs the remote and presses OK on
- * their face: first, second, third. When everybody's done, or the time is up, the TV says so, kindly.
+ * The tidy-up race: a big clock counting up from 0:00 and everyone's face. Whoever is done grabs the remote and presses
+ * OK on their face: first, second, third, with their time. When everybody's done the TV says who was fastest. A count
+ * up, not a count down (Kyle, 29/10/2026), so nobody runs out of time; left open an hour, it closes.
  *
  * Every night at the time a grown-up set in Beyond Family (TV > Tidy-up race), if Beyond TV is open then; or straight
  * away from the remote in Beyond Family. On LG and Samsung the app can't switch the TV on by itself, so it starts only
@@ -11,6 +12,14 @@ var Tidy = (function () {
   'use strict';
 
   var open = null, setting = null, lastDay = '';
+  var LONGEST = 60 * 60000;   // left open an hour, the race was forgotten
+
+  /** 2:31, or 1:02:05 past the hour. */
+  function time(ms) {
+    var s = Math.floor(Math.max(0, ms) / 1000), m = Math.floor(s / 60) % 60, h = Math.floor(s / 3600);
+    function two(n) { return (n < 10 ? '0' : '') + n; }
+    return h ? h + ':' + two(m) + ':' + two(s % 60) : Math.floor(s / 60) + ':' + two(s % 60);
+  }
 
   function racing() {
     var all = Profiles.list().filter(function (p) { return !p.visitor && !p.together; });
@@ -20,16 +29,15 @@ var Tidy = (function () {
 
   function start(minutes) {
     if (open) open.close();
-    minutes = Math.max(1, Math.min(30, minutes || (setting && setting.minutes) || 10));
-    var ends = Date.now() + minutes * 60000, timer = 0, over = false, order = [], people = racing();
+    // The minutes from Beyond Family no longer set an end: the clock counts up.
+    var started = Date.now(), timer = 0, over = false, order = [], people = racing();
     var clock, title, sub, close, api;
 
     function tick() {
       if (over) return;
-      var left = Math.max(0, ends - Date.now()), s = Math.ceil(left / 1000);
-      clock.textContent = Math.floor(s / 60) + ':' + (s % 60 < 10 ? '0' : '') + (s % 60);
-      UI.setClass(clock, 'late', s <= 60);
-      if (!left) { end(false); return; }
+      var gone = Date.now() - started;
+      clock.textContent = time(gone);
+      if (gone >= LONGEST) { api.close(); return; }   // forgotten: nobody is racing any more
       timer = setTimeout(tick, 250);
     }
 
@@ -37,28 +45,21 @@ var Tidy = (function () {
       if (over || order.indexOf(p) >= 0) return;
       order.push(p);
       var n = order.length;
-      place.textContent = n === 1 ? '🏆 ' + tr('1º', '1st', '1º') : n === 2 ? tr('2º', '2nd', '2º') : n === 3 ? tr('3º', '3rd', '3º')
-        : '✓ ' + tr('Pronto', 'Done', 'Listo');
+      place.textContent = (n === 1 ? '🏆 ' + tr('1º', '1st', '1º') : n === 2 ? tr('2º', '2nd', '2º') : n === 3 ? tr('3º', '3rd', '3º')
+        : '✓') + '  ' + time(Date.now() - started);
       UI.setClass(node, 'done', true);
-      if (order.length === people.length) end(true);
+      if (order.length === people.length) end();
     }
 
-    function end(everyone) {
+    // Everybody's done.
+    function end() {
       over = true;
       clearTimeout(timer);
       Chime.play();
-      if (everyone) {
-        clock.textContent = '🎉';
-        UI.setClass(clock, 'party', true);
-        title.textContent = tr('Tudo arrumado!', 'All tidy!', '¡Todo ordenado!');
-        sub.textContent = people.length > 1 ? tr('Mais rápido: ', 'Fastest tonight: ', 'El más rápido: ') + order[0].name : tr('Muito bem!', 'Well done!', '¡Muy bien!');
-      } else {
-        clock.textContent = '0:00';
-        title.textContent = tr('Acabou o tempo!', "Time's up!", '¡Se acabó el tiempo!');
-        sub.textContent = !order.length ? tr('Quase lá. Mais um pouquinho e pronto!', "Nearly there. A little more and it's done!", 'Casi. ¡Un poco más y listo!')
-          : tr('Muito bem, ', 'Well done, ', '¡Muy bien, ') + order.map(function (p) { return p.name; }).join(', ')
-            + tr('. Os outros, quase lá!', '. Everyone else, nearly there!', '. ¡Los demás, casi!');
-      }
+      clock.textContent = '🎉';
+      UI.setClass(clock, 'party', true);
+      title.textContent = tr('Tudo arrumado!', 'All tidy!', '¡Todo ordenado!');
+      sub.textContent = people.length > 1 ? tr('Mais rápido: ', 'Fastest tonight: ', 'El más rápido: ') + order[0].name : tr('Muito bem!', 'Well done!', '¡Muy bien!');
       UI.setClass(close, 'on', true);
       api.focusNode(close);
       timer = setTimeout(function () { if (open === api) api.close(); }, 90000);
@@ -68,7 +69,7 @@ var Tidy = (function () {
       cls: 'bt-tidy',
       build: function (layer, a) {
         var box = UI.el('div', 'bt-box', layer);
-        title = UI.el('div', 'bt-heading', box, '🧺  ' + tr('Corrida da arrumação!', 'Tidy-up race!', '¡Carrera de ordenar!'));
+        title = UI.el('div', 'bt-heading', box, tr('Corrida da arrumação!', 'Tidy-up race!', '¡Carrera de ordenar!'));
         clock = UI.el('div', 'clock', box);
         sub = UI.el('div', 'bt-sub', box, tr('Prontos, já! Quem terminar, aperte OK no seu rosto.',
           "Ready, set, go! When you're done, press OK on your face.", '¡Preparados, listos, ya! Cuando termines, pulsa OK en tu cara.'));
