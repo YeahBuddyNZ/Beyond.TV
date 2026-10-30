@@ -41,3 +41,4 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0031](0031-snap-sound-pace.md) | Snap: sound, an easier pace and more snaps |
 | [0032](0032-silly-games.md) | Silly games: party games with one remote |
 | [0033](0033-chess.md) | Chess, and Ludo without robots for a group |
+| [0034](0034-tv-logs.md) | The TV's own log goes with its check-in |

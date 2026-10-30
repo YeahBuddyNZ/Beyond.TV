@@ -251,7 +251,8 @@ HDMI (Chromecast with Google TV, Google TV Streamer, onn 4K, NVIDIA Shield). Set
   city to 0.1 degrees, make, model, versions, mode, open and crash counts, the last 20 errors. Never what anybody
   watches. Home Settings > Help fix problems turns it off and posts `/tv/checkin/forget`. Anything new it sends goes
   in the README's Privacy section and on the website in the same change. `Checkin.error(c, where, text)` is how a
-  failure worth knowing about gets reported.
+  failure worth knowing about gets reported. `AppLog.w` lines also go with it as the TV's log (ADR 0034, `tv_logs`, read it with the Supabase MCP):
+  a line that names an app, a show or a person goes through `AppLog.here`, which stays on the TV.
 - After any change, `./build.sh` must end with `Built BeyondTV.apk`.
 - LG and Samsung (`web/`): plain ES5 JavaScript and CSS without variables, grid or backdrop-filter, since older TVs
   (webOS 3 and 4, Tizen 3) run a Chromium from 2015 to 2017; only transform and opacity animate. `web/tv.js` is the

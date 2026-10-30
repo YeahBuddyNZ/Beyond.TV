@@ -942,7 +942,7 @@ final class Family {
             try {
                 c.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
             } catch (Exception e) {
-                AppLog.w("family: couldn't open " + pkg + ": " + e);
+                AppLog.here("family: couldn't open " + pkg + ": " + e);
             }
         });
     }
