@@ -1069,3 +1069,16 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .bt-layer.bt-music { background: #0D0C18; }
 .bt-layer.bt-music::before { display: none; }
 .bt-music iframe { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; border: 0; background: #0D0C18; }
+
+/* Look around (skylook.js): the sky as a window, with whatever is in the middle named in the corner. */
+.bt-sky .lookbox { position: absolute; left: 1100px; top: 900px; }
+.bt-layer.bt-skylook { background: #05071A; overflow: hidden; }
+.bt-layer.bt-skylook::before { display: none; }
+.bt-skylook .look { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+.bt-skylook .lookcard { position: absolute; left: 70px; bottom: 90px; width: 900px; padding: 30px 40px; border-radius: 28px; background: rgba(13, 12, 24, 0.9); opacity: 0; -webkit-transition: opacity 0.25s; transition: opacity 0.25s; }
+.bt-skylook .lookcard .kind { font-size: 22px; letter-spacing: 3px; text-transform: uppercase; color: #E8A33D; }
+.bt-skylook .lookcard .name { margin-top: 6px; font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 56px; font-weight: 700; }
+.bt-skylook .lookcard .where { margin-top: 8px; font-size: 28px; color: rgba(247, 246, 242, 0.7); }
+.bt-skylook .lookcard .about { margin-top: 14px; font-size: 28px; line-height: 38px; color: rgba(247, 246, 242, 0.92); }
+.bt-skylook .corner { position: absolute; right: 60px; top: 44px; font-size: 28px; font-weight: 600; color: rgba(247, 246, 242, 0.85); text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6); }
+.bt-skylook .hint { position: absolute; right: 60px; bottom: 44px; font-size: 24px; color: rgba(247, 246, 242, 0.6); text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6); }

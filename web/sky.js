@@ -67,6 +67,9 @@ var Sky = (function () {
 
   function sunAlt(ms, p) { var s = sun(ms); return horizon(s.ra, s.dec, sidereal(ms, p.lon), p.lat).alt; }
 
+  /** The sun from the ground, {az, alt}. */
+  function sunPlace(ms, p) { var s = sun(ms); return horizon(s.ra, s.dec, sidereal(ms, p.lon), p.lat); }
+
   /** The moon from the ground: the parallax lowers it by up to a degree. */
   function moonAt(ms, p) {
     var m = moon(ms), h = horizon(m.ra, m.dec, sidereal(ms, p.lon), p.lat);
@@ -346,7 +349,7 @@ var Sky = (function () {
           UI.el('span', '', s, stars[i][1] + '  ·  ' + stars[i][2] + '°');
         }
       }
-      UI.el('div', 'hint', hintBox, tr('◀ ▶ uma hora por vez  ·  OK para agora', '◀ ▶ an hour at a time  ·  OK for now', '◀ ▶ una hora a la vez  ·  OK para ahora'));
+      UI.el('div', 'hint', hintBox, tr('◀ ▶ uma hora por vez  ·  OK para agora  ·  ▼ olhar em volta', '◀ ▶ an hour at a time  ·  OK for now  ·  ▼ look around', '◀ ▶ una hora a la vez  ·  OK para ahora  ·  ▼ mirar alrededor'));
     }
 
     function move(hours) { at += hours * 3600000; render(); }
@@ -360,6 +363,7 @@ var Sky = (function () {
         hintBox = UI.el('div', 'hints', layer);
         a.add(UI.el('div', 'hold', layer), function () { at = start === now ? Date.now() : tonight(Date.now(), p); render(); },
           {first: true, left: function () { move(-1); }, right: function () { move(1); }});
+        if (window.SkyLook) a.add(UI.button(UI.el('div', 'lookbox', layer), tr('Olhar em volta', 'Look around', 'Mirar alrededor'), null), function () { SkyLook.open(); });
         render();
       }
     });
@@ -374,5 +378,9 @@ var Sky = (function () {
     return {name: ph.name, lit: ph.lit, emoji: north[south ? (8 - i) % 8 : i]};
   }
 
-  return {open: open, moon: moonNow, _test: {sun: sun, moon: moon, phase: phase, next: next, riseSet: riseSet, moonAt: moonAt, sunAlt: sunAlt}};
+  /** What Look around (skylook.js) builds on: the same sun, moon and star positions, so there is one set of sums. */
+  var core = {init: names, place: place, sidereal: sidereal, horizon: horizon, moonAt: moonAt, sunAlt: sunAlt, sunPlace: sunPlace,
+    phase: phase, drawMoon: drawMoon, compass: compass, matarikiName: matarikiName, tonight: tonight};
+
+  return {open: open, moon: moonNow, core: core, _test: {sun: sun, moon: moon, phase: phase, next: next, riseSet: riseSet, moonAt: moonAt, sunAlt: sunAlt}};
 })();

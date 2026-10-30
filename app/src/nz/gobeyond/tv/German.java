@@ -452,7 +452,7 @@ final class German {
             case "Bright stars": return "Helle Sterne";
             case "Pleiades": return "Plejaden";
             case "Southern Cross": return "Kreuz des Südens";
-            case "◀ ▶ an hour at a time  ·  OK for now": return "◀ ▶ eine Stunde weiter  ·  OK für jetzt";
+            case "◀ ▶ an hour at a time  ·  OK for now  ·  ▼ look around": return "◀ ▶ eine Stunde weiter  ·  OK für jetzt  ·  ▼ umschauen";
             case "New moon": return "Neumond";
             case "Waxing crescent": return "Zunehmende Sichel";
             case "First quarter": return "Erstes Viertel";

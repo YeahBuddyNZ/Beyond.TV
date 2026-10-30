@@ -31,7 +31,7 @@ import java.nio.charset.StandardCharsets;
 public class TableActivity extends Activity {
     static void open(Context c) { open(c, null); }
 
-    /** start: "silly" opens the silly games (web/laughs.js) and "arcade" the arcade (web/arcade.js), rather than the board and card games. */
+    /** start: "silly" opens the silly games (web/laughs.js), "arcade" the arcade (web/arcade.js) and "sky" Look around (web/skylook.js), rather than the board and card games. */
     static void open(Context c, String start) {
         c.startActivity(new Intent(c, TableActivity.class).putExtra("start", start).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
@@ -90,6 +90,16 @@ public class TableActivity extends Activity {
         }
 
         @JavascriptInterface public String language() { return Ui.language; }
+
+        /** Where the TV is, for the sky: latitude and longitude as set in Home Settings, the city and the country. */
+        @JavascriptInterface public String place() {
+            try {
+                return new JSONObject().put("lat", Prefs.latitude()).put("lon", Prefs.longitude()).put("city", Prefs.city())
+                        .put("country", Config.TMDB_REGION.trim().toUpperCase(java.util.Locale.ROOT)).toString();
+            } catch (JSONException e) {
+                return "";
+            }
+        }
 
         /** Which games to open: "silly" for the silly games, "arcade" for the arcade, otherwise the board and card games. */
         @JavascriptInterface public String start() {

@@ -1,6 +1,6 @@
 /*
  * The board and card games on Google TV (TableActivity, ADR 0024): table.html runs the same games as LG and Samsung in
- * a WebView, and this stands in for the home screen around them. The silly games (laughs.js) and the arcade (arcade.js) run here too. Who's playing comes from the TV's People, the levels
+ * a WebView, and this stands in for the home screen around them. The silly games (laughs.js), the arcade (arcade.js) and Look around (skylook.js) run here too. Who's playing comes from the TV's People, the levels
  * are kept in the app's own files (BeyondTable.load and save), and the remote's keys arrive through TableHost.key.
  * Not loaded on LG or Samsung. Plain ES5.
  */
@@ -11,6 +11,10 @@ var TableHost = (function () {
   var people = [];
   try { people = JSON.parse(bridge.people()) || []; } catch (e) { people = []; }
   var me = bridge ? bridge.current() : '';
+  // Where the TV is, for the sky (sky.js reads Place). In a browser, Auckland.
+  var where = {lat: -36.8485, lon: 174.7633, city: '', country: ''};
+  try { if (bridge && bridge.place) where = JSON.parse(bridge.place()) || where; } catch (e) { /* keep Auckland */ }
+  window.Place = where;
 
   I18N.set(bridge ? bridge.language() : 'auto');
   window.TV = {keys: {left: 37, up: 38, right: 39, down: 40, ok: 13, back: 4}, browser: false};
@@ -45,6 +49,6 @@ var TableHost = (function () {
   if (!bridge) document.addEventListener('keydown', function (e) { key(e.keyCode === 27 ? 4 : e.keyCode); e.preventDefault(); });
 
   var first = bridge && bridge.start ? bridge.start() : '';
-  if (first === 'silly') Laughs.open(); else if (first === 'arcade') Arcade.open(); else Table.open();
+  if (first === 'silly') Laughs.open(); else if (first === 'arcade') Arcade.open(); else if (first === 'sky') SkyLook.open(); else Table.open();
   return {key: key};
 })();
