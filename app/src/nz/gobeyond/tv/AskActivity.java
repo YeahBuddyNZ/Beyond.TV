@@ -150,7 +150,7 @@ public class AskActivity extends Activity {
                     startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
                     finish();
                 } catch (RuntimeException e) {
-                    AppLog.w("ask: couldn't open " + intent + ": " + e);
+                    AppLog.here("ask: couldn't open " + intent + ": " + e);
                 }
             });
             return true;

@@ -32,9 +32,9 @@ final class Checkin {
 
     static final String URL_BASE = "https://beyondfamily.app/api/tv/checkin";
     private static final String FEEDBACK = "https://beyondfamily.app/api/tv/feedback",
-            MESSAGES = "https://beyondfamily.app/api/tv/messages";
+            MESSAGES = "https://beyondfamily.app/api/tv/messages", LOG = URL_BASE + "/log";
     private static final long DAY = 24L * 60 * 60 * 1000, HOUR = 60L * 60 * 1000;
-    private static final int KEEP = 20;
+    private static final int KEEP = 20, LOG_LINES = 300;
     private static final Object LOCK = new Object();
 
     private static File dir(Context c) {
@@ -110,15 +110,19 @@ final class Checkin {
     static void maybeSend(Context c) {
         final Context app = c.getApplicationContext();
         if (!on(app)) return;
-        long since = System.currentTimeMillis() - file(app, "sent").lastModified();
+        long now = System.currentTimeMillis(), since = now - file(app, "sent").lastModified();
         boolean errors = file(app, "errors.txt").length() > 0;
-        if (since < DAY && !(errors && since > HOUR)) return;
+        final boolean checkin = since >= DAY || (errors && since > HOUR);
+        // The log goes more often than the check-in, so Beyond can read a TV's day while it is still that day.
+        final boolean log = now - file(app, "log-sent").lastModified() >= 3 * HOUR && AppLog.file(app).length() > 0;
+        if (!checkin && !log) return;
         new Thread(() -> {
             try {
-                sendNow(app);
+                if (checkin) sendNow(app);
             } catch (Throwable t) {
                 AppLog.w("checkin: " + t);
             }
+            sendLog(app, checkin ? "checkin" : "every few hours");
         }, "beyond-tv-checkin").start();
     }
 
@@ -172,6 +176,61 @@ final class Checkin {
         AppLog.w("checkin: sent");
     }
 
+    // MARK: - The log
+
+    /**
+     * The TV's own log (AppLog), the last few hundred lines, so Beyond can see what went wrong without a cable. Only
+     * the app's own lines: never which app was opened (AppLog.here keeps those on the TV), and addresses, links'
+     * queries and anything shaped like a key are taken out here as well. Blocking: call it off the UI thread.
+     */
+    static void sendLog(Context c, String reason) {
+        if (!on(c)) return;
+        try {
+            touch(file(c, "log-sent"));
+            List<String> lines;
+            synchronized (AppLog.class) {
+                lines = last(lines(AppLog.file(c)), LOG_LINES);
+            }
+            if (lines.isEmpty()) return;
+            JSONArray list = new JSONArray();
+            for (String line : lines) {
+                String[] p = line.trim().split("\t", 3);
+                if (p.length < 3) continue;
+                long at = number(p[0]);
+                if (at > 0) list.put(new JSONObject().put("at", at).put("process", cut(p[1], 12)).put("text", scrub(p[2])));
+            }
+            JSONObject body = new JSONObject()
+                    .put("id", id(c))
+                    .put("reason", cut(reason, 30))
+                    .put("version", cut(c.getPackageManager().getPackageInfo(c.getPackageName(), 0).versionName, 30))
+                    .put("lines", list);
+            post(LOG, body.toString());
+        } catch (Throwable t) {
+            android.util.Log.i("BeyondTV", "log: " + t);   // not AppLog.w: a failed send must not grow the log it sends
+        }
+    }
+
+    /** Keeps the newest half of the log file, from a line's start. Called under AppLog's lock. */
+    static void trimLog(File f, int keep) {
+        String all = read(f);
+        if (all.length() <= keep) return;
+        String tail = all.substring(all.length() - keep);
+        int nl = tail.indexOf('\n');
+        write(f, nl < 0 ? "" : tail.substring(nl + 1));
+    }
+
+    private static final java.util.regex.Pattern ADDRESS =
+            java.util.regex.Pattern.compile("\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}(:\\d+)?\\b"),
+            QUERY = java.util.regex.Pattern.compile("(https?://[^\\s?#]+)[?#]\\S*"),
+            SECRET = java.util.regex.Pattern.compile("[A-Za-z0-9_\\-]{32,}");
+
+    static String scrub(String text) {
+        String s = ADDRESS.matcher(text).replaceAll("(address)");
+        s = QUERY.matcher(s).replaceAll("$1?…");
+        s = SECRET.matcher(s).replaceAll("(hidden)");
+        return cut(s, 300);
+    }
+
     // MARK: - Talk to Beyond
 
     /**
@@ -191,6 +250,7 @@ final class Checkin {
             if (!city.isEmpty()) body.put("city", cut(city, 60));
             post(FEEDBACK, body.toString());
             touch(file(c, "talked"));
+            if (on(c)) sendLog(c, "feedback");   // what the TV was doing when somebody spoke up
             return true;
         } catch (Throwable t) {
             AppLog.w("feedback: " + t);

@@ -58,7 +58,7 @@ final class RemoteKeys {
         if (pkg.isEmpty()) return false;   // "Nothing": the key goes on as if we weren't here
         if (e.getAction() == KeyEvent.ACTION_DOWN && e.getRepeatCount() == 0) {
             Intent intent = launchIntent(c.getPackageManager(), pkg);
-            AppLog.w("remote key " + e.getKeyCode() + " -> " + pkg + (intent == null ? " (not installed)" : ""));
+            AppLog.here("remote key " + e.getKeyCode() + " -> " + pkg + (intent == null ? " (not installed)" : ""));
             if (intent != null) c.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         }
         return true;

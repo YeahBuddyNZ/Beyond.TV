@@ -428,7 +428,7 @@ final class HomeApps {
             a.startActivity(intent, ActivityOptions.makeScaleUpAnimation(from, x, y, Math.max(w, 1), Math.max(h, 1)).toBundle());
             return true;
         } catch (ActivityNotFoundException | SecurityException e) {
-            AppLog.w("couldn't open " + it.label + ": " + e.getMessage());
+            AppLog.here("couldn't open " + it.label + ": " + e.getMessage());
             if (plain == null || plain == intent) return false;
             plain.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             try {
@@ -690,7 +690,7 @@ final class HomeApps {
                     android.util.TypedValue value = new android.util.TypedValue();
                     r.getValue(res, value, true);
                     Drawable d = r.getDrawableForDensity(res, DisplayMetrics.DENSITY_XXXHIGH, null);
-                    if (d != null) AppLog.w("TV banner for " + pkg + ": " + value.string + " (" + d.getIntrinsicWidth() + "×" + d.getIntrinsicHeight() + ")");
+                    if (d != null) AppLog.here("TV banner for " + pkg + ": " + value.string + " (" + d.getIntrinsicWidth() + "×" + d.getIntrinsicHeight() + ")");
                     return d;
                 }
             }
