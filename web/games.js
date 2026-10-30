@@ -21,6 +21,7 @@ var Games = (function () {
           ['🎤', tr('Karaokê', 'Karaoke', 'Karaoke'), function () { a.close(); Karaoke.choose(); }],
           ['🎲', tr('Jogos de tabuleiro e cartas', 'Board and card games', 'Juegos de mesa y cartas'), function () { a.close(); Table.open(); }],
           ['🤪', tr('Jogos bobos', 'Silly games', 'Juegos locos'), function () { a.close(); Laughs.open(); }],
+          ['🕹', tr('Fliperama', 'Arcade', 'Arcade'), function () { a.close(); Arcade.open(); }],
           ['🎉', tr('Festa', 'Party', 'Fiesta'), function () { a.close(); Party.choose(); }],
           ['🏆', tr('Quiz da noite', 'Quiz night', 'Noche de quiz'), function () { family('quiz', a); }],
           ['🍽', tr('Pergunta do jantar', 'Dinner question', 'Pregunta de la cena'), function () { family('question', a); }],

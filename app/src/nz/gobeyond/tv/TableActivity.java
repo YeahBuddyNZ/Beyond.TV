@@ -31,7 +31,7 @@ import java.nio.charset.StandardCharsets;
 public class TableActivity extends Activity {
     static void open(Context c) { open(c, null); }
 
-    /** start: "silly" opens the silly games (web/laughs.js) rather than the board and card games. */
+    /** start: "silly" opens the silly games (web/laughs.js) and "arcade" the arcade (web/arcade.js), rather than the board and card games. */
     static void open(Context c, String start) {
         c.startActivity(new Intent(c, TableActivity.class).putExtra("start", start).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
@@ -91,7 +91,7 @@ public class TableActivity extends Activity {
 
         @JavascriptInterface public String language() { return Ui.language; }
 
-        /** Which games to open: "silly" for the silly games, otherwise the board and card games. */
+        /** Which games to open: "silly" for the silly games, "arcade" for the arcade, otherwise the board and card games. */
         @JavascriptInterface public String start() {
             String s = getIntent().getStringExtra("start");
             return s == null ? "" : s;

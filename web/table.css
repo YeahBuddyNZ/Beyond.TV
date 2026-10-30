@@ -219,3 +219,11 @@
 .lu-player .chip.w { background: #FFFFFF; }
 .lu-player .chip.b { background: #22221F; }
 .ch-taken { font-family: 'DejaVu Sans', 'Noto Sans Symbols2', 'Segoe UI Symbol', sans-serif; font-size: 30px; letter-spacing: -2px; }
+
+/* The arcade (arcade.js): one 1280 by 720 canvas in the middle of the stage. */
+.bt-layer.bt-arcade { background: #0D0C18; }
+.bt-layer.bt-arcade::before { display: none; }
+.bt-arcade .ar-title { position: absolute; left: 0; right: 0; top: 52px; text-align: center; font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 52px; font-weight: 800; color: #F7F6F2; }
+.bt-arcade .ar-canvas { position: absolute; left: 320px; top: 170px; width: 1280px; height: 720px; border-radius: 28px; background: #14122A; }
+.bt-arcade .ar-help { position: absolute; left: 0; right: 0; top: 940px; text-align: center; font-size: 28px; color: rgba(247, 246, 242, 0.6); }
+.bt-arcade-pick .cakes { max-width: 980px; }
