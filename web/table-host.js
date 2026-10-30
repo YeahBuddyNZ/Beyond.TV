@@ -1,6 +1,6 @@
 /*
  * The board and card games on Google TV (TableActivity, ADR 0024): table.html runs the same games as LG and Samsung in
- * a WebView, and this stands in for the home screen around them. The silly games (laughs.js) run here too. Who's playing comes from the TV's People, the levels
+ * a WebView, and this stands in for the home screen around them. The silly games (laughs.js) and the arcade (arcade.js) run here too. Who's playing comes from the TV's People, the levels
  * are kept in the app's own files (BeyondTable.load and save), and the remote's keys arrive through TableHost.key.
  * Not loaded on LG or Samsung. Plain ES5.
  */
@@ -44,6 +44,7 @@ var TableHost = (function () {
   // A keyboard on a computer, when table.html is opened in a browser to try it.
   if (!bridge) document.addEventListener('keydown', function (e) { key(e.keyCode === 27 ? 4 : e.keyCode); e.preventDefault(); });
 
-  if (bridge && bridge.start && bridge.start() === 'silly') Laughs.open(); else Table.open();
+  var first = bridge && bridge.start ? bridge.start() : '';
+  if (first === 'silly') Laughs.open(); else if (first === 'arcade') Arcade.open(); else Table.open();
   return {key: key};
 })();

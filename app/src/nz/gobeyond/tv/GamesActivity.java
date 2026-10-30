@@ -53,6 +53,7 @@ public class GamesActivity extends Activity {
                 {"🎤", Ui.tr("Karaokê", "Karaoke", "Karaoke"), (Runnable) () -> go(() -> KaraokePickActivity.open(this))},
                 {"🎲", Ui.tr("Jogos de tabuleiro e cartas", "Board and card games", "Juegos de mesa y cartas"), (Runnable) () -> go(() -> TableActivity.open(this))},
                 {"🤪", Ui.tr("Jogos bobos", "Silly games", "Juegos locos"), (Runnable) () -> go(() -> TableActivity.open(this, "silly"))},
+                {"🕹", Ui.tr("Fliperama", "Arcade", "Arcade"), (Runnable) () -> go(() -> TableActivity.open(this, "arcade"))},
                 {"🎉", Ui.tr("Festa", "Party", "Fiesta"), (Runnable) () -> go(() -> PartyPickActivity.open(this))},
                 {"🏆", Ui.tr("Quiz da noite", "Quiz night", "Noche de quiz"), (Runnable) () -> family("quiz")},
                 {"🍽", Ui.tr("Pergunta do jantar", "Dinner question", "Pregunta de la cena"), (Runnable) () -> family("question")},
