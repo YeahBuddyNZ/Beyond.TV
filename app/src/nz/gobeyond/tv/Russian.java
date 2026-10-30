@@ -495,7 +495,7 @@ final class Russian {
             case "Bright stars": return "Яркие звёзды";
             case "Pleiades": return "Плеяды";
             case "Southern Cross": return "Южный Крест";
-            case "◀ ▶ an hour at a time  ·  OK for now": return "◀ ▶ на час вперёд или назад  ·  OK: сейчас";
+            case "◀ ▶ an hour at a time  ·  OK for now  ·  ▼ look around": return "◀ ▶ на час вперёд или назад  ·  OK: сейчас  ·  ▼ осмотреться";
             case "New moon": return "Новолуние";
             case "Waxing crescent": return "Растущий серп";
             case "First quarter": return "Первая четверть";

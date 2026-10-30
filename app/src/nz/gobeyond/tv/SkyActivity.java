@@ -61,6 +61,7 @@ public class SkyActivity extends Activity {
         if (code == KeyEvent.KEYCODE_DPAD_LEFT) chart.move(-1);
         else if (code == KeyEvent.KEYCODE_DPAD_RIGHT) chart.move(1);
         else if (code == KeyEvent.KEYCODE_DPAD_CENTER || code == KeyEvent.KEYCODE_ENTER) chart.now();
+        else if (code == KeyEvent.KEYCODE_DPAD_DOWN) TableActivity.open(this, "sky");   // Look around is web/skylook.js in the same WebView as the games
         return true;
     }
 
@@ -556,7 +557,7 @@ public class SkyActivity extends Activity {
             text.setTypeface(Ui.regular);
             text.setTextSize(24 * k);
             text.setColor(0x73F7F6F2);
-            c.drawText(Ui.tr("◀ ▶ uma hora por vez  ·  OK para agora", "◀ ▶ an hour at a time  ·  OK for now", "◀ ▶ una hora a la vez  ·  OK para ahora"),
+            c.drawText(Ui.tr("◀ ▶ uma hora por vez  ·  OK para agora  ·  ▼ olhar em volta", "◀ ▶ an hour at a time  ·  OK for now  ·  ▼ look around", "◀ ▶ una hora a la vez  ·  OK para ahora  ·  ▼ mirar alrededor"),
                     x, 1025 * k, text);
         }
 
