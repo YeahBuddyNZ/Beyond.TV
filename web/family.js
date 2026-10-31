@@ -406,6 +406,12 @@ var Family = (function () {
       if (c.app && !BeyondTV.openShelf(c.app)) UI.toast(tr('Esse app não está nesta TV', "That app isn't on this TV", 'Esa app no está en este TV'));
       return;
     }
+    if (c.kind === 'sleep') {
+      // Turned off from a phone (ADR 0037): LG turns off (its remote control API asks once); Samsung, which lets no
+      // app turn it off, fades to black until a key is pressed, the same as the sleep timer.
+      hide(); UI.closeAll(); Sleep.now();
+      return;
+    }
     if (c.kind === 'launch') {
       if (!BeyondTV.openShelf(c.app)) UI.toast(tr('Esse app não está nesta TV', "That app isn't on this TV", 'Esa app no está en este TV'));
       return;

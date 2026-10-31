@@ -722,6 +722,10 @@ final class Family {
                     if (!openAfter.isEmpty()) launch(app, openAfter);
                 });
                 break;
+            case "sleep":
+                // Turned off from a phone (ADR 0037): the sleep key through the TV's own ADB, then power if it ignored it.
+                adb().post(() -> sleep(app));
+                break;
             case "profile":
                 final String member = "bf-" + cmd.optString("memberId");
                 MAIN.post(() -> {
@@ -906,6 +910,22 @@ final class Family {
             Thread.sleep(2500);
             if (!Sleep.awake(a)) shell(c, "input keyevent 26");   // TVs that only know power
             Thread.sleep(3000);
+        } catch (InterruptedException ignored) {
+        }
+    }
+
+    /** On the ADB thread. Puts the TV to sleep, the same way the sleep timer does (Sleep.Receiver), only when it's on. */
+    private static void sleep(Context c) {
+        Adb a = openAdb(c);
+        if (a == null) {
+            Checkin.error(c, "sleep", "no adb");
+            return;
+        }
+        if (!Sleep.awake(a)) return;   // already dark: a power press now would turn it back on
+        try {
+            shell(c, "input keyevent 223");   // sleep
+            Thread.sleep(2500);
+            if (Sleep.awake(a)) shell(c, "input keyevent 26");   // TVs that only know power
         } catch (InterruptedException ignored) {
         }
     }
