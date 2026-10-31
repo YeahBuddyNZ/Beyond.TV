@@ -55,6 +55,8 @@ var Sleep = (function () {
   return {
     press: function () { return set(next()); },
     left: left,
-    set: set
+    set: set,
+    /** Now, from a phone (ADR 0037). */
+    now: function () { clear(); sleepNow(); }
   };
 })();

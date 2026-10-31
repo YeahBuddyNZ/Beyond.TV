@@ -44,3 +44,4 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0034](0034-tv-logs.md) | The TV's own log goes with its check-in |
 | [0035](0035-arcade.md) | The arcade: four remote-only games |
 | [0036](0036-look-around.md) | Look around: the sky as a window |
+| [0037](0037-turn-off-from-a-phone.md) | Turn the TV off from a phone |
