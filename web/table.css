@@ -227,3 +227,71 @@
 .bt-arcade .ar-canvas { position: absolute; left: 320px; top: 170px; width: 1280px; height: 720px; border-radius: 28px; background: #14122A; }
 .bt-arcade .ar-help { position: absolute; left: 0; right: 0; top: 940px; text-align: center; font-size: 28px; color: rgba(247, 246, 242, 0.6); }
 .bt-arcade-pick .cakes { max-width: 980px; }
+
+/* School lunches (lunch.js, ADR 0038). Only transform and opacity animate. */
+.ln-note { position: absolute; left: 0; right: 0; top: 790px; text-align: center; font-size: 26px; color: rgba(247, 246, 242, 0.55); }
+.ln-top { position: absolute; left: 0; right: 0; top: 50px; text-align: center; }
+.ln-who { font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 44px; font-weight: 700; }
+.ln-slots { margin-top: 22px; white-space: nowrap; }
+.ln-slot { display: inline-block; vertical-align: top; width: 120px; height: 120px; margin: 0 8px; border-radius: 26px; background: rgba(247, 246, 242, 0.07); border: 3px dashed rgba(247, 246, 242, 0.2); box-sizing: border-box; }
+.ln-slot .day { margin-top: 10px; font-size: 20px; font-weight: 600; color: rgba(247, 246, 242, 0.55); }
+.ln-slot .what { font-size: 54px; line-height: 70px; }
+.ln-slot.full { border: 3px solid #E8A33D; background: rgba(232, 163, 61, 0.14); }
+.ln-card {
+  position: absolute; left: 560px; top: 290px; width: 800px; min-height: 480px; padding: 36px 56px 40px; box-sizing: border-box;
+  border-radius: 44px; background: #F7F6F2; color: #22221F; text-align: center; box-shadow: 0 0 0 6px #9E7BFF, 0 30px 70px rgba(0, 0, 0, 0.55);
+  -webkit-transition: -webkit-transform 0.28s ease-in, opacity 0.28s ease-in; transition: transform 0.28s ease-in, opacity 0.28s ease-in;
+}
+.ln-card.go-right { opacity: 0; -webkit-transform: translateX(760px) rotate(14deg); transform: translateX(760px) rotate(14deg); }
+.ln-card.go-left { opacity: 0; -webkit-transform: translateX(-760px) rotate(-14deg); transform: translateX(-760px) rotate(-14deg); }
+.ln-icon { font-size: 150px; line-height: 1.1; }
+.ln-name { margin-top: 10px; font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 58px; font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; }
+.ln-line { margin-top: 18px; font-size: 30px; line-height: 1.35; color: #55534B; }
+.ln-tags { margin-top: 22px; font-size: 24px; font-weight: 600; color: #6135D6; }
+.ln-how { margin-top: 22px; padding-top: 20px; border-top: 2px solid rgba(34, 34, 31, 0.12); text-align: left; }
+.ln-how .step { margin-top: 8px; font-size: 25px; line-height: 1.35; }
+.ln-card.how { top: 230px; }
+.ln-card.how .ln-icon { font-size: 70px; }
+.ln-card.how .ln-line { display: none; }
+.ln-nah, .ln-yum { position: absolute; top: 500px; font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 48px; font-weight: 700; }
+.ln-nah { left: 150px; color: rgba(247, 246, 242, 0.5); }
+.ln-yum { right: 150px; color: #F2C27A; }
+.ln-foot { position: absolute; left: 0; right: 0; top: 920px; text-align: center; }
+.ln-foot .bt-button { margin: 0 12px; }
+
+.ln-days { position: absolute; left: 0; right: 0; top: 300px; text-align: center; white-space: nowrap; }
+.ln-day { display: inline-block; vertical-align: top; width: 300px; height: 420px; margin: 0 12px; padding: 30px 24px; box-sizing: border-box; border-radius: 34px; background: rgba(247, 246, 242, 0.08); white-space: normal; }
+.ln-day .day { font-size: 28px; font-weight: 700; color: #E8A33D; }
+.ln-day .icon { margin-top: 20px; font-size: 110px; line-height: 1.1; }
+.ln-day .name { margin-top: 18px; font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 32px; font-weight: 700; line-height: 1.15; }
+.ln-day .when { margin-top: 14px; font-size: 22px; color: rgba(247, 246, 242, 0.6); }
+.ln-week .tg-foot .bt-button, .ln-list .tg-foot .bt-button, .ln-shopping .tg-foot .bt-button { margin: 0 12px; }
+
+.ln-cols { position: absolute; left: 0; right: 0; top: 250px; text-align: center; white-space: nowrap; }
+.ln-col { display: inline-block; vertical-align: top; margin: 0 15px; padding: 28px; box-sizing: border-box; border-radius: 30px; background: rgba(247, 246, 242, 0.08); text-align: left; white-space: normal; }
+.ln-col .who { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ln-col .who .avatar { display: inline-block; vertical-align: middle; }
+.ln-col .who .n { margin-left: 16px; vertical-align: middle; font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 34px; font-weight: 700; }
+.ln-col .at { margin: 8px 0 14px; font-size: 20px; color: rgba(247, 246, 242, 0.5); }
+.ln-col .pick { font-size: 25px; line-height: 1.6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ln-col .loves { margin-top: 18px; font-size: 20px; font-weight: 700; color: #E8A33D; }
+.ln-col .fav { margin-top: 4px; font-size: 22px; line-height: 1.4; color: rgba(247, 246, 242, 0.8); }
+
+.ln-recipes { position: absolute; left: 120px; top: 250px; width: 720px; }
+.ln-row { margin-bottom: 12px; padding: 18px 28px; border-radius: 26px; background: rgba(247, 246, 242, 0.08); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ln-row .icon { font-size: 40px; vertical-align: middle; }
+.ln-row .name { margin-left: 16px; font-size: 32px; font-weight: 700; vertical-align: middle; }
+.ln-row .for { margin-top: 4px; font-size: 22px; color: rgba(247, 246, 242, 0.6); }
+.ln-row.focus { background: #F7F6F2; color: #22221F; box-shadow: 0 0 0 4px #9E7BFF; }
+.ln-row.focus .for { color: #55534B; }
+.ln-pane { position: absolute; left: 900px; right: 120px; top: 250px; padding: 40px 48px; border-radius: 36px; background: rgba(247, 246, 242, 0.08); }
+.ln-pane .title { font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 44px; font-weight: 800; }
+.ln-pane .tags { margin-top: 12px; font-size: 24px; font-weight: 600; color: #F2C27A; }
+.ln-pane .sub { margin-top: 30px; font-size: 24px; font-weight: 700; color: #9E7BFF; }
+.ln-pane .need { margin-top: 8px; font-size: 28px; line-height: 1.4; }
+.ln-pane .step { margin-top: 10px; font-size: 27px; line-height: 1.4; }
+.ln-shop { position: absolute; left: 120px; top: 950px; }
+
+.ln-buy { position: absolute; left: 200px; right: 200px; top: 280px; white-space: nowrap; }
+.ln-buy .col { display: inline-block; vertical-align: top; width: 33%; white-space: normal; }
+.ln-buy .item { font-size: 30px; line-height: 1.5; }
