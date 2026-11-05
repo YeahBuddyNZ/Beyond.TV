@@ -348,3 +348,6 @@ HDMI (Chromecast with Google TV, Google TV Streamer, onn 4K, NVIDIA Shield). Set
   *Original* can bring it back.
 - Don't change the TV's picture, sound, network or account settings.
 - Keep the way back working: the *Original* mode and the watchdog.
+
+## Version control
+- Version control follows `docs/VERSION-CONTROL.md` (Beyond standard): work on a branch, push `wip/*` for unfinished work at the end of every session, never commit keys or signing files, and run `git config core.hooksPath .githooks` once per clone. Apple platform design follows Apple's Human Interface Guidelines; web UI is ReUI only.

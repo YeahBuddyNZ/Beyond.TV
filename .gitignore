@@ -13,3 +13,28 @@ __pycache__/
 # macOS
 .DS_Store
 BeyondTV-orsay.zip
+
+# >>> Beyond version control standard (managed block, safe to re-run)
+.env
+.env.*
+!.env.example
+config.properties
+*.keystore
+*.jks
+*.p12
+*.p8
+*.pfx
+*.pem
+*.key
+*.mobileprovision
+service-account*.json
+node_modules/
+.vercel/
+*.apk
+*.aab
+*.ipa
+*.xcarchive
+DerivedData/
+.DS_Store
+*.log
+# <<< Beyond version control standard
