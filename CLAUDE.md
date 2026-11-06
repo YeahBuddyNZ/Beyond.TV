@@ -7,6 +7,8 @@ LG TVs (webOS) and Samsung TVs (Tizen) get the same home screen as a web app: `w
 The website is in `docs/`: one static page (`docs/index.html`), no build step. A push to `main` that changes it
 publishes it to GitHub Pages (`.github/workflows/pages.yml`).
 
+This file loads into every session, so long rules are summarised here and kept word for word in `docs/history/` (index: `docs/history/INDEX.md`). Where a line says "Full rule", read it before changing that area. Keep this file under 20 KB; add long notes to `docs/history/`.
+
 ## Beyond TV: what's ours
 
 Beyond TV is Beyond's (gobeyond.co.nz) free TV home screen, part of the Beyond Tools showcase. It is a fork of
@@ -74,79 +76,15 @@ your own (below) when they want their city baked in or the picks.
 
 ## Installing it on an LG TV (webOS)
 
-On LG it's an app, installed through LG's Developer Mode, and it changes nothing else on the TV: LG's home screen
-stays, and Beyond TV opens with a long press of a number key.
-
-1. **Ask** for the TV's IP address and their city, if they didn't say. Tools: Python 3 and OpenSSH (`ssh`,
-   `ssh-keygen`), already on macOS, Linux and Windows 10+.
-2. **On the TV** (they do it): LG Content Store → *Developer Mode* → sign in with a free LG developer account
-   (webostv.developer.lge.com) → *Dev Mode Status* on (the TV restarts) → *Key Server* on. It shows the IP and a
-   passphrase.
-3. **Settings:** the same `config.properties` as on Android (the first `python3 webos/build.py` creates it). The
-   TMDB key rules above apply.
-4. **Build:** `python3 webos/build.py` must end with `Built BeyondTV-webos.ipk`.
-5. **Install:** the first time needs the TV's passphrase, typed by them: ask them to run
-   `python3 webos/install.py <IP>` in their own terminal (yours can't answer its prompt, and the passphrase doesn't go
-   in the chat). It keeps the unlocked key in `~/.ssh/beyondtv_webos_<IP>`, so later updates run from your terminal
-   with the same command.
-6. **Tell them:** while Beyond TV is open, holding a number key pins it to that key. Developer Mode lasts about 40
-   days; *EXTEND* in that app renews it (if it runs out, the TV removes developer apps, and installing again brings it
-   back). `--uninstall` removes Beyond TV.
+Moved to `docs/history/sections.md` (section "Installing it on an LG TV (webOS)"). Read it before working in this area.
 
 ## Installing it on a Samsung TV (Tizen)
 
-On Samsung it's an app too (2017 and newer, Tizen 3+), installed through Samsung's Developer Mode; Samsung's home
-screen stays. Two ways:
-
-- **The release, no tools:** TizenBrew Installer (github.com/reisxd/TizenBrewInstaller) installs the latest GitHub
-  release when they type `YeahBuddyNZ/Beyond.TV`, and on 2023+ TVs signs it with their Samsung account. That build
-  has no TMDB key (no picks) and takes the city from the TV's time zone. Walk them through the README's steps.
-- **Their own build** (their city, their TMDB key), below.
-
-1. **Ask** for the TV's IP address and their city, if they didn't say.
-2. **On the TV** (they do it): *Apps* → type `1 2 3 4 5` on the remote → *Developer mode* on, *Host PC IP* = this
-   computer's IP → restart the TV.
-3. **Tools:** Samsung's `tizen` command to sign (Tizen Studio's CLI, or Samsung's Claude Code plugin
-   `tizen-sdk-skills` from github.com/Samsung/tizen-agent-skills, which installs it and makes Samsung certificates),
-   and `python3 tizen/install.py` to install, which speaks SDB itself. `tizen` runs on Java; Samsung's `sdb`, its new
-   `tz` and Tizen Studio's installer (with its own JDK) are Intel binaries on macOS. On Apple Silicon without Rosetta,
-   take the CLI from Samsung's package repository (download.tizen.org/sdk/tizenstudio/official, `pkg_list_macos-64`;
-   check each zip's SHA256 there): unzip the `data/` of `new-common-cli`, `certificate-generator`, `sdk-utils` and
-   `sdk-utils-core` into `~/tizen-studio`, then write `~/tizen-studio/sdk.info` with three lines,
-   `TIZEN_SDK_INSTALLED_PATH=<that folder>`, `TIZEN_SDK_DATA_PATH=<home>/tizen-studio-data` and `JDK_PATH=<a native
-   JDK 17's .jdk folder>` (Homebrew: `/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk`). That `tizen` signs natively.
-4. **Certificate, once:** 2023+ TVs (Tizen 7+) need a Samsung certificate, made with their Samsung account for this TV
-   (its DUID): the plugin's Samsung profile opens the browser for them to sign in, or Tizen Studio's Certificate
-   Manager does it. 2017-2022 TVs take a Tizen certificate (`tizen certificate`, then `tizen security-profiles add`
-   and `tizen cli-config "profiles.path=<home>/tizen-studio-data/profile/profiles.xml"`; on macOS the passwords go to
-   the login Keychain). Certificate passwords are theirs: they type them in their own terminal, never in the chat.
-5. **Settings:** the same `config.properties`; the TMDB key rules above apply.
-6. **Build and sign:** `python3 tizen/build.py --sign <profile>` must end with `Built BeyondTV-tizen.wgt (...,
-   signed with "<profile>")`.
-7. **Install:** `python3 tizen/install.py <IP>`: it pushes the app over SDB (port 26101), installs it with the TV's
-   `0 vd_appinstall` and opens it with `0 was_execute` (tested on a 2017 Tizen 3.0 TV); `--uninstall` removes it.
-   With Samsung's tools instead: `sdb connect <IP>`, `tizen install -n BeyondTV-tizen.wgt -t <serial from sdb
-   devices>` and `tizen run -p BeyondTVnz.BeyondTV -t <serial>`. Updates need the same certificate: the TV refuses
-   one signed by another (uninstall first). A retail TV's sdbd only takes files (`filesync_support:push`): nothing
-   can be pulled from it. To look inside the running app, `0 debug BeyondTVnz.BeyondTV 300` over SDB opens it with
-   a Web Inspector port (Runtime.evaluate works on Tizen 3; screenshots don't).
-8. **Tell them:** *Autorun Last App* in the TV's settings (under Start Screen Options; where it is changes by year)
-   makes the TV turn on into Beyond TV.
+Moved to `docs/history/sections.md` (section "Installing it on a Samsung TV (Tizen)"). Read it before working in this area.
 
 ## Installing it on an older Samsung TV (Orsay, 2011 to 2015)
 
-Samsung TVs before 2016 (a 2014 UA40H6300, say) run Orsay: no Tizen, no TizenBrew. ADR 0028. Smart Hub stays.
-
-0. **Without building:** `install-orsay.sh` (Mac, Linux; Perl serves, so no Python needed) and `install-orsay.ps1`
-   (Windows; a TcpListener, so no admin) download `BeyondTV-orsay.zip` from the `tv` release (CI puts it there,
-   `--generic`) and serve it on port 80 with the TV steps printed. Build your own (below) for their city or picks.
-1. **Build:** `python3 orsay/build.py` (or `--generic`) must end with `Built BeyondTV-orsay.zip`.
-2. **Serve:** `sudo python3 orsay/serve.py` (port 80 is what the TV asks; `--ip` if it guesses wrong). It answers only
-   `/widgetlist.xml` and `/Widget/BeyondTV.zip`.
-3. **On the TV** (they do it): Smart Hub, Samsung Account, sign in as `develop` (password `sso1029dev!` on firmware
-   that asks), hold OK on an app, *IP Setting* = the computer's IP, hold OK again, *Start User App Sync*.
-4. **Tell them:** one Smart Hub tile instead of the app list, no inputs, and https may fail on old certificates.
-   Not yet run on a real Orsay TV: say so.
+Moved to `docs/history/sections.md` (section "Installing it on an older Samsung TV (Orsay, 2011 to 2015)"). Read it before working in this area.
 
 ## Releases
 
@@ -172,32 +110,7 @@ before building. Keep anything the updater needs from the network in `Http.java`
 
 ## Adapting it to another TV
 
-Read first, change after. Read-only commands that tell you what the TV has:
-
-```bash
-adb shell getprop ro.product.brand; adb shell getprop ro.product.model; adb shell getprop ro.build.version.release
-adb shell cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.HOME
-adb shell cmd role get-role-holders android.app.role.HOME
-adb shell settings get secure screensaver_components; adb shell settings get secure screensaver_default_component
-adb shell pm list packages -s     # system apps (-3 for the ones they installed)
-```
-
-Then, in the code:
-
-- `HomeMode.DEBLOAT`: add the brand's promo, demo, store-mode and telemetry apps, one comment per line. Only those.
-- `HomeMode.PROTECTED`: add the brand's system pieces: picture, sound, inputs and HDMI-CEC, the tuner and live TV,
-  remote and Bluetooth pairing, setup, updates, system UI. When in doubt, protect it.
-- `HomeApps.SHELF`, `LIVE_TV_APPS` and `HIDDEN`: the shelf apps, the brand's live TV app, apps to hide from All Apps.
-- Build, install, have them switch on the TV, read `adb logcat -s BeyondTV`, then have them switch back to
-  *Original* once and confirm everything returned.
-
-LG and Samsung: the web app above. Other TVs that don't run Google TV or Android TV: the way is a Google TV streamer on
-HDMI (Chromecast with Google TV, Google TV Streamer, onn 4K, NVIDIA Shield). Set Beyond TV up on the streamer.
-
-**Uninstalled while in Beyond TV mode?** The apps it turned off stay off. Bring them back with
-`adb shell pm enable <package>` (the `DEBLOAT` list and the stock home screen), then
-`adb shell cmd package set-home-activity <stock home activity>` and
-`adb shell settings put secure screensaver_components <stock screensaver>`.
+Moved to `docs/history/sections.md` (section "Adapting it to another TV"). Read it before working in this area.
 
 ## The code
 
@@ -232,21 +145,7 @@ HDMI (Chromecast with Google TV, Google TV Streamer, onn 4K, NVIDIA Shield). Set
   isn't obvious.
 - Settings come from `config.properties` through the generated `out/gen/nz/gobeyond/tv/Config.java` (never edit that).
   What the person changes on the TV (`Prefs`: Home Settings, Shelf, Remote Buttons) wins over those first values.
-- The remote's app buttons (`RemoteKeys`, `RemoteKeyService`) use each brand's key codes: they run only on TCL,
-  Vestel, KTC (NextStar) and Sony TVs and Formovie projectors, the service is on only in Beyond TV mode, and *Original* takes it out of the enabled accessibility
-  services. The system waits for the service on every key, so it lives alone in the `:keys` process: what it reads is
-  in `remote-keys.txt` (`Prefs.keyApp`), never in SharedPreferences, and `onKeyEvent` does no heavy work.
-  Vestel (F&U and other store brands; MediaTek, Android TV 14 tested) maps its Netflix button to `KEYCODE_STEM_1`, a
-  global key (`dumpsys window policy` lists them) that the key filter sees first; its YouTube, Prime Video and Google
-  Play buttons stay with the system. The stock lists needed no Vestel entries.
-  KTC (NextStar; MediaTek, Google TV 14 tested) maps its Tabii button to `KEYCODE_BUTTON_8`, also a global key, which
-  KTC's own hot-key receiver would open Tabii with; its Netflix, YouTube and Prime Video buttons stay with the system.
-  Sony (BRAVIA VH22, Android TV 12 tested) sends `KEYCODE_BUTTON_9` for its BRAVIA CORE, Disney+, Prime Video,
-  YouTube and Crunchyroll buttons and `KEYCODE_BUTTON_4` for Netflix, global keys for `com.sony.dtv.sonyvendorservice`;
-  only the scan code tells them apart, so `Prefs` keys them as `SONY_KEY` + scan code. "Sony default" (empty) leaves
-  the key to the TV. Sony ships its own Apple TV build, `com.apple.atve.sony.appletv`.
-  Xiaomi projectors made by Formovie (Fengmi; L1, MediaTek, Google TV 14 tested) send the same `KEYCODE_STEM_1` for
-  Netflix (`RemoteKeys.STEM_NETFLIX`); their YouTube button goes to MediaTek's `GlobalKeyReceiver` and stays with the system.
+- The remote's app buttons (`RemoteKeys`, `RemoteKeyService`) use each brand's key codes: they run only on TCL, Full rule, read before changing this area: `docs/history/rules.md`, "The remote's app buttons".
 - The daily check-in (`Checkin.java`, `web/checkin.js`) posts to Beyond Family's `/api/tv/checkin`: a made-up id, the
   city to 0.1 degrees, make, model, versions, mode, open and crash counts, the last 20 errors. Never what anybody
   watches. Home Settings > Help fix problems turns it off and posts `/tv/checkin/forget`. Anything new it sends goes
@@ -254,79 +153,8 @@ HDMI (Chromecast with Google TV, Google TV Streamer, onn 4K, NVIDIA Shield). Set
   failure worth knowing about gets reported. `AppLog.w` lines also go with it as the TV's log (ADR 0034, `tv_logs`, read it with the Supabase MCP):
   a line that names an app, a show or a person goes through `AppLog.here`, which stays on the TV.
 - After any change, `./build.sh` must end with `Built BeyondTV.apk`.
-- LG and Samsung (`web/`): plain ES5 JavaScript and CSS without variables, grid or backdrop-filter, since older TVs
-  (webOS 3 and 4, Tizen 3) run a Chromium from 2015 to 2017; only transform and opacity animate. `web/tv.js` is the
-  TV's side: on LG, Luna (`listLaunchPoints`, `launch`, the inputs; where webOS 6 and newer deny `listLaunchPoints`
-  to Developer Mode apps, the list comes from the TV's remote control API on `ws://127.0.0.1:3000` once the TV has
-  allowed it (it asks once; a "no" isn't asked again), and until then from `getAppLoadStatus` over a list of known
-  app ids, which shows their names without icons); on Samsung, `tizen.application` (`getAppsInfo`,
-  `launch`), the `VIDEOSOURCE` property and `tizen.tvwindow.setSource` for the inputs, then Samsung's viewer
-  (`org.tizen.tv-viewer`) to show them. Samsung's own data is unreliable: on Tizen 3 no app's `iconPath` loads (on
-  Tizen 4 and 5, YouTube's and Prime Video's are a placeholder), so logos are bundled in `web/icons/` and keyed by app
-  id in `SAMSUNG_ICONS` (SVGs need a width and height for old WebKit); some names are empty or long
-  (`SAMSUNG_TITLES`); and Tizen 3 answers no "settings" app control, so TV Settings opens `org.tizen.menu`.
-  `web/home.js` follows `HomeView`'s layout and behavior, so a design change on
-  Android belongs there too. Text: `tr(pt, en, es)`, with the German and Russian in `web/strings.js` (keyed by the English). Built without a city (`--generic`), `web/zones.js`
-  (`tools/make_zones.py`, from the tz database) turns the TV's time zone into the city, the currency and the region.
-  `web/profiles.js` is Who's watching: Family comes first (`together`, never in the list or Beyond Family's members),
-  with family-friendly picks (`Profiles.gentle()`) and its own shelf; a kid needs the PIN to switch to it.
-  `web/sky.js` is Tonight's sky (ADR 0023): a star chart for the TV's location and the moon (phase, rise and set, next full and new), worked out on the TV from the clock; stars from `web/skydata.js`, made with `app/assets/sky.json` by `tools/make_sky.py` from d3-celestial (BSD). On Google TV it's `SkyActivity.java`: the same maths, change one, change both. `web/skylook.js` is Look around (ADR 0036): the same sky as a window you turn with the arrows (a stereographic projection, `Sky.core` gives it the sun, moon and star positions so there is one set of sums), naming what is in the middle of the screen. Press down on the sky to open it. On Google TV it runs in `TableActivity`'s WebView (start `sky`, `BeyondTable.place()` gives it the latitude and longitude); sky.js and skydata.js are copied into the APK's assets for it. It is web only: there is no Java twin.
-  `web/bedtime.js` is Bedtime breathing: a night light that slows from six breaths a minute and fades to dark (moon button at night, or a `bedtime` command from Beyond Family).
-  `web/party.js` is Party mode (ADR 0016): a disco or a birthday from a `party` command (`party-end` stops it), music made on the TV, and with Beyond Home the room's Party moment every chord and Party over at the end. On Google TV it's `PartyActivity.java` and `PartyMusic.java`: the same tune, change one, change both. The Party button at the top of the home screen asks disco or whose birthday (`Party.choose`, `PartyPickActivity.java`; ADR 0017).
-  `web/karaoke.js` is Karaoke night (ADR 0020, 0022): a `karaoke` command (one turn: singer, colour, song, `videoId` or null, `query`, `next`) or `karaoke-set` (a playlist: `playlist` and `turns`) plays each song in our own player (YouTube's embed; on Google TV a WebView in `KaraokeActivity.java`), and the player's end moves to the next turn by itself (`Family.nextTurn` for tonight's queue). No video: `Family.findVideo` asks Beyond Family (`/tv/karaoke/find`), else the YouTube app. Playlists are built on the TV (`Karaoke.choose`, `KaraokePickActivity.java`) and saved with `Family.savePlaylist` (`/tv/karaoke/playlists`). Never store or show lyrics.
-  `web/games.js` is Games (ADR 0021): the gamepad button on the home screen, where every game starts from the remote (karaoke, party, quiz night, dinner question, tidy race, bedtime). On Google TV it's `GamesActivity.java`. Karaoke picks the singer and the song on the TV (`Karaoke.choose`, `KaraokePickActivity.java`; same `STARTERS` list, change one, change both), and a typed song goes to Beyond Family (`/tv/karaoke/songs`). Quiz night and the dinner question are started and moved on with `Family.game` (`POST /tv/quiz`, `/tv/question`: start, reveal, next, end). A new game goes in both. Who's watching fits everyone on one screen (`WhoActivity.fit` and `perRow`, `pick` in `web/profiles.js`): smaller faces, then rows, never a scroll.
-  `web/notes.js` is Notes on the TV and `web/ask.js` is Ask Beyond (ADR 0025): notes ride on `/tv/sync` (`home.notes`,
-  ink as points on a 1000 by 750 grid, Beyond Family's `shared/tvNotes.ts`), sit under Tonight at home and never cover
-  an app; the orb asks `/tv/ask` with the app names (`BeyondTV.watchApps`), and an `ask` command is a phone's question.
-  Google TV runs both in `AskActivity`'s WebView (`web/ask.html`, `web/ask-host.js`, copied by `build.sh`); its
-  bridge only calls `/tv/ask` and `/tv/notes/:id/heart|down`, and the TMDB key stays in Java.
-  `web/table.js` is Board and card games (ADR 0024): who's playing, the game, the robots, the debrief, and each person's robot level per game (kept on the TV only: `files/table.json` through `BeyondTable` on Google TV, localStorage `bt.table` on LG and Samsung; never sent). `web/ludo.js`, `web/chess.js` (ADR 0033; rules checked by move counts, robot is alpha-beta with a time limit) and `web/snap.js` (Sheep, Penguin, Volcano and Snap) are the games, with their sounds in `web/sfx.js` (Web Audio, made on the TV; ADR 0031), each with its rules apart from the screen (`Ludo.rules`, `Snap.rules`), tested by `node tests/table-games.test.js`. `web/arcade.js` is the Arcade (ADR 0035): Eel, Paddle, Sky Guard and Dot Chase on one canvas, steered by turning (one press per push, never a held key); `node tests/arcade.test.js`. `web/laughs.js` is Silly games (ADR 0032): Who's most likely to…?, Would you rather? and Spin for a dare, for a room with one remote; its lines are in all five languages in the file, the grown-ups' extras only when no kid plays, and Google TV opens it in the same WebView (`TableActivity.open(c, "silly")`). Google TV runs these same files in `TableActivity.java`'s WebView: `build.sh` copies them (and `sfx.js`) with `web/table.html` and `web/table-host.js` (People, the language, the store and the remote's keys) into the APK's assets, so a game is written once. Our own names and art only, never another game's trade mark; the dice are fair and robots never see what a person can't.
-  `web/tidy.js` is the tidy-up race (`home.tidy` from `/tv/sync`: `{at, minutes, wake}`, or a `tidy` command): Who's tidying? first when there's more than one face (ADR 0030), then a clock counting up from 0:00 (ADR 0029) and those faces, OK on yours when done, with your time. On Google TV it's `Tidy.java` (the nightly alarm, which wakes the TV through its own ADB; settings kept in `files/tidy.json`) and `TidyActivity.java`. ADR 0012.
-  `web/chime.js` and `Chime.java` are the start chime, the same four notes (ADR 0012; change one, change both, and `tools/make_chime.py`). Played when the TV comes on and at the race's start and end, only while Home Settings › Sounds is on.
-  `web/kidpicks.js` is Picks for kids: for a kid watching, the cards are a hand-picked list of each service's own shows matched to `likes` (a grown-up's, from Beyond Family or the profile editor behind the PIN) and `loves` (the kid's own), or one "What do you like to watch?" card; now and then, back from an app, it suggests one. No TMDB needed. Its like ids match Beyond Family's `TV_LIKES`. `KidPicks.java` holds the same lists for Google TV (likes from `Family.likes`): change one, change both.
-  `web/music.js` is the family's own music (ADR 0027): Beyond Music (`/api/hello` on port 8097, `{app: "beyond-music"}`)
-  found at the address it had last, `beyond-music.local` or the Beyond Home box joins the shelf as Music and opens its
-  own TV screens in an iframe; Back at its first screen comes as a `postMessage`. On Google TV it's `Music.java`
-  (asks `beyond-music.local` itself, `Mdns.java`), a Music button in the corner, and `MusicActivity`'s WebView, which
-  reaches the server only through `MusicRelay` on 127.0.0.1 (the one cleartext address in
-  `res/xml/network_security_config.xml`). Tested by `tests/MusicTest.java`.
-  `web/homehub.js` is Your home: it finds the family's Beyond Home box (`/tv/hi` on port 8098: the address it found
-  last, `homeassistant.local`, `homeassistant`, or `homeHub` in the config), pairs by a code typed in the Beyond Home
-  app (Settings, TVs), then reads `/tv/snapshot` (every 4 seconds while the tab shows, every minute otherwise) and asks
-  `/tv/act` for named things only (`{room, do: moment|volume_up|volume_down|mute|power|toggle}`). The box builds every
-  call (YeahBuddyNZ/Beyond-Home, `server/tvs.mjs`). No box, no tab; kids never get it. ADR 0010.
-  On Google TV it's `HomeHub.java` (also finds the box by Home Assistant's `_home-assistant._tcp` announcement),
-  `RoomActivity.java` and the `home` tab in `HomeView` (first three rooms). Plain http to the home network goes through
-  `LocalHttp.java` (the cameras use it too), never the system's http stack, so cleartext stays off.
-  `web/pets.js` asks a kid who just picked their face whether the household's pets got fed (`pets` in `/tv/sync`, each with `due` worked out by Beyond Family); "Yes" posts `/tv/pets/fed` with the kid's member id, "Not yet" asks again after 30 minutes. On Google TV it's `PetsActivity.java` (from `WhoActivity.choose`, after Make it yours; pets in `Family.petsDue`): change one, change both.
-  `web/outside.js` is the fine day nudge: once a day on a mild, dry day, coming back from an app suggests going outside, and the next key press 10+ minutes later offers to count it as green time (`POST /tv/green`).
-  The dinner question lives in `web/family.js` (`dinner`): `question` opens it, `question-answered` fills in faces (never the words), `question-reveal` shows the answers, `question-end` closes it.
-  `web/myworld.js` is Make it yours: a kid restyles their own profile (buddy, colour, world, loves) with no PIN;
-  it never touches the name, shelf, PIN or kid flag, and a Beyond Family refresh keeps what they picked.
-  `MyWorldActivity.java` is the same on Google TV (same buddies, colours and worlds: change one, change both); `HomeView`
-  draws the watcher's world instead of the sky, with the dark look, and `Family.pushLook` sends it to Beyond Family.
-  Orsay (Samsung 2011 to 2015, ADR 0028) is the same `web/`, packed by `orsay/build.py`: `TV.orsay`, the remote's codes through `TV.code`, one Smart Hub tile, check-in as `tizen` with OS `Orsay <year>`; tested by `node tests/orsay.test.js`.
-  `tools/webapp.py` is what both builds share. Preview: `python3 webos/build.py --preview` (or `tizen/build.py`), then
-  open `out/webos/index.html` in a browser (a stand-in lists sample apps).
-- Beyond Family on Android (`Family.java`, `FamilyService.java`, `LinkActivity.java`, all in `:home`): the same
-  server and protocol as `web/family.js` (`/tv/hello`, `/tv/code`, `/tv/sync` long poll, `/tv/bye`), state in
-  `files/family.json` (the boot receiver in the main process reads it). Settings › Beyond Family shows the code or the
-  household. Linked, `FamilyService` (a foreground service, so it keeps listening while another app has the screen)
-  turns the household's people into `People` (ids `bf-<member id>`) and runs commands: `key` and `launch` go through
-  the TV's own ADB (never asking for the key from there), falling back to our own screens; `say` opens `SayActivity`, full screen over any app until OK (ADR 0018; the TV's ADB allows it
-  over apps on Android 10+, else a toast); `profile` switches who's watching; `bedtime` opens `BedtimeActivity`; the
-  Pinned tiles (`home.widgets` from `/tv/sync`, ADR 0009): a *Pinned* tab first, drawn by `pinnedCards` in `web/home.js`
-  (six) and `HomeView.pinnedCards` (three); camera pictures through `Cameras.java` (home network only, its own socket for
-  http) and `CameraActivity` full screen.
-  `question*` commands drive `DinnerActivity`; the noticeboard (`Family.board`) and earn your screen
-  (`Family.jobs`, `JobsActivity`) read the sync. `KidPicks` fills a kid's cards. Together and reactions are still LG and Samsung
-  only: port them from `web/` into the same `Family.run`.
-  Your face on any TV: each person's look (`profile` in `/tv/sync`: emoji, colour, world, loves, shelf by app name
-  `t:netflix`) lives in Beyond Family. On the web a change marks the person `pending` and `Family.pushProfile` sends it
-  (`POST /tv/people/:member`); until Beyond Family has it, the TV's copy wins. `visitors` in `/tv/sync` are people
-  signed in from another home (Who's watching › Sign in with Beyond Family, `POST /tv/visit/code`); a TV that isn't
-  linked keeps its own people and adds them, and keeps listening while it has any. Android takes the face (drawn
-  in place of the initial) and colour, sends a colour change, and has the same sign in and sign out.
+- LG and Samsung (`web/`): plain ES5 JavaScript and CSS without variables, grid or backdrop-filter, since older TVs Full rule, read before changing this area: `docs/history/rules.md`, "LG and Samsung".
+- Beyond Family on Android (`Family.java`, `FamilyService.java`, `LinkActivity.java`, all in `:home`): the same Full rule, read before changing this area: `docs/history/rules.md`, "Beyond Family on Android".
 - Seasonal art (`docs/art/`): Art mode shows our own pictures in a season (`seasons.json`: `from`/`to` as MM-DD on the
   TV's clock, may run over New Year) instead of the museum's; `Art.java` and `web/art.js` read it from GitHub Pages, so a
   new picture is a JPEG (2560 x 1440) and a line there, no app update. `tools/season_art.js` redraws the ones we drew.
@@ -337,6 +165,7 @@ HDMI (Chromecast with Google TV, Google TV Streamer, onn 4K, NVIDIA Shield). Set
 
 ## Always
 
+- Many Android classes have a `web/` twin (profiles, party, karaoke, tidy, chime, kupu, pets and more): change one, change both. The twin list is in `docs/history/rules.md` under "LG and Samsung".
 - A decision that changes what happens on somebody's TV gets an ADR in `docs/adr/` in the same PR (index in its README). Never rewrite an accepted one; write a new one that replaces it.
 - Every feature someone can see goes on the website (`docs/index.html`: *What it does now*, or *On the way* while it
   is coming) and in the README's roadmap, in the same PR (Kyle's rule). Homes are free, always; business screens are
