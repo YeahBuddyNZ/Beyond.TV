@@ -218,6 +218,9 @@ final class German {
             case "Tea tonight": return "Heute zum Abendessen";
             case "All day": return "Ganztägig";
             case "Board and card games": return "Brett- und Kartenspiele";
+            case "School lunches": return "Pausenbrote";
+            case "Silly games": return "Lustige Spiele";
+            case "Arcade": return "Spielhalle";
             case "The games need Android System WebView.": return "Die Spiele brauchen Android System WebView.";
             case "Bedtime breathing": return "Atmen vor dem Schlafen";
             case "Breathe in": return "Einatmen";

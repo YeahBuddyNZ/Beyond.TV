@@ -45,3 +45,4 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0035](0035-arcade.md) | The arcade: four remote-only games |
 | [0036](0036-look-around.md) | Look around: the sky as a window |
 | [0037](0037-turn-off-from-a-phone.md) | Turn the TV off from a phone |
+| [0038](0038-school-lunches.md) | School lunches: kids pick, grown-ups get the list |
