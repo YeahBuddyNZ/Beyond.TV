@@ -205,6 +205,16 @@
             android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|density|fontScale|locale|layoutDirection"
             android:theme="@style/BeyondTV.Home" />
 
+        <!-- NZ election results, live: Beyond's results page for TVs in a WebView, until 27/11/2026 (ADR 0039). -->
+        <activity
+            android:name=".ElectionActivity"
+            android:process=":home"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:screenOrientation="landscape"
+            android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|density|fontScale|locale|layoutDirection"
+            android:theme="@style/BeyondTV.Home" />
+
         <!-- Board and card games against the robots: the web games in a WebView (ADR 0024). -->
         <activity
             android:name=".TableActivity"

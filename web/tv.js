@@ -379,6 +379,30 @@ var TV = (function () {
       });
     },
 
+    /**
+     * Opens a web page full screen in the TV's own browser (LG's Web Browser, Samsung's Internet); done(ok). Pages
+     * that refuse to be framed (gobeyond.nz) can't be shown inside the app, so the browser it is. A desktop browser
+     * opens a new tab.
+     */
+    openUrl: function (url, done) {
+      if (samsung) {
+        try {
+          var control = new window.tizen.ApplicationControl('http://tizen.org/appcontrol/operation/view', url, null, null, null);
+          window.tizen.application.launchAppControl(control, null, function () { if (done) done(true); }, function () { if (done) done(false); });
+        } catch (e) {
+          if (done) done(false);
+        }
+        return;
+      }
+      if (orsay) { if (done) setTimeout(function () { done(false); }, 0); return; }
+      if (!webos) {
+        try { window.open(url, '_blank'); } catch (e) {}
+        if (done) setTimeout(function () { done(true); }, 0);
+        return;
+      }
+      this.launch('com.webos.app.browser', {target: url}, done);
+    },
+
     /** The antenna and HDMI inputs; `connected` when the TV says a device is on (when it tells). */
     inputs: function (done) {
       if (samsung) { samsungInputs(done); return; }
