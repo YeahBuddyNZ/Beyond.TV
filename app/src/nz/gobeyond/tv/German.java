@@ -444,6 +444,9 @@ final class German {
             case "Now watching: ": return "Jetzt schaut: ";
             case "That app isn't on this TV": return "Diese App ist nicht auf diesem Fernseher";
             case "Listening for the family's remote and messages": return "Wartet auf die Fernbedienung und Nachrichten der Familie";
+            case "Election results": return "Wahlergebnisse";
+            case "The election results need Android System WebView.": return "Die Wahlergebnisse brauchen Android System WebView.";
+            case "Can't reach the results just now. Check the internet and try again.": return "Die Ergebnisse sind gerade nicht erreichbar. Prüf das Internet und versuch es nochmal.";
             case "Tonight's sky": return "Der Himmel heute Nacht";
             case "Now": return "Jetzt";
             case "lit": return "beleuchtet";

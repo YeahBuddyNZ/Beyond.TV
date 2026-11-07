@@ -75,6 +75,8 @@ final class HomeApps {
     static final int ASK = 15, NOTES = 16;
     /** The family's own music, once Beyond Music answers on the home network (MusicActivity, ADR 0027). */
     static final int MUSIC = 17;
+    /** NZ election results, live, until 27/11/2026 (ElectionActivity, ADR 0039). */
+    static final int ELECTION = 18;
     /** Image size of each card (16:9; on screen it shows up to ~330 px wide). */
     static final int TILE_W = 384, TILE_H = 216;
 

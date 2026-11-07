@@ -571,6 +571,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         String label = watcher.together() ? Ui.tr("Família", "Family", "Familia") : watcher.name == null ? "" : watcher.name;
         watcherLabel = label.length() > 12 ? label.substring(0, 11) + "…" : label;
         boolean kid = watcher.kid;   // kids get fewer: no feedback, no HDMI inputs
+        // NZ election results, live (ElectionActivity, ADR 0039): on New Zealand TVs until 27/11/2026, then gone.
+        if (ElectionActivity.showing()) lightButtons.add(HomeApps.action(HomeApps.ELECTION, "election", Ui.tr("Resultados da eleição", "Election results", "Resultados electorales"), "check"));
         // Bedtime breathing, at night: a night light that breathes, then fades to dark.
         if (nightTarget) lightButtons.add(HomeApps.action(HomeApps.BEDTIME, "bedtime", Ui.tr("Respirar para dormir", "Bedtime breathing", "Respirar para dormir"), "bedtime"));
         // Notes left from a phone in Beyond Family (ADR 0025): the button is there while any are up, and opens them big.
@@ -2536,6 +2538,10 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         }
         if (it.kind == HomeApps.SKY) {
             SkyActivity.open(activity);
+            return;
+        }
+        if (it.kind == HomeApps.ELECTION) {
+            ElectionActivity.open(activity);
             return;
         }
         if (it.kind == HomeApps.MUSIC) {

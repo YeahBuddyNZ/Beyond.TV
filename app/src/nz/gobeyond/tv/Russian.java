@@ -487,6 +487,9 @@ final class Russian {
             case "Now watching: ": return "Сейчас смотрит: ";
             case "That app isn't on this TV": return "Этого приложения нет на телевизоре";
             case "Listening for the family's remote and messages": return "Ждёт пульт и сообщения семьи";
+            case "Election results": return "Итоги выборов";
+            case "The election results need Android System WebView.": return "Для итогов выборов нужен Android System WebView.";
+            case "Can't reach the results just now. Check the internet and try again.": return "Итоги сейчас недоступны. Проверьте интернет и попробуйте ещё раз.";
             case "Tonight's sky": return "Небо сегодня ночью";
             case "Now": return "Сейчас";
             case "lit": return "освещено";

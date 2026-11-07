@@ -245,6 +245,15 @@
       : tr('Explorar', 'Explore', 'Explorar');
   }
 
+  var ELECTION_URL = 'https://www.gobeyond.nz/election/live/tv';
+
+  /** The election results button: New Zealand TVs only, up to the end of 27/11/2026 New Zealand time (28/11 00:00 NZDT). */
+  function electionOn() {
+    var zone = TV.zone();
+    if (zone !== 'Pacific/Auckland' && zone !== 'Pacific/Chatham' && zone !== 'NZ') return false;
+    return Date.now() < Date.UTC(2026, 10, 27, 11, 0, 0);
+  }
+
   /** The round buttons at the top right: Live TV, HDMI Inputs, Settings and whoever's watching (kids get fewer). */
   function topButtons() {
     var kid = Profiles.kid(), list = [];
@@ -254,6 +263,13 @@
     else if (!kid) list.push({dots: true, label: tr('Fale com a Beyond', 'Talk to Beyond', 'Habla con Beyond'), run: talkToBeyond});
     // Notes from the family, when there are any up: opens them big (notes.js).
     if (Notes.count()) list.push({emoji: '\uD83D\uDCDD', label: tr('Bilhetes', 'Notes', 'Notas'), run: function () { Notes.open(); }});
+    // NZ election results, live (ADR 0039): on New Zealand TVs until 27/11/2026, then gone. Opens Beyond's results
+    // page for TVs in the TV's browser. Same as ElectionActivity.java (showing): change one, change both.
+    if (electionOn()) list.push({icon: 'check', label: tr('Resultados da eleição', 'Election results', 'Resultados electorales'), run: function () {
+      TV.openUrl(ELECTION_URL, function (ok) {
+        if (!ok) toast(tr('Abra gobeyond.nz/election no navegador da TV.', 'Open gobeyond.nz/election in the TV\'s browser.', 'Abre gobeyond.nz/election en el navegador de la TV.'));
+      });
+    }});
     list.push({icon: 'live_tv', label: tr('TV aberta', 'Live TV', 'TV en vivo'), run: function () {
       var live = liveTV(); if (live) launcher(live.id, tr('TV aberta', 'Live TV', 'TV en vivo'))();
     }});
