@@ -32,16 +32,28 @@ Free and open source, built in Aotearoa by [Beyond](https://gobeyond.co.nz). One
 
 ## What you get
 
-- **Pinned tiles.** Pick up to six tiles in Beyond Family: an app, a show, the kids' jobs ticking off, a camera at home. Every TV opens on them.
-- **Make it yours.** Kids make it theirs on their own profile, with the remote, no grown-up needed: a buddy, a colour, a world that fills their home screen, and the things they love drifting through it. On Google TV, LG and Samsung (on Google TV from Who's watching).
-- **Tonight's sky.** Press the star for a star chart of the sky over your house, with the Southern Cross, Matariki and the moon's phase, moonrise and next full moon. Worked out on the TV, no internet. Press down for **Look around**: the sky as a window you turn with the arrows, naming whatever is in the middle.
-- **School lunches.** Kids swipe through lunch ideas with the remote and fill Monday to Friday. You get the list of what they chose, a Sunday cook-up to make it ahead, and the shopping list. All nut free, and it stays on the TV. Games › School lunches.
-- **No ads.** No sponsored rows, banners or autoplaying promos.
+- **Who's watching.** Family first, then a profile for each person. Kids get only their own apps and family-friendly picks, behind a grown-up PIN; teens get YouTube and music too.
 - **Your apps, front and centre.** Netflix, Neon, TVNZ+, Disney+, ThreeNow, Plex and the rest in one App Dock, in the order you pick on the TV.
+- **No ads.** No sponsored rows, banners or autoplaying promos.
+- **A home screen of its own.** "Kia ora" with your name, Keep watching, and Tonight at home beside it: tea, birthdays, today's calendar, notes and the weather.
 - **Trending, not sponsored.** Fresh picks every hour from what's trending and the latest releases, only from apps you already have.
+- **Games on the TV.** Press Games for karaoke, quiz night, a party, board and card games, the arcade, silly games and the tidy-up race. All of it starts from the remote; phones are an extra, never a must.
+- **Karaoke night.** Pick who's singing and a song, and the TV plays its karaoke version with the words on screen, then moves on to the next singer by itself. Save playlists for next time.
+- **Board and card games.** Ludo, Chess, Snap and our own slap games, against robots named after our birds that get a little smarter each time you beat them. The dice are fair and the robots never cheat.
+- **Arcade and silly games.** Eel, Paddle, Sky Guard and Dot Chase, played with the arrows and OK. Then Who's most likely to, Would you rather and Spin for a dare for everyone in the room.
+- **School lunches.** Kids swipe through lunch ideas with the remote and fill Monday to Friday. You get the list of what they chose, a Sunday cook-up to make it ahead, and the shopping list. All nut free, and it stays on the TV. Games › School lunches.
+- **Make it yours.** Kids make it theirs on their own profile, with the remote, no grown-up needed: a buddy, a colour, a world that fills their home screen, and the things they love drifting through it.
+- **Tonight's sky.** Press the star for a star chart of the sky over your house, with the Southern Cross, Matariki and the moon's phase, moonrise and next full moon. Worked out on the TV, no internet. Press down for **Look around**: the sky as a window you turn with the arrows, naming whatever is in the middle.
+- **Art on the wall.** When nobody's watching, paintings fill the screen like a picture frame, a new set each day, with our own art at Halloween and Christmas.
+- **Beyond Family on the big screen.** Linked to [Beyond Family](https://beyondfamily.app): messages and notes from your phone, the dinner question, *Have the pets been fed?*, a phone remote, and turning the TV on and off from your phone.
+- **Pinned tiles.** Pick up to six tiles in Beyond Family: an app, a show, the kids' jobs ticking off, a camera at home. Every TV opens on them.
+- **Your home and your music.** With Beyond Home, a card for each room, Movie night in one press and one remote for the sound and the lights. With Beyond Music, your own albums and New Zealand radio on the remote.
+- **Te reo word of the day.** A new kupu on the home screen each day, with what it means.
+- **Bedtime made easy.** A sleep timer under the App Dock, and bedtime breathing: a night light that slows everyone down, then fades to dark.
 - **Weather one press away.** Hour by hour, with sunrise and sunset.
 - **Light by day, dark by night.** It follows your city's real sunset.
-- **Beyond's look.** Paper and ink, Sora headings, and focus in Beyond's moss green, the same family as [Beyond Family](https://beyondfamily.app).
+- **Keeps itself up to date.** New versions arrive by themselves, and one OK puts them on.
+- **Beyond's look.** The four dots, Beyond's purple and Sora headings, the same family as [Beyond Family](https://beyondfamily.app).
 - **Safe.** No root. Nothing is uninstalled. One button brings back the factory home screen.
 
 ## Roadmap
