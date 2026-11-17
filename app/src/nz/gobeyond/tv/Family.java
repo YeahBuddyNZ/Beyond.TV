@@ -722,6 +722,13 @@ final class Family {
                     if (!openAfter.isEmpty()) launch(app, openAfter);
                 });
                 break;
+            case "sky":
+                // Look around (ADR 0036), opened from a phone's Point the sky (ADR 0040).
+                MAIN.post(() -> { if (!TableActivity.skyOpen()) TableActivity.open(app, "sky"); });
+                break;
+            case "sky-look":
+                TableActivity.look(cmd.optDouble("az", Double.NaN), cmd.optDouble("alt", Double.NaN));
+                break;
             case "sleep":
                 // Turned off from a phone (ADR 0037): the sleep key through the TV's own ADB, then power if it ignored it.
                 adb().post(() -> sleep(app));

@@ -36,6 +36,20 @@ public class TableActivity extends Activity {
         c.startActivity(new Intent(c, TableActivity.class).putExtra("start", start).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
 
+    /** The screen showing Look around, if there is one: a phone's compass (Family, ADR 0040) turns its view. */
+    private static volatile TableActivity sky;
+
+    /** True while Look around is showing, so a second Point the sky does not stack another screen on it. */
+    static boolean skyOpen() { return sky != null; }
+
+    /** Turns Look around to where a phone is pointing. Nothing happens when it isn't showing, so a stray update never opens a screen. */
+    static void look(double az, double alt) {
+        TableActivity a = sky;
+        if (a == null || Double.isNaN(az) || Double.isNaN(alt)) return;
+        final String js = String.format(java.util.Locale.ROOT, "if(window.SkyLook)SkyLook.look(%.1f,%.1f)", az, alt);
+        a.runOnUiThread(() -> { if (a.web != null) a.web.evaluateJavascript(js, null); });
+    }
+
     private static final String FILE = "table.json";
     private WebView web;
 
@@ -67,6 +81,7 @@ public class TableActivity extends Activity {
         web.addJavascriptInterface(new Bridge(), "BeyondTable");
         setContentView(web);
         web.loadUrl("file:///android_asset/table.html");
+        if ("sky".equals(getIntent().getStringExtra("start"))) sky = this;
     }
 
     /** What the page asks of the TV. Runs on the WebView's own thread. */
@@ -175,6 +190,7 @@ public class TableActivity extends Activity {
     }
 
     @Override protected void onDestroy() {
+        if (sky == this) sky = null;
         if (web != null) {
             web.destroy();
             web = null;
