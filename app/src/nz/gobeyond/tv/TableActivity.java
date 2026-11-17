@@ -1,12 +1,17 @@
 package nz.gobeyond.tv;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.webkit.JavascriptInterface;
+import android.webkit.PermissionRequest;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.Toast;
@@ -19,6 +24,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -31,7 +37,7 @@ import java.nio.charset.StandardCharsets;
 public class TableActivity extends Activity {
     static void open(Context c) { open(c, null); }
 
-    /** start: "silly" opens the silly games (web/laughs.js), "lunch" school lunches (web/lunch.js), "arcade" the arcade (web/arcade.js) and "sky" Look around (web/skylook.js), rather than the board and card games. */
+    /** start: "silly" opens the silly games (web/laughs.js), "lunch" school lunches (web/lunch.js), "arcade" the arcade (web/arcade.js), "sky" Look around (web/skylook.js) and "lights" the light show (web/lights.js), rather than the board and card games. */
     static void open(Context c, String start) {
         c.startActivity(new Intent(c, TableActivity.class).putExtra("start", start).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
@@ -51,7 +57,10 @@ public class TableActivity extends Activity {
     }
 
     private static final String FILE = "table.json";
+    private static final int ASK_MIC = 41;
     private WebView web;
+    // The light show's way to Beyond Music (ADR 0027's relay on 127.0.0.1), started the first time the page asks.
+    private MusicRelay relay;
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     @Override protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +88,15 @@ public class TableActivity extends Activity {
         ws.setTextZoom(100);
         web.setFocusable(false);
         web.addJavascriptInterface(new Bridge(), "BeyondTable");
+        // The light show's "Listen to the room" (ADR 0041): only the microphone, only for our own page, and only once
+        // the person has said yes to Android's own question. The sound is read as levels on the TV, never kept.
+        web.setWebChromeClient(new WebChromeClient() {
+            @Override public void onPermissionRequest(PermissionRequest r) {
+                boolean ours = r.getOrigin() != null && "file".equals(r.getOrigin().getScheme());
+                boolean micOnly = r.getResources().length == 1 && PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(r.getResources()[0]);
+                if (ours && micOnly && micAllowed()) r.grant(r.getResources()); else r.deny();
+            }
+        });
         setContentView(web);
         web.loadUrl("file:///android_asset/table.html");
         if ("sky".equals(getIntent().getStringExtra("start"))) sky = this;
@@ -122,6 +140,42 @@ public class TableActivity extends Activity {
             return s == null ? "" : s;
         }
 
+        /** Beyond Music through this TV's relay, for the light show, or "" when there's no music to be found. */
+        @JavascriptInterface public String music() {
+            synchronized (TableActivity.this) {
+                if (relay != null) return "http://127.0.0.1:" + relay.port();
+                String base = Music.base();
+                if (base == null) return "";
+                try {
+                    relay = new MusicRelay(new URL(base));
+                    relay.start();
+                    return "http://127.0.0.1:" + relay.port();
+                } catch (Exception e) {
+                    relay = null;
+                    return "";
+                }
+            }
+        }
+
+        /** Whether this TV has a microphone at all (built in, or a USB one or webcam plugged in). */
+        @JavascriptInterface public boolean canListen() {
+            return getPackageManager().hasSystemFeature(PackageManager.FEATURE_MICROPHONE);
+        }
+
+        /** Asks Android for the microphone; the answer comes back as Lights.answer(true or false). */
+        @JavascriptInterface public void ask() {
+            runOnUiThread(() -> {
+                if (micAllowed()) answer(true);
+                else requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, ASK_MIC);
+            });
+        }
+
+        /** Older TVs (Android 9 to 11) and 1 GB ones: the light show starts in its light mode. */
+        @JavascriptInterface public boolean lowPower() {
+            ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+            return Ui.LEGACY || (am != null && am.isLowRamDevice());
+        }
+
         /** A kid watching with a grown-up PIN set: grown-up things (Start fresh) wait for a grown-up. */
         @JavascriptInterface public boolean locked() { return People.kid(TableActivity.this) && People.hasPin(TableActivity.this); }
 
@@ -154,6 +208,18 @@ public class TableActivity extends Activity {
         }
 
         @JavascriptInterface public void close() { runOnUiThread(TableActivity.this::finish); }
+    }
+
+    private boolean micAllowed() {
+        return checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void answer(boolean yes) {
+        if (web != null) web.evaluateJavascript("window.Lights && Lights.answer(" + yes + ")", null);
+    }
+
+    @Override public void onRequestPermissionsResult(int code, String[] permissions, int[] results) {
+        if (code == ASK_MIC) answer(results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED);
     }
 
     /** The remote straight to the page: arrows, OK and Back, as the LG and Samsung key codes the games expect. */
@@ -191,6 +257,10 @@ public class TableActivity extends Activity {
 
     @Override protected void onDestroy() {
         if (sky == this) sky = null;
+        synchronized (this) {
+            if (relay != null) relay.close();
+            relay = null;
+        }
         if (web != null) {
             web.destroy();
             web = null;

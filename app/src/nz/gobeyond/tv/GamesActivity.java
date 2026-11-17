@@ -14,7 +14,7 @@ import android.widget.Toast;
 
 /**
  * Games, from the remote (ADR 0021): every game and family activity starts here on the TV, no phone needed. Karaoke,
- * board and card games against the robots and silly party games (both TableActivity), a party, quiz night, the dinner
+ * board and card games against the robots, silly party games and the light show (all TableActivity), a party, quiz night, the dinner
  * question, the tidy-up race and bedtime breathing. Quiz night and the dinner question need Beyond Family, because everyone answers on their
  * phones. Same as Games.open in web/games.js.
  */
@@ -56,6 +56,7 @@ public class GamesActivity extends Activity {
                 {"🕹", Ui.tr("Fliperama", "Arcade", "Arcade"), (Runnable) () -> go(() -> TableActivity.open(this, "arcade"))},
                 {"🥪", Ui.tr("Lanches da escola", "School lunches", "Almuerzos del cole"), (Runnable) () -> go(() -> TableActivity.open(this, "lunch"))},
                 {"🎉", Ui.tr("Festa", "Party", "Fiesta"), (Runnable) () -> go(() -> PartyPickActivity.open(this))},
+                {"✨", Ui.tr("Show de luzes", "Light show", "Show de luces"), (Runnable) () -> go(() -> TableActivity.open(this, "lights"))},
                 {"🏆", Ui.tr("Quiz da noite", "Quiz night", "Noche de quiz"), (Runnable) () -> family("quiz")},
                 {"🍽", Ui.tr("Pergunta do jantar", "Dinner question", "Pregunta de la cena"), (Runnable) () -> family("question")},
                 {"🧹", Ui.tr("Corrida da arrumação", "Tidy-up race", "Carrera de ordenar"), (Runnable) () -> go(() -> TidyActivity.open(this, 10))},
