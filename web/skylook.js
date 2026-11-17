@@ -4,7 +4,7 @@
  * down tilt it) and it glides there; the horizon, the four directions, the stars, the constellation lines, the moon
  * and the sun are all drawn where they really are from here. Whatever sits in the middle of the screen is named, with
  * where it is and a line about it. OK opens Find, which turns the view to something: the Moon, the Southern Cross,
- * Matariki or the brightest star up, or moves the time. Later a phone's compass can point the view too (aim).
+ * Matariki or the brightest star up, or moves the time. A phone's compass can point the view too (look, ADR 0040).
  *
  * The maths is sky.js's (Sky.core), so there is one sun, one moon and one set of star positions; this file only
  * projects them. Plain ES5; the canvas is redrawn only while the view is moving or the time has moved on.
@@ -155,7 +155,10 @@ var SkyLook = (function () {
 
   // MARK: - The screen
 
+  var current = null;
+
   function open() {
+    if (current) return current;
     var core = Sky.core;
     core.init();
     blurbs();
@@ -427,10 +430,17 @@ var SkyLook = (function () {
         if (k === TV.keys.ok) { find(); return true; }
         return false;
       },
-      closed: function () { if (timer) clearTimeout(timer); timer = null; }
+      closed: function () { if (timer) clearTimeout(timer); timer = null; current = null; }
     });
-    return {aim: aim, close: function () { api.close(); }};
+    current = {aim: aim, close: function () { api.close(); }};
+    return current;
   }
 
-  return {open: open, _test: {frame: frame, project: project, between: between, toHorizon: toHorizon, vec: vec, nearest: nearest, darkness: darkness}};
+  /** A phone's compass (ADR 0040): turn the view to where the phone points, opening Look around first when it isn't. */
+  function look(az, alt) {
+    if (typeof az !== 'number' || typeof alt !== 'number' || isNaN(az) || isNaN(alt)) return;
+    open().aim(az, alt);
+  }
+
+  return {open: open, look: look, _test: {frame: frame, project: project, between: between, toHorizon: toHorizon, vec: vec, nearest: nearest, darkness: darkness}};
 })();
