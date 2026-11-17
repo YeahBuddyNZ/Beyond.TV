@@ -219,6 +219,7 @@ final class Russian {
             case "Board and card games": return "Настольные и карточные игры";
             case "School lunches": return "Школьные обеды";
             case "Silly games": return "Весёлые игры";
+            case "Light show": return "Световое шоу";
             case "Arcade": return "Аркада";
             case "The games need Android System WebView.": return "Для игр нужен Android System WebView.";
             case "Bedtime breathing": return "Дыхание перед сном";

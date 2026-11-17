@@ -220,6 +220,7 @@ final class German {
             case "Board and card games": return "Brett- und Kartenspiele";
             case "School lunches": return "Pausenbrote";
             case "Silly games": return "Lustige Spiele";
+            case "Light show": return "Lichtshow";
             case "Arcade": return "Spielhalle";
             case "The games need Android System WebView.": return "Die Spiele brauchen Android System WebView.";
             case "Bedtime breathing": return "Atmen vor dem Schlafen";

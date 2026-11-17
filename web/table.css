@@ -295,3 +295,12 @@
 .ln-buy { position: absolute; left: 200px; right: 200px; top: 280px; white-space: nowrap; }
 .ln-buy .col { display: inline-block; vertical-align: top; width: 33%; white-space: normal; }
 .ln-buy .item { font-size: 30px; line-height: 1.5; }
+
+/* Light show (lights.js, ADR 0041): one canvas, full screen. The canvas may be drawn at half size (light mode) and
+   stretched back up here. Only opacity animates. */
+.bt-layer.bt-lights { background: #0D0C18; }
+.bt-layer.bt-lights::before { display: none; }
+.bt-lights .li-canvas { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+.bt-lights .li-label { position: absolute; left: 96px; bottom: 84px; max-width: 1400px; font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 44px; font-weight: 700; color: #F7F6F2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0; -webkit-transition: opacity 0.6s; transition: opacity 0.6s; }
+.bt-lights .li-help { position: absolute; left: 0; right: 0; top: 56px; text-align: center; font-size: 28px; color: rgba(247, 246, 242, 0.7); opacity: 0; -webkit-transition: opacity 0.6s; transition: opacity 0.6s; }
+.bt-lights .li-label.shown, .bt-lights .li-help.shown { opacity: 1; }

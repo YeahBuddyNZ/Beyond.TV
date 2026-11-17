@@ -109,6 +109,8 @@ var Music = (function () {
     start: start,
     open: open,
     found: function () { return found; },
+    /** Where the music answered, while it does: the Light show (lights.js) plays from here. */
+    base: function () { return found ? state.base : null; },
     /** True once: the first time this TV finds the music, so the home screen can say so. */
     firstTime: function () {
       if (!found || state.told) return false;
