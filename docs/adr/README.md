@@ -50,3 +50,4 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0040](0040-phone-compass-sky.md) | A phone's compass points the sky |
 | [0041](0041-light-show.md) | Light show: the room's music drawn as light |
 | [0042](0042-live-tv-free-channels.md) | Live TV: free channels on one screen |
+| [0043](0043-learn-chess-and-how-to-play.md) | Learn chess, and How to play for every game |

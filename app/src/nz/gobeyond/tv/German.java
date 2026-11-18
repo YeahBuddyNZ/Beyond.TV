@@ -502,6 +502,7 @@ final class German {
             case "Paid, only from Sky": return "Kostenpflichtig, nur bei Sky";
             case "For sport without a Sky box: Sky Sport Now.": return "Für Sport ohne Sky-Box: Sky Sport Now.";
             case "Got it": return "Verstanden";
+            case "How to play": return "Wie man spielt";
             case "▲ ▼ to change channel": return "▲ ▼ wechselt den Sender";
             default:
                 if (english.startsWith("Beyond™ TV is on: new home screen and screensaver, ")) {

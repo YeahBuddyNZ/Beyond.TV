@@ -446,6 +446,7 @@ var Lights = (function () {
         if (hasMusic()) add('🎵', say('A nossa música', 'Our music', 'Nuestra música'), 'music');
         if (canListen()) add('🎙', say('Ouvir a sala', 'Listen to the room', 'Escuchar la sala'), 'room');
         add('✨', say('Só luzes', 'Just lights', 'Solo luces'), 'lights');
+        if (window.Guides) a.add(UI.button(row, '📖  ' + say('Como jogar', 'How to play', 'Cómo jugar')), function () { Guides.show('lights'); });
         UI.el('div', 'bt-sub', box, say(
           'Ouvir a sala só mede o volume, aqui na TV. Nada é gravado nem enviado.',
           'Listening to the room only measures how loud it is, here on the TV. Nothing is recorded or sent.',

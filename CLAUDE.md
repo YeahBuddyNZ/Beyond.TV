@@ -159,6 +159,8 @@ Moved to `docs/history/sections.md` (section "Adapting it to another TV"). Read 
   TV's clock, may run over New Year) instead of the museum's; `Art.java` and `web/art.js` read it from GitHub Pages, so a
   new picture is a JPEG (2560 x 1440) and a line there, no app update. `tools/season_art.js` redraws the ones we drew.
   Only art we made or own: free downloads from other studios are usually personal use only (Small Lily Studio's are).
+- How to play (`web/guides.js`, ADR 0043): every game has a guide (the aim, the remote, the rules, tips) in all five
+  languages. A new game adds its guide and its id in `ORDER` in the same change; `tests/learn.test.js` checks.
 - Te reo word of the day: `web/kupu.js` and `Kupu.java` hold the same list and pick by the same local day, so every
   TV in a house shows the same kupu. Change one, change both. On Android it leads the quotes row (`HomeView.kupuFor`,
   measured once a day, never in the frame loop); *Te reo word of the day* in Home Settings turns it off.

@@ -90,7 +90,7 @@ var Snap = (function () {
       key: key,
       back: function () {
         hold(true);
-        Table.leave(function (yes) { if (yes) { stop(); UI.close(); } else hold(false); });
+        Table.leave(function (yes) { if (yes) { stop(); UI.close(); } else hold(false); }, g && g.chant ? 'chant' : 'snap');
         return true;
       },
       closed: function () { stop(); }

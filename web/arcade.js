@@ -512,6 +512,7 @@ var Arcade = (function () {
       } else if (state === 'paused') {
         text(say('Pausado', 'Paused', 'En pausa'), W / 2, 260, 80, PAPER, 'center', '800');
         text(say('OK para continuar. Voltar para sair.', 'OK to carry on. Back to leave.', 'OK para seguir. Atrás para salir.'), W / 2, 380, 36, EMBER, 'center');
+        if (window.Guides) text(say('▼ Como jogar', '▼ How to play', '▼ Cómo jugar'), W / 2, 450, 30, 'rgba(247,246,242,0.75)', 'center', '600');
       } else {
         text(g.endText(), W / 2, 220, 56, PAPER, 'center', '800');
         text(g.scoreText ? g.scoreText() : say('Pontos: ', 'Score: ', 'Puntos: ') + g.score, W / 2, 330, 64, EMBER, 'center', '800');
@@ -565,7 +566,11 @@ var Arcade = (function () {
       key: function (k) {
         if (!g) return true;
         if (state === 'ready') { if (k === OK) state = 'play'; return true; }
-        if (state === 'paused') { if (k === OK) state = 'play'; return true; }
+        if (state === 'paused') {
+          if (k === OK) state = 'play';
+          else if (k === DOWN && window.Guides) Guides.show(spec.id);
+          return true;
+        }
         if (state === 'over') { if (k === OK) { begin(spec); state = 'play'; } return true; }
         g.key(k);
         return true;
@@ -594,6 +599,7 @@ var Arcade = (function () {
             a.add(UI.button(row, spec.icon + '  ' + spec.name(), null, first ? 'primary' : ''), function () { run(spec); }, {first: first});
           })(GAMES[i], i === 0);
         }
+        if (window.Guides) a.add(UI.button(row, '📖  ' + say('Como jogar', 'How to play', 'Cómo jugar')), function () { Guides.list(['eel', 'paddle', 'guard', 'dots']); });
         var line = [];
         for (var j = 0; j < GAMES.length; j++) line.push(GAMES[j].name() + ': ' + (GAMES[j].id === 'paddle' ? (bests.paddle || 1) : (bests[GAMES[j].id] || 0)));
         UI.el('div', 'bt-sub', box, say('Melhores: ', 'Bests: ', 'Mejores: ') + line.join('  ·  '));

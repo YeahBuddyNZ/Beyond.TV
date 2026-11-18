@@ -173,6 +173,8 @@ var Table = (function () {
       about: function () { return tr('Seis para sair, dê a volta e chegue em casa.', 'Roll a six to get out, race round, get home.', 'Saca un seis para salir, da la vuelta y llega a casa.'); }},
     {id: 'chess', icon: '\u265E', name: function () { return tr('Xadrez', 'Chess', 'Ajedrez'); },
       about: function () { return tr('Dê xeque-mate no rei. Contra um robô, ou dois no mesmo controle.', 'Checkmate the king. Against a robot, or two of you on one remote.', 'Jaque mate al rey. Contra un robot, o dos con un mando.'); }},
+    {id: 'learn', icon: '🎓', name: function () { return tr('Aprender xadrez', 'Learn chess', 'Aprender ajedrez'); },
+      about: function () { return tr('Passo a passo: cada peça, cada regra, depois uma partida com treinador.', 'Step by step: every piece, every rule, then a game with a coach.', 'Paso a paso: cada pieza, cada regla y luego una partida con entrenador.'); }},
     {id: 'chant', icon: '🐑', name: function () { return tr('Ovelha, Pinguim, Vulcão', 'Sheep, Penguin, Volcano', 'Oveja, Pingüino, Volcán'); },
       about: function () { return tr('Diga a palavra, vire a carta: se combinar, aperte OK!', 'Say the word, flip the card: if they match, slap OK!', 'Di la palabra, voltea la carta: si coinciden, ¡pulsa OK!'); }},
     {id: 'snap', icon: '🃏', name: function () { return 'Snap'; },
@@ -186,7 +188,7 @@ var Table = (function () {
       cls: 'bt-table bt-table-games',
       build: function (layer, api) {
         UI.heading(UI.el('div', 'tg-top', layer), tr('Qual jogo?', 'Which game?', '¿Qué juego?'), chosen.map(nameOf).join(', '));
-        var list = UI.el('div', 'tg-games', layer);
+        var list = UI.el('div', 'tg-games' + (GAMES.length > 4 ? ' five' : ''), layer);
         for (var i = 0; i < GAMES.length; i++) {
           (function (g, first) {
             var card = UI.el('div', 'tg-game', list);
@@ -194,7 +196,10 @@ var Table = (function () {
             UI.el('div', 'title', card, g.name());
             UI.el('div', 'about', card, g.about());
             var r = record(chosen[0], g.id);
-            if (r.played) UI.el('div', 'level', card, say('Robôs no nível {n}', 'Robots at level {n}', 'Robots en nivel {n}', robotLevel(chosen, g.id).toFixed(1)));
+            if (g.id === 'learn' && window.ChessCoach) {
+              var done = ChessCoach.progress(chosen[0]);
+              if (done) UI.el('div', 'level', card, say('Lições feitas: {n} de {m}', 'Lessons done: {n} of {m}', 'Lecciones hechas: {n} de {m}', done, ChessCoach.count()));
+            } else if (r.played) UI.el('div', 'level', card, say('Robôs no nível {n}', 'Robots at level {n}', 'Robots en nivel {n}', robotLevel(chosen, g.id).toFixed(1)));
             api.add(card, function () { setup(g); }, {first: first});
           })(GAMES[i], i === 0);
         }
@@ -210,6 +215,7 @@ var Table = (function () {
 
   /** Robots and, for Ludo, a quick or a full game; for chess, who has White. */
   function setup(g) {
+    if (g.id === 'learn') { ChessCoach.open(chosen[0]); return; }
     var chess = g.id === 'chess';
     var humans = g.id === 'ludo' ? chosen.slice() : chosen.slice(0, chess ? 2 : 1);
     var max = g.id === 'ludo' ? 4 - humans.length : 3;
@@ -273,6 +279,7 @@ var Table = (function () {
           api.close();
           play(spec);
         }, {first: true});
+        if (window.Guides && Guides.has(g.id)) api.add(UI.button(buttons, '📖  ' + tr('Como jogar', 'How to play', 'Cómo jugar')), function () { Guides.show(g.id); });
       }
     });
   }
@@ -405,16 +412,20 @@ var Table = (function () {
 
   function toast(text) { UI.toast(text); }
 
-  /** Asks before leaving a game half way: then(true) leaves. */
-  function leave(then) {
+  /**
+   * Back in the middle of a game: keep playing, read how to play (guide is a Guides id), or leave. then(true) leaves.
+   * sub replaces the line about levels (a lesson doesn't count towards one).
+   */
+  function leave(then, guide, sub) {
     UI.open({
       cls: 'bt-table bt-alert',
       build: function (layer, api) {
         var box = UI.el('div', 'bt-box', layer);
-        UI.heading(box, tr('Sair do jogo?', 'Leave the game?', '¿Salir del juego?'), tr(
+        UI.heading(box, tr('Sair do jogo?', 'Leave the game?', '¿Salir del juego?'), sub || tr(
           'Esta partida não conta para os níveis.', 'This game won\'t count towards anyone\'s level.', 'Esta partida no cuenta para los niveles.'));
         var row = UI.el('div', 'bt-buttons', box);
         api.add(UI.button(row, tr('Continuar jogando', 'Keep playing', 'Seguir jugando'), null, 'primary'), function () { api.close(); then(false); }, {first: true});
+        if (guide && window.Guides && Guides.has(guide)) api.add(UI.button(row, '📖  ' + tr('Como jogar', 'How to play', 'Cómo jugar')), function () { Guides.show(guide); });
         api.add(UI.button(row, tr('Sair', 'Leave', 'Salir'), null, 'danger'), function () { api.close(); then(true); });
       },
       back: function () { return false; }
@@ -422,7 +433,7 @@ var Table = (function () {
   }
 
   return {
-    open: open, debrief: debrief, leave: leave, say: say, nameOf: nameOf, record: record, learn: learn,
+    open: open, debrief: debrief, leave: leave, keep: save, say: say, nameOf: nameOf, record: record, learn: learn,
     robotLevel: robotLevel, forget: forget, game: game
   };
 })();

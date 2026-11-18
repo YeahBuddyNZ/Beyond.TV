@@ -1,7 +1,7 @@
 /*
  * Games, from the remote (ADR 0021): every game and family activity starts here on the TV, no phone needed. Karaoke,
  * board and card games against the robots (table.js), silly party games (laughs.js), school lunches (lunch.js), a party, the light show (lights.js), quiz night, the dinner
- * question, the tidy-up race and bedtime breathing. Quiz night and the dinner question need Beyond Family, because
+ * question, the tidy-up race and bedtime breathing, and How to play, a guide to every one (guides.js). Quiz night and the dinner question need Beyond Family, because
  * everyone answers on their phones. Same as GamesActivity.java. Plain ES5.
  */
 var Games = (function () {
@@ -28,7 +28,8 @@ var Games = (function () {
           ['🏆', tr('Quiz da noite', 'Quiz night', 'Noche de quiz'), function () { family('quiz', a); }],
           ['🍽', tr('Pergunta do jantar', 'Dinner question', 'Pregunta de la cena'), function () { family('question', a); }],
           ['🧹', tr('Corrida da arrumação', 'Tidy-up race', 'Carrera de ordenar'), function () { a.close(); Tidy.start(10); }],
-          ['🌙', tr('Respirar para dormir', 'Bedtime breathing', 'Respirar para dormir'), function () { a.close(); Bedtime.start(15); }]
+          ['🌙', tr('Respirar para dormir', 'Bedtime breathing', 'Respirar para dormir'), function () { a.close(); Bedtime.start(15); }],
+          ['📖', tr('Como jogar', 'How to play', 'Cómo jugar'), function () { Guides.list(); }]
         ];
         for (var i = 0; i < games.length; i++) {
           a.add(UI.button(row, games[i][0] + '  ' + games[i][1], null, i === 0 ? 'primary' : ''), games[i][2], {first: i === 0});
