@@ -270,9 +270,8 @@
         if (!ok) toast(tr('Abra gobeyond.nz/election no navegador da TV.', 'Open gobeyond.nz/election in the TV\'s browser.', 'Abre gobeyond.nz/election en el navegador de la TV.'));
       });
     }});
-    list.push({icon: 'live_tv', label: tr('TV aberta', 'Live TV', 'TV en vivo'), run: function () {
-      var live = liveTV(); if (live) launcher(live.id, tr('TV aberta', 'Live TV', 'TV en vivo'))();
-    }});
+    // Live TV (livetv.js, ADR 0042): the aerial, the free-to-air apps and free world news on one screen.
+    list.push({icon: 'live_tv', label: tr('TV aberta', 'Live TV', 'TV en vivo'), run: openLive});
     if (!kid) list.push({icon: 'hdmi', label: tr('Entradas HDMI', 'HDMI Inputs', 'Entradas HDMI'), run: function () {
       st.zone = Z.SHELF; openDrawer(); st.drawer = 1 < drawerInputs ? 1 : 0; updateFocus();
     }});
@@ -1135,6 +1134,22 @@
   function tvSettings() {
     TV.settings(function (ok) {
       if (!ok) toast(tr('Não deu para abrir os Ajustes da TV', "Couldn't open TV Settings", 'No se pudieron abrir los Ajustes del TV'));
+    });
+  }
+
+  /** The Live TV screen, with this TV's aerial and apps. Plex opens Plex itself here, for its free channels. */
+  function openLive() {
+    var live = liveTV();
+    LiveTV.open({
+      apps: apps,
+      aerial: live ? {id: live.id, title: tr('TV aberta', 'Live TV', 'TV en vivo')} : null,
+      launch: function (x) {
+        if (!/plex|cdp-30/i.test((x.title || '') + ' ' + x.id)) { launcher(x.id, x.title)(); return; }
+        TV.launch(x.id, null, function (ok) {
+          if (!ok) toast(tr('Não deu para abrir ', "Couldn't open ", 'No se pudo abrir ') + x.title);
+          else Family.now(x.title);
+        });
+      }
     });
   }
 

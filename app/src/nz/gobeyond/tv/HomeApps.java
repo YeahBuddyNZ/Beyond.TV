@@ -77,6 +77,8 @@ final class HomeApps {
     static final int MUSIC = 17;
     /** NZ election results, live, until 27/11/2026 (ElectionActivity, ADR 0039). */
     static final int ELECTION = 18;
+    /** Live TV: the aerial, the free-to-air apps and free world news on one screen (LiveTvActivity, ADR 0042). */
+    static final int LIVE = 19;
     /** Image size of each card (16:9; on screen it shows up to ~330 px wide). */
     static final int TILE_W = 384, TILE_H = 216;
 

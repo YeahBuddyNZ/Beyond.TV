@@ -1082,3 +1082,22 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .bt-skylook .lookcard .about { margin-top: 14px; font-size: 28px; line-height: 38px; color: rgba(247, 246, 242, 0.92); }
 .bt-skylook .corner { position: absolute; right: 60px; top: 44px; font-size: 28px; font-weight: 600; color: rgba(247, 246, 242, 0.85); text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6); }
 .bt-skylook .hint { position: absolute; right: 60px; bottom: 44px; font-size: 24px; color: rgba(247, 246, 242, 0.6); text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6); }
+
+/* MARK: - Live TV (livetv.js) */
+.bt-live .bt-box { position: absolute; left: 140px; right: 140px; top: 70px; }
+.bt-live .row { margin-top: 30px; }
+.bt-live .row .bt-buttons { text-align: left; }
+.bt-live .row .bt-buttons .bt-button { margin: 0 18px 18px 0; }
+.bt-live .bt-button.small { height: 64px; line-height: 64px; font-size: 26px; padding: 0 28px; border-radius: 32px; }
+.bt-live .help { margin-top: 20px; text-align: left; }
+.bt-live .help .bt-button { margin: 0; }
+.bt-live .bt-button.quiet { background: transparent; box-shadow: inset 0 0 0 2px rgba(247, 246, 242, 0.25); }
+.bt-live .bt-button.quiet.focus { background: #F7F6F2; }
+.bt-live .tip { margin-top: 30px; max-width: 1200px; }
+.bt-live-help .bt-box { top: 160px; }
+.bt-live-help .line { margin-top: 44px; max-width: 1400px; }
+.bt-live-help .what { font-family: 'Sora', 'Inter', sans-serif; font-weight: 600; font-size: 38px; }
+.bt-live-help .bt-buttons { margin-top: 60px; text-align: left; }
+.bt-live-player .channel { position: absolute; left: 60px; bottom: 60px; padding: 18px 34px; border-radius: 20px; background: rgba(13, 12, 24, 0.82); font-size: 34px; color: #F7F6F2; -webkit-transition: opacity 0.6s; transition: opacity 0.6s; }
+.bt-live-player .channel b { font-family: 'Sora', 'Inter', sans-serif; font-weight: 600; }
+.bt-live-player .channel span { color: rgba(247, 246, 242, 0.7); }

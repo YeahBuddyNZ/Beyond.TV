@@ -582,7 +582,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         // Beyond: feedback, spoken or typed (FeedbackActivity), not for kids.
         if (Family.linked(getContext())) lightButtons.add(HomeApps.action(HomeApps.ASK, "ask", Ui.tr("Pergunte à Beyond", "Ask Beyond", "Pregúntale a Beyond"), "dots"));
         else if (!kid) lightButtons.add(HomeApps.action(HomeApps.FEEDBACK, "feedback", Ui.tr("Fale com a Beyond", "Talk to Beyond"), "dots"));
-        lightButtons.add(HomeApps.action(HomeApps.LIVE_TV, "live", Ui.tr("TV aberta", "Live TV"), "live_tv"));
+        // Live TV (LiveTvActivity, ADR 0042): the aerial, the free-to-air apps and free world news on one screen.
+        lightButtons.add(HomeApps.action(HomeApps.LIVE, "live", Ui.tr("TV aberta", "Live TV"), "live_tv"));
         if (!kid) lightButtons.add(HomeApps.action(HomeApps.INPUTS, "inputs", Ui.tr("Entradas HDMI", "HDMI Inputs"), "hdmi"));
         // Games, for anyone with the remote: karaoke, a party, quiz night and the rest, no phone needed (GamesActivity).
         lightButtons.add(HomeApps.action(HomeApps.GAMES, "games", Ui.tr("Jogos", "Games", "Juegos"), "gamepad"));
@@ -2534,6 +2535,10 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         }
         if (it.kind == HomeApps.GAMES) {
             GamesActivity.open(activity);
+            return;
+        }
+        if (it.kind == HomeApps.LIVE) {
+            LiveTvActivity.open(activity);
             return;
         }
         if (it.kind == HomeApps.SKY) {

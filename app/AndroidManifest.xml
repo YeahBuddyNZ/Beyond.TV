@@ -199,6 +199,16 @@
             android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|density|fontScale|locale|layoutDirection"
             android:theme="@style/BeyondTV.Home" />
 
+        <!-- Live TV: the aerial, the free-to-air apps and free world news on one screen (ADR 0042). -->
+        <activity
+            android:name=".LiveTvActivity"
+            android:process=":home"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:screenOrientation="landscape"
+            android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|density|fontScale|locale|layoutDirection"
+            android:theme="@style/BeyondTV.Home" />
+
         <!-- Games from the remote: karaoke, party, quiz night, the dinner question, the tidy race, bedtime. -->
         <activity
             android:name=".GamesActivity"
