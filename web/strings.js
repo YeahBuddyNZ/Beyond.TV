@@ -7,6 +7,20 @@ var I18N = (function () {
 
   var lang = 'en';
   var german = {
+    // How to play and Learn chess (guides.js, chesscoach.js)
+    "How to play": "Wie man spielt",
+    "▼ How to play": "▼ Wie man spielt",
+    "Back a page": "Eine Seite zurück",
+    "◀ ▶ turns the page · Back closes": "◀ ▶ blättert · Zurück schließt",
+    "Pick a game to see its rules and how to play it with the remote.": "Wähl ein Spiel, um seine Regeln zu sehen und wie man es mit der Fernbedienung spielt.",
+    "The lessons you've done stay ticked.": "Die Lektionen, die du geschafft hast, bleiben abgehakt.",
+    "Chess with a coach": "Schach mit Trainer",
+    "Arrows to move, OK to pick up a piece. OK on an empty square for a hint.": "Pfeile zum Bewegen, OK nimmt eine Figur. OK auf einem leeren Feld gibt einen Tipp.",
+    "Have another think. You've got this!": "Denk nochmal nach. Du schaffst das!",
+    "Hint": "Tipp",
+    "Learn chess": "Schach lernen",
+    "Step by step: every piece, every rule, then a game with a coach.": "Schritt für Schritt: jede Figur, jede Regel, dann eine Partie mit Trainer.",
+    "Lessons done: {n} of {m}": "Lektionen geschafft: {n} von {m}",
     // Live TV (livetv.js)
     "Pick a channel": "Such dir einen Sender aus",
     "Free channels, no subscription": "Kostenlose Sender, ohne Abo",
@@ -744,6 +758,20 @@ var I18N = (function () {
   }
 
   var russian = {
+    // How to play and Learn chess (guides.js, chesscoach.js)
+    "How to play": "Как играть",
+    "▼ How to play": "▼ Как играть",
+    "Back a page": "Назад",
+    "◀ ▶ turns the page · Back closes": "◀ ▶ листают · «Назад» закрывает",
+    "Pick a game to see its rules and how to play it with the remote.": "Выберите игру, чтобы узнать правила и как играть с пультом.",
+    "The lessons you've done stay ticked.": "Пройденные уроки останутся отмеченными.",
+    "Chess with a coach": "Шахматы с тренером",
+    "Arrows to move, OK to pick up a piece. OK on an empty square for a hint.": "Стрелки двигают, OK берёт фигуру. OK на пустой клетке даёт подсказку.",
+    "Have another think. You've got this!": "Подумайте ещё. У вас получится!",
+    "Hint": "Подсказка",
+    "Learn chess": "Учимся шахматам",
+    "Step by step: every piece, every rule, then a game with a coach.": "Шаг за шагом: каждая фигура, каждое правило, потом партия с тренером.",
+    "Lessons done: {n} of {m}": "Пройдено уроков: {n} из {m}",
     // Live TV (livetv.js)
     "Pick a channel": "Выберите канал",
     "Free channels, no subscription": "Бесплатные каналы, без подписки",

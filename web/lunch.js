@@ -374,6 +374,7 @@ var Lunch = (function () {
           })(cards[i], i === 0);
         }
         UI.el('div', 'ln-note', layer, tr('Tudo sem castanhas, e tudo fica nesta TV.', 'Every idea is nut free, and it all stays on this TV.', 'Todo sin frutos secos, y todo se queda en esta tele.'));
+        if (window.Guides) api.add(UI.button(UI.el('div', 'tg-foot low', layer), '📖  ' + tr('Como jogar', 'How to play', 'Cómo jugar'), null, 'quiet'), function () { Guides.show('lunch'); });
       }
     });
   }

@@ -215,6 +215,8 @@ var Laughs = (function () {
             api.add(card, function () { if (g.min) who(g); else start(g, []); }, {first: first});
           })(GAMES[i], i === 0);
         }
+        if (window.Guides) api.add(UI.button(UI.el('div', 'tg-foot low', layer), '📖  ' + tr('Como jogar', 'How to play', 'Cómo jugar'), null, 'quiet'),
+          function () { Guides.list(['likely', 'rather', 'dare']); });
       }
     });
   }

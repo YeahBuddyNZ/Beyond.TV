@@ -186,7 +186,7 @@ var Ludo = (function () {
       key: key,
       back: function () {
         hold(true);
-        Table.leave(function (yes) { if (yes) { stop(); UI.close(); } else hold(false); });
+        Table.leave(function (yes) { if (yes) { stop(); UI.close(); } else hold(false); }, 'ludo');
         return true;
       },
       closed: function () { stop(); }

@@ -5,7 +5,9 @@
  * three times or fifty moves with no pawn moved and nothing taken. The robot looks a few moves ahead (alpha-beta);
  * how far, and how often it slips, comes from the level (table.js). Chess has nothing hidden, so the robot sees the
  * same board you do. Each move a person makes is weighed the same way, so the debrief can say kindly what to look
- * for next time. Plain ES5.
+ * for next time. Learn chess (chesscoach.js, ADR 0043) uses the same board for its lessons (opts.lesson: a set
+ * position and a task, no robot moves) and its coached game (opts.coach: every move graded and explained, a hint on
+ * any empty square, a second chance before a big mistake). Plain ES5.
  */
 var Chess = (function () {
   'use strict';
@@ -396,19 +398,23 @@ var Chess = (function () {
     var white = opts.players[0], black = opts.players[1];
     g = {s: s, opts: opts, level: opts.level, side: {w: white, b: black}, phase: 'busy', picked: -1, targets: [],
       cursor: {w: sq('e2'), b: sq('e7')}, nodes: {}, notes: {}, best: {}, timers: [], last: null,
+      lesson: opts.lesson || null, coach: !!opts.coach, show: null, review: null, why: null,
       // Facing the person: a person playing Black against a robot sees Black at the bottom.
       flip: black && !black.robot && white.robot};
     for (var i = 0; i < opts.players.length; i++) {
       var p = opts.players[i];
       if (!p.robot) { g.notes[p.id] = []; g.best[p.id] = {checks: 0, taken: 0, castled: false, queens: 0}; }
     }
+    // A lesson starts on the learner's first piece, wherever the position put it.
+    if (g.lesson) for (var f = 0; f < 64; f++) if (s.b[f] && sideOf(s.b[f]) === s.turn) { g.cursor[s.turn] = f; break; }
     UI.open({
-      cls: 'bt-table tg-chess',
+      cls: 'bt-table tg-chess' + (g.coach || g.lesson ? ' coached' : ''),
       build: function (layer, api) { draw(layer); },
       key: key,
       back: function () {
         hold(true);
-        Table.leave(function (yes) { if (yes) { stop(); UI.close(); } else hold(false); });
+        Table.leave(function (yes) { if (yes) { stop(); UI.close(); } else hold(false); }, 'chess', g.lesson ?
+          tr('As lições que você já fez ficam guardadas.', 'The lessons you\'ve done stay ticked.', 'Las lecciones que ya hiciste quedan marcadas.') : '');
         return true;
       },
       closed: function () { stop(); }
@@ -453,8 +459,9 @@ var Chess = (function () {
     g.nodes.pieces = UI.el('div', 'ch-pieces', board);
     g.nodes.cursor = UI.el('div', 'ch-cursor', board);
     var side = UI.el('div', 'lu-side ch-side', layer);
-    UI.heading(side, tr('Xadrez', 'Chess', 'Ajedrez'));
+    UI.heading(side, g.lesson ? g.lesson.title : g.coach ? tr('Xadrez com treinador', 'Chess with a coach', 'Ajedrez con entrenador') : tr('Xadrez', 'Chess', 'Ajedrez'));
     var list = UI.el('div', 'lu-players', side);
+    if (g.lesson) list.style.display = 'none';
     g.nodes.rows = {};
     var sides = ['w', 'b'];
     for (var q = 0; q < 2; q++) {
@@ -466,6 +473,7 @@ var Chess = (function () {
     }
     g.nodes.say = UI.el('div', 'lu-say', side);
     g.nodes.hint = UI.el('div', 'lu-hint', side);
+    g.nodes.coach = UI.el('div', 'ch-coach', side);
     paint();
   }
 
@@ -478,6 +486,7 @@ var Chess = (function () {
       UI.setClass(cell, 'last', !!g.last && (g.last.from === i || g.last.to === i));
       UI.setClass(cell, 'check', i === check);
       UI.setClass(cell, 'picked', i === g.picked);
+      UI.setClass(cell, 'hint', !!g.show && (g.show.from === i || g.show.to === i));
     }
     var pieces = g.nodes.pieces;
     pieces.innerHTML = '';
@@ -515,12 +524,32 @@ var Chess = (function () {
     g.nodes.hint.textContent = hint || '';
   }
 
+  /** The coach's box beside the board: a grade ('great', 'good', 'ok' or 'oops') and a few words, or nothing. */
+  function coachSay(grade, label, text, more) {
+    var box = g.nodes.coach;
+    if (!more) box.innerHTML = '';
+    var p = UI.el('p', '', box);
+    if (label) UI.el('span', 'grade ' + (grade || ''), p, label);
+    if (text) UI.el('span', '', p, text);
+  }
+
+  var HELP = function () { return tr('Setas para andar, OK para pegar uma peça', 'Arrows to move, OK to pick up a piece', 'Flechas para moverte, OK para coger una pieza'); };
+  var HELP_HINT = function () { return tr('Setas para andar, OK para pegar uma peça. OK numa casa vazia: uma dica.', 'Arrows to move, OK to pick up a piece. OK on an empty square for a hint.', 'Flechas para moverte, OK para coger una pieza. OK en una casilla vacía: una pista.'); };
+
   function who(side) { return g.side[side]; }
   function nameOf(p) { return p.robot ? p.name : Table.nameOf(p); }
 
   function turn() {
     if (!g) return;
     var s = g.s, p = who(s.turn);
+    if (g.lesson) {
+      g.phase = 'move'; g.picked = -1; g.targets = [];
+      paint();
+      // "Nice! Two to go" stays up, with the task under it.
+      tell(g.cheer || g.lesson.prompt(), g.cheer ? g.lesson.prompt() : HELP());
+      g.cheer = '';
+      return;
+    }
     var over = status(s);
     if (over) { finish(over); return; }
     g.picked = -1; g.targets = [];
@@ -539,7 +568,7 @@ var Chess = (function () {
     tell(check ? Table.say('Xeque! Proteja seu rei, {n}.', 'Check! Keep your king safe, {n}.', '¡Jaque! Protege a tu rey, {n}.', nameOf(p)) :
       two ? Table.say('Sua vez, {n} ({m}).', 'Your turn, {n} ({m}).', 'Tu turno, {n} ({m}).', nameOf(p), colourName(s.turn)) :
         Table.say('Sua vez, {n}!', 'Your turn, {n}!', '¡Tu turno, {n}!', nameOf(p)),
-      tr('Setas para andar, OK para pegar uma peça', 'Arrows to move, OK to pick up a piece', 'Flechas para moverte, OK para coger una pieza'));
+      g.coach ? HELP_HINT() : HELP());
   }
 
   function colourName(side) { return side === 'w' ? tr('brancas', 'White', 'blancas') : tr('pretas', 'Black', 'negras'); }
@@ -547,6 +576,7 @@ var Chess = (function () {
   function think() {
     if (!g) return;
     var m = robotPick(g.s, g.level, null, 1500);
+    if (m && g.coach) g.why = ChessCoach.why(g.s, m);
     if (m) move(m);
   }
 
@@ -555,7 +585,7 @@ var Chess = (function () {
     var s = g.s, at2 = g.cursor[s.turn], p = s.b[at2];
     if (g.picked >= 0) {
       for (var i = 0; i < g.targets.length; i++) {
-        if (g.targets[i].to === at2) { var m = g.targets[i]; g.picked = -1; g.targets = []; notice(m); move(m); return; }
+        if (g.targets[i].to === at2) { var m = g.targets[i]; g.picked = -1; g.targets = []; g.show = null; decide(m); return; }
       }
       if (at2 === g.picked) { g.picked = -1; g.targets = []; paint(); return; }
     }
@@ -575,6 +605,38 @@ var Chess = (function () {
       return;
     }
     if (g.picked >= 0) { g.picked = -1; g.targets = []; paint(); }
+    else if (g.coach) hint();
+  }
+
+  /** A person's move, put down: in a coached game, graded first, with a second chance before a big mistake. */
+  function decide(m) {
+    if (g.lesson) { move(m); return; }
+    if (!g.coach) { notice(m); move(m); return; }
+    var p = who(g.s.turn), r = ChessCoach.review(g.s, m);
+    if (r.tip) g.notes[p.id].push({gap: r.gap, text: r.tip});
+    g.review = r;
+    if (r.grade !== 'oops' || !r.better) { move(m); return; }
+    g.phase = 'busy';
+    paint();
+    ChessCoach.ask(r, function (choice) {
+      if (!g) return;
+      if (choice === 'keep') { move(m); return; }
+      g.review = null;
+      if (choice === 'show') g.show = {from: r.better.from, to: r.better.to};
+      g.phase = 'move';
+      paint();
+      tell(choice === 'show' ? ChessCoach.better(r.better) : tr('Pense de novo. Você consegue!', 'Have another think. You\'ve got this!', 'Piénsalo otra vez. ¡Tú puedes!'), HELP_HINT());
+    });
+  }
+
+  /** OK on an empty square in a coached game: the coach points at a good move, and says why. */
+  function hint() {
+    var h = ChessCoach.hint(g.s);
+    if (!h) return;
+    Sfx.play('flip');
+    g.show = {from: h.m.from, to: h.m.to};
+    paint();
+    coachSay('good', tr('Dica', 'Hint', 'Pista'), h.text);
   }
 
   /** Slides the piece across, then plays the move. */
@@ -597,6 +659,14 @@ var Chess = (function () {
     play(s, m);
     g.last = m;
     g.cursor[mover] = m.to;
+    g.show = null;
+    if (g.lesson) {
+      if (m.cap) Sfx.play('capture'); else if (m.castle || m.promo) Sfx.play('home'); else Sfx.play('place');
+      g.picked = -1; g.targets = [];
+      paint();
+      g.lesson.after(m, lessonCtl());
+      return;
+    }
     var check = inCheck(s);
     if (!p.robot) {
       var b = g.best[p.id];
@@ -612,7 +682,40 @@ var Chess = (function () {
     if (m.promo) tell(Table.say('Um peão de {n} virou rainha!', '{n}\'s pawn became a queen!', '¡El peón de {n} se convirtió en dama!', nameOf(p)));
     else if (m.castle) tell(Table.say('{n} fez o roque.', '{n} castled.', '{n} enrocó.', nameOf(p)));
     else if (m.cap) tell(Table.say('{n} pegou um {m}.', '{n} took a {m}.', '{n} capturó un {m}.', nameOf(p), pieceName(kindOf(m.cap))));
+    if (g.coach) {
+      if (!p.robot && g.review) coachSay(g.review.grade, g.review.label, g.review.text);
+      else if (p.robot) coachSay('', '', ChessCoach.afterRobot(s, m, nameOf(p), g.why), true);
+      g.review = null; g.why = null;
+    }
     later(m.cap || m.castle || m.promo ? 900 : 350, turn);
+  }
+
+  /** What a lesson can do after the learner's move: go again, start the position over, or end. */
+  function lessonCtl() {
+    var lesson = g.lesson;
+    return {
+      s: g.s,
+      tell: function (text) { tell(text, ''); },
+      again: function () {
+        g.cheer = g.nodes.say.textContent;
+        g.s.turn = lesson.side || 'w';
+        g.s.ep = -1;
+        later(500, turn);
+      },
+      reset: function (ms) {
+        g.phase = 'busy';
+        later(ms || 2200, function () {
+          g.s = fromFen(lesson.fen);
+          g.last = null;
+          for (var f = 0; f < 64; f++) if (g.s.b[f] && sideOf(g.s.b[f]) === g.s.turn) { g.cursor[g.s.turn] = f; break; }
+          turn();
+        });
+      },
+      done: function (ms) {
+        g.phase = 'busy';
+        later(ms || 900, function () { stop(); UI.close(); lesson.passed(); });
+      }
+    };
   }
 
   /**
@@ -707,11 +810,11 @@ var Chess = (function () {
       if (b.checks) good.push(Table.say('Xeques dados: {n}.', 'Checks given: {n}.', 'Jaques dados: {n}.', b.checks));
       praise[p.id] = good;
     }
-    var again = g.opts.again;
+    var again = g.opts.again, coached = g.coach;
     later(2600, function () {
       stop();
       UI.close();
-      Table.debrief({game: 'chess', order: order, tips: tips, praise: praise, again: again, draw: draw ? words[why] : ''});
+      Table.debrief({game: coached ? 'learn' : 'chess', order: order, tips: tips, praise: praise, again: again, draw: draw ? words[why] : ''});
     });
   }
 
@@ -737,8 +840,9 @@ var Chess = (function () {
 
   return {
     start: start,
-    // For the tests (and nothing else).
+    // For the tests and the coach (chesscoach.js).
     rules: {newGame: newGame, fromFen: fromFen, legal: legal, play: play, make: make, unmake: unmake, status: status,
-      inCheck: inCheck, rank: rank, robotPick: robotPick, depthFor: depthFor, sq: sq, name: name, evaluate: evaluate, MATE: MATE}
+      inCheck: inCheck, rank: rank, robotPick: robotPick, depthFor: depthFor, sq: sq, name: name, evaluate: evaluate, MATE: MATE,
+      attacked: attacked, pseudo: pseudo, hangs: hangs, VALUE: VALUE, kindOf: kindOf, sideOf: sideOf, other: other, pieceName: pieceName}
   };
 })();

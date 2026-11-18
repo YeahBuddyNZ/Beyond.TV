@@ -545,6 +545,7 @@ final class Russian {
             case "Paid, only from Sky": return "Платно, только у Sky";
             case "For sport without a Sky box: Sky Sport Now.": return "Спорт без приставки Sky: Sky Sport Now.";
             case "Got it": return "Понятно";
+            case "How to play": return "Как играть";
             case "▲ ▼ to change channel": return "▲ ▼ переключают канал";
             default:
                 // Notices are saved in the language in use when they were generated.
