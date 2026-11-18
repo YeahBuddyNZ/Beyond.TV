@@ -7,6 +7,27 @@ var I18N = (function () {
 
   var lang = 'en';
   var german = {
+    // Live TV (livetv.js)
+    "Pick a channel": "Such dir einen Sender aus",
+    "Free channels, no subscription": "Kostenlose Sender, ohne Abo",
+    "Here in Aotearoa": "Hier in Aotearoa",
+    "On your TV": "Auf deinem Fernseher",
+    "Your aerial": "Deine Antenne",
+    "World news, free": "Weltnachrichten, kostenlos",
+    "More free channels": "Mehr kostenlose Sender",
+    "Pick Live TV in Plex": "Wähle in Plex Live-TV",
+    "Paid extras": "Bezahlte Extras",
+    "Which channels can I get?": "Welche Sender bekomme ich?",
+    "Ask a grown-up to add the Freeview app.": "Bitte einen Erwachsenen, die Freeview-App zu installieren.",
+    "No aerial? The Freeview Streaming TV app has every free NZ channel. Find it in the TV's app store.": "Keine Antenne? Die App Freeview Streaming TV hat alle kostenlosen Sender Neuseelands. Du findest sie im App-Store des Fernsehers.",
+    "Free, with an aerial or the Freeview app": "Kostenlos, mit Antenne oder der Freeview-App",
+    "and more": "und mehr",
+    "Free, right here in Beyond™ TV": "Kostenlos, direkt hier in Beyond™ TV",
+    "News around the clock: ": "Nachrichten rund um die Uhr: ",
+    "Paid, only from Sky": "Kostenpflichtig, nur bei Sky",
+    "For sport without a Sky box: Sky Sport Now.": "Für Sport ohne Sky-Box: Sky Sport Now.",
+    "Got it": "Verstanden",
+    "▲ ▼ to change channel": "▲ ▼ wechselt den Sender",
     // The family's own music (music.js)
     "Found your music. It's on the home screen now, with your apps.": "Deine Musik ist gefunden. Sie ist jetzt bei deinen Apps auf dem Startbildschirm.",
     "Your music isn't answering right now. Is the computer it's on switched on?": "Deine Musik antwortet gerade nicht. Ist der Computer, auf dem sie liegt, eingeschaltet?",
@@ -723,6 +744,27 @@ var I18N = (function () {
   }
 
   var russian = {
+    // Live TV (livetv.js)
+    "Pick a channel": "Выберите канал",
+    "Free channels, no subscription": "Бесплатные каналы, без подписки",
+    "Here in Aotearoa": "Здесь, в Аотеароа",
+    "On your TV": "На вашем телевизоре",
+    "Your aerial": "Ваша антенна",
+    "World news, free": "Мировые новости, бесплатно",
+    "More free channels": "Ещё бесплатные каналы",
+    "Pick Live TV in Plex": "Выберите «Прямой эфир» в Plex",
+    "Paid extras": "Платные дополнения",
+    "Which channels can I get?": "Какие каналы мне доступны?",
+    "Ask a grown-up to add the Freeview app.": "Попросите взрослого установить приложение Freeview.",
+    "No aerial? The Freeview Streaming TV app has every free NZ channel. Find it in the TV's app store.": "Нет антенны? В приложении Freeview Streaming TV есть все бесплатные каналы Новой Зеландии. Оно есть в магазине приложений телевизора.",
+    "Free, with an aerial or the Freeview app": "Бесплатно, с антенной или в приложении Freeview",
+    "and more": "и другие",
+    "Free, right here in Beyond™ TV": "Бесплатно, прямо здесь, в Beyond™ TV",
+    "News around the clock: ": "Новости круглосуточно: ",
+    "Paid, only from Sky": "Платно, только у Sky",
+    "For sport without a Sky box: Sky Sport Now.": "Спорт без приставки Sky: Sky Sport Now.",
+    "Got it": "Понятно",
+    "▲ ▼ to change channel": "▲ ▼ переключают канал",
     // The family's own music (music.js)
     "Found your music. It's on the home screen now, with your apps.": "Ваша музыка найдена. Она теперь на главном экране, рядом с приложениями.",
     "Your music isn't answering right now. Is the computer it's on switched on?": "Ваша музыка сейчас не отвечает. Компьютер, на котором она хранится, включён?",

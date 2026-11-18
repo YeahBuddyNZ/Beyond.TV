@@ -482,6 +482,27 @@ final class German {
             case "Couldn't tell Beyond Family just now.": return "Beyond Family ließ sich gerade nicht erreichen.";
             case "Thanks, ": return "Danke, ";
             case "! It's ticked off in Beyond Family.": return "! Es ist in Beyond Family abgehakt.";
+            // Live TV (LiveTvActivity)
+            case "Pick a channel": return "Such dir einen Sender aus";
+            case "Free channels, no subscription": return "Kostenlose Sender, ohne Abo";
+            case "Here in Aotearoa": return "Hier in Aotearoa";
+            case "On your TV": return "Auf deinem Fernseher";
+            case "Your aerial": return "Deine Antenne";
+            case "World news, free": return "Weltnachrichten, kostenlos";
+            case "More free channels": return "Mehr kostenlose Sender";
+            case "Pick Live TV in Plex": return "Wähle in Plex Live-TV";
+            case "Paid extras": return "Bezahlte Extras";
+            case "Which channels can I get?": return "Welche Sender bekomme ich?";
+            case "Ask a grown-up to add the Freeview app.": return "Bitte einen Erwachsenen, die Freeview-App zu installieren.";
+            case "No aerial? The Freeview Streaming TV app has every free NZ channel. Find it in the TV's app store.": return "Keine Antenne? Die App Freeview Streaming TV hat alle kostenlosen Sender Neuseelands. Du findest sie im App-Store des Fernsehers.";
+            case "Free, with an aerial or the Freeview app": return "Kostenlos, mit Antenne oder der Freeview-App";
+            case "and more": return "und mehr";
+            case "Free, right here in Beyond™ TV": return "Kostenlos, direkt hier in Beyond™ TV";
+            case "News around the clock: ": return "Nachrichten rund um die Uhr: ";
+            case "Paid, only from Sky": return "Kostenpflichtig, nur bei Sky";
+            case "For sport without a Sky box: Sky Sport Now.": return "Für Sport ohne Sky-Box: Sky Sport Now.";
+            case "Got it": return "Verstanden";
+            case "▲ ▼ to change channel": return "▲ ▼ wechselt den Sender";
             default:
                 if (english.startsWith("Beyond™ TV is on: new home screen and screensaver, ")) {
                     return "Beyond™ TV ist an: neuer Startbildschirm und Bildschirmschoner, "

@@ -525,6 +525,27 @@ final class Russian {
             case "Couldn't tell Beyond Family just now.": return "Сейчас не получилось сообщить Beyond Family.";
             case "Thanks, ": return "Спасибо, ";
             case "! It's ticked off in Beyond Family.": return "! Отмечено в Beyond Family.";
+            // Live TV (LiveTvActivity)
+            case "Pick a channel": return "Выберите канал";
+            case "Free channels, no subscription": return "Бесплатные каналы, без подписки";
+            case "Here in Aotearoa": return "Здесь, в Аотеароа";
+            case "On your TV": return "На вашем телевизоре";
+            case "Your aerial": return "Ваша антенна";
+            case "World news, free": return "Мировые новости, бесплатно";
+            case "More free channels": return "Ещё бесплатные каналы";
+            case "Pick Live TV in Plex": return "Выберите «Прямой эфир» в Plex";
+            case "Paid extras": return "Платные дополнения";
+            case "Which channels can I get?": return "Какие каналы мне доступны?";
+            case "Ask a grown-up to add the Freeview app.": return "Попросите взрослого установить приложение Freeview.";
+            case "No aerial? The Freeview Streaming TV app has every free NZ channel. Find it in the TV's app store.": return "Нет антенны? В приложении Freeview Streaming TV есть все бесплатные каналы Новой Зеландии. Оно есть в магазине приложений телевизора.";
+            case "Free, with an aerial or the Freeview app": return "Бесплатно, с антенной или в приложении Freeview";
+            case "and more": return "и другие";
+            case "Free, right here in Beyond™ TV": return "Бесплатно, прямо здесь, в Beyond™ TV";
+            case "News around the clock: ": return "Новости круглосуточно: ";
+            case "Paid, only from Sky": return "Платно, только у Sky";
+            case "For sport without a Sky box: Sky Sport Now.": return "Спорт без приставки Sky: Sky Sport Now.";
+            case "Got it": return "Понятно";
+            case "▲ ▼ to change channel": return "▲ ▼ переключают канал";
             default:
                 // Notices are saved in the language in use when they were generated.
                 String[] prefixes = {"Couldn't check Beyond™ TV: ", "Couldn't turn on Beyond™ TV: ",

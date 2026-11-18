@@ -1,0 +1,65 @@
+{
+  "about": "Free 24/7 news channels Beyond TV plays from each channel's own official YouTube live stream. Read by web/livetv.js and LiveTvActivity.java; edit here to add or drop one without an app update.",
+  "channels": [
+    {
+      "id": "abc-au",
+      "name": "ABC News",
+      "from": "Australia",
+      "youtube": "UCVgO39Bk5sMo66-6o6Spn6Q"
+    },
+    {
+      "id": "sky-news",
+      "name": "Sky News",
+      "from": "UK",
+      "youtube": "UCoMdktPbSTixAyNGwb-UYkQ"
+    },
+    {
+      "id": "aljazeera",
+      "name": "Al Jazeera",
+      "from": "Qatar",
+      "youtube": "UCNye-wNBqNL5ZzHSJj3l8Bg"
+    },
+    {
+      "id": "dw",
+      "name": "DW News",
+      "from": "Germany",
+      "youtube": "UCknLrEdhRCp1aegoMqRaCZg"
+    },
+    {
+      "id": "france24",
+      "name": "France 24",
+      "from": "France",
+      "youtube": "UCQfwfsi5VrQ8yKZ-UWmAEFg"
+    },
+    {
+      "id": "nhk",
+      "name": "NHK World",
+      "from": "Japan",
+      "youtube": "UCSPEjw8F2nQDtmUKPFNF7_A"
+    },
+    {
+      "id": "cna",
+      "name": "CNA",
+      "from": "Singapore",
+      "youtube": "UC83jt4dlz1Gjl58fzQrrKZg"
+    },
+    {
+      "id": "livenow-fox",
+      "name": "LiveNOW from FOX",
+      "from": "USA",
+      "youtube": "UCJg9wBPyKMNA5sRDnvzmkdg"
+    },
+    {
+      "id": "euronews",
+      "name": "Euronews",
+      "from": "Europe",
+      "youtube": "UCSrZ3UV4jOidv8ppoVuvW9Q"
+    },
+    {
+      "id": "bloomberg",
+      "name": "Bloomberg",
+      "from": "USA",
+      "youtube": "UCIALMKvObZNtJ6AmdCLP7Lg"
+    }
+  ]
+}
