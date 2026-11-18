@@ -17,6 +17,8 @@
     <!-- The light show's "Listen to the room" (ADR 0041): asked only when someone picks it, read as levels on the TV,
          never recorded or sent. Most TVs have no microphone of their own; a USB one or a webcam works. -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- The light show's "The TV's sound" (ADR 0044): Visualizer on the whole output needs it. No prompt. -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
     <!-- Android 11+: without this list the app can't "see" the other apps (getLeanbackLaunchIntentForPackage
          returns null). The shelf and streaming apps, the live TV apps and, through the <intent>, every TV app

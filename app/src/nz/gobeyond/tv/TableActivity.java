@@ -61,6 +61,9 @@ public class TableActivity extends Activity {
     private WebView web;
     // The light show's way to Beyond Music (ADR 0027's relay on 127.0.0.1), started the first time the page asks.
     private MusicRelay relay;
+    // The light show's "The TV's sound" (ADR 0044): Android's Visualizer on the TV's output, only while it's on screen.
+    private final TvSound tvSound = new TvSound();
+    private boolean tvWasOn;
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     @Override protected void onCreate(Bundle savedInstanceState) {
@@ -170,6 +173,22 @@ public class TableActivity extends Activity {
             });
         }
 
+        /** The TV's own sound can be drawn: Visualizer needs the microphone permission and an audio output. */
+        @JavascriptInterface public boolean canHearTv() {
+            return getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUDIO_OUTPUT);
+        }
+
+        /** Starts listening to the TV's output, after ask() said yes; false when this TV won't share it. */
+        @JavascriptInterface public boolean tvStart() { return micAllowed() && tvSound.start(); }
+
+        @JavascriptInterface public String tvFft() { return tvSound.fft(); }
+
+        @JavascriptInterface public String tvWave() { return tvSound.wave(); }
+
+        @JavascriptInterface public int tvNyquist() { return tvSound.nyquist(); }
+
+        @JavascriptInterface public void tvStop() { tvSound.stop(); }
+
         /** Older TVs (Android 9 to 11) and 1 GB ones: the light show starts in its light mode. */
         @JavascriptInterface public boolean lowPower() {
             ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
@@ -248,15 +267,21 @@ public class TableActivity extends Activity {
     @Override protected void onPause() {
         super.onPause();
         if (web != null) web.onPause();
+        // Let go of the TV's sound while someone is off changing the song in Spotify; back on when they return.
+        tvWasOn = tvSound.on();
+        tvSound.stop();
     }
 
     @Override protected void onResume() {
         super.onResume();
         if (web != null) web.onResume();
+        if (tvWasOn) tvSound.start();
+        tvWasOn = false;
     }
 
     @Override protected void onDestroy() {
         if (sky == this) sky = null;
+        tvSound.stop();
         synchronized (this) {
             if (relay != null) relay.close();
             relay = null;
