@@ -49,13 +49,41 @@ check('up from the last', L.step(9, 1, 10) === 0);
 check('down from the first', L.step(0, -1, 10) === 9);
 check('no channels', L.step(3, 1, 0) === 0);
 
-// The player asks for the channel's live stream, YouTube's own player
+// The player asks for the video the channel streams now when we know it, else the channel's live stream
 var url = L.embedUrl(L.NEWS[0]);
 check('embed by channel', url.indexOf('https://www.youtube.com/embed/live_stream?channel=' + L.NEWS[0].youtube) === 0 && /autoplay=1/.test(url));
+check('embed by video', L.embedUrl({youtube: L.NEWS[0].youtube, video: 'abcdefghijk'}).indexOf('https://www.youtube.com/embed/abcdefghijk?') === 0);
+check('logo from our site', L.logoUrl(L.NEWS[0]) === 'https://yeahbuddynz.github.io/Beyond.TV/live/logos/' + L.NEWS[0].id + '.jpg');
+check('no logo for an odd id', L.logoUrl({id: '../x'}) === null);
+
+// On air: a recent now.json gives each channel its video and leaves out the ones not live
+var t = Date.parse('2026-11-21T10:00:00Z');
+var now = {at: '2026-11-21T09:00:00Z', channels: {}};
+now.channels[L.NEWS[0].youtube] = {video: 'abcdefghijk'};
+now.channels[L.NEWS[1].youtube] = {video: 'bad id'};
+var air = L.onAir(L.NEWS, now, t);
+check('live channel gets its video', air.length === 1 && air[0].video === 'abcdefghijk' && air[0].name === L.NEWS[0].name);
+check('the list itself is untouched', !L.NEWS[0].video);
+check('old now.json: every channel, by channel id', L.onAir(L.NEWS, {at: '2026-11-01T00:00:00Z', channels: now.channels}, t).length === L.NEWS.length);
+check('no now.json: every channel', L.onAir(L.NEWS, null, t).length === L.NEWS.length && !L.onAir(L.NEWS, null, t)[0].video);
+check('a now.json from the future is not trusted', L.onAir(L.NEWS, {at: '2026-11-25T00:00:00Z', channels: now.channels}, t).length === L.NEWS.length);
+
+// Rows: every channel lands in one, and a channel with no group is news
+var total = 0;
+['featured', 'news', 'more', 'kids'].forEach(function (g) { total += L.inGroup(L.NEWS, g).length; });
+check('every channel in one row', total === L.NEWS.length);
+check('featured row has channels', L.inGroup(L.NEWS, 'featured').length >= 4);
+check('kids row has channels', L.inGroup(L.NEWS, 'kids').length >= 1);
+check('no group is news', L.inGroup([{name: 'x', youtube: 'UCabcdefghijklmnopqrstuv'}], 'news').length === 1);
+check('every channel has a logo on the site', L.NEWS.every(function (c) { return fs.existsSync(path.join(__dirname, '..', 'docs', 'live', 'logos', c.id + '.jpg')); }));
 
 // The website's list is the same as the app's own copy
 var site = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'docs', 'live', 'channels.json'), 'utf8'));
 check('website list matches the app', JSON.stringify(site.channels) === JSON.stringify(L.NEWS));
+var java = fs.readFileSync(path.join(__dirname, '..', 'app', 'src', 'nz', 'gobeyond', 'tv', 'LiveTvActivity.java'), 'utf8');
+var javaList = java.slice(java.indexOf('static final String[][] NEWS'), java.indexOf('};', java.indexOf('static final String[][] NEWS')));
+var javaRows = javaList.match(/\{"[^}]*\}/g).map(function (r) { return JSON.parse('[' + r.slice(1, -1) + ']'); });
+check('Google TV list matches the website', JSON.stringify(javaRows) === JSON.stringify(site.channels.map(function (c) { return [c.id, c.name, c.from, c.youtube, c.group, c.colour]; })));
 
 console.log(passed + ' passed, ' + failed + ' failed');
 process.exit(failed ? 1 : 0);

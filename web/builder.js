@@ -2,7 +2,7 @@
  * Build it (ADR 0052): builder games for the remote. Build a road the way it is done for real, one job after another
  * (survey, clear, dig, drains, gravel, roll, asphalt, lines, open), picking the right machine for each job and then
  * driving it. Build a bridge: pick a shape and a material for the gap, the load and the money, then a truck tests it
- * (ADR 0053). More jobs (a town) plug in beside them. Played with the remote alone: the arrows and OK, and Back
+ * (ADR 0054). More jobs (a town) plug in beside them. Played with the remote alone: the arrows and OK, and Back
  * pauses (Back again leaves, back to Games). Bests stay on this TV, nothing is sent. Google TV runs this same file in
  * TableActivity's WebView (start "road" or "bridge"). The words are the game's own, in all five languages, like rcland.js.
  * Plain ES5: one 1280 by 720 canvas, plain shapes, nothing to download, no emoji (older TVs have no emoji font).

@@ -538,6 +538,9 @@ final class Russian {
             case "Here in Aotearoa": return "Здесь, в Аотеароа";
             case "On your TV": return "На вашем телевизоре";
             case "Your aerial": return "Ваша антенна";
+            case "Featured": return "Рекомендуемые";
+            case "Weather, space and music": return "Погода, космос и музыка";
+            case "For kids": return "Для детей";
             case "World news, free": return "Мировые новости, бесплатно";
             case "More free channels": return "Ещё бесплатные каналы";
             case "Pick Live TV in Plex": return "Выберите «Прямой эфир» в Plex";

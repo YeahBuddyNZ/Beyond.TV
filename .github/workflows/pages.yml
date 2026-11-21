@@ -1,10 +1,13 @@
-# Publishes the website in docs/ to GitHub Pages (gobeyond.co.nz) whenever it changes on main.
+# Publishes the website in docs/ to GitHub Pages (gobeyond.co.nz) whenever it changes on main, and every hour so Live TV's
+# now.json (the video each channel is streaming now, ADR 0053) stays current.
 name: Website
 
 on:
   push:
     branches: [main]
     paths: ["docs/**", ".github/workflows/pages.yml"]
+  schedule:
+    - cron: "23 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -24,6 +27,11 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v7
+      - name: Live TV, what's on air
+        # A channel YouTube can't be read from here keeps the copy in the repo; a failure never stops the website.
+        continue-on-error: true
+        timeout-minutes: 5
+        run: python3 tools/live_now.py docs/live
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:
