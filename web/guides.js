@@ -222,6 +222,21 @@ var Guides = (function () {
         ['Desfiladeiros fundos e portos com navios não aceitam pilares no meio. Madeira é leve e barata, perfeita para quem vai a pé.', 'Deep gorges and harbours with ships cannot have legs in the middle. Wood is light and cheap, perfect for people on foot.', 'Los barrancos hondos y los puertos con barcos no admiten pilares en el medio. La madera es ligera y barata, perfecta para gente a pie.', 'Tiefe Schluchten und Häfen mit Schiffen vertragen keine Pfeiler in der Mitte. Holz ist leicht und billig, perfekt für Fußgänger.', 'В глубоком ущелье и в гавани с кораблями нельзя ставить опоры посередине. Дерево лёгкое и дешёвое, идеально для пешеходов.']])
     ]},
 
+    town: {icon: '🏘️', name: ['Planejar uma cidade', 'Plan a town', 'Planear un pueblo', 'Eine Stadt planen', 'Спланировать город'], pages: [
+      page(AIM, [
+        ['Planeje três cidades, de uma vila até uma cidade movimentada, até todo mundo ficar feliz.', 'Plan three towns, from a little village to a busy town, until everyone is happy.', 'Planea tres pueblos, de una aldea a un pueblo animado, hasta que todos estén felices.', 'Plane drei Städte, vom kleinen Dorf bis zur lebhaften Stadt, bis alle glücklich sind.', 'Спланируйте три города, от деревни до оживлённого города, чтобы все были счастливы.'],
+        ['Cada casa tem uma carinha: verde é feliz, amarela tem um problema, vermelha tem mais. A lista à direita mostra o que falta.', 'Every house has a face: green is happy, amber has one problem, red has more. The list on the right shows what\'s short.', 'Cada casa tiene una cara: verde es feliz, ámbar tiene un problema, roja tiene más. La lista de la derecha muestra lo que falta.', 'Jedes Haus hat ein Gesicht: grün ist glücklich, gelb hat ein Problem, rot mehrere. Die Liste rechts zeigt, was fehlt.', 'У каждого дома есть лицо: зелёное счастливое, жёлтое с одной проблемой, красное с несколькими. Список справа показывает, чего не хватает.']]),
+      page(REMOTE, [
+        ['As setas levam o quadrado pelo terreno. OK abre a lista do que construir ali.', 'The arrows move the square around the land. OK opens the list of what to build there.', 'Las flechas mueven el cuadro por el terreno. OK abre la lista de qué construir ahí.', 'Die Pfeile bewegen das Feld übers Land. OK öffnet die Liste, was dort gebaut wird.', 'Стрелки двигают рамку по участку. OK открывает список того, что здесь построить.'],
+        ['Na lista, ◀ ▶ escolhem e OK constrói. OK em algo já construído oferece derrubar.', 'In the list, ◀ ▶ choose and OK builds. OK on something already built offers to knock it down.', 'En la lista, ◀ ▶ eligen y OK construye. OK sobre algo construido ofrece derribarlo.', 'In der Liste wählen ◀ ▶, und OK baut. OK auf etwas Gebautem bietet Abreißen an.', 'В списке ◀ ▶ выбирают, OK строит. OK на постройке предлагает её снести.'],
+        ARCADE_BACK]),
+      page(TIPS, [
+        ['Primeiro as estradas: casas e prédios só funcionam com uma estrada ligada à entrada da cidade, à esquerda.', 'Roads first: houses and buildings only work with a road joined to the way in on the left.', 'Primero las carreteras: casas y edificios solo funcionan con una carretera unida a la entrada, a la izquierda.', 'Zuerst Straßen: Häuser und Gebäude funktionieren nur mit einer Straße zur Einfahrt links.', 'Сначала дороги: дома и здания работают, только если дорога ведёт к въезду слева.'],
+        ['Usinas, esgoto e oficinas são barulhentos: deixe um espaço até as casas.', 'Power stations, wastewater and workshops are noisy and smelly: leave a gap before the houses.', 'Centrales, depuradoras y talleres son ruidosos: deja un hueco hasta las casas.', 'Kraftwerk, Kläranlage und Werkstatt sind laut: lass Abstand zu den Häusern.', 'Электростанции, очистные и мастерские шумят: оставьте промежуток до домов.'],
+        ['Sorveteria e parque são divertidos, mas não são necessidades. Gaste o dinheiro primeiro no que as pessoas precisam.', 'An ice cream shop and a park are fun, but they aren\'t needs. Spend the money on what people need first.', 'La heladería y el parque son divertidos, pero no son necesidades. Gasta primero en lo que la gente necesita.', 'Eisdiele und Park machen Spaß, sind aber kein Bedarf. Gib das Geld zuerst für das aus, was die Leute brauchen.', 'Кафе-мороженое и парк это весело, но не нужды. Сначала тратьте деньги на то, что людям нужно.'],
+        ['Três estrelas se sobrar um quarto do dinheiro.', 'Three stars if a quarter of the money is left.', 'Tres estrellas si sobra una cuarta parte del dinero.', 'Drei Sterne, wenn ein Viertel des Geldes übrig ist.', 'Три звезды, если осталась четверть денег.']])
+    ]},
+
     candy: {icon: '🍭', name: ['A Terra dos Doces da London', 'London\'s Candy Land', 'La Tierra de los Dulces de London', 'Londons Zuckerland', 'Сладкая страна Лондон'], pages: [
       page(AIM, [
         ['Passeie por um mundo de doces e brinque em seis lugares mágicos. Aqui ninguém perde: tudo vale brilhos.', 'Wander a world made of sweets and play in six magic places. Nobody loses here: everything earns sparkles.', 'Pasea por un mundo de dulces y juega en seis lugares mágicos. Aquí nadie pierde: todo da destellos.', 'Spazier durch eine Welt aus Süßigkeiten und spiel an sechs Zauberorten. Hier verliert niemand: Alles bringt Glitzer.', 'Гуляйте по сладкому миру и играйте в шести волшебных местах. Здесь никто не проигрывает: всё приносит блёстки.'],
@@ -326,7 +341,7 @@ var Guides = (function () {
   };
 
   /** The order on the How to play screen: the same as the Games screen. */
-  var ORDER = ['karaoke', 'ludo', 'chess', 'chant', 'snap', 'likely', 'rather', 'dare', 'rcland', 'road', 'bridge', 'candy', 'eel', 'paddle', 'guard', 'dots',
+  var ORDER = ['karaoke', 'ludo', 'chess', 'chant', 'snap', 'likely', 'rather', 'dare', 'rcland', 'road', 'bridge', 'town', 'candy', 'eel', 'paddle', 'guard', 'dots',
     'crew', 'lunch', 'party', 'lights', 'quiz', 'question', 'tidy', 'bedtime'];
 
   function nameOf(id) { return GUIDES[id] ? L(GUIDES[id].name) : ''; }

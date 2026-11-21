@@ -1,4 +1,4 @@
-# 0055. London's Candy Land: a kind candy world for the remote
+# 0056. London's Candy Land: a kind candy world for the remote
 
 Date: 21/11/2026. Status: accepted.
 

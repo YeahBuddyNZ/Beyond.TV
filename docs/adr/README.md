@@ -62,4 +62,5 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0052](0052-build-it-builder-games.md) | Build it: builder games, starting with a road |
 | [0053](0053-live-tv-tiles-and-live-videos.md) | Live TV: logo tiles, more channels, and the video that is live now |
 | [0054](0054-build-a-bridge.md) | Build it: build a bridge |
-| [0055](0055-londons-candy-land.md) | Lolly Land (London's Candy Land): a kind candy world for the remote |
+| [0055](0055-plan-a-town.md) | Build it: plan a town |
+| [0056](0056-londons-candy-land.md) | Lolly Land (London's Candy Land): a kind candy world for the remote |
