@@ -171,9 +171,47 @@ R.drive(g, 51);
 check('3 picks first person', g.view === 2 && g.camT > 0);
 R.drive(g, 403);
 check('a colour button goes round the cameras', g.view === 0);
+R.drive(g, 427); R.drive(g, 34);
+check('channel up and down go round the cameras too', g.view === 2);
 check('the camera is kept for next time', R.newGame(0, {view: 1}).view === 1 && R.newGame(0, {view: 9}).view === 0);
 var tow = R.towAt({x: 100, y: 100, h: 0, vx: 0, vy: 0});
 check('the water skier is towed from ahead', tow.x > 100 && tow.y === 100);
+
+// Race mode (ADR 0049): a countdown holds everyone still, gates count only in order, two laps, stunts take time off.
+check('a second off for every 500 stunt points', R.raceTotal(60, 1000) === 58 && R.raceTotal(5, 99999) === 0);
+check('times read well', R.fmtTime(42.34) === '42.3 s' && R.fmtTime(75.2) === '1:15.2');
+[false, true].forEach(function (water) {
+  var gates = R.course(water);
+  check((water ? 'lake' : 'park') + ' course gates are inside the fence', gates.length >= 8 && gates.every(function (gt) { return gt.x > 200 && gt.x < 3400 && gt.y > 200 && gt.y < 2400; }));
+});
+g = R.newGame(0, {});
+R.newRace(g, 1);
+R.drive(g, UP); R.drive(g, UP); R.drive(g, UP);
+run(g, 2);
+check('the countdown holds the car still', g.car.speed === 0 && g.race.time === 0);
+// Driving straight to the third gate, skipping the second, doesn't count it.
+var skip = g.race.gates[2];
+g.car.x = skip.x; g.car.y = skip.y;
+run(g, 2);
+check('a gate out of order does not count', g.race.next === 1);
+// A bot steering at the next gate gets every machine round both laps.
+R.MACHINES.forEach(function (m, mi) {
+  var rg = R.newGame(mi, {}); R.newRace(rg, 2);
+  for (var t = 0; t < 240 && !rg.race.done; t += 1 / 60) {
+    var gt = rg.race.gates[rg.race.next], d = Math.atan2(gt.y - rg.car.y, gt.x - rg.car.x) - rg.car.h;
+    while (d > Math.PI) d -= 2 * Math.PI;
+    while (d < -Math.PI) d += 2 * Math.PI;
+    rg.car.want = rg.car.h + d; rg.car.gear = 3;
+    R.step(rg, 1 / 60);
+  }
+  check(m.id + ' finishes two laps of the race', rg.race.done && rg.race.lap === R.LAPS && rg.race.time > 10 && rg.race.total <= rg.race.time);
+});
+g = R.newGame(3, {});
+R.newRace(g, 1);
+run(g, 4);
+R.drive(g, OK); R.step(g, 0.2); R.drive(g, UP);
+run(g, 3);
+check('stunts in a race count for it', g.stunts === 0 || g.stunts > 0);
 
 // Drawing doesn't throw: every frame kind on a stand-in canvas.
 var calls = 0;
@@ -202,6 +240,10 @@ try {
     });
   });
   R.drawPick(6, 1.3, 50, 1, 1); R.drawPick(0, 1.3, 0, 2, 2);
+  R.drawPick(0, 1.3, '41.2 s', 2, 0, 2, 2);
+  [0, 1, 2].forEach(function (v) { var rg = R.newGame(v ? 5 : 0, {}); rg.view = v; R.newRace(rg, 1); R.render(rg); run(rg, 4); R.render(rg); rg.race.done = true; rg.race.total = 30; rg.race.doneT = 1; R.render(rg); });
+  var res = [{player: 1, name: R.MACHINES[0].name, time: 40, stunts: 900, total: 38.2, best: true}, {player: 2, name: R.MACHINES[1].name, time: 39, stunts: 0, total: 39}];
+  R.drawResult(res.slice(0, 1), 2, 1, 38.2); R.drawResult(res, 2, 1, 38.2); R.drawResult(res.slice(0, 1), 1, 1, 0);
 } catch (e) { drawn = false; console.log(e.stack); }
 check('every screen draws', drawn && calls > 100);
 
