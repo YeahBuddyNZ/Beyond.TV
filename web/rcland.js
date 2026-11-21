@@ -95,6 +95,8 @@ var RCLand = (function () {
     ['Sair', 'Leave', 'Salir', 'Verlassen', 'Выйти']];
   var PAUSE_HELP = ['◀ ▶ câmera  ·  ▲ ▼ escolher  ·  OK  ·  Voltar sair', '◀ ▶ camera  ·  ▲ ▼ choose  ·  OK  ·  Back to leave', '◀ ▶ cámara  ·  ▲ ▼ elegir  ·  OK  ·  Atrás salir', '◀ ▶ Kamera  ·  ▲ ▼ wählen  ·  OK  ·  Zurück verlassen', '◀ ▶ камера  ·  ▲ ▼ выбрать  ·  OK  ·  «Назад» выйти'];
   // How to change the camera while driving, on screen the whole time: every remote has Back and the arrows.
+  var YUM = ['Saudável!', 'Healthy!', '¡Sano!', 'Gesund!', 'Полезно!'];
+  var SUGAR = ['Açúcar demais!', 'Too much sugar!', '¡Demasiado azúcar!', 'Zu viel Zucker!', 'Слишком много сахара!'];
   var CAM_HOW = ['Voltar, depois ◀ ▶', 'Back, then ◀ ▶', 'Atrás, luego ◀ ▶', 'Zurück, dann ◀ ▶', '«Назад», затем ◀ ▶'];
   var TRICKS = {
     front: ['Mortal', 'Front flip', 'Voltereta', 'Salto', 'Сальто'],
@@ -220,7 +222,10 @@ var RCLand = (function () {
     // Barrels float: a machine too small to smash one pushes it out of the way rather than getting stuck between them.
     barrel: {r: 22, h: 40, tough: 2, pts: 120, push: true},
     island: {r: 150, h: 9999, tough: 99, pts: 0},
-    hoop: {r: 42, h: 0, tough: 0, pts: 250, float: true}
+    hoop: {r: 42, h: 0, tough: 0, pts: 250, float: true},
+    // Kyle, 21/11/2026: healthy snacks to drive through for points, sugary ones take points off.
+    snack: {r: 28, h: 0, tough: 0, pts: 150, float: true},
+    sweet: {r: 28, h: 0, tough: 0, pts: 150, float: true}
   };
   var BLOCKS = [CORAL, BLUE, EMBER, VIOLET, '#5CC4AE'];
   var BALLOONS = [CORAL, BLUE, LILAC, EMBER, '#5CC4AE', '#E8475C'];
@@ -305,7 +310,19 @@ var RCLand = (function () {
     for (i = 0; i < 9; i++) { add('tree', 90 + srand() * 40, 260 + i * 260); add('tree', WW - 90 - srand() * 40, 260 + i * 260); }
     var middle = [[1300, 420], [1420, 470], [2150, 700], [1450, 1700], [2150, 1950], [1980, 600]];
     for (i = 0; i < middle.length; i++) add('tree', middle[i][0], middle[i][1]);
+    // Last, so everything above stays where it was.
+    snacks(add, [[1000, 240], [1220, 240], [1440, 240], [2500, 240], [2720, 240], [3350, 700], [3350, 1100], [3350, 2000],
+      [2750, 2400], [2000, 2400], [950, 2400], [730, 2400], [250, 1500], [250, 1700], [1600, 1500], [2000, 1350]]);
     return w;
+  }
+
+  // Healthy snacks and sugary ones, floating at bumper height. Every third spot is sugary, so there's always one to dodge.
+  var GOOD = ['apple', 'carrot', 'banana', 'broccoli'], BAD = ['lolly', 'donut', 'fizzy', 'cupcake'];
+  function snacks(add, spots) {
+    for (var i = 0; i < spots.length; i++) {
+      var bad = i % 3 === 1;
+      add(bad ? 'sweet' : 'snack', spots[i][0], spots[i][1], {z: 30, f: (bad ? BAD : GOOD)[i % 4]});
+    }
   }
 
   /** The lake: water from fence to fence with a beach round it, islands, ski ramps, a surf break with waves on the right. */
@@ -367,6 +384,8 @@ var RCLand = (function () {
       wv.len = 170; wv.wid = sf.h; wv.h = 55; wv.wave = 140; wv.float = false;
       w.waves.push(wv);
     }
+    snacks(add, [[1100, 1800], [1320, 1800], [1540, 1800], [250, 1060], [250, 1260], [1000, 250], [1180, 250], [800, 1950],
+      [2150, 1900], [2400, 1250], [2000, 1000], [2600, 1900]]);
     return w;
   }
 
@@ -573,6 +592,20 @@ var RCLand = (function () {
       burst(g, o.x, o.y, o.z, 14, [EMBER, '#FFD27A', PAPER], 260, 200, 9, 2);
       sfx('star');
       award(g, o.pts, o.x, o.y, o.z, '★', EMBER);
+    } else if (o.kind === 'snack') {
+      burst(g, o.x, o.y, o.z, 10, ['#5DAA4F', PAPER, EMBER], 240, 160, 7, 2);
+      sfx('star');
+      var got = award(g, o.pts, o.x, o.y, o.z, L(YUM), '#8FE07A');
+      // In a race, good food counts like a stunt.
+      if (g.race) g.stunts += got;
+    } else if (o.kind === 'sweet') {
+      // Sugary: points off and the combo ends. Never below nothing.
+      burst(g, o.x, o.y, o.z, 10, [CORAL, '#FF8FB1', PAPER], 240, 160, 7, 2);
+      sfx('lose'); shake(g, 5);
+      g.combo.n = 0; g.combo.t = 0;
+      g.score = Math.max(0, g.score - o.pts);
+      if (g.race) g.stunts = Math.max(0, g.stunts - o.pts);
+      pop(g, L(SUGAR) + '  -' + o.pts, o.x, o.y, o.z, CORAL, true);
     } else if (o.kind === 'hoop') {
       stat(g, 'hoops');
       part(g, o.x, o.y, o.z, 0, 0, 0, 0.4, LILAC, 50, 3);
@@ -1184,6 +1217,48 @@ var RCLand = (function () {
     disc(x, y, 9 * k, '#8A5A3B');
   }
 
+  /** A snack, centred, about r across: healthy ones in a green ring, sugary ones in a red ring with a line through. */
+  function food(o, r) {
+    var good = o.kind === 'snack';
+    disc(0, 0, r * 1.05, good ? 'rgba(93,170,79,0.35)' : 'rgba(216,90,48,0.35)');
+    c.strokeStyle = good ? '#8FE07A' : CORAL; c.lineWidth = 4; c.beginPath(); c.arc(0, 0, r * 1.05, 0, TAU); c.stroke();
+    var k = r / 28, f = o.f;
+    c.save(); c.scale(k, k);
+    if (f === 'apple') {
+      disc(-7, 2, 14, '#D93B30'); disc(7, 2, 14, '#D93B30'); disc(-5, -3, 5, 'rgba(255,255,255,0.35)');
+      c.fillStyle = '#6B4226'; c.fillRect(-1.5, -18, 3, 9); oval(7, -15, 7, 3.5, '#5DAA4F');
+    } else if (f === 'carrot') {
+      c.fillStyle = '#F07A2A'; c.beginPath(); c.moveTo(-8, -12); c.lineTo(8, -12); c.lineTo(0, 20); c.closePath(); c.fill();
+      c.strokeStyle = '#C2571C'; c.lineWidth = 2; c.beginPath(); c.moveTo(-4, -2); c.lineTo(1, -2); c.moveTo(-2, 6); c.lineTo(2, 6); c.stroke();
+      c.fillStyle = '#5DAA4F'; c.beginPath(); c.moveTo(-6, -12); c.lineTo(-8, -22); c.lineTo(0, -14); c.lineTo(4, -23); c.lineTo(6, -12); c.fill();
+    } else if (f === 'banana') {
+      c.strokeStyle = '#F2C94C'; c.lineWidth = 10; c.lineCap = 'round';
+      c.beginPath(); c.arc(0, -10, 20, Math.PI * 0.2, Math.PI * 0.8); c.stroke(); c.lineCap = 'butt';
+      disc(-16, 2, 2.5, '#6B4226');
+    } else if (f === 'broccoli') {
+      c.fillStyle = '#7FB069'; c.fillRect(-4, 0, 8, 16);
+      disc(-9, -4, 9, '#2E8B3E'); disc(9, -4, 9, '#2E8B3E'); disc(0, -11, 10, '#3A9E4A'); disc(0, -1, 8, '#2E8B3E');
+    } else if (f === 'lolly') {
+      c.fillStyle = PAPER; c.fillRect(-1.5, 4, 3, 18);
+      disc(0, -6, 13, '#FF6FA8'); c.strokeStyle = PAPER; c.lineWidth = 3;
+      c.beginPath(); c.arc(0, -6, 8, 0, Math.PI * 1.5); c.stroke(); c.beginPath(); c.arc(0, -6, 3, 0, Math.PI * 1.5); c.stroke();
+    } else if (f === 'donut') {
+      disc(0, 0, 17, '#C98B4E'); disc(0, -1, 14, '#FF8FB1'); disc(0, 0, 6, good ? '#2E8B3E' : '#7A2E1F');
+      c.fillStyle = PAPER; c.fillRect(-9, -9, 4, 2); c.fillRect(6, -5, 2, 4); c.fillStyle = '#6EC6FF'; c.fillRect(-4, 8, 4, 2); c.fillRect(8, 5, 2, 4);
+    } else if (f === 'fizzy') {
+      box(-10, -16, 20, 32, 4, '#D93B30'); c.fillStyle = '#B5B1AC'; c.fillRect(-10, -16, 20, 4); c.fillRect(-10, 13, 20, 3);
+      c.fillStyle = PAPER; c.fillRect(-10, -2, 20, 5);
+    } else {
+      c.fillStyle = '#C98B4E'; c.beginPath(); c.moveTo(-12, 0); c.lineTo(12, 0); c.lineTo(8, 16); c.lineTo(-8, 16); c.closePath(); c.fill();
+      disc(-6, -3, 8, '#FF8FB1'); disc(6, -3, 8, '#FF8FB1'); disc(0, -10, 8, '#FFB3CB'); disc(0, -19, 4, '#D93B30');
+    }
+    c.restore();
+    if (!good) {
+      c.strokeStyle = CORAL; c.lineWidth = 4;
+      c.beginPath(); c.moveTo(-r * 0.74, -r * 0.74); c.lineTo(r * 0.74, r * 0.74); c.stroke();
+    }
+  }
+
   function drawObj(o, t) {
     var s = o.pop > 0 ? 1 - o.pop * 1.6 : 1;
     if (s <= 0.05) return;
@@ -1197,6 +1272,8 @@ var RCLand = (function () {
         c.strokeStyle = EMBER; c.lineWidth = 9; oval(0, 0, o.r, o.r * 0.42, 'rgba(158,123,255,0.25)');
         c.beginPath(); c.save(); c.scale(1, 0.42); c.arc(0, 0, o.r, 0, TAU); c.restore(); c.stroke();
         c.restore();
+      } else if (o.kind === 'snack' || o.kind === 'sweet') {
+        c.save(); c.translate(o.x, y); c.scale(s, s); food(o, o.r); c.restore();
       } else if (o.kind === 'balloon') {
         c.strokeStyle = 'rgba(255,255,255,0.7)'; c.lineWidth = 1.5;
         c.beginPath(); c.moveTo(o.x, y + o.r); c.quadraticCurveTo(o.x + 8, y + o.r + 20, o.x, o.y); c.stroke();
@@ -1730,6 +1807,8 @@ var RCLand = (function () {
       c.strokeStyle = 'rgba(255,255,255,0.8)'; c.lineWidth = 1.5;
       c.beginPath(); c.moveTo(0, r); c.quadraticCurveTo(8, r + 20, 0, r + 44); c.stroke();
       oval(0, 0, r * 0.85, r, o.c); oval(-r * 0.3, -r * 0.35, r * 0.22, r * 0.3, 'rgba(255,255,255,0.5)');
+    } else if (o.kind === 'snack' || o.kind === 'sweet') {
+      food(o, r);
     } else if (o.kind === 'star') {
       c.scale(Math.cos(t * 3 + o.a), 1);
       disc(0, 0, r * 0.9, 'rgba(232,163,61,0.25)');

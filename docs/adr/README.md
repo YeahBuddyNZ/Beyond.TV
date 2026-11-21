@@ -58,3 +58,4 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0048](0048-remote-control-land-cameras-and-the-lake.md) | Remote Control Land: three cameras and a lake with four water sports |
 | [0049](0049-remote-control-land-race-mode.md) | Remote Control Land: race mode, two players, and a camera you can find |
 | [0050](0050-light-show-hears-the-room.md) | The light show hears the room, keeps the beat, and ripples when you wave |
+| [0051](0051-remote-control-land-snacks.md) | Remote Control Land: healthy snacks score, sugary ones cost |
