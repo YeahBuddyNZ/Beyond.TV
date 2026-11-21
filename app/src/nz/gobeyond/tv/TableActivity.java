@@ -254,7 +254,8 @@ public class TableActivity extends Activity {
             case KeyEvent.KEYCODE_NUMPAD_ENTER:
             case KeyEvent.KEYCODE_BUTTON_A: js = 13; break;
             case KeyEvent.KEYCODE_BACK:
-            case KeyEvent.KEYCODE_ESCAPE: js = 4; break;
+            case KeyEvent.KEYCODE_ESCAPE:
+            case KeyEvent.KEYCODE_BUTTON_B: js = 4; break;
             default: return super.dispatchKeyEvent(e);
         }
         // One press, one key: a held OK must not slap over and over.

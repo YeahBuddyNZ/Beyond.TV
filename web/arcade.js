@@ -15,6 +15,12 @@ var Arcade = (function () {
   var INK = '#0D0C18', PAPER = '#F7F6F2', MOSS = '#2F7D6D', EMBER = '#E8A33D', CORAL = '#D85A30', BLUE = '#378ADD', LILAC = '#9E7BFF';
   var LEFT = 37, UP = 38, RIGHT = 39, DOWN = 40, OK = 13;
 
+  /** Back on every remote: Google TV's (4), LG's (461), Samsung's (10009), and Escape or Backspace on a keyboard. */
+  function isBack(k) {
+    var tv = typeof TV !== 'undefined' ? TV : (window.TV || null);
+    return k === 4 || k === 461 || k === 10009 || k === 27 || k === 8 || !!(tv && tv.keys && k === tv.keys.back);
+  }
+
   function say(pt, en, es) { return tr(pt, en, es); }
   function sfx(kind) { if (window.Sfx) Sfx.play(kind); }
 
@@ -118,9 +124,11 @@ var Arcade = (function () {
     }
     place();
 
-    g.how = say('Setas viram a enguia. Ela não para, então coma as frutas e não se morda.',
-      'The arrows turn the eel. It never stops, so eat the fruit and don\'t bite yourself.',
-      'Las flechas giran la anguila. No se detiene: come la fruta y no te muerdas.');
+    g.how = say('Setas viram a enguia. Ela não para, então coma as frutas e não se morda. OK pausa.',
+      'The arrows turn the eel. It never stops, so eat the fruit and don\'t bite yourself. OK pauses.',
+      'Las flechas giran la anguila. No se detiene: come la fruta y no te muerdas. OK pausa.');
+    // The eel can't stop, so OK pauses it (run() sees okPauses).
+    g.okPauses = true;
     g.key = function (k) {
       var d = DIRS[k];
       if (!d) return;
@@ -238,12 +246,12 @@ var Arcade = (function () {
   function makeGuard() {
     var COLS = 9, ROWS = 4, TOTAL = COLS * ROWS, GX = 100, GY = 66, SIZE = 56, SHIP_Y = H - 60;
     var g = {id: 'guard', score: 0, over: false, lives: 3};
-    var wave = 1, jellies, ox, oy, dirx, tick, ship = {x: W / 2, v: 0}, shot = null, bombs = [], hurt = 0, alive, resting = 0;
+    var wave = 1, jellies, ox, oy, dirx, tick, ship = {x: W / 2, v: 0}, shots = [], cool = 0, bombs = [], hurt = 0, alive, resting = 0;
 
     function build() {
       jellies = [];
       for (var r = 0; r < ROWS; r++) for (var c = 0; c < COLS; c++) jellies.push({c: c, r: r, alive: true});
-      ox = 120; oy = 60 + Math.min(wave - 1, 3) * 20; dirx = 1; tick = 0; alive = TOTAL; shot = null; bombs = [];
+      ox = 120; oy = 60 + Math.min(wave - 1, 3) * 20; dirx = 1; tick = 0; alive = TOTAL; shots = []; bombs = [];
     }
     build();
 
@@ -252,13 +260,15 @@ var Arcade = (function () {
       'Izquierda y derecha mueven la nave y sigue sola. OK dispara, abajo para. Detén las medusas antes de que lleguen abajo.');
     g.key = function (k) {
       if (k === LEFT) ship.v = -400; else if (k === RIGHT) ship.v = 400; else if (k === DOWN) ship.v = 0;
-      else if (k === OK && !shot) { shot = {x: ship.x, y: SHIP_Y - 30}; sfx('hop'); }
+      // Up to three shots in the air, a moment apart, so every OK press fires.
+      else if (k === OK && shots.length < 3 && cool === 0) { shots.push({x: ship.x, y: SHIP_Y - 30}); cool = 4; sfx('hop'); }
     };
     g.update = function () {
       var dt = TICK / 1000, i, j;
       ship.x = Math.max(40, Math.min(W - 40, ship.x + ship.v * dt));
       if (ship.x === 40 || ship.x === W - 40) ship.v = 0;
       if (hurt > 0) hurt--;
+      if (cool > 0) cool--;
       if (resting > 0) { resting--; if (resting === 0) build(); return; }
       tick++;
       if (tick % jellyEvery(alive, TOTAL, wave) === 0) {
@@ -270,17 +280,19 @@ var Arcade = (function () {
       var lowest = 0;
       for (i = 0; i < jellies.length; i++) if (jellies[i].alive) lowest = Math.max(lowest, oy + jellies[i].r * GY + SIZE);
       if (lowest >= SHIP_Y - 24) { g.over = true; return; }
-      if (shot) {
+      for (j = shots.length - 1; j >= 0; j--) {
+        var shot = shots[j], hit = false;
         shot.y -= 840 * dt;
-        if (shot.y < -20) shot = null;
-        else for (i = 0; i < jellies.length && shot; i++) {
+        if (shot.y < -20) { shots.splice(j, 1); continue; }
+        for (i = 0; i < jellies.length && !hit; i++) {
           var a = jellies[i];
           if (!a.alive) continue;
           var ax = ox + a.c * GX, ay = oy + a.r * GY;
           if (shot.x > ax - 6 && shot.x < ax + SIZE + 6 && shot.y > ay && shot.y < ay + SIZE) {
-            a.alive = false; alive--; shot = null; g.score += 10 * (ROWS - a.r); sfx('capture');
+            a.alive = false; alive--; hit = true; g.score += 10 * (ROWS - a.r); sfx('capture');
           }
         }
+        if (hit) shots.splice(j, 1);
       }
       if (alive === 0) { wave++; g.score += 100; sfx('win'); resting = 30; return; }
       // The jellies drop bombs, from the front of a column.
@@ -323,7 +335,8 @@ var Arcade = (function () {
         c2.beginPath(); c2.moveTo(ship.x, SHIP_Y - 28); c2.lineTo(ship.x + 36, SHIP_Y + 18); c2.lineTo(ship.x - 36, SHIP_Y + 18); c2.closePath(); c2.fill();
         disc(ship.x, SHIP_Y, 9, '#5CC4AE');
       }
-      if (shot) { c2.fillStyle = PAPER; c2.fillRect(shot.x - 3, shot.y, 6, 22); }
+      c2.fillStyle = PAPER;
+      for (i = 0; i < shots.length; i++) c2.fillRect(shots[i].x - 3, shots[i].y, 6, 22);
       c2.fillStyle = EMBER;
       for (i = 0; i < bombs.length; i++) { rr(bombs[i].x - 5, bombs[i].y, 10, 22, 5); c2.fill(); }
     };
@@ -359,10 +372,13 @@ var Arcade = (function () {
     }
     freshDots(); spawn();
 
-    g.how = say('Setas escolhem o caminho, e você continua. Coma todos os pontos. Um ponto grande deixa os fantasmas com medo.',
-      'The arrows pick your way and you keep going. Eat every dot. A big dot makes the ghosts scared.',
-      'Las flechas eligen el camino y sigues solo. Come todos los puntos. Un punto grande asusta a los fantasmas.');
-    g.key = function (k) { if (DIRS[k]) who.want = DIRS[k]; };
+    g.how = say('Setas escolhem o caminho, e você continua, e OK para. Coma todos os pontos. Um ponto grande deixa os fantasmas com medo.',
+      'The arrows pick your way and you keep going, and OK stops. Eat every dot. A big dot makes the ghosts scared.',
+      'Las flechas eligen el camino y sigues solo, y OK te para. Come todos los puntos. Un punto grande asusta a los fantasmas.');
+    g.key = function (k) {
+      if (DIRS[k]) { who.want = DIRS[k]; who.stop = false; }
+      else if (k === OK) { who.want = null; who.stop = true; }
+    };
 
     function ticksPer(kind) {
       if (kind === 'me') return TOTAL_TICKS;
@@ -380,6 +396,7 @@ var Arcade = (function () {
       if (d && open(grid, m.c + d.x, m.r + d.y)) { m.tc = m.c + d.x; m.tr = m.r + d.y; } else { m.dir = null; m.tc = m.c; m.tr = m.r; }
     }
     function pickMe(m) {
+      if (m.stop) return null;
       if (m.want && open(grid, m.c + m.want.x, m.r + m.want.y)) return m.want;
       return m.dir && open(grid, m.c + m.dir.x, m.r + m.dir.y) ? m.dir : null;
     }
@@ -885,6 +902,8 @@ var Arcade = (function () {
         UI.el('div', 'ar-help', layer, say('Setas: virar · OK: começar, atirar ou parar · Voltar: pausa', 'Arrows turn · OK starts, fires or stops · Back pauses', 'Flechas: girar · OK: empezar, disparar o parar · Atrás: pausa'));
       },
       key: function (k) {
+        // Back goes to back() below (pause, or leave): it must never be swallowed here.
+        if (isBack(k)) return false;
         if (!g) return true;
         if (state === 'ready') { if (k === OK) state = 'play'; return true; }
         if (state === 'paused') {
@@ -893,6 +912,7 @@ var Arcade = (function () {
           return true;
         }
         if (state === 'over') { if (k === OK) { begin(spec); state = 'play'; } return true; }
+        if (k === OK && g.okPauses) { state = 'paused'; return true; }
         g.key(k);
         return true;
       },
