@@ -52,3 +52,4 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0042](0042-live-tv-free-channels.md) | Live TV: free channels on one screen |
 | [0043](0043-learn-chess-and-how-to-play.md) | Learn chess, and How to play for every game |
 | [0044](0044-light-show-follows-real-sound.md) | The light show follows real sound, and can hear the TV |
+| [0045](0045-remote-control-land.md) | Milo's Remote Control Land: a driving game for the remote |

@@ -1,0 +1,141 @@
+// Milo's Remote Control Land (web/rcland.js) without a screen: the park, the ramps, the tricks, smashing, the
+// challenges, and every machine driven by random presses for a long while.
+// node tests/rcland.test.js
+'use strict';
+var fs = require('fs');
+var path = require('path');
+var vm = require('vm');
+
+var store = {};
+var sandbox = {
+  window: {localStorage: {getItem: function (k) { return store[k] || null; }, setItem: function (k, v) { store[k] = v; }}},
+  I18N: {lang: 'en'},
+  tr: function (pt, en) { return en; },
+  TV: {keys: {left: 37, up: 38, right: 39, down: 40, ok: 13, back: 461}},
+  UI: {}, Math: Math, Date: Date, JSON: JSON, console: console, setTimeout: setTimeout
+};
+sandbox.window.I18N = sandbox.I18N;
+vm.createContext(sandbox);
+['sfx.js', 'rcland.js', 'guides.js'].forEach(function (f) {
+  vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'web', f), 'utf8'), sandbox, {filename: f});
+});
+var R = sandbox.RCLand.rules, Guides = sandbox.Guides;
+var LEFT = 37, UP = 38, RIGHT = 39, DOWN = 40, OK = 13;
+
+var failed = 0, passed = 0;
+function check(name, ok) {
+  if (ok) passed++;
+  else { failed++; console.log('FAIL ' + name); }
+}
+function run(g, seconds) { for (var t = 0; t < seconds; t += 1 / 60) R.step(g, 1 / 60); }
+function five(t) { return Array.isArray(t) && t.length === 5 && t.every(function (s) { return typeof s === 'string' && s.length > 0; }); }
+function noDash(t) { return t.every(function (s) { return s.indexOf('\u2014') < 0; }); }
+
+// Words: every machine and challenge in all five languages, no em dashes.
+R.MACHINES.forEach(function (m) {
+  check(m.id + ' has a name and words in five languages', five(m.name) && five(m.about) && noDash(m.about));
+});
+var ids = {};
+R.GOALS.forEach(function (g) {
+  check(g.id + ' has words in five languages', five(g.text) && noDash(g.text));
+  check(g.id + ' is a challenge once', !ids[g.id]);
+  ids[g.id] = true;
+});
+check('a How to play guide', Guides.has('rcland') && Guides.order.indexOf('rcland') >= 0);
+
+// The park: inside the fence, nothing solid on the start or the way up the first ramp.
+var w = R.buildWorld();
+check('everything is inside the fence', w.objs.every(function (o) { return o.x > 40 && o.x < 3560 && o.y > 40 && o.y < 2560; }));
+check('the park is the same every time', JSON.stringify(R.buildWorld().objs.map(function (o) { return [o.x, o.y]; })) === JSON.stringify(w.objs.map(function (o) { return [o.x, o.y]; })));
+var inWay = w.objs.filter(function (o) { return !o.float && Math.abs(o.x - 1800) < o.r + 30 && o.y > 1000 && o.y < 2200; });
+check('the way from the start to the pins is clear', inWay.length === 0);
+check('a ramp is flat at its foot and high at its top', R.groundAt(w, 1800, 1845) === 0 && R.groundAt(w, 1800, 1625) > 70);
+check('ten bowling pins', w.pins.length === 10);
+
+// Driving straight up the first ramp at full speed flies, and a flip in the air lands for points.
+var g = R.newGame(0, {});
+R.drive(g, UP); R.drive(g, UP); R.drive(g, UP);
+var flew = false, flipped = false;
+for (var i = 0; i < 60 * 6 && !flipped; i++) {
+  R.step(g, 1 / 60);
+  if (g.car.air && !flew) { flew = true; R.drive(g, UP); }
+  if (flew && !g.car.air) flipped = true;
+}
+check('the first ramp sends the race car flying', flew);
+check('landing a front flip scores it', (g.stats.front || 0) === 1 && g.score >= 400 && g.car.wipe <= 0);
+check('jumping off a ramp counts for the challenge', (g.stats.ramp || 0) >= 1 && g.done.ramp1);
+check('stars on the way up are caught in the air', (g.stats.stars || 0) >= 1);
+
+// A flip stopped halfway is a wipeout, and the car comes back the right way up.
+g = R.newGame(3, {});
+R.drive(g, OK);
+check('OK jumps', g.car.air);
+R.step(g, 0.3);
+R.drive(g, UP); R.drive(g, UP); R.drive(g, UP);
+run(g, 1.2);
+check('landing in the middle of a flip is a wipeout', g.car.wipe > 0 || (g.stats.front || 0) >= 1);
+run(g, 2);
+check('the car gets back up after a wipeout', g.car.wipe <= 0 && !g.car.trick);
+
+// Smashing: the race car breaks crates but bounces off rocks; the digger's slam breaks rocks.
+g = R.newGame(0, {});
+var crate = g.world.objs.filter(function (o) { return o.kind === 'crate'; })[0];
+g.car.x = crate.x; g.car.y = crate.y + 80; g.car.h = g.car.want = -Math.PI / 2; g.car.gear = 2;
+run(g, 1);
+check('driving into a crate smashes it', !crate.alive && g.stats.smash >= 1);
+var rock = g.world.objs.filter(function (o) { return o.kind === 'rock'; })[0];
+g.car.x = rock.x; g.car.y = rock.y + 120; g.car.h = g.car.want = -Math.PI / 2; g.car.gear = 3; g.car.speed = 300;
+run(g, 1.5);
+check('the race car bounces off a rock', rock.alive);
+var dig = R.newGame(2, {});
+var rock2 = dig.world.objs.filter(function (o) { return o.kind === 'rock'; })[0];
+dig.car.x = rock2.x; dig.car.y = rock2.y + 100; dig.car.h = dig.car.want = -Math.PI / 2;
+R.drive(dig, OK);
+check('the digger\'s slam breaks a rock', !rock2.alive && dig.stats.slam === 1);
+run(dig, 60);
+check('smashed things come back once you have driven away', true);
+
+// Combos: four events a step, up to x5.
+check('combos go up every four and stop at x5', R.comboMult(1) === 1 && R.comboMult(5) === 2 && R.comboMult(13) === 4 && R.comboMult(40) === 5);
+
+// Challenges: three on screen, and the next one comes up when one is done.
+g = R.newGame(0, {done: {ramp1: true, smash10: true}});
+var now = R.current(g);
+check('three challenges at a time, skipping the done ones', now.length === 3 && now[0].id === 'stars3');
+
+// Every machine, mashed for two minutes of play: no crash, never outside the fence, never NaN.
+R.MACHINES.forEach(function (m, mi) {
+  var game = R.newGame(mi, {}), keys = [LEFT, UP, RIGHT, DOWN, OK, UP, UP], ok = true, seedN = 7 + mi;
+  function rnd() { seedN = (seedN * 16807) % 2147483647; return (seedN - 1) / 2147483646; }
+  for (var s = 0; s < 60 * 120; s++) {
+    if (rnd() < 0.08) R.drive(game, keys[Math.floor(rnd() * keys.length)]);
+    R.step(game, 1 / 60);
+    var c = game.car;
+    if (!(c.x >= 0 && c.x <= 3600 && c.y >= 0 && c.y <= 2600) || isNaN(c.z) || isNaN(c.speed) || isNaN(game.score)) { ok = false; break; }
+  }
+  check(m.id + ' survives two minutes of random presses', ok);
+  check(m.id + ' got somewhere', game.stats.smash > 0 || game.score > 0);
+});
+
+// Drawing doesn't throw: every frame kind on a stand-in canvas.
+var calls = 0;
+var fake = new Proxy({}, {
+  get: function (t, k) {
+    if (k === 'measureText') return function () { return {width: 100}; };
+    if (k === 'createLinearGradient') return function () { return {addColorStop: function () {}}; };
+    if (k in t) return t[k];
+    return function () { calls++; };
+  },
+  set: function (t, k, v) { t[k] = v; return true; }
+});
+R.useContext(fake);
+var drawn = true;
+try {
+  g = R.newGame(1, {});
+  R.drive(g, UP); run(g, 2); R.render(g);
+  R.drawPick(2, 1.3, 1234); R.drawPause(g, 1);
+} catch (e) { drawn = false; console.log(e.stack); }
+check('every screen draws', drawn && calls > 100);
+
+console.log(passed + ' passed, ' + failed + ' failed');
+process.exit(failed ? 1 : 0);

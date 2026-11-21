@@ -14,7 +14,7 @@ import android.widget.Toast;
 
 /**
  * Games, from the remote (ADR 0021): every game and family activity starts here on the TV, no phone needed. Karaoke,
- * board and card games against the robots, silly party games and the light show (all TableActivity), a party, quiz night, the dinner
+ * board and card games against the robots, silly party games, Milo's Remote Control Land and the light show (all TableActivity), a party, quiz night, the dinner
  * question, the tidy-up race, bedtime breathing and How to play. Quiz night and the dinner question need Beyond Family, because everyone answers on their
  * phones. Same as Games.open in web/games.js.
  */
@@ -45,7 +45,7 @@ public class GamesActivity extends Activity {
                 Ui.displaySemibold, 64 * k, 0xFFFFFFFF));
         TextView sub = FeedbackActivity.text(this, Ui.tr("O que vamos fazer?", "What shall we do?", "¿Qué hacemos?"),
                 Ui.regular, 32 * k, 0xCCFFFFFF);
-        sub.setPadding(0, Math.round(12 * k), 0, Math.round(44 * k));
+        sub.setPadding(0, Math.round(12 * k), 0, Math.round(32 * k));
         column.addView(sub);
 
         boolean linked = Family.linked(this);
@@ -53,6 +53,8 @@ public class GamesActivity extends Activity {
                 {"🎤", Ui.tr("Karaokê", "Karaoke", "Karaoke"), (Runnable) () -> go(() -> KaraokePickActivity.open(this))},
                 {"🎲", Ui.tr("Jogos de tabuleiro e cartas", "Board and card games", "Juegos de mesa y cartas"), (Runnable) () -> go(() -> TableActivity.open(this))},
                 {"🤪", Ui.tr("Jogos bobos", "Silly games", "Juegos locos"), (Runnable) () -> go(() -> TableActivity.open(this, "silly"))},
+                // Milo's Remote Control Land (web/rcland.js, ADR 0045), in TableActivity's WebView like the arcade.
+                {"🏎", Ui.tr("Terra do Controle Remoto do Milo", "Milo's Remote Control Land", "La Tierra Teledirigida de Milo"), (Runnable) () -> go(() -> TableActivity.open(this, "rcland"))},
                 {"🕹", Ui.tr("Fliperama", "Arcade", "Arcade"), (Runnable) () -> go(() -> TableActivity.open(this, "arcade"))},
                 {"🥪", Ui.tr("Lanches da escola", "School lunches", "Almuerzos del cole"), (Runnable) () -> go(() -> TableActivity.open(this, "lunch"))},
                 {"🎉", Ui.tr("Festa", "Party", "Fiesta"), (Runnable) () -> go(() -> PartyPickActivity.open(this))},
@@ -66,11 +68,13 @@ public class GamesActivity extends Activity {
         };
         LinearLayout row = null;
         Button first = null;
+        // Five rows of three since Remote Control Land: a little shorter, so the hint below still fits on the screen.
+        boolean five = games.length > 12;
         for (int i = 0; i < games.length; i++) {
             if (i % 3 == 0) {
                 row = new LinearLayout(this);
-                LinearLayout.LayoutParams rp = new LinearLayout.LayoutParams(-1, Math.round(96 * k));
-                rp.bottomMargin = Math.round(22 * k);
+                LinearLayout.LayoutParams rp = new LinearLayout.LayoutParams(-1, Math.round((five ? 84 : 96) * k));
+                rp.bottomMargin = Math.round((five ? 16 : 22) * k);
                 column.addView(row, rp);
             }
             final Runnable run = (Runnable) games[i][2];

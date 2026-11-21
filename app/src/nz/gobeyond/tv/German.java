@@ -222,6 +222,7 @@ final class German {
             case "Silly games": return "Lustige Spiele";
             case "Light show": return "Lichtshow";
             case "Arcade": return "Spielhalle";
+            case "Milo's Remote Control Land": return "Milos Fernsteuer-Land";
             case "The games need Android System WebView.": return "Die Spiele brauchen Android System WebView.";
             case "Bedtime breathing": return "Atmen vor dem Schlafen";
             case "Breathe in": return "Einatmen";

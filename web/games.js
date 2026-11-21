@@ -1,6 +1,6 @@
 /*
  * Games, from the remote (ADR 0021): every game and family activity starts here on the TV, no phone needed. Karaoke,
- * board and card games against the robots (table.js), silly party games (laughs.js), school lunches (lunch.js), a party, the light show (lights.js), quiz night, the dinner
+ * board and card games against the robots (table.js), silly party games (laughs.js), Milo's Remote Control Land (rcland.js, ADR 0045), school lunches (lunch.js), a party, the light show (lights.js), quiz night, the dinner
  * question, the tidy-up race and bedtime breathing, and How to play, a guide to every one (guides.js). Quiz night and the dinner question need Beyond Family, because
  * everyone answers on their phones. Same as GamesActivity.java. Plain ES5.
  */
@@ -11,7 +11,7 @@ var Games = (function () {
 
   function open() {
     UI.open({
-      cls: 'bt-outside bt-party-pick bt-games',
+      cls: 'bt-outside bt-party-pick bt-games bt-games-main',
       build: function (layer, a) {
         var box = UI.el('div', 'bt-box', layer);
         UI.el('div', 'sun', box, '🎮');
@@ -21,6 +21,7 @@ var Games = (function () {
           ['🎤', tr('Karaokê', 'Karaoke', 'Karaoke'), function () { a.close(); Karaoke.choose(); }],
           ['🎲', tr('Jogos de tabuleiro e cartas', 'Board and card games', 'Juegos de mesa y cartas'), function () { a.close(); Table.open(); }],
           ['🤪', tr('Jogos bobos', 'Silly games', 'Juegos locos'), function () { a.close(); Laughs.open(); }],
+          ['🏎', tr('Terra do Controle Remoto do Milo', 'Milo\'s Remote Control Land', 'La Tierra Teledirigida de Milo'), function () { a.close(); RCLand.open(); }],
           ['🕹', tr('Fliperama', 'Arcade', 'Arcade'), function () { a.close(); Arcade.open(); }],
           ['🥪', tr('Lanches da escola', 'School lunches', 'Almuerzos del cole'), function () { a.close(); Lunch.open(); }],
           ['🎉', tr('Festa', 'Party', 'Fiesta'), function () { a.close(); Party.choose(); }],
