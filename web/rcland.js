@@ -29,15 +29,37 @@ var RCLand = (function () {
 
   var TITLE = ['Terra do Controle Remoto do Milo', 'Milo\'s Remote Control Land', 'La Tierra Teledirigida de Milo', 'Milos Fernsteuer-Land', 'Страна машинок Майло'];
   var PICK = ['Escolha sua máquina', 'Pick your machine', 'Elige tu máquina', 'Such dir deine Maschine aus', 'Выберите машину'];
-  var PICK_HELP = ['◀ ▶ escolher  ·  ▲ ▼ terra, água ou câmera  ·  OK dirigir  ·  Voltar sair', '◀ ▶ pick  ·  ▲ ▼ land, water or camera  ·  OK to drive  ·  Back to leave',
-    '◀ ▶ elegir  ·  ▲ ▼ tierra, agua o cámara  ·  OK conducir  ·  Atrás salir', '◀ ▶ wählen  ·  ▲ ▼ Land, Wasser oder Kamera  ·  OK losfahren  ·  Zurück verlassen',
-    '◀ ▶ выбрать  ·  ▲ ▼ суша, вода или камера  ·  OK ехать  ·  «Назад» выйти'];
+  var PICK_HELP = ['◀ ▶ escolher  ·  ▲ ▼ terra, água, modo ou câmera  ·  OK dirigir  ·  Voltar sair', '◀ ▶ pick  ·  ▲ ▼ land, water, mode or camera  ·  OK to drive  ·  Back to leave',
+    '◀ ▶ elegir  ·  ▲ ▼ tierra, agua, modo o cámara  ·  OK conducir  ·  Atrás salir', '◀ ▶ wählen  ·  ▲ ▼ Land, Wasser, Modus oder Kamera  ·  OK losfahren  ·  Zurück verlassen',
+    '◀ ▶ выбрать  ·  ▲ ▼ суша, вода, режим или камера  ·  OK ехать  ·  «Назад» выйти'];
   var ON_LAND = ['Na terra', 'On land', 'En tierra', 'An Land', 'На суше'];
   var ON_WATER = ['Na água', 'On the water', 'En el agua', 'Auf dem Wasser', 'На воде'];
   var CAMERA = ['Câmera', 'Camera', 'Cámara', 'Kamera', 'Камера'];
   /** The three cameras: 0 from above, 1 chase (behind the machine), 2 first person (in the driver's seat). */
   var VIEWS = [['De cima', 'From above', 'Desde arriba', 'Von oben', 'Сверху'], ['Atrás', 'Chase', 'Detrás', 'Hinterher', 'Сзади'],
     ['Primeira pessoa', 'First person', 'Primera persona', 'Ich-Sicht', 'От первого лица']];
+  // Race mode (ADR 0049).
+  var MODE = ['Modo', 'Mode', 'Modo', 'Modus', 'Режим'];
+  var MODES = [['Dirigir à vontade', 'Free drive', 'Conducción libre', 'Frei fahren', 'Свободная езда'], ['Corrida', 'Race', 'Carrera', 'Rennen', 'Гонка'],
+    ['Corrida: 2 jogadores', 'Race: 2 players', 'Carrera: 2 jugadores', 'Rennen: 2 Spieler', 'Гонка: 2 игрока']];
+  var PLAYER = ['Jogador', 'Player', 'Jugador', 'Spieler', 'Игрок'];
+  var LAP = ['Volta', 'Lap', 'Vuelta', 'Runde', 'Круг'];
+  var TIME = ['Tempo', 'Time', 'Tiempo', 'Zeit', 'Время'];
+  var STUNTS = ['Truques', 'Stunts', 'Trucos', 'Stunts', 'Трюки'];
+  var TOTAL = ['Total', 'Total', 'Total', 'Gesamt', 'Итог'];
+  var OFF = ['a menos', 'off', 'menos', 'weniger', 'долой'];
+  var GO_RACE = ['Já!', 'Go!', '¡Ya!', 'Los!', 'Марш!'];
+  var LAST_LAP = ['Última volta!', 'Last lap!', '¡Última vuelta!', 'Letzte Runde!', 'Последний круг!'];
+  var FINISH = ['Chegada!', 'Finish!', '¡Meta!', 'Ziel!', 'Финиш!'];
+  var NEXT_GATE = ['Siga a seta pelos portões', 'Follow the arrow through the gates', 'Sigue la flecha por las puertas', 'Folg dem Pfeil durch die Tore', 'Следуйте за стрелкой через ворота'];
+  var WINS = ['venceu!', 'wins!', '¡gana!', 'gewinnt!', 'побеждает!'];
+  var TIE = ['Empate!', 'A tie!', '¡Empate!', 'Unentschieden!', 'Ничья!'];
+  var YOUR_TURN = ['Vez do jogador 2: passe o controle', 'Player 2\'s turn: pass the remote', 'Turno del jugador 2: pasa el mando', 'Spieler 2 ist dran: Fernbedienung weitergeben', 'Очередь игрока 2: передайте пульт'];
+  var RESULT_HELP = [['OK próximo jogador  ·  Voltar menu', 'OK next player  ·  Back to the menu', 'OK siguiente jugador  ·  Atrás menú', 'OK nächster Spieler  ·  Zurück zum Menü', 'OK следующий игрок  ·  «Назад» в меню'],
+    ['OK correr de novo  ·  Voltar menu', 'OK race again  ·  Back to the menu', 'OK otra carrera  ·  Atrás menú', 'OK nochmal  ·  Zurück zum Menü', 'OK ещё раз  ·  «Назад» в меню']];
+  var RACE_RULE = ['O melhor total vence: cada 500 pontos de truques tiram 1 segundo.', 'Best total wins: every 500 stunt points takes a second off your time.',
+    'Gana el mejor total: cada 500 puntos de trucos quitan 1 segundo.', 'Die beste Gesamtzeit gewinnt: Je 500 Stuntpunkte gibt es 1 Sekunde Abzug.', 'Побеждает лучший итог: каждые 500 очков трюков снимают 1 секунду.'];
+  var NEW_BEST = ['Novo recorde!', 'New best!', '¡Nuevo récord!', 'Neuer Rekord!', 'Новый рекорд!'];
   var TOO_TOUGH_WATER = ['Duro demais! Tente a lancha.', 'Too tough! Try the speedboat.', '¡Demasiado duro! Prueba la lancha.', 'Zu hart! Probier das Rennboot.', 'Слишком прочно! Попробуйте катер.'];
   var SPLASHDOWN = ['Caiu na água! Aterrisse reto.', 'Splashdown! Land the right way up.', '¡Al agua! Aterriza derecho.', 'Platsch! Lande richtig herum.', 'Плюх! Приземляйтесь ровно.'];
   var WAVE = ['Onda!', 'Wave!', '¡Ola!', 'Welle!', 'Волна!'];
@@ -71,7 +93,9 @@ var RCLand = (function () {
     ['Trocar de máquina', 'Change machine', 'Cambiar de máquina', 'Maschine wechseln', 'Сменить машину'],
     ['Como jogar', 'How to play', 'Cómo jugar', 'Wie man spielt', 'Как играть'],
     ['Sair', 'Leave', 'Salir', 'Verlassen', 'Выйти']];
-  var PAUSE_HELP = ['▲ ▼ escolher  ·  OK  ·  Voltar sair', '▲ ▼ choose  ·  OK  ·  Back to leave', '▲ ▼ elegir  ·  OK  ·  Atrás salir', '▲ ▼ wählen  ·  OK  ·  Zurück verlassen', '▲ ▼ выбрать  ·  OK  ·  «Назад» выйти'];
+  var PAUSE_HELP = ['◀ ▶ câmera  ·  ▲ ▼ escolher  ·  OK  ·  Voltar sair', '◀ ▶ camera  ·  ▲ ▼ choose  ·  OK  ·  Back to leave', '◀ ▶ cámara  ·  ▲ ▼ elegir  ·  OK  ·  Atrás salir', '◀ ▶ Kamera  ·  ▲ ▼ wählen  ·  OK  ·  Zurück verlassen', '◀ ▶ камера  ·  ▲ ▼ выбрать  ·  OK  ·  «Назад» выйти'];
+  // How to change the camera while driving, on screen the whole time: every remote has Back and the arrows.
+  var CAM_HOW = ['Voltar, depois ◀ ▶', 'Back, then ◀ ▶', 'Atrás, luego ◀ ▶', 'Zurück, dann ◀ ▶', '«Назад», затем ◀ ▶'];
   var TRICKS = {
     front: ['Mortal', 'Front flip', 'Voltereta', 'Salto', 'Сальто'],
     back: ['Mortal para trás', 'Back flip', 'Voltereta atrás', 'Rückwärtssalto', 'Сальто назад'],
@@ -193,7 +217,8 @@ var RCLand = (function () {
     // The lake.
     buoy: {r: 16, h: 34, tough: 1, pts: 40},
     duck: {r: 16, h: 26, tough: 1, pts: 60},
-    barrel: {r: 22, h: 40, tough: 2, pts: 120},
+    // Barrels float: a machine too small to smash one pushes it out of the way rather than getting stuck between them.
+    barrel: {r: 22, h: 40, tough: 2, pts: 120, push: true},
     island: {r: 150, h: 9999, tough: 99, pts: 0},
     hoop: {r: 42, h: 0, tough: 0, pts: 250, float: true}
   };
@@ -208,7 +233,7 @@ var RCLand = (function () {
       pond: {x: 850, y: 660, rx: 330, ry: 190}, sand: {x: 2380, y: 380, w: 860, h: 640},
       track: {x: 250, y: 230, w: 3100, h: 2170, r: 340}};
     function add(kind, x, y, extra) {
-      var k = KINDS[kind], o = {kind: kind, x: x, y: y, r: k.r, h: k.h, tough: k.tough, pts: k.pts, float: !!k.float,
+      var k = KINDS[kind], o = {kind: kind, x: x, y: y, r: k.r, h: k.h, tough: k.tough, pts: k.pts, float: !!k.float, push: !!k.push,
         z: 0, alive: true, back: 0, pop: 0, a: srand() * TAU, c: '', hx: x, hy: y};
       if (extra) for (var e in extra) if (extra.hasOwnProperty(e)) o[e] = extra[e];
       w.objs.push(o);
@@ -289,7 +314,7 @@ var RCLand = (function () {
     var w = {objs: [], ramps: [], pads: [], pins: [], waves: [], edge: 150, water: true, pond: null, sand: null, track: null,
       surf: {x: 2480, y: 300, w: 980, h: 2000}};
     function add(kind, x, y, extra) {
-      var k = KINDS[kind], o = {kind: kind, x: x, y: y, r: k.r, h: k.h, tough: k.tough, pts: k.pts, float: !!k.float,
+      var k = KINDS[kind], o = {kind: kind, x: x, y: y, r: k.r, h: k.h, tough: k.tough, pts: k.pts, float: !!k.float, push: !!k.push,
         z: 0, alive: true, back: 0, pop: 0, a: srand() * TAU, c: '', hx: x, hy: y};
       if (extra) for (var e in extra) if (extra.hasOwnProperty(e)) o[e] = extra[e];
       w.objs.push(o);
@@ -380,6 +405,38 @@ var RCLand = (function () {
 
   // MARK: - A game
 
+  /**
+   * The race course: gates in order round the park's dirt track, or a loop round the lake. a is the way through.
+   * The first gate is the start and the finish.
+   */
+  var COURSES = {
+    land: [[1800, 2380], [2900, 2380], [3350, 1900], [3350, 800], [2700, 250], [1300, 250], [250, 700], [250, 1900], [900, 2380]],
+    water: [[1600, 2060], [2900, 2330], [3200, 1500], [3150, 600], [2200, 330], [1100, 300], [350, 700], [250, 1250], [300, 1720], [1000, 1800]]
+  };
+  var LAPS = 2, GATE_W = 230;
+  function course(water) {
+    var pts = COURSES[water ? 'water' : 'land'], out = [];
+    for (var i = 0; i < pts.length; i++) {
+      var pv = pts[(i + pts.length - 1) % pts.length], nx = pts[(i + 1) % pts.length];
+      out.push({x: pts[i][0], y: pts[i][1], a: Math.atan2(nx[1] - pv[1], nx[0] - pv[0]), w: GATE_W});
+    }
+    return out;
+  }
+  /** A race for one player: 3, 2, 1, go, then two laps through the gates in order. */
+  function newRace(g, player) {
+    var gates = course(g.water), s0 = gates[0], car = g.car;
+    g.race = {gates: gates, next: 1, lap: 1, laps: LAPS, time: 0, count: 3.4, done: false, doneT: 0, player: player || 1};
+    car.x = s0.x - Math.cos(s0.a) * 160; car.y = s0.y - Math.sin(s0.a) * 160; car.h = car.want = s0.a;
+    g.cam.x = car.x; g.cam.y = car.y; g.cam.yaw = s0.a;
+    g.started = true;
+  }
+  /** A race's total: the time, less a second for every 500 stunt points. */
+  function raceTotal(time, stunts) { return Math.max(0, time - stunts / 500); }
+  function fmtTime(t) {
+    var m = Math.floor(t / 60), sec = t - m * 60;
+    return (m ? m + ':' + (sec < 10 ? '0' : '') : '') + sec.toFixed(1) + (m ? '' : ' s');
+  }
+
   function newGame(mi, saved) {
     saved = saved || load();
     var stats = {}, k;
@@ -393,7 +450,7 @@ var RCLand = (function () {
       car: {x: 1800, y: 2060, z: 0, vz: 0, h: -Math.PI / 2, want: -Math.PI / 2, speed: 0, gear: 0, steer: 0, air: false, vx: 0, vy: 0, ramp: null,
         kx: 0, ky: 0, boost: 0, wipe: 0, roll: 0, trick: null, queue: [], tricks: [], takeoff: 0, rampVz: 0, onRamp: false,
         slam: 0, slamCd: 0, wet: false, padCd: 0, safe: 0, trail: 0, run: 0, bonk: 0},
-      combo: {n: 0, t: 0}, parts: [], pi: 0, pops: [], skids: [], si: 0,
+      combo: {n: 0, t: 0}, parts: [], pi: 0, pops: [], skids: [], si: 0, stunts: 0, race: null,
       cam: {x: 1800, y: 1940, zoom: 1.15, shake: 0, yaw: -Math.PI / 2}, flash: 0, started: false, tough: 0, banner: null
     };
   }
@@ -433,6 +490,7 @@ var RCLand = (function () {
     g.score += got;
     pop(g, (label ? label + '  ' : '') + '+' + got, x, y, z, colour || PAPER, big);
     checkGoals(g);
+    return got;
   }
 
   // MARK: - Juice: particles, pop-up words, skid marks, shake
@@ -585,7 +643,7 @@ var RCLand = (function () {
     else burst(g, car.x, car.y, 2, 10, ['rgba(255,255,255,0.55)', 'rgba(201,155,99,0.6)'], 160, 40, 14, 1);
     if (air >= 1.5) stat(g, 'bigair');
     if (!n) {
-      if (air > 0.9) award(g, Math.round(air * 10) * 10, car.x, car.y, 60, L(BIG_AIR), LILAC);
+      if (air > 0.9) g.stunts += award(g, Math.round(air * 10) * 10, car.x, car.y, 60, L(BIG_AIR), LILAC);
       car.tricks = [];
       return;
     }
@@ -600,7 +658,7 @@ var RCLand = (function () {
     if (spin) parts.push(L(TRICKS.spin) + (spin > 1 ? ' x' + spin : ''));
     var pts = Math.round((front * 400 + back * 400 + spin * 300) * (1 + 0.5 * (n - 1)) + (air > 0.6 ? air * 100 : 0));
     pts = Math.round(pts / 10) * 10;
-    award(g, pts, car.x, car.y, 80, (close ? L(CLOSE_ONE) + ' ' : '') + parts.join(' + ') + '!', EMBER, true);
+    g.stunts += award(g, pts, car.x, car.y, 80, (close ? L(CLOSE_ONE) + ' ' : '') + parts.join(' + ') + '!', EMBER, true);
     for (i = 1; i < n; i++) g.combo.n++;
     car.tricks = [];
     if (n >= 2) confetti(g);
@@ -608,8 +666,11 @@ var RCLand = (function () {
 
   // MARK: - The remote
 
-  /** Colour buttons, 1 2 3, C or V change the camera too, where a remote or keyboard has them. The pause menu always can. */
-  var CAMERA_KEYS = {403: 1, 404: 1, 405: 1, 406: 1, 49: 1, 50: 1, 51: 1, 67: 1, 86: 1};
+  /**
+   * Colour buttons, channel up and down, Info, 1 2 3, C or V change the camera too, where a remote or keyboard has them.
+   * Every remote can do it from the pause menu: Back, then ◀ ▶ (shown under the score the whole time).
+   */
+  var CAMERA_KEYS = {403: 1, 404: 1, 405: 1, 406: 1, 33: 1, 34: 1, 427: 1, 428: 1, 457: 1, 49: 1, 50: 1, 51: 1, 67: 1, 86: 1};
   function nextView(g, d) {
     g.view = (g.view + (d || 1) + VIEWS.length) % VIEWS.length;
     g.camT = 2.2;
@@ -638,6 +699,35 @@ var RCLand = (function () {
 
   // MARK: - One step of the world
 
+  /** The race clock, the countdown, and the gates: drive through the next one, in order, two laps. */
+  function raceStep(g, dt) {
+    var rc = g.race, car = g.car;
+    if (rc.done) { rc.doneT += dt; return; }
+    if (rc.count > 0) {
+      var was = Math.ceil(rc.count - 0.4);
+      rc.count -= dt;
+      var now = Math.ceil(rc.count - 0.4);
+      if (now !== was) sfx(now > 0 ? 'hop' : 'boost');
+      return;
+    }
+    rc.time += dt;
+    var gt = rc.gates[rc.next], dx = car.x - gt.x, dy = car.y - gt.y;
+    if (dx * dx + dy * dy > (gt.w / 2 + 20) * (gt.w / 2 + 20)) return;
+    if (rc.next === 0) {
+      if (rc.lap >= rc.laps) {
+        rc.done = true; rc.total = raceTotal(rc.time, g.stunts);
+        sfx('win'); confetti(g); shake(g, 6);
+        pop(g, L(FINISH), car.x, car.y, 100, EMBER, true);
+        return;
+      }
+      rc.lap++;
+      sfx('combo');
+      pop(g, L(LAST_LAP), car.x, car.y, 100, LILAC, true);
+    } else sfx('star');
+    part(g, gt.x, gt.y, 60, 0, 0, 0, 0.4, LILAC, 70, 3);
+    rc.next = (rc.next + 1) % rc.gates.length;
+  }
+
   function step(g, dt) {
     var car = g.car, m = g.m, w = g.world, i;
     g.t += dt;
@@ -652,6 +742,7 @@ var RCLand = (function () {
     if (car.bonk > 0) car.bonk -= dt;
     if (g.camT > 0) g.camT -= dt;
     if (w.waves.length) rollWaves(w, dt);
+    if (g.race) raceStep(g, dt);
 
     if (car.wipe > 0) {
       car.wipe -= dt; car.roll += dt * 14;
@@ -663,6 +754,8 @@ var RCLand = (function () {
     var top = m.top, target = car.gear >= 0 ? car.gear / 3 * top : -top * 0.3;
     if (car.boost > 0) { car.boost -= dt; target = top * 1.45; }
     if (car.wipe > 0) target = 0;
+    var rc = g.race;
+    if (rc && (rc.count > 0 || rc.done)) target = 0;
     var wet = !car.air && inPond(w, car.x, car.y), sandy = !car.air && inSand(w, car.x, car.y);
     if (wet) target *= 0.55;
     if (sandy && m.power < 3) target *= 0.75;
@@ -696,10 +789,19 @@ var RCLand = (function () {
     var gh = groundAt(w, nx, ny), ramp = w.under;
     if (!car.air && gh > car.z + 22 && !(ramp && ramp.wave)) {
       // The side or the back of a ramp: it's a wall from there. A wave just lifts you.
-      car.speed = -car.speed * 0.3; car.kx = -vx * 0.3; car.ky = -vy * 0.3; car.vx *= -0.3; car.vy *= -0.3;
-      nx = car.x; ny = car.y; gh = groundAt(w, nx, ny); ramp = w.under;
+      // A glancing blow slides along the wall, so nobody gets stuck against one; a head-on one bounces back.
+      var sx = groundAt(w, nx, car.y) <= car.z + 22, sy = groundAt(w, car.x, ny) <= car.z + 22;
+      var along = sx && (!sy || Math.abs(vx) >= Math.abs(vy)) ? 0 : sy ? 1 : -1;
+      if (along >= 0 && Math.abs(along ? vy : vx) > Math.abs(along ? vx : vy) * 0.35) {
+        if (along) { nx = car.x; car.vx = 0; } else { ny = car.y; car.vy = 0; }
+        car.speed *= 0.97;
+      } else {
+        car.speed = -car.speed * 0.3; car.kx = -vx * 0.3; car.ky = -vy * 0.3; car.vx *= -0.3; car.vy *= -0.3;
+        nx = car.x; ny = car.y;
+        shake(g, 4);
+      }
+      gh = groundAt(w, nx, ny); ramp = w.under;
       if (car.bonk <= 0) { sfx('bonk'); car.bonk = 0.4; }
-      shake(g, 4);
     }
     car.x = nx; car.y = ny;
     car.run += Math.abs(car.speed) * dt;
@@ -799,8 +901,16 @@ var RCLand = (function () {
       if (o.float) { if (Math.abs(car.z + 15 - o.z) < 65 && car.wipe <= 0) collect(g, o); continue; }
       if (car.z > o.h) continue;
       if (o.tough <= m.power) { smash(g, o, false); continue; }
-      // Too tough for this machine: bounce off it.
       var d = Math.sqrt(d2) || 1, ux = dx / d, uy = dy / d;
+      // A floating barrel drifts away from the machine and slows it a little.
+      if (o.push) {
+        o.x += ux * (rr - d + 2); o.y += uy * (rr - d + 2);
+        car.speed *= 0.9;
+        if (car.bonk <= 0) { sfx('bonk'); car.bonk = 0.4; }
+        if (g.tough <= 0) { g.tough = 5; pop(g, L(TOO_TOUGH_WATER), o.x, o.y, 90, PAPER); }
+        continue;
+      }
+      // Too tough for this machine: bounce off it.
       car.x = o.x - ux * (rr + 1); car.y = o.y - uy * (rr + 1);
       var into = vx * ux + vy * uy;
       if (into > 0) { car.speed = -car.speed * 0.35; car.kx -= ux * into * 0.4; car.ky -= uy * into * 0.4; car.vx *= 0.2; car.vy *= 0.2; }
@@ -1257,6 +1367,23 @@ var RCLand = (function () {
     return {x: car.x + Math.cos(h) * 190, y: car.y + Math.sin(h) * 190, h: h};
   }
 
+  /** A race gate from above: two posts and a banner across. The next one glows; the start and finish is chequered. */
+  function drawGate(gt, i, rc, t) {
+    var px = -Math.sin(gt.a) * gt.w / 2, py = Math.cos(gt.a) * gt.w / 2, next = i === rc.next;
+    var col = next ? (Math.sin(t * 8) > 0 ? EMBER : LILAC) : 'rgba(247,246,242,0.6)';
+    if (i === 0) {
+      for (var k = 0; k < 10; k++) {
+        var f0 = k / 10 - 0.5, f1 = (k + 1) / 10 - 0.5;
+        c.strokeStyle = k % 2 ? '#22221F' : PAPER; c.lineWidth = 14;
+        c.beginPath(); c.moveTo(gt.x + px * 2 * f0, gt.y + py * 2 * f0); c.lineTo(gt.x + px * 2 * f1, gt.y + py * 2 * f1); c.stroke();
+      }
+    }
+    c.strokeStyle = col; c.lineWidth = next ? 8 : 4;
+    c.beginPath(); c.moveTo(gt.x + px, gt.y + py - 90 * ZT); c.lineTo(gt.x - px, gt.y - py - 90 * ZT); c.stroke();
+    disc(gt.x + px, gt.y + py, 12, '#22221F'); disc(gt.x - px, gt.y - py, 12, '#22221F');
+    disc(gt.x + px, gt.y + py - 90 * ZT, 10, col); disc(gt.x - px, gt.y - py - 90 * ZT, 10, col);
+  }
+
   function drawCar(g) {
     var car = g.car, m = g.m;
     if (car.safe > 0 && Math.floor(car.safe * 10) % 2) return;
@@ -1689,12 +1816,14 @@ var RCLand = (function () {
     if (g.view === 1) add(2, car, car.x, car.y, car.z, 10);
     var tb = m.towed && car.wipe <= 0 ? towAt(car) : null;
     if (tb) add(3, tb, tb.x, tb.y, 0, 20);
+    if (g.race) for (i = 0; i < g.race.gates.length; i++) { o = g.race.gates[i]; add(4, i, o.x, o.y, 0, -o.w / 2); }
     var list = ITEMS.slice(0, n).sort(byDepth);
     for (i = 0; i < list.length; i++) {
       var it = list[i];
       if (it.k === 0) sprite3(it.o, g.t);
       else if (it.k === 1) wedge3(it.o);
       else if (it.k === 2) car3(g);
+      else if (it.k === 4) gate3(g.race.gates[it.o], it.o, g.race, g.t);
       else model3(model('tow'), it.o.x, it.o.y, 0, it.o.h, 0, 0);
     }
     if (tb && proj(car.x + Math.cos(car.h) * 14, car.y + Math.sin(car.h) * 14, car.z + 32)) {
@@ -1724,6 +1853,21 @@ var RCLand = (function () {
     }
     c.restore();
     if (g.view === 2) bonnet(g);
+  }
+
+  /** A race gate in 3D: two posts and a banner, the start and finish chequered on the ground. */
+  function gate3(gt, i, rc, t) {
+    var px = -Math.sin(gt.a) * gt.w / 2, py = Math.cos(gt.a) * gt.w / 2, next = i === rc.next;
+    var col = next ? (Math.sin(t * 8) > 0 ? EMBER : LILAC) : '#F7F6F2';
+    var ax = gt.x + px, ay = gt.y + py, bx = gt.x - px, by = gt.y - py, ux = Math.cos(gt.a) * 5, uy = Math.sin(gt.a) * 5;
+    if (i === 0) for (var k = 0; k < 10; k++) {
+      var f0 = k / 10, f1 = (k + 1) / 10;
+      poly3([ax + (bx - ax) * f0 - ux * 3, ay + (by - ay) * f0 - uy * 3, 1, ax + (bx - ax) * f1 - ux * 3, ay + (by - ay) * f1 - uy * 3, 1,
+        ax + (bx - ax) * f1 + ux * 3, ay + (by - ay) * f1 + uy * 3, 1, ax + (bx - ax) * f0 + ux * 3, ay + (by - ay) * f0 + uy * 3, 1], k % 2 ? '#22221F' : PAPER);
+    }
+    poly3([ax - ux, ay - uy, 0, ax + ux, ay + uy, 0, ax + ux, ay + uy, 120, ax - ux, ay - uy, 120], '#3A3942');
+    poly3([bx - ux, by - uy, 0, bx + ux, by + uy, 0, bx + ux, by + uy, 120, bx - ux, by - uy, 120], '#3A3942');
+    poly3([ax, ay, 92, bx, by, 92, bx, by, 120, ax, ay, 120], col);
   }
 
   /** The machine in the chase view, tipping through its flips and spins like the picture from above. */
@@ -1815,6 +1959,7 @@ var RCLand = (function () {
       c.beginPath(); c.moveTo(s.x1, s.y1); c.lineTo(s.x2, s.y2); c.stroke();
     }
     for (i = 0; i < w.pads.length; i++) drawPad(w.pads[i], g.t);
+    if (g.race) for (i = 0; i < g.race.gates.length; i++) drawGate(g.race.gates[i], i, g.race, g.t);
     for (i = 0; i < w.ramps.length; i++) drawRamp(w.ramps[i]);
     for (i = 0; i < w.objs.length; i++) {
       o = w.objs[i];
@@ -1852,6 +1997,53 @@ var RCLand = (function () {
     hud(g);
   }
 
+  /** The race: player, lap, time and stunts in the corner, an arrow to the next gate, the countdown. */
+  function raceHud(g) {
+    var rc = g.race, car = g.car;
+    box(W - 400, 18, 380, 178, 18, 'rgba(13,12,24,0.6)');
+    text(L(PLAYER) + ' ' + rc.player, W - 380, 44, 20, LILAC, 'left', '800');
+    text(L(LAP) + ' ' + Math.min(rc.lap, rc.laps) + '/' + rc.laps, W - 36, 44, 20, PAPER, 'right', '800');
+    text(fmtTime(rc.time), W - 380, 92, 44, PAPER, 'left', '800');
+    text(L(STUNTS) + ' ' + g.stunts, W - 380, 140, 20, EMBER, 'left', '700');
+    text('-' + (g.stunts / 500).toFixed(1) + ' s', W - 36, 140, 20, EMBER, 'right', '700');
+    text(L(RACE_RULE).split(':')[0], W - 380, 174, 15, 'rgba(247,246,242,0.55)', 'left', '600');
+    if (!rc.done) {
+      // Which way to the next gate, turned to the camera.
+      var gt = rc.gates[rc.next], a = Math.atan2(gt.y - car.y, gt.x - car.x);
+      if (g.view > 0) a = a - V.yaw - Math.PI / 2;
+      c.save(); c.translate(W / 2, 150); c.rotate(a);
+      disc(0, 0, 40, 'rgba(13,12,24,0.55)');
+      c.fillStyle = EMBER; c.beginPath(); c.moveTo(30, 0); c.lineTo(-16, -20); c.lineTo(-6, 0); c.lineTo(-16, 20); c.closePath(); c.fill();
+      c.restore();
+    }
+    if (rc.count > 0) {
+      var n = Math.ceil(rc.count - 0.4), k = (rc.count - 0.4) % 1;
+      c.globalAlpha = Math.min(1, 0.4 + k);
+      text(n > 0 ? String(n) : L(GO_RACE), W / 2, H / 2 - 40, n > 0 ? 160 + (1 - k) * 40 : 140, n > 0 ? PAPER : EMBER, 'center', '800', 'rgba(13,12,24,0.7)');
+      c.globalAlpha = 1;
+      text(L(NEXT_GATE), W / 2, H / 2 + 70, 26, PAPER, 'center', '700', 'rgba(13,12,24,0.7)');
+    }
+    if (rc.done) {
+      c.globalAlpha = Math.min(1, rc.doneT * 2);
+      box(W / 2 - 300, H / 2 - 120, 600, 220, 30, 'rgba(13,12,24,0.85)');
+      text(L(FINISH), W / 2, H / 2 - 74, 44, EMBER, 'center', '800');
+      text(L(TIME) + ' ' + fmtTime(rc.time) + '   ' + L(STUNTS) + ' ' + g.stunts, W / 2, H / 2 - 18, 24, PAPER, 'center', '700');
+      text(L(TOTAL) + ' ' + fmtTime(rc.total), W / 2, H / 2 + 40, 40, PAPER, 'center', '800');
+      c.globalAlpha = 1;
+    }
+  }
+
+  /** Under the score: which camera, and how to change it (Back, then ◀ ▶), so nobody has to hunt for it. */
+  function camChip(g) {
+    box(20, 120, 250, 62, 18, 'rgba(13,12,24,0.55)');
+    // A little camera: body, lens, viewfinder bump.
+    box(36, 136, 30, 21, 5, LILAC);
+    box(42, 131, 11, 7, 2, LILAC);
+    c.fillStyle = 'rgba(13,12,24,0.8)'; c.beginPath(); c.arc(51, 146.5, 6, 0, 7); c.fill();
+    text(L(VIEWS[g.view]), 78, 140, 18, PAPER, 'left', '800');
+    text(L(CAM_HOW), 78, 165, 17, LILAC, 'left', '700');
+  }
+
   function hud(g) {
     var car = g.car, i;
     // Score.
@@ -1859,6 +2051,7 @@ var RCLand = (function () {
     text(L(SCORE), 40, 42, 18, 'rgba(247,246,242,0.7)', 'left', '600');
     text(String(g.score), 40, 76, 38, PAPER, 'left', '800');
     text(L(BEST) + ' ' + Math.max(g.best, g.score), 255, 42, 16, 'rgba(247,246,242,0.55)', 'right', '600');
+    camChip(g);
     // Combo.
     if (comboMult(g.combo.n) > 1) {
       var mult = comboMult(g.combo.n), pulse = 1 + Math.max(0, g.combo.t - 2.6) * 0.6;
@@ -1869,12 +2062,15 @@ var RCLand = (function () {
       box(W / 2 - 70, 96, 140, 8, 4, 'rgba(13,12,24,0.5)');
       box(W / 2 - 70, 96, 140 * Math.max(0, g.combo.t / 3), 8, 4, LILAC);
     }
+    if (g.race) raceHud(g);
     // Challenges.
-    var now = current(g);
+    var now = g.race ? [] : current(g);
     var ch = 58 + Math.max(1, now.length) * 40;
-    box(W - 400, 18, 380, ch, 18, 'rgba(13,12,24,0.55)');
-    text(L(CHALLENGES), W - 380, 42, 18, LILAC, 'left', '700');
-    if (!now.length) text(L(ALL_DONE), W - 380, 82, 18, PAPER, 'left', '600');
+    if (!g.race) {
+      box(W - 400, 18, 380, ch, 18, 'rgba(13,12,24,0.55)');
+      text(L(CHALLENGES), W - 380, 42, 18, LILAC, 'left', '700');
+      if (!now.length) text(L(ALL_DONE), W - 380, 82, 18, PAPER, 'left', '600');
+    }
     for (i = 0; i < now.length; i++) {
       var have = Math.min(now[i].need, g.stats[now[i].stat] || 0), y = 82 + i * 40;
       box(W - 382, y - 13, 26, 26, 7, 'rgba(247,246,242,0.15)');
@@ -1957,8 +2153,8 @@ var RCLand = (function () {
   }
 
   /** The picker: land or water machines (the row ▲ ▼ moves between), then the camera. row: 0 land, 1 water, 2 camera. */
-  function drawPick(sel, t, bests, row, view) {
-    row = row || 0; view = view || 0;
+  function drawPick(sel, t, bests, row, view, mode, player) {
+    row = row || 0; view = view || 0; mode = mode || 0;
     c.setTransform(1, 0, 0, 1, 0, 0);
     backdrop(t);
     dots(W / 2 - 33, 36);
@@ -1974,7 +2170,7 @@ var RCLand = (function () {
     var first = water ? LAND_COUNT : 0, count = water ? MACHINES.length - LAND_COUNT : LAND_COUNT;
     var cw = 220, gap = 22, x0 = (W - (cw * count + gap * (count - 1))) / 2;
     for (i = 0; i < count; i++) {
-      var mi = first + i, m = MACHINES[mi], here = mi === sel, x = x0 + i * (cw + gap), y = 186, ch = 330, lit = here && row < 2;
+      var mi = first + i, m = MACHINES[mi], here = mi === sel, x = x0 + i * (cw + gap), y = 176, ch = 306, lit = here && row < 2;
       c.save();
       if (here) { c.translate(x + cw / 2, y + ch / 2); c.scale(1.05, 1.05); c.translate(-(x + cw / 2), -(y + ch / 2)); }
       if (lit) box(x - 6, y - 6, cw + 12, ch + 12, 30, 'rgba(158,123,255,0.55)');
@@ -1986,24 +2182,63 @@ var RCLand = (function () {
       text(L(m.name), x + cw / 2, y + 188, 22, PAPER, 'center', '800');
       var vals = [Math.min(1, m.top / 880), Math.min(1, m.jump / 1.4), m.power / 3];
       for (var s2 = 0; s2 < 3; s2++) {
-        var by = y + 228 + s2 * 34;
+        var by = y + 222 + s2 * 30;
         text(L(STAT_NAMES[s2]), x + 18, by, 15, 'rgba(247,246,242,0.65)', 'left', '600');
         box(x + 100, by - 6, 100, 12, 6, 'rgba(247,246,242,0.12)');
         box(x + 100, by - 6, 100 * vals[s2], 12, 6, here ? EMBER : 'rgba(247,246,242,0.45)');
       }
       c.restore();
     }
-    text(L(MACHINES[sel].about), W / 2, 548, 22, PAPER, 'center', '600');
-    if (bests) text(L(BEST) + ' ' + bests, W / 2, 578, 17, 'rgba(247,246,242,0.55)', 'center', '600');
-    // The camera.
-    text(L(CAMERA), W / 2 - 360, 626, 20, row === 2 ? LILAC : 'rgba(247,246,242,0.6)', 'right', '700');
-    for (i = 0; i < VIEWS.length; i++) {
-      var vx = W / 2 - 340 + i * 230, chosen = i === view;
-      box(vx, 604, 210, 44, 22, chosen ? (row === 2 ? VIOLET : 'rgba(110,61,219,0.55)') : 'rgba(247,246,242,0.08)');
-      if (chosen && row === 2) { c.strokeStyle = LILAC; c.lineWidth = 3; rr(vx, 604, 210, 44, 22); c.stroke(); }
-      text(L(VIEWS[i]), vx + 105, 627, 19, chosen ? PAPER : 'rgba(247,246,242,0.6)', 'center', chosen ? '800' : '600');
+    text(L(MACHINES[sel].about), W / 2, 512, 21, PAPER, 'center', '600');
+    if (bests) text(L(BEST) + ' ' + bests, W / 2, 540, 17, 'rgba(247,246,242,0.55)', 'center', '600');
+    // The mode, then the camera: a row of pills each.
+    pills(MODE, MODES, mode, row === 2, 562);
+    pills(CAMERA, VIEWS, view, row === 3, 618);
+    if (player) {
+      box(30, 24, 210, 56, 28, VIOLET);
+      text(L(PLAYER) + ' ' + player, 135, 52, 26, PAPER, 'center', '800');
     }
     text(L(PICK_HELP), W / 2, 690, 19, LILAC, 'center', '700');
+  }
+
+  function pills(label, names, at, lit, y) {
+    text(L(label), W / 2 - 360, y + 22, 20, lit ? LILAC : 'rgba(247,246,242,0.6)', 'right', '700');
+    for (var i = 0; i < names.length; i++) {
+      var x = W / 2 - 340 + i * 230, chosen = i === at;
+      box(x, y, 210, 44, 22, chosen ? (lit ? VIOLET : 'rgba(110,61,219,0.55)') : 'rgba(247,246,242,0.08)');
+      if (chosen && lit) { c.strokeStyle = LILAC; c.lineWidth = 3; rr(x, y, 210, 44, 22); c.stroke(); }
+      text(L(names[i]), x + 105, y + 23, 18, chosen ? PAPER : 'rgba(247,246,242,0.6)', 'center', chosen ? '800' : '600');
+    }
+  }
+
+  /** After a race: each player's time, stunts and total, and the winner once everyone has had a go. */
+  function drawResult(results, players, t, best) {
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    backdrop(t);
+    dots(W / 2 - 33, 60);
+    var done = results.length >= players, i, win = -1;
+    if (done && players > 1) {
+      win = results[0].total < results[1].total ? 0 : results[1].total < results[0].total ? 1 : -2;
+      text(win === -2 ? L(TIE) : L(PLAYER) + ' ' + (win + 1) + ' ' + L(WINS), W / 2, 130, 56, EMBER, 'center', '800');
+    } else text(L(FINISH), W / 2, 130, 56, EMBER, 'center', '800');
+    var n = results.length, cw = 440, x0 = (W - (cw * n + 40 * (n - 1))) / 2;
+    for (i = 0; i < n; i++) {
+      var r = results[i], x = x0 + i * (cw + 40), lit = i === win;
+      if (lit) box(x - 6, 184, cw + 12, 332, 30, 'rgba(232,163,61,0.6)');
+      box(x, 190, cw, 320, 26, lit ? '#2E2350' : 'rgba(247,246,242,0.08)');
+      text(L(PLAYER) + ' ' + r.player, x + cw / 2, 232, 28, lit ? EMBER : LILAC, 'center', '800');
+      text(L(r.name), x + cw / 2, 270, 20, 'rgba(247,246,242,0.7)', 'center', '600');
+      text(L(TIME), x + 40, 324, 22, 'rgba(247,246,242,0.7)', 'left', '600'); text(fmtTime(r.time), x + cw - 40, 324, 24, PAPER, 'right', '800');
+      text(L(STUNTS) + ' ' + r.stunts, x + 40, 370, 22, 'rgba(247,246,242,0.7)', 'left', '600');
+      text((r.stunts / 500).toFixed(1) + ' s ' + L(OFF), x + cw - 40, 370, 24, EMBER, 'right', '800');
+      c.fillStyle = 'rgba(247,246,242,0.2)'; c.fillRect(x + 40, 400, cw - 80, 2);
+      text(L(TOTAL), x + 40, 450, 26, PAPER, 'left', '800'); text(fmtTime(r.total), x + cw - 40, 450, 40, lit ? EMBER : PAPER, 'right', '800');
+      if (r.best) text(L(NEW_BEST), x + cw / 2, 492, 18, EMBER, 'center', '700');
+    }
+    if (!done) text(L(YOUR_TURN), W / 2, 570, 28, PAPER, 'center', '800');
+    else if (best) text(L(BEST) + ' ' + fmtTime(best), W / 2, 570, 22, 'rgba(247,246,242,0.6)', 'center', '600');
+    text(L(RACE_RULE), W / 2, 622, 19, 'rgba(247,246,242,0.7)', 'center', '600');
+    text(L(RESULT_HELP[done ? 1 : 0]), W / 2, 680, 20, LILAC, 'center', '700');
   }
 
   function drawPause(g, at) {
@@ -2024,7 +2259,7 @@ var RCLand = (function () {
 
   // MARK: - The screen
 
-  var g = null, state = '', sel = 0, menu = 0, prow = 0, view = 0, canvas = null, live = false, last = 0, clock = 0, motorAt = 0;
+  var g = null, state = '', sel = 0, menu = 0, prow = 0, view = 0, mode = 0, turn = 0, results = [], canvas = null, live = false, last = 0, clock = 0, motorAt = 0;
   var raf = window.requestAnimationFrame || window.webkitRequestAnimationFrame || function (f) { return setTimeout(function () { f(Date.now()); }, 16); };
 
   function isBack(k) { return k === 27 || k === 8 || k === 4 || k === 461 || k === 10009 || (window.TV && TV.keys && k === TV.keys.back); }
@@ -2041,8 +2276,13 @@ var RCLand = (function () {
         motorAt = clock;
         Sfx.motor(g.car.wipe > 0 ? 0.1 : Math.min(1, Math.abs(g.car.speed) / g.m.top + (g.car.air ? 0.3 : 0)) + 0.05);
       }
+      // A finished race goes to the results after a moment to enjoy the finish.
+      if (g.race && g.race.done && g.race.doneT > 2.5) finishRace();
     } else if (state === 'paused' && g) { render(g); drawPause(g, menu); }
-    else if (state === 'pick') { var sv = load(); drawPick(sel, clock, (sel >= LAND_COUNT ? sv.bestWater : sv.best) || 0, prow, view); }
+    else if (state === 'pick') {
+      var sv = load(), rb = sv[sel >= LAND_COUNT ? 'raceWater' : 'race'];
+      drawPick(sel, clock, mode ? (rb ? fmtTime(rb) : 0) : (sel >= LAND_COUNT ? sv.bestWater : sv.best) || 0, prow, view, mode, mode === 2 ? turn + 1 : 0);
+    } else if (state === 'result') { var sr = load(); drawResult(results, mode === 2 ? 2 : 1, clock, sr[results.length && results[0].water ? 'raceWater' : 'race']); }
     raf(frame);
   }
 
@@ -2051,27 +2291,46 @@ var RCLand = (function () {
   function start() {
     g = newGame(sel);
     g.view = view;
+    if (mode) newRace(g, turn + 1);
     state = 'play';
     save(g);
+  }
+
+  /** A race just finished: keep its result (and the best total on this TV), then show them all. */
+  function finishRace() {
+    var rc = g.race, s2 = load(), key = g.water ? 'raceWater' : 'race', best = !s2[key] || rc.total < s2[key];
+    results.push({player: rc.player, name: g.m.name, time: rc.time, stunts: g.stunts, total: rc.total, water: g.water, best: best});
+    save(g);
+    if (best) { s2 = load(); s2[key] = rc.total; try { window.localStorage.setItem(KEY, JSON.stringify(s2)); } catch (e) {} }
+    hush();
+    state = 'result';
+  }
+  /** OK on the results: the next player picks their machine, or everyone races again. */
+  function afterResult() {
+    if (results.length < (mode === 2 ? 2 : 1)) turn = results.length;
+    else { results = []; turn = 0; }
+    prow = sel >= LAND_COUNT ? 1 : 0;
+    state = 'pick';
   }
 
   function choose(api) {
     if (menu === 0) state = 'play';
     else if (menu === 1) nextView(g);
-    else if (menu === 2) { view = g.view; save(g); prow = sel >= LAND_COUNT ? 1 : 0; state = 'pick'; }
+    else if (menu === 2) { view = g.view; save(g); prow = sel >= LAND_COUNT ? 1 : 0; results = []; turn = 0; state = 'pick'; }
     else if (menu === 3) { if (window.Guides) Guides.show('rcland'); }
     else api.close();
   }
 
   /** ◀ ▶ in the picker: a machine in this row (land or water), or the camera. */
   function pickSide(d) {
-    if (prow === 2) { view = (view + d + VIEWS.length) % VIEWS.length; return; }
+    if (prow === 3) { view = (view + d + VIEWS.length) % VIEWS.length; return; }
+    if (prow === 2) { mode = (mode + d + MODES.length) % MODES.length; results = []; turn = 0; return; }
     var first = prow ? LAND_COUNT : 0, count = prow ? MACHINES.length - LAND_COUNT : LAND_COUNT;
     sel = first + (sel - first + d + count) % count;
   }
   /** ▲ ▼ in the picker: land, water, camera. Moving between land and water picks the first machine there. */
   function pickRow(d) {
-    var to = Math.max(0, Math.min(2, prow + d));
+    var to = Math.max(0, Math.min(3, prow + d));
     if (to === prow) return;
     if (to < 2 && (to === 1) !== (sel >= LAND_COUNT)) sel = to ? LAND_COUNT : 0;
     prow = to;
@@ -2102,11 +2361,13 @@ var RCLand = (function () {
           else if (CAMERA_KEYS[k]) { view = k >= 49 && k <= 51 ? k - 49 : (view + 1) % VIEWS.length; sfx('hop'); }
           return true;
         }
+        if (state === 'result') { if (k === OK) { sfx('six'); afterResult(); } return true; }
         if (state === 'paused') {
           if (k === UP) { menu = (menu + MENU.length - 1) % MENU.length; sfx('hop'); }
           else if (k === DOWN) { menu = (menu + 1) % MENU.length; sfx('hop'); }
           else if (k === OK) choose(canvas.parentNode.rcApi);
-          else if (menu === 1 && (k === LEFT || k === RIGHT)) { nextView(g, k === LEFT ? -1 : 1); sfx('hop'); }
+          // ◀ ▶ change the camera from any row, so Back then ◀ ▶ is all it takes.
+          else if (k === LEFT || k === RIGHT) { nextView(g, k === LEFT ? -1 : 1); sfx('hop'); }
           return true;
         }
         if (state === 'play' && g) drive(g, k);
@@ -2114,6 +2375,8 @@ var RCLand = (function () {
       },
       back: function () {
         if (state === 'play') { state = 'paused'; menu = 0; hush(); if (g) save(g); return true; }
+        // From the results, or player 2's turn to pick, Back goes to the machines screen rather than out.
+        if (state === 'result' || (state === 'pick' && turn > 0)) { results = []; turn = 0; state = 'pick'; return true; }
         return false;
       },
       closed: function () {
@@ -2129,6 +2392,7 @@ var RCLand = (function () {
   return {open: open, rules: {MACHINES: MACHINES, GOALS: GOALS, KINDS: KINDS, buildWorld: buildWorld, groundAt: groundAt,
     comboMult: comboMult, newGame: newGame, step: step, drive: drive, current: current, L: L,
     WATER_GOALS: WATER_GOALS, LAND_COUNT: LAND_COUNT, VIEWS: VIEWS, rollWaves: rollWaves, towAt: towAt,
+    newRace: newRace, course: course, raceTotal: raceTotal, LAPS: LAPS, drawResult: drawResult, fmtTime: fmtTime,
     // For the tests and a preview in a browser: draw on a stand-in canvas, and the game on screen.
     useContext: function (ctx) { c = ctx; }, render: render, drawPick: drawPick, drawPause: drawPause, playing: function () { return g; }}};
 })();

@@ -57,13 +57,15 @@ public class TableActivity extends Activity {
     }
 
     private static final String FILE = "table.json";
-    private static final int ASK_MIC = 41;
+    private static final int ASK_MIC = 41, ASK_CAMERA = 42;
     private WebView web;
     // The light show's way to Beyond Music (ADR 0027's relay on 127.0.0.1), started the first time the page asks.
     private MusicRelay relay;
     // The light show's "The TV's sound" (ADR 0044): Android's Visualizer on the TV's output, only while it's on screen.
     private final TvSound tvSound = new TvSound();
-    private boolean tvWasOn;
+    private boolean tvWasOn, roomWasOn;
+    // The light show's "Listen to the room" (ADR 0050): a USB or built-in microphone picked by the app, not the WebView.
+    private final RoomSound roomSound = new RoomSound();
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     @Override protected void onCreate(Bundle savedInstanceState) {
@@ -96,8 +98,14 @@ public class TableActivity extends Activity {
         web.setWebChromeClient(new WebChromeClient() {
             @Override public void onPermissionRequest(PermissionRequest r) {
                 boolean ours = r.getOrigin() != null && "file".equals(r.getOrigin().getScheme());
-                boolean micOnly = r.getResources().length == 1 && PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(r.getResources()[0]);
-                if (ours && micOnly && micAllowed()) r.grant(r.getResources()); else r.deny();
+                // The light show's "Wave to make ripples" (ADR 0050): the camera, only once Android's own question said
+                // yes. Its pictures are only compared on the TV, a few small grey frames at a time, never kept or sent.
+                if (ours && r.getResources().length == 1) {
+                    String want = r.getResources()[0];
+                    if (PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(want) && micAllowed()) { r.grant(r.getResources()); return; }
+                    if (PermissionRequest.RESOURCE_VIDEO_CAPTURE.equals(want) && cameraAllowed()) { r.grant(r.getResources()); return; }
+                }
+                r.deny();
             }
         });
         setContentView(web);
@@ -160,9 +168,47 @@ public class TableActivity extends Activity {
             }
         }
 
-        /** Whether this TV has a microphone at all (built in, or a USB one or webcam plugged in). */
+        /** Whether this TV has a microphone at all (built in, often only in the remote, or a USB one or webcam plugged in). */
         @JavascriptInterface public boolean canListen() {
-            return getPackageManager().hasSystemFeature(PackageManager.FEATURE_MICROPHONE);
+            return getPackageManager().hasSystemFeature(PackageManager.FEATURE_MICROPHONE) || RoomSound.any(TableActivity.this);
+        }
+
+        /** "usb" when a USB microphone or webcam is plugged in, "tv" for one built in (often the remote's), else "". */
+        @JavascriptInterface public String micKind() {
+            android.media.AudioDeviceInfo d = RoomSound.best(TableActivity.this);
+            if (d == null) return "";
+            return d.getType() == android.media.AudioDeviceInfo.TYPE_BUILTIN_MIC ? "tv" : "usb";
+        }
+
+        /** Starts listening to the room after ask() said yes: "usb", "tv" or "other" for the microphone, or "". */
+        @JavascriptInterface public String roomStart() { return micAllowed() ? roomSound.start(TableActivity.this) : ""; }
+
+        @JavascriptInterface public String roomFft() { return roomSound.fft(); }
+
+        @JavascriptInterface public String roomWave() { return roomSound.wave(); }
+
+        @JavascriptInterface public int roomNyquist() { return roomSound.nyquist(); }
+
+        @JavascriptInterface public float roomPeak() { return roomSound.peak(); }
+
+        @JavascriptInterface public void roomStop() { roomSound.stop(); }
+
+        /** A camera is plugged in or built in right now, for "Wave to make ripples". */
+        @JavascriptInterface public boolean canWatch() {
+            try {
+                android.hardware.camera2.CameraManager cm = (android.hardware.camera2.CameraManager) getSystemService(Context.CAMERA_SERVICE);
+                return cm != null && cm.getCameraIdList().length > 0;
+            } catch (Throwable t) {
+                return false;
+            }
+        }
+
+        /** Asks Android for the camera; the answer comes back as Lights.cameraAnswer(true or false). */
+        @JavascriptInterface public void askCamera() {
+            runOnUiThread(() -> {
+                if (cameraAllowed()) cameraAnswer(true);
+                else requestPermissions(new String[]{Manifest.permission.CAMERA}, ASK_CAMERA);
+            });
         }
 
         /** Asks Android for the microphone; the answer comes back as Lights.answer(true or false). */
@@ -233,12 +279,21 @@ public class TableActivity extends Activity {
         return checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
     }
 
+    private boolean cameraAllowed() {
+        return checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void cameraAnswer(boolean yes) {
+        if (web != null) web.evaluateJavascript("window.Lights && Lights.cameraAnswer(" + yes + ")", null);
+    }
+
     private void answer(boolean yes) {
         if (web != null) web.evaluateJavascript("window.Lights && Lights.answer(" + yes + ")", null);
     }
 
     @Override public void onRequestPermissionsResult(int code, String[] permissions, int[] results) {
         if (code == ASK_MIC) answer(results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED);
+        if (code == ASK_CAMERA) cameraAnswer(results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED);
     }
 
     /** The remote straight to the page: arrows, OK and Back, as the LG and Samsung key codes the games expect. */
@@ -271,6 +326,8 @@ public class TableActivity extends Activity {
         // Let go of the TV's sound while someone is off changing the song in Spotify; back on when they return.
         tvWasOn = tvSound.on();
         tvSound.stop();
+        roomWasOn = roomSound.on();
+        roomSound.stop();
     }
 
     @Override protected void onResume() {
@@ -278,11 +335,14 @@ public class TableActivity extends Activity {
         if (web != null) web.onResume();
         if (tvWasOn) tvSound.start();
         tvWasOn = false;
+        if (roomWasOn) roomSound.start(this);
+        roomWasOn = false;
     }
 
     @Override protected void onDestroy() {
         if (sky == this) sky = null;
         tvSound.stop();
+        roomSound.stop();
         synchronized (this) {
             if (relay != null) relay.close();
             relay = null;
