@@ -229,6 +229,7 @@ final class Russian {
             case "Build a road": return "Построить дорогу";
             case "Build a bridge": return "Построить мост";
             case "Plan a town": return "Спланировать город";
+            case "London's Candy Land": return "Сладкая страна Лондон";
             case "The games need Android System WebView.": return "Для игр нужен Android System WebView.";
             case "Bedtime breathing": return "Дыхание перед сном";
             case "Breathe in": return "Вдох";
