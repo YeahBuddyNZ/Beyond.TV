@@ -2,9 +2,9 @@
  * Build it (ADR 0052): builder games for the remote. Build a road the way it is done for real, one job after another
  * (survey, clear, dig, drains, gravel, roll, asphalt, lines, open), picking the right machine for each job and then
  * driving it. Build a bridge: pick a shape and a material for the gap, the load and the money, then a truck tests it
- * (ADR 0054). More jobs (a town) plug in beside them. Played with the remote alone: the arrows and OK, and Back
+ * (ADR 0054). Plan a town: roads, houses and everything people need, with happy or sad faces (ADR 0055). Played with the remote alone: the arrows and OK, and Back
  * pauses (Back again leaves, back to Games). Bests stay on this TV, nothing is sent. Google TV runs this same file in
- * TableActivity's WebView (start "road" or "bridge"). The words are the game's own, in all five languages, like rcland.js.
+ * TableActivity's WebView (start "road", "bridge" or "town"). The words are the game's own, in all five languages, like rcland.js.
  * Plain ES5: one 1280 by 720 canvas, plain shapes, nothing to download, no emoji (older TVs have no emoji font).
  */
 var Builder = (function () {
@@ -678,7 +678,7 @@ var Builder = (function () {
     c.font = '700 22px Sora, Inter, Arial, sans-serif';
     var w = Math.min(980, c.measureText(g.msg.text).width + 60);
     var lines = Math.ceil((c.measureText(g.msg.text).width + 60) / 980);
-    var h = 30 + lines * 29, y = g.phase === 'pick' || g.phase === 'levels' ? 540 : 100;
+    var h = 30 + lines * 29, y = g.phase === 'pick' && g.job !== 'town' || g.phase === 'levels' || g.phase === 'brief' ? 540 : 100;
     box(W / 2 - w / 2, y, w, h, 22, 'rgba(13,12,24,0.86)');
     wrap(g.msg.text, W / 2, y + 15 + 14, w - 48, 22, g.msg.colour, '700');
     c.globalAlpha = 1;
@@ -1199,11 +1199,496 @@ var Builder = (function () {
     drawMsg(g);
   }
 
+  // MARK: - Plan a town: the words
+
+  var TOWN_TITLE = ['Planejar uma cidade', 'Plan a town', 'Planear un pueblo', 'Eine Stadt planen', 'Спланировать город'];
+  /** What a town needs. Each one is a building that serves so many people; fire safety covers the houses near it. */
+  var NEEDS = {
+    water: {name: ['Água', 'Water', 'Agua', 'Wasser', 'Вода'], colour: '#378ADD',
+      sad: ['Não tem água para beber nem para o banho!', 'There\'s no water to drink or wash in!', '¡No hay agua para beber ni para bañarse!', 'Es gibt kein Wasser zum Trinken und Waschen!', 'Нет воды ни попить, ни помыться!']},
+    power: {name: ['Energia', 'Power', 'Electricidad', 'Strom', 'Электричество'], colour: '#F2C230',
+      sad: ['As luzes não acendem e a geladeira está quente!', 'The lights won\'t go on and the fridge is warm!', '¡No se encienden las luces y la nevera está caliente!', 'Das Licht geht nicht an und der Kühlschrank ist warm!', 'Свет не горит, а холодильник тёплый!']},
+    food: {name: ['Comida', 'Food', 'Comida', 'Essen', 'Еда'], colour: '#5DAA4F',
+      sad: ['Não tem onde comprar comida!', 'There\'s nowhere to buy food!', '¡No hay dónde comprar comida!', 'Es gibt nirgends Essen zu kaufen!', 'Негде купить еду!']},
+    waste: {name: ['Esgoto', 'Wastewater', 'Aguas residuales', 'Abwasser', 'Канализация'], colour: '#8A6E4B',
+      sad: ['As privadas não dão descarga! Para onde vai o cocô?', 'The toilets won\'t flush! Where does the poo go?', '¡Los váteres no tiran de la cadena! ¿Adónde va la caca?', 'Die Klos spülen nicht! Wohin mit dem Kacka?', 'Унитазы не смываются! Куда всё девается?']},
+    school: {name: ['Escola', 'School', 'Escuela', 'Schule', 'Школа'], colour: '#E8A33D',
+      sad: ['As crianças não têm escola!', 'The kids have no school to go to!', '¡Los niños no tienen escuela!', 'Die Kinder haben keine Schule!', 'Детям некуда ходить в школу!']},
+    doctor: {name: ['Médico', 'Doctor', 'Médico', 'Arzt', 'Врач'], colour: '#D85A30',
+      sad: ['Estou doente e não tem médico!', 'I\'m sick and there\'s no doctor!', '¡Estoy malo y no hay médico!', 'Ich bin krank und es gibt keinen Arzt!', 'Я заболел, а врача нет!']},
+    jobs: {name: ['Empregos', 'Jobs', 'Trabajo', 'Arbeit', 'Работа'], colour: '#6E7FA0',
+      sad: ['Não tem trabalho, então não tem dinheiro!', 'There are no jobs, so there\'s no money!', '¡No hay trabajo, así que no hay dinero!', 'Es gibt keine Arbeit, also kein Geld!', 'Работы нет, значит, и денег нет!']},
+    fire: {name: ['Bombeiros', 'Fire safety', 'Bomberos', 'Feuerwehr', 'Пожарные'], colour: '#C0392B',
+      sad: ['Se pegar fogo, os bombeiros estão longe demais!', 'If there\'s a fire, the fire engine is too far away!', '¡Si hay un fuego, los bomberos están demasiado lejos!', 'Wenn es brennt, ist die Feuerwehr zu weit weg!', 'Если будет пожар, пожарные слишком далеко!']}
+  };
+  var NEED_IDS = ['water', 'power', 'food', 'waste', 'school', 'doctor', 'jobs', 'fire'];
+  /** cost in $1000s; cap: people one building serves; smelly: nobody wants to live right next to it; reach: tiles it covers. */
+  var BUILDINGS = {
+    road: {cost: 1, name: ['Estrada', 'Road', 'Carretera', 'Straße', 'Дорога'],
+      gives: ['Liga tudo. Casas e prédios precisam de uma estrada até a entrada da cidade.', 'Joins it all up. Houses and buildings need a road all the way to the town\'s way in.', 'Lo une todo. Casas y edificios necesitan una carretera hasta la entrada del pueblo.', 'Verbindet alles. Häuser und Gebäude brauchen eine Straße bis zur Stadteinfahrt.', 'Соединяет всё. Домам и зданиям нужна дорога до въезда в город.']},
+    house: {cost: 4, people: 10, name: ['Casas', 'Houses', 'Casas', 'Häuser', 'Дома'],
+      gives: ['Casas para 10 pessoas. Elas só se mudam se uma estrada chegar até aqui.', 'Homes for 10 people. They only move in when a road reaches it.', 'Casas para 10 personas. Solo se mudan si llega una carretera.', 'Wohnungen für 10 Leute. Sie ziehen nur ein, wenn eine Straße hinführt.', 'Дома на 10 человек. Люди въедут, только если сюда ведёт дорога.']},
+    water: {cost: 15, need: 'water', cap: 60, name: ['Caixa d\'água', 'Water tower', 'Depósito de agua', 'Wasserturm', 'Водонапорная башня'],
+      gives: ['Água limpa para 60 pessoas.', 'Clean water for 60 people.', 'Agua limpia para 60 personas.', 'Sauberes Wasser für 60 Leute.', 'Чистая вода для 60 человек.']},
+    power: {cost: 25, need: 'power', cap: 80, smelly: true, name: ['Usina de energia', 'Power station', 'Central eléctrica', 'Kraftwerk', 'Электростанция'],
+      gives: ['Energia para 80 pessoas. É barulhenta: ninguém quer morar do lado.', 'Power for 80 people. It\'s noisy: nobody wants to live right next to it.', 'Electricidad para 80 personas. Hace ruido: nadie quiere vivir al lado.', 'Strom für 80 Leute. Laut: niemand will direkt daneben wohnen.', 'Электричество для 80 человек. Шумит: рядом жить никто не хочет.']},
+    waste: {cost: 15, need: 'waste', cap: 60, smelly: true, name: ['Estação de esgoto', 'Wastewater plant', 'Depuradora', 'Kläranlage', 'Очистные сооружения'],
+      gives: ['Limpa a água das privadas e pias de 60 pessoas. Tem cheiro ruim de perto.', 'Cleans the water from toilets and sinks for 60 people. It smells up close.', 'Limpia el agua de váteres y fregaderos de 60 personas. Huele mal de cerca.', 'Reinigt das Wasser aus Klos und Spülen für 60 Leute. Riecht von Nahem.', 'Очищает воду из туалетов и раковин для 60 человек. Вблизи пахнет.']},
+    shop: {cost: 8, need: 'food', cap: 40, name: ['Mercado', 'Supermarket', 'Supermercado', 'Supermarkt', 'Супермаркет'],
+      gives: ['Comida para 40 pessoas.', 'Food for 40 people.', 'Comida para 40 personas.', 'Essen für 40 Leute.', 'Еда для 40 человек.']},
+    school: {cost: 20, need: 'school', cap: 60, name: ['Escola', 'School', 'Escuela', 'Schule', 'Школа'],
+      gives: ['Aulas para as crianças de 60 pessoas.', 'Lessons for the kids of 60 people.', 'Clases para los niños de 60 personas.', 'Unterricht für die Kinder von 60 Leuten.', 'Уроки для детей 60 человек.']},
+    doctor: {cost: 15, need: 'doctor', cap: 60, name: ['Posto de saúde', 'Doctor\'s', 'Centro de salud', 'Arztpraxis', 'Поликлиника'],
+      gives: ['Médicos e enfermeiros para 60 pessoas.', 'Doctors and nurses for 60 people.', 'Médicos y enfermeros para 60 personas.', 'Ärzte und Pflegekräfte für 60 Leute.', 'Врачи и медсёстры для 60 человек.']},
+    jobs: {cost: 15, need: 'jobs', cap: 50, smelly: true, name: ['Oficina', 'Workshop', 'Taller', 'Werkstatt', 'Мастерская'],
+      gives: ['Trabalho para 50 pessoas. É barulhenta de perto.', 'Jobs for 50 people. It\'s noisy up close.', 'Trabajo para 50 personas. Hace ruido de cerca.', 'Arbeit für 50 Leute. Laut von Nahem.', 'Работа для 50 человек. Вблизи шумно.']},
+    fire: {cost: 12, need: 'fire', reach: 4, name: ['Bombeiros', 'Fire station', 'Bomberos', 'Feuerwache', 'Пожарная часть'],
+      gives: ['Protege as casas a até 4 quadras daqui.', 'Keeps the houses up to 4 squares away safe.', 'Protege las casas a hasta 4 casillas.', 'Schützt die Häuser bis 4 Felder weit.', 'Защищает дома в пределах 4 клеток.']},
+    park: {cost: 4, fun: 2, name: ['Parque', 'Park', 'Parque', 'Park', 'Парк'],
+      gives: ['Um lugar para brincar. Divertido, mas não resolve as necessidades.', 'Somewhere to play. Fun, but it doesn\'t fix a need.', 'Un sitio para jugar. Divertido, pero no cubre una necesidad.', 'Ein Ort zum Spielen. Lustig, aber kein Bedarf.', 'Место для игр. Весело, но это не нужда.']},
+    icecream: {cost: 10, fun: 1, name: ['Sorveteria', 'Ice cream shop', 'Heladería', 'Eisdiele', 'Кафе-мороженое'],
+      gives: ['Sorvete! Gostoso, mas não é uma necessidade.', 'Ice cream! Yum, but it isn\'t a need.', '¡Helado! Rico, pero no es una necesidad.', 'Eis! Lecker, aber kein Bedarf.', 'Мороженое! Вкусно, но это не нужда.']},
+    knock: {cost: 0, name: ['Derrubar', 'Knock it down', 'Derribar', 'Abreißen', 'Снести'],
+      gives: ['Tira o que está aqui e devolve metade do dinheiro.', 'Takes away what\'s here and gives back half the money.', 'Quita lo que hay y devuelve la mitad del dinero.', 'Entfernt, was hier steht, und gibt das halbe Geld zurück.', 'Убирает то, что здесь стоит, и возвращает половину денег.']}
+  };
+  var TOWNS = [
+    {id: 'village', goal: 30, budget: 110, needs: ['water', 'power', 'food'],
+      name: ['Uma pequena vila', 'A little village', 'Una pequeña aldea', 'Ein kleines Dorf', 'Маленькая деревня']},
+    {id: 'country', goal: 60, budget: 210, needs: ['water', 'power', 'food', 'waste', 'school', 'doctor'],
+      name: ['Uma cidade do interior', 'A country town', 'Un pueblo de campo', 'Eine Landstadt', 'Городок']},
+    {id: 'busy', goal: 100, budget: 420, needs: NEED_IDS,
+      name: ['Uma cidade movimentada', 'A busy town', 'Un pueblo animado', 'Eine lebhafte Stadt', 'Оживлённый город']}
+  ];
+  var TOWN_NEEDS = ['Esta cidade precisa de:', 'This town needs:', 'Este pueblo necesita:', 'Diese Stadt braucht:', 'Этому городу нужно:'];
+  var TOWN_GOAL = ['Meta: {n} pessoas felizes', 'Goal: {n} happy people', 'Meta: {n} personas felices', 'Ziel: {n} glückliche Leute', 'Цель: {n} счастливых жителей'];
+  var PEOPLE = ['Pessoas', 'People', 'Personas', 'Leute', 'Жители'];
+  var TOWN_BRIEF_HELP = ['◀ ▶ escolher  ·  OK começar  ·  Voltar para o menu', '◀ ▶ pick a town  ·  OK to start  ·  Back for the menu', '◀ ▶ elegir  ·  OK empezar  ·  Atrás para el menú', '◀ ▶ wählen  ·  OK starten  ·  Zurück fürs Menü', '◀ ▶ выбрать  ·  OK начать  ·  Назад: меню'];
+  var TOWN_HELP = ['Setas andar  ·  OK construir aqui  ·  Voltar para o menu', 'Arrows to move  ·  OK to build here  ·  Back for the menu', 'Flechas mover  ·  OK construir aquí  ·  Atrás para el menú', 'Pfeile bewegen  ·  OK hier bauen  ·  Zurück fürs Menü', 'Стрелки: ходить  ·  OK: строить  ·  Назад: меню'];
+  var PICK_HELP = ['◀ ▶ escolher  ·  OK construir  ·  Voltar fechar', '◀ ▶ choose  ·  OK to build  ·  Back to close', '◀ ▶ elegir  ·  OK construir  ·  Atrás cerrar', '◀ ▶ wählen  ·  OK bauen  ·  Zurück schließen', '◀ ▶ выбрать  ·  OK строить  ·  Назад: закрыть'];
+  var NO_MONEY = ['Não tem dinheiro suficiente. Derrube algo que não precisa?', 'Not enough money. Knock down something you don\'t need?', 'No hay suficiente dinero. ¿Derribas algo que no haga falta?', 'Nicht genug Geld. Etwas abreißen, das du nicht brauchst?', 'Не хватает денег. Снести что-то ненужное?'];
+  var NEEDS_ROAD = ['Ninguém se muda até uma estrada chegar aqui.', 'Nobody can move in until a road reaches it.', 'Nadie se muda hasta que llegue una carretera.', 'Niemand zieht ein, bis eine Straße hinführt.', 'Никто не въедет, пока сюда не проведут дорогу.'];
+  var WORKS_ROAD = ['Precisa de uma estrada do lado para funcionar.', 'It needs a road next to it to work.', 'Necesita una carretera al lado para funcionar.', 'Es braucht eine Straße daneben, um zu arbeiten.', 'Чтобы работать, рядом нужна дорога.'];
+  var ICE_LESSON = ['Sorvete! Todo mundo adora, mas não é uma necessidade: primeiro água, energia e comida.', 'Ice cream! Everyone loves it, but it isn\'t a need: water, power and food come first.', '¡Helado! A todos les encanta, pero no es una necesidad: primero agua, luz y comida.', 'Eis! Alle lieben es, aber es ist kein Bedarf: zuerst Wasser, Strom und Essen.', 'Мороженое! Все его любят, но это не нужда: сначала вода, свет и еда.'];
+  var SMELLY = ['Eca, é barulhento e fedido morar do lado disso!', 'Phew, it\'s noisy and smelly living right next to that!', '¡Puaj, vivir justo al lado de eso es ruidoso y apestoso!', 'Puh, direkt daneben ist es laut und stinkig!', 'Фу, жить прямо рядом с этим шумно и вонюче!'];
+  var TOWN_WON = ['Todo mundo está feliz!', 'Everyone is happy!', '¡Todos están felices!', 'Alle sind glücklich!', 'Все счастливы!'];
+  var TOWN_WON_WHY = ['Uma cidade de verdade precisa de tudo isso antes de qualquer coisa divertida. Sobrou ${n} mil.', 'A real town needs all of these before the fun things. You had ${n}k left.', 'Un pueblo de verdad necesita todo esto antes que las cosas divertidas. Te sobraron ${n} mil.', 'Eine echte Stadt braucht das alles vor den lustigen Sachen. Übrig: ${n}k.', 'Настоящему городу всё это нужно раньше развлечений. Осталось ${n} тыс.'];
+  var NEXT_TOWN = ['OK próxima cidade', 'OK next town', 'OK siguiente pueblo', 'OK nächste Stadt', 'OK следующий город'];
+  var ALL_TOWNS = ['OK de volta às cidades', 'OK back to the towns', 'OK volver a los pueblos', 'OK zurück zu den Städten', 'OK обратно к городам'];
+
+  // MARK: - Plan a town: the rules
+
+  var TC = 12, TR = 7, TS = 76, TX = 24, TY = 98, GATE = 3;
+
+  function newTown() {
+    var sv = load(), stars = sv.townStars || [], at = 0;
+    while (at < TOWNS.length - 1 && stars[at]) at++;
+    var g = {job: 'town', phase: 'brief', level: at, stars: stars.slice(), t: 0, tt: 0, fx: [], msg: null,
+      cells: [], cx: 1, cy: GATE, pick: 0, opts: [], money: 0, people: 0, supply: {}, moods: [0, 0, 0], moaned: 0, iced: false};
+    freshTown(g);
+    return g;
+  }
+
+  function townUnlocked(g, i) { return i === 0 || !!g.stars[i - 1]; }
+
+  /** Empty land for the chosen town: a few trees, and the road in from the highway. */
+  function freshTown(g) {
+    var t = TOWNS[g.level], i;
+    g.cells = [];
+    for (i = 0; i < TC * TR; i++) g.cells.push({b: ((i % TC) * 7 + Math.floor(i / TC) * 5) % 11 === 3 && i % TC > 1 ? 'tree' : null, linked: false, mood: -1, problems: []});
+    g.cells[GATE * TC].b = 'road'; g.cells[GATE * TC].fixed = true;
+    g.money = t.budget; g.cx = 1; g.cy = GATE; g.iced = false; g.moaned = g.t;
+    townCompute(g);
+  }
+
+  function startTown(g) { freshTown(g); g.phase = 'plan'; g.tt = 0; }
+
+  function cellAt(g, x, y) { return x < 0 || y < 0 || x >= TC || y >= TR ? null : g.cells[y * TC + x]; }
+
+  /** Who lives here, what they have, and how each house feels. */
+  function townCompute(g) {
+    var t = TOWNS[g.level], i, x, y, cl, n;
+    // Roads joined to the way in, on the left.
+    for (i = 0; i < g.cells.length; i++) { g.cells[i].linked = false; g.cells[i].reached = false; }
+    var todo = [GATE * TC]; g.cells[GATE * TC].reached = true;
+    while (todo.length) {
+      var at = todo.pop(), ax = at % TC, ay = (at - ax) / TC, nb = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+      for (n = 0; n < 4; n++) {
+        cl = cellAt(g, ax + nb[n][0], ay + nb[n][1]);
+        if (cl && cl.b === 'road' && !cl.reached) { cl.reached = true; todo.push((ay + nb[n][1]) * TC + ax + nb[n][0]); }
+      }
+    }
+    // A building works when a joined-up road runs past it.
+    for (y = 0; y < TR; y++) for (x = 0; x < TC; x++) {
+      cl = cellAt(g, x, y);
+      if (!cl.b || cl.b === 'tree') continue;
+      if (cl.b === 'road') { cl.linked = cl.reached; continue; }
+      cl.linked = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(function (d) { var o = cellAt(g, x + d[0], y + d[1]); return o && o.b === 'road' && o.reached; });
+    }
+    var people = 0, supply = {};
+    NEED_IDS.forEach(function (id) { supply[id] = 0; });
+    for (i = 0; i < g.cells.length; i++) {
+      cl = g.cells[i]; var def = BUILDINGS[cl.b];
+      if (!def || !cl.linked) continue;
+      if (def.people) people += def.people;
+      if (def.need && def.cap) supply[def.need] += def.cap;
+    }
+    g.people = people; g.supply = supply;
+    var short = t.needs.filter(function (id) { return id !== 'fire' && supply[id] < people; });
+    var moods = [0, 0, 0], houses = 0;
+    for (y = 0; y < TR; y++) for (x = 0; x < TC; x++) {
+      cl = cellAt(g, x, y);
+      if (cl.b !== 'house' || !cl.linked) { cl.mood = -1; cl.problems = []; continue; }
+      houses++;
+      var problems = short.slice(), fun = false;
+      for (var yy = 0; yy < TR; yy++) for (var xx = 0; xx < TC; xx++) {
+        var o = cellAt(g, xx, yy), od = BUILDINGS[o.b];
+        if (!od || !o.linked) continue;
+        var dx = Math.abs(xx - x), dy = Math.abs(yy - y);
+        if (od.smelly && dx <= 1 && dy <= 1 && problems.indexOf('smelly') < 0) problems.push('smelly');
+        if (od.fun && dx + dy <= od.fun) fun = true;
+        if (od.reach && dx + dy <= od.reach) cl.safe = true;
+      }
+      if (t.needs.indexOf('fire') >= 0 && !cl.safe) problems.push('fire');
+      cl.safe = false;
+      cl.problems = problems; cl.fun = fun;
+      cl.mood = problems.length === 0 ? 0 : problems.length === 1 ? 1 : 2;
+      moods[cl.mood]++;
+    }
+    g.moods = moods; g.houses = houses;
+    g.won = people >= t.goal && moods[1] === 0 && moods[2] === 0;
+  }
+
+  /** What can go on the cursor's square: building there already means knock it down. */
+  function townOptions(g) {
+    var cl = cellAt(g, g.cx, g.cy);
+    if (cl.fixed) return [];
+    if (cl.b && cl.b !== 'tree') return ['knock'];
+    var t = TOWNS[g.level], out = ['road', 'house'];
+    ['water', 'power', 'shop', 'waste', 'school', 'doctor', 'jobs', 'fire'].forEach(function (id) {
+      if (t.needs.indexOf(BUILDINGS[id].need) >= 0) out.push(id);
+    });
+    return out.concat(['park', 'icecream']);
+  }
+
+  function townPlace(g, id) {
+    var cl = cellAt(g, g.cx, g.cy), def = BUILDINGS[id], px = TX + g.cx * TS + TS / 2, py = TY + g.cy * TS + TS / 2;
+    if (id === 'knock') {
+      g.money += Math.floor(BUILDINGS[cl.b].cost / 2); cl.b = null; sfx('crunch'); fx(g, px, py, '#B08A5A', 16, 200);
+    } else {
+      if (g.money < def.cost) { say(g, L(NO_MONEY), CORAL); sfx('bonk'); return; }
+      g.money -= def.cost; cl.b = id; sfx('place'); fx(g, px, py, LILAC, 12, 200);
+    }
+    g.phase = 'plan';
+    townCompute(g);
+    if (id === 'house' && !cl.linked) say(g, L(NEEDS_ROAD), EMBER);
+    else if (id === 'icecream' && !g.iced) { g.iced = true; say(g, L(ICE_LESSON), EMBER); }
+    else if (def.need && !cl.linked) say(g, L(WORKS_ROAD), EMBER);
+    if (g.won) { g.phase = 'won'; g.tt = 0; townWin(g); }
+  }
+
+  function townStars(g) { var left = g.money / TOWNS[g.level].budget; return left >= 0.25 ? 3 : left >= 0.1 ? 2 : 1; }
+
+  function townWin(g) {
+    var s = townStars(g);
+    g.stars[g.level] = Math.max(g.stars[g.level] || 0, s);
+    var sv = load(); sv.townStars = g.stars; save(sv);
+    sfx('win'); fx(g, W / 2, 300, EMBER, 30, 420); fx(g, W / 2, 300, LILAC, 30, 420);
+  }
+
+  function townKey(g, k) {
+    if (g.phase === 'brief') {
+      if (k === LEFT || k === RIGHT) { g.level = (g.level + (k === LEFT ? TOWNS.length - 1 : 1)) % TOWNS.length; freshTown(g); sfx('hop'); }
+      else if (k === OK) {
+        if (!townUnlocked(g, g.level)) { say(g, L(LOCKED), EMBER); sfx('bonk'); return; }
+        startTown(g); sfx('six');
+      }
+      return;
+    }
+    if (g.phase === 'plan') {
+      if (k === LEFT) g.cx = Math.max(0, g.cx - 1);
+      else if (k === RIGHT) g.cx = Math.min(TC - 1, g.cx + 1);
+      else if (k === UP) g.cy = Math.max(0, g.cy - 1);
+      else if (k === DOWN) g.cy = Math.min(TR - 1, g.cy + 1);
+      else if (k === OK) {
+        g.opts = townOptions(g);
+        if (!g.opts.length) { sfx('bonk'); return; }
+        g.phase = 'pick'; g.pick = Math.min(g.opts[0] === 'knock' ? 0 : g.lastPick || 0, g.opts.length - 1); sfx('pop');
+        return;
+      }
+      sfx('hop');
+      return;
+    }
+    if (g.phase === 'pick') {
+      if (k === LEFT || k === RIGHT) { g.pick = (g.pick + (k === LEFT ? g.opts.length - 1 : 1)) % g.opts.length; sfx('hop'); }
+      else if (k === UP) g.phase = 'plan';
+      else if (k === OK) { if (g.opts[0] !== 'knock') g.lastPick = g.pick; townPlace(g, g.opts[g.pick]); }
+      return;
+    }
+    if (g.phase === 'won' && k === OK && g.tt > 1.6) {
+      if (g.level < TOWNS.length - 1) g.level++;
+      g.phase = 'brief'; freshTown(g);
+    }
+  }
+
+  /** Back goes up one: the builder's list closes, a finished town goes back to the towns. */
+  function townBack(g) {
+    if (g.phase === 'pick') { g.phase = 'plan'; return true; }
+    if (g.phase === 'won') { g.phase = 'brief'; return true; }
+    return false;
+  }
+
+  function townStep(g, dt) {
+    g.t += dt; g.tt += dt;
+    if (g.msg) { g.msg.t -= dt; if (g.msg.t <= 0) g.msg = null; }
+    for (var i = g.fx.length - 1; i >= 0; i--) {
+      var p = g.fx[i];
+      p.t += dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 600 * dt;
+      if (p.t > p.life) g.fx.splice(i, 1);
+    }
+    // Now and then somebody says what's wrong, so a sad face always has a reason.
+    if (g.phase === 'plan' && !g.msg && g.t - g.moaned > 6) {
+      g.moaned = g.t;
+      for (var k = 0; k < g.cells.length; k++) {
+        var cl = g.cells[(k + Math.floor(g.t)) % g.cells.length];
+        if (cl.problems && cl.problems.length) {
+          var pr = cl.problems[Math.floor(g.t) % cl.problems.length];
+          say(g, pr === 'smelly' ? L(SMELLY) : L(NEEDS[pr].sad), CORAL);
+          break;
+        }
+      }
+    }
+  }
+
+  // MARK: - Plan a town: drawing
+
+  function face(x, y, r, mood) {
+    disc(x, y, r, mood === 0 ? '#5CC46A' : mood === 1 ? EMBER : CORAL);
+    disc(x - r * 0.35, y - r * 0.2, r * 0.13, INK); disc(x + r * 0.35, y - r * 0.2, r * 0.13, INK);
+    c.strokeStyle = INK; c.lineWidth = Math.max(2, r * 0.14); c.lineCap = 'round'; c.beginPath();
+    if (mood === 0) c.arc(x, y + r * 0.05, r * 0.45, 0.15 * Math.PI, 0.85 * Math.PI);
+    else if (mood === 1) { c.moveTo(x - r * 0.4, y + r * 0.35); c.lineTo(x + r * 0.4, y + r * 0.35); }
+    else c.arc(x, y + r * 0.7, r * 0.45, 1.2 * Math.PI, 1.8 * Math.PI);
+    c.stroke();
+  }
+
+  /** One building in a square at x, y of size s (also the picker's little pictures). */
+  function building(id, x, y, s, g, cx, cy) {
+    var u = s / 76, mx = x + s / 2;
+    function R(a, b, w, h, col, r) { box(x + a * u, y + b * u, w * u, h * u, (r || 3) * u, col); }
+    if (id === 'road') {
+      box(x, y, s, s, 0, '#4A4954');
+      var dirs = g ? [[1, 0], [-1, 0], [0, 1], [0, -1]].filter(function (d) { var o = cellAt(g, cx + d[0], cy + d[1]); return o && o.b === 'road' || (cx + d[0] < 0 && cy === GATE); }) : [[1, 0], [-1, 0]];
+      for (var d = 0; d < dirs.length; d++) line(mx, y + s / 2, mx + dirs[d][0] * s / 2, y + s / 2 + dirs[d][1] * s / 2, 3 * u, 'rgba(247,246,242,0.7)');
+      disc(mx, y + s / 2, 3 * u, 'rgba(247,246,242,0.7)');
+      return;
+    }
+    if (id === 'tree') { tree(mx, y + s - 8 * u, 0.6 * u); return; }
+    if (id === 'house') {
+      R(14, 34, 48, 34, PAPER); poly([x + 8 * u, y + 36 * u, mx, y + 12 * u, x + 68 * u, y + 36 * u], CORAL);
+      R(32, 48, 12, 20, '#7A4E2E'); R(18, 42, 10, 10, '#9ED0F5'); R(48, 42, 10, 10, '#9ED0F5');
+      return;
+    }
+    if (id === 'water') {
+      line(x + 26 * u, y + 40 * u, x + 20 * u, y + 70 * u, 4 * u, STEEL); line(x + 50 * u, y + 40 * u, x + 56 * u, y + 70 * u, 4 * u, STEEL);
+      R(16, 12, 44, 30, BLUE, 12); disc(mx, y + 27 * u, 7 * u, '#9ED0F5');
+      return;
+    }
+    if (id === 'power') {
+      R(10, 34, 56, 34, '#7C8597'); R(46, 10, 12, 28, '#5B6270');
+      disc(52 * u + x, y + 8 * u, 6 * u, 'rgba(220,220,230,0.8)');
+      poly([x + 28 * u, y + 38 * u, x + 22 * u, y + 54 * u, x + 32 * u, y + 52 * u, x + 26 * u, y + 66 * u, x + 40 * u, y + 46 * u, x + 30 * u, y + 48 * u], HIVIS);
+      return;
+    }
+    if (id === 'waste') {
+      disc(x + 26 * u, y + 44 * u, 18 * u, '#6C8F87'); disc(x + 26 * u, y + 44 * u, 12 * u, '#8A6E4B');
+      disc(x + 54 * u, y + 52 * u, 14 * u, '#6C8F87'); disc(x + 54 * u, y + 52 * u, 9 * u, '#8A6E4B');
+      return;
+    }
+    if (id === 'shop') {
+      R(10, 30, 56, 38, PAPER);
+      for (var st = 0; st < 4; st++) R(10 + st * 14, 22, 14, 12, st % 2 ? PAPER : '#5DAA4F', 1);
+      R(30, 46, 16, 22, '#9ED0F5'); disc(x + 18 * u, y + 52 * u, 5 * u, CORAL); disc(x + 58 * u, y + 52 * u, 5 * u, EMBER);
+      return;
+    }
+    if (id === 'school') {
+      R(8, 32, 60, 36, EMBER); poly([x + 4 * u, y + 34 * u, mx, y + 14 * u, x + 72 * u, y + 34 * u], '#B5562E');
+      R(32, 48, 12, 20, '#7A4E2E'); disc(mx, y + 30 * u, 5 * u, HIVIS);
+      line(x + 64 * u, y + 32 * u, x + 64 * u, y + 6 * u, 2 * u, INK); poly([x + 64 * u, y + 6 * u, x + 76 * u, y + 11 * u, x + 64 * u, y + 16 * u], BLUE);
+      return;
+    }
+    if (id === 'doctor') {
+      R(10, 22, 56, 46, PAPER); R(32, 30, 12, 30, CORAL, 1); R(23, 39, 30, 12, CORAL, 1);
+      return;
+    }
+    if (id === 'jobs') {
+      R(8, 36, 60, 32, '#6E7FA0');
+      for (var sw = 0; sw < 3; sw++) poly([x + (8 + sw * 20) * u, y + 36 * u, x + (8 + sw * 20) * u, y + 20 * u, x + (28 + sw * 20) * u, y + 36 * u], '#55637F');
+      R(16, 48, 12, 10, HIVIS); R(46, 48, 12, 10, HIVIS);
+      return;
+    }
+    if (id === 'fire') {
+      R(10, 24, 56, 44, '#C0392B'); R(20, 40, 36, 28, '#F2E6D8'); for (var fl = 0; fl < 3; fl++) line(x + 20 * u, y + (46 + fl * 7) * u, x + 56 * u, y + (46 + fl * 7) * u, 1.5 * u, '#C9B8A2');
+      disc(mx, y + 31 * u, 4 * u, HIVIS);
+      return;
+    }
+    if (id === 'park') {
+      R(6, 6, 64, 64, '#5DBA66', 10); tree(x + 26 * u, y + 52 * u, 0.5 * u); R(42, 50, 22, 5, '#7A4E2E'); R(44, 55, 3, 7, '#7A4E2E'); R(59, 55, 3, 7, '#7A4E2E');
+      return;
+    }
+    if (id === 'icecream') {
+      R(10, 30, 56, 38, '#F4B6D2'); for (var ic = 0; ic < 4; ic++) R(10 + ic * 14, 24, 14, 10, ic % 2 ? PAPER : '#E77FB0', 1);
+      poly([x + 30 * u, y + 46 * u, x + 46 * u, y + 46 * u, x + 38 * u, y + 66 * u], '#D9A066'); disc(mx, y + 42 * u, 9 * u, '#FDF1C7'); disc(mx + 2 * u, y + 34 * u, 6 * u, '#E77FB0');
+      return;
+    }
+    if (id === 'knock') {
+      R(16, 40, 44, 24, '#B08A5A', 10); line(x + 20 * u, y + 20 * u, x + 56 * u, y + 56 * u, 6 * u, CORAL); line(x + 56 * u, y + 20 * u, x + 20 * u, y + 56 * u, 6 * u, CORAL);
+    }
+  }
+
+  function renderTown(g) {
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    var t = TOWNS[g.level], x, y, cl;
+    box(0, 0, W, H, 0, '#3E7A3A');
+    // The land, square by square.
+    for (y = 0; y < TR; y++) for (x = 0; x < TC; x++) {
+      var px = TX + x * TS, py = TY + y * TS;
+      box(px, py, TS, TS, 0, (x + y) % 2 ? '#7CC46A' : '#74BC62');
+    }
+    // The highway coming in from the left.
+    box(0, TY + GATE * TS, TX, TS, 0, '#4A4954');
+    for (y = 0; y < TR; y++) for (x = 0; x < TC; x++) {
+      cl = cellAt(g, x, y);
+      if (!cl.b) continue;
+      var bx = TX + x * TS, by = TY + y * TS;
+      building(cl.b, bx, by, TS, g, x, y);
+      var def = BUILDINGS[cl.b];
+      if (def && def.smelly && cl.linked) for (var w = 0; w < 2; w++) {
+        var wy = by + 4 - ((g.t * 14 + w * 9) % 18);
+        c.globalAlpha = 0.6; line(bx + 22 + w * 26, wy + 8, bx + 26 + w * 26 + Math.sin(g.t * 4 + w) * 3, wy, 3, '#9BB86A'); c.globalAlpha = 1;
+      }
+      // Not joined to a road yet: a little sign.
+      if (cl.b !== 'tree' && cl.b !== 'road' && !cl.linked) { disc(bx + TS - 14, by + 14, 11, CORAL); text('!', bx + TS - 14, by + 15, 16, PAPER, 'center', '800'); }
+      if (cl.b === 'house' && cl.mood >= 0) {
+        face(bx + TS - 15, by + 15, 12, cl.mood);
+        if (cl.fun) disc(bx + 12, by + 12, 6, '#E77FB0');
+      }
+    }
+    // The cursor.
+    var cxp = TX + g.cx * TS, cyp = TY + g.cy * TS, pulse = 0.6 + 0.4 * Math.sin(g.t * 5);
+    c.strokeStyle = 'rgba(158,123,255,' + pulse + ')'; c.lineWidth = 5; rr(cxp + 2, cyp + 2, TS - 4, TS - 4, 10); c.stroke();
+    c.strokeStyle = PAPER; c.lineWidth = 2; rr(cxp + 6, cyp + 6, TS - 12, TS - 12, 8); c.stroke();
+    // What a fire station would cover, while one is picked or under the cursor.
+    var showFire = (g.phase === 'pick' && g.opts[g.pick] === 'fire') || (cellAt(g, g.cx, g.cy) || {}).b === 'fire';
+    if (showFire) {
+      c.fillStyle = 'rgba(192,57,43,0.18)';
+      for (y = 0; y < TR; y++) for (x = 0; x < TC; x++) if (Math.abs(x - g.cx) + Math.abs(y - g.cy) <= 4) c.fillRect(TX + x * TS, TY + y * TS, TS, TS);
+    }
+    for (var i = 0; i < g.fx.length; i++) {
+      var p = g.fx[i]; c.globalAlpha = Math.max(0, 1 - p.t / p.life);
+      c.fillStyle = p.c; c.fillRect(p.x - p.s / 2, p.y - p.s / 2, p.s, p.s);
+    }
+    c.globalAlpha = 1;
+    drawTownTop(g); drawTownPanel(g);
+    if (g.phase === 'brief') drawTownBrief(g);
+    else if (g.phase === 'pick') drawTownPick(g);
+    else if (g.phase === 'won' && g.tt > 1.2) drawTownWon(g);
+    else drawHint(L(TOWN_HELP));
+    drawMsg(g);
+  }
+
+  function drawTownTop(g) {
+    var t = TOWNS[g.level];
+    box(14, 12, W - 28, 74, 20, 'rgba(13,12,24,0.78)');
+    text((g.level + 1) + '. ' + L(t.name), 34, 49, 28, PAPER, 'left', '800');
+    for (var i = 0; i < 3; i++) starShape(W / 2 + 40 + i * 30, 49, 11, i < (g.stars[g.level] || 0) ? EMBER : 'rgba(247,246,242,0.18)');
+    text(L(PEOPLE) + ' ' + g.people + ' / ' + t.goal + '   ·   ' + L(MONEY) + ' $' + g.money + 'k', W - 34, 49, 20, 'rgba(247,246,242,0.9)', 'right', '700');
+  }
+
+  /** The town's needs, each with what it has against how many people live here. */
+  function drawTownPanel(g) {
+    var t = TOWNS[g.level], x0 = TX + TC * TS + 14, w = W - 14 - x0, y = TY;
+    box(x0, y, w, TR * TS, 20, 'rgba(13,12,24,0.8)');
+    face(x0 + 34, y + 34, 15, 0); text(String(g.moods[0]), x0 + 56, y + 35, 22, PAPER, 'left', '800');
+    face(x0 + 124, y + 34, 15, 1); text(String(g.moods[1]), x0 + 146, y + 35, 22, PAPER, 'left', '800');
+    face(x0 + 214, y + 34, 15, 2); text(String(g.moods[2]), x0 + 236, y + 35, 22, PAPER, 'left', '800');
+    var row = Math.min(54, (TR * TS - 80) / t.needs.length);
+    t.needs.forEach(function (id, i) {
+      var ry = y + 78 + i * row, need = NEEDS[id], have, ok;
+      if (id === 'fire') {
+        var covered = 0;
+        g.cells.forEach(function (cl) { if (cl.b === 'house' && cl.linked && cl.problems.indexOf('fire') < 0) covered++; });
+        ok = covered === g.houses; have = covered + ' / ' + g.houses;
+      } else { have = g.supply[id] + ' / ' + g.people; ok = g.supply[id] >= g.people; }
+      disc(x0 + 26, ry + 12, 9, need.colour);
+      text(L(need.name), x0 + 44, ry + 12, 18, PAPER, 'left', '700');
+      text(have, x0 + w - 16, ry + 12, 18, ok ? '#7EE08A' : CORAL, 'right', '800');
+      var full = id === 'fire' ? (g.houses ? 1 : 0) : g.people ? Math.min(1, g.supply[id] / g.people) : 1;
+      box(x0 + 44, ry + 28, w - 60, 6, 3, 'rgba(247,246,242,0.12)');
+      box(x0 + 44, ry + 28, (w - 60) * (id === 'fire' ? (ok ? 1 : 0.4) : full), 6, 3, ok ? '#5CC46A' : CORAL);
+    });
+  }
+
+  function drawTownBrief(g) {
+    c.fillStyle = 'rgba(13,12,24,0.72)'; c.fillRect(0, 0, W, H);
+    dots(W / 2 - 33, 90);
+    text(L(TOWN_TITLE), W / 2, 146, 46, PAPER, 'center', '800');
+    var cw = 330, gap = 24, x0 = (W - (cw * 3 + gap * 2)) / 2;
+    for (var i = 0; i < TOWNS.length; i++) {
+      var t = TOWNS[i], x = x0 + i * (cw + gap), y = 200, here = i === g.level, open = townUnlocked(g, i);
+      if (here) box(x - 6, y - 6, cw + 12, 392, 26, 'rgba(158,123,255,0.6)');
+      box(x, y, cw, 380, 22, here ? '#241E4A' : '#1A1733');
+      var a = open ? 1 : 0.35;
+      c.globalAlpha = a;
+      text(String(i + 1) + '. ' + L(t.name), x + cw / 2, y + 40, 24, PAPER, 'center', '800');
+      text(L(TOWN_GOAL).replace('{n}', t.goal), x + cw / 2, y + 80, 18, '#7EE08A', 'center', '700');
+      text(L(TOWN_NEEDS), x + 24, y + 120, 16, 'rgba(247,246,242,0.6)', 'left', '700');
+      for (var n = 0; n < t.needs.length; n++) {
+        var nx = x + 24 + (n % 2) * 150, ny = y + 152 + Math.floor(n / 2) * 34;
+        disc(nx + 8, ny, 8, NEEDS[t.needs[n]].colour);
+        text(L(NEEDS[t.needs[n]].name), nx + 24, ny + 1, 17, PAPER, 'left', '600');
+      }
+      text(L(MONEY) + ' $' + t.budget + 'k', x + cw / 2, y + 320, 18, 'rgba(247,246,242,0.75)', 'center', '700');
+      for (var s = 0; s < 3; s++) starShape(x + cw / 2 - 34 + s * 34, y + 352, 13, s < (g.stars[i] || 0) ? EMBER : 'rgba(247,246,242,0.15)');
+      c.globalAlpha = 1;
+      if (!open) { box(x + cw / 2 - 22, y + 196, 44, 34, 7, 'rgba(247,246,242,0.5)'); c.strokeStyle = 'rgba(247,246,242,0.5)'; c.lineWidth = 6; c.beginPath(); c.arc(x + cw / 2, y + 196, 14, Math.PI, 0); c.stroke(); }
+    }
+    drawHint(L(TOWN_BRIEF_HELP));
+  }
+
+  function drawTownPick(g) {
+    var n = g.opts.length, cw = 86, gap = 8, x0 = (TX + TC * TS) / 2 - (n * cw + (n - 1) * gap) / 2, y0 = H - 196;
+    var pw = Math.max(640, n * (cw + gap) + 40);
+    box((TX + TC * TS) / 2 - pw / 2, y0, pw, 186, 24, 'rgba(13,12,24,0.92)');
+    for (var i = 0; i < n; i++) {
+      var x = x0 + i * (cw + gap), on = i === g.pick, id = g.opts[i], def = BUILDINGS[id];
+      box(x, y0 + 14, cw, cw, 14, on ? '#3A2F78' : 'rgba(247,246,242,0.08)');
+      if (on) { c.strokeStyle = LILAC; c.lineWidth = 3; rr(x, y0 + 14, cw, cw, 14); c.stroke(); }
+      c.globalAlpha = def.cost > g.money ? 0.4 : 1;
+      building(id, x + 5, y0 + 19, cw - 10, null);
+      c.globalAlpha = 1;
+    }
+    var pick = BUILDINGS[g.opts[g.pick]], cl = cellAt(g, g.cx, g.cy);
+    var price = g.opts[g.pick] === 'knock' ? '+ $' + Math.floor(BUILDINGS[cl.b].cost / 2) + 'k' : '$' + pick.cost + 'k';
+    text(L(pick.name) + '   ' + price, (TX + TC * TS) / 2, y0 + 126, 22, pick.cost > g.money ? CORAL : PAPER, 'center', '800');
+    text(L(pick.gives), (TX + TC * TS) / 2, y0 + 158, 17, 'rgba(247,246,242,0.8)', 'center', '600');
+    text(L(PICK_HELP), (TX + TC * TS) / 2, y0 - 16, 17, PAPER, 'center', '700');
+  }
+
+  function drawTownWon(g) {
+    box(W / 2 - 420, 170, 840, 300, 32, 'rgba(13,12,24,0.92)');
+    text(L(TOWN_WON), W / 2, 226, 44, EMBER, 'center', '800');
+    var s = townStars(g);
+    for (var i = 0; i < 3; i++) starShape(W / 2 - 60 + i * 60, 282, 24, i < s ? EMBER : 'rgba(247,246,242,0.15)');
+    wrap(L(TOWN_WON_WHY).replace('{n}', g.money), W / 2, 336, 760, 22, PAPER, '600');
+    text(g.level === TOWNS.length - 1 ? L(ALL_TOWNS) : L(NEXT_TOWN), W / 2, 434, 22, LILAC, 'center', '700');
+  }
+
   // MARK: - The jobs
 
   var JOBS = {
     road: {make: newRoad, key: roadKey, step: roadStep, render: renderRoad, guide: 'road'},
-    bridge: {make: newBridge, key: bridgeKey, step: bridgeStep, render: renderBridge, back: bridgeBack, guide: 'bridge'}
+    bridge: {make: newBridge, key: bridgeKey, step: bridgeStep, render: renderBridge, back: bridgeBack, guide: 'bridge'},
+    town: {make: newTown, key: townKey, step: townStep, render: renderTown, back: townBack, guide: 'town'}
   };
 
   // MARK: - The screen
@@ -1239,7 +1724,7 @@ var Builder = (function () {
     else api.close();
   }
 
-  /** Opens a job: 'road' or 'bridge'. */
+  /** Opens a job: 'road', 'bridge' or 'town'. */
   function open(which) {
     job = JOBS[which] || JOBS.road;
     menu = 0; last = 0;
@@ -1284,6 +1769,8 @@ var Builder = (function () {
     roadKey: roadKey, roadStep: roadStep, stepDone: stepDone, L: L,
     SHAPES: SHAPES, MATERIALS: MATERIALS, STRENGTH: STRENGTH, BRIDGES: BRIDGES, newBridge: newBridge, judge: judge,
     bridgeKey: bridgeKey, bridgeStep: bridgeStep, bridgeBack: bridgeBack, renderBridge: renderBridge,
+    NEEDS: NEEDS, NEED_IDS: NEED_IDS, BUILDINGS: BUILDINGS, TOWNS: TOWNS, newTown: newTown, startTown: startTown, townKey: townKey,
+    townStep: townStep, townBack: townBack, townCompute: townCompute, townOptions: townOptions, renderTown: renderTown,
     // For the tests and a preview in a browser: draw on a stand-in canvas, and the game on screen.
     useContext: function (ctx) { c = ctx; }, renderRoad: renderRoad, drawPause: drawPause, playing: function () { return g; }}};
 })();
