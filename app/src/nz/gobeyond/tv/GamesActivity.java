@@ -53,7 +53,7 @@ public class GamesActivity extends Activity {
                 {"🎤", Ui.tr("Karaokê", "Karaoke", "Karaoke"), (Runnable) () -> go(() -> KaraokePickActivity.open(this))},
                 {"🎲", Ui.tr("Jogos de tabuleiro e cartas", "Board and card games", "Juegos de mesa y cartas"), (Runnable) () -> go(() -> TableActivity.open(this))},
                 {"🤪", Ui.tr("Jogos bobos", "Silly games", "Juegos locos"), (Runnable) () -> go(() -> TableActivity.open(this, "silly"))},
-                // Milo's Remote Control Land (web/rcland.js, ADR 0045), in TableActivity's WebView like the arcade.
+                // Milo's Remote Control Land (web/rcland.js, ADR 0046), in TableActivity's WebView like the arcade.
                 {"🏎", Ui.tr("Terra do Controle Remoto do Milo", "Milo's Remote Control Land", "La Tierra Teledirigida de Milo"), (Runnable) () -> go(() -> TableActivity.open(this, "rcland"))},
                 {"🕹", Ui.tr("Fliperama", "Arcade", "Arcade"), (Runnable) () -> go(() -> TableActivity.open(this, "arcade"))},
                 {"🥪", Ui.tr("Lanches da escola", "School lunches", "Almuerzos del cole"), (Runnable) () -> go(() -> TableActivity.open(this, "lunch"))},

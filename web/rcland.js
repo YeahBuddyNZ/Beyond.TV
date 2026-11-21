@@ -1,5 +1,5 @@
 /*
- * Milo's Remote Control Land (ADR 0045): pick a machine (race car, monster truck, digger, dune buggy or bulldozer) and
+ * Milo's Remote Control Land (ADR 0046): pick a machine (race car, monster truck, digger, dune buggy or bulldozer) and
  * drive it round a park full of ramps, things to smash, stars, balloons and a pond. Flips and spins in the air score
  * points, landing them keeps a combo going, and challenges give a goal. Played with the remote alone, one press per push
  * like the arcade (ADR 0035): ▲ ▼ change gear, ◀ ▶ turn a bit, OK jumps; in the air the arrows and OK do tricks. Back

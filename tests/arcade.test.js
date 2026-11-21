@@ -26,7 +26,9 @@ function check(name, ok) {
 
 // A canvas that accepts anything and draws nothing.
 var ctx = {measureText: function () { return {width: 100}; }, save: function () {}, restore: function () {}};
-['beginPath', 'moveTo', 'lineTo', 'arc', 'closePath', 'fill', 'stroke', 'fillRect', 'fillText', 'quadraticCurveTo'].forEach(function (m) { ctx[m] = function () {}; });
+['beginPath', 'moveTo', 'lineTo', 'arc', 'closePath', 'fill', 'stroke', 'fillRect', 'fillText', 'quadraticCurveTo', 'bezierCurveTo',
+  'translate', 'scale', 'rotate'].forEach(function (m) { ctx[m] = function () {}; });
+ctx.createLinearGradient = function () { return {addColorStop: function () {}}; };
 A.useContext(ctx);
 
 // The maze: every row the same length, every open square reachable, dots to eat and room for everyone to start.
@@ -57,7 +59,7 @@ check('never quicker than every 2 ticks', A.jellyEvery(1, 36, 9) === 2);
 
 // Each game played by random presses: it must draw, take every key, and end or keep going without throwing.
 var KEYS = [37, 38, 39, 40, 13];
-['eel', 'paddle', 'guard', 'dots'].forEach(function (id) {
+['eel', 'paddle', 'guard', 'dots', 'crew'].forEach(function (id) {
   var ended = 0, threw = false;
   for (var game = 0; game < 6; game++) {
     var g = A.make(id);
@@ -73,7 +75,7 @@ var KEYS = [37, 38, 39, 40, 13];
     } catch (e) { console.log(id, e.stack); threw = true; }
   }
   check(id + ' plays without a problem', !threw);
-  if (id !== 'paddle') check(id + ' can be lost by playing badly', ended > 0);
+  if (id !== 'paddle' && id !== 'crew') check(id + ' can be lost by playing badly', ended > 0);
 });
 
 // Eel: eating grows it, hitting itself ends it.
@@ -90,6 +92,86 @@ var KEYS = [37, 38, 39, 40, 13];
   for (var t = 0; t < 20000 && !g.over; t++) g.update();
   check('a still paddle loses to the robot', g.over && !g.won);
   check('losing does not make the robot quicker', (JSON.parse(store['btv.arcade'] || '{}').paddle || 1) === 1);
+})();
+
+// Launch Crew: four scams and four real messages, each with words; the gauge, the stars and the lanes.
+(function () {
+  var m = A.crewMessages();
+  check('Launch Crew has four scams and four real messages', m.filter(function (x) { return x.scam; }).length === 4 && m.length === 8);
+  check('every scam says why, every real one says who from', m.every(function (x) { return x.scam ? !!x.why : !!x.from; }));
+  var top = 0, low = 100;
+  for (var t = 0; t < 400; t++) { top = Math.max(top, A.crewFuel(t)); low = Math.min(low, A.crewFuel(t)); }
+  check('the fuel needle sweeps the whole gauge', top >= 99 && low <= 1);
+  check('the green is near the top but not over', A.crewFuelOk(90) && !A.crewFuelOk(60) && !A.crewFuelOk(100));
+  check('stars: 3 for 7 or more, 2 for 5 or 6, never none', A.crewStars(8) === 3 && A.crewStars(7) === 3 && A.crewStars(5) === 2 && A.crewStars(0) === 1);
+  var same = false;
+  for (var i = 0; i < 300; i++) { var last = i % 3; if (A.crewLane(last, Math.random()) === last) same = true; }
+  check('a message never drops down the same lane as the one before', !same);
+})();
+
+// Launch Crew played well: board everyone, fuel in the green, fix every spark, then zap only the scams.
+(function () {
+  var g = A.make('crew'), t;
+  for (t = 0; t < 400; t++) { g.key(13); g.update(); }
+  for (t = 0; t < 3000 && !g.over; t++) {
+    g.update();
+    g.draw();
+  }
+  check('a crew left alone never takes off', !g.over);
+
+  g = A.make('crew');
+  var p, n = 0;
+  for (t = 0; t < 6000 && !g.over; t++) {
+    p = g.peek();
+    if (p.phase === 'board' && t % 3 === 0) g.key(13);
+    else if (p.phase === 'fuel' && A.crewFuelOk(p.fuel) && p.fuel < 95) g.key(13);
+    else if (p.phase === 'fix' && p.spark) g.key(p.spark);
+    else if (p.phase === 'fly') {
+      var scam = null;
+      p.fallers.forEach(function (f) { if (f.m.scam && f.y > 100) scam = f; });
+      if (scam && scam.lane < p.lane) g.key(37);
+      else if (scam && scam.lane > p.lane) g.key(39);
+      else if (scam) g.key(13);
+      else if (p.fallers.some(function (f) { return !f.m.scam && f.lane === p.lane; })) g.key(p.lane < 2 ? 39 : 37);
+    }
+    g.update();
+    if (t % 25 === 0) g.draw();
+  }
+  check('a crew played well reaches the Moon', g.over && g.won);
+  check('and handles every message right', g.score === 8);
+  check('which earns three stars', g.scoreText().indexOf('★★★') === 0);
+})();
+
+// The remote in a game (Kyle, 21/11/2026: Back and OK did nothing in Sky Guard). Back must reach back(), which
+// pauses a game being played and leaves one that's paused, ready or over; OK starts and carries on.
+(function () {
+  var screens = [], adds = [];
+  sandbox.TV = {keys: {left: 37, up: 38, right: 39, down: 40, ok: 13, back: 4}};
+  sandbox.setInterval = function () { return 1; };
+  sandbox.clearInterval = function () {};
+  sandbox.UI = {
+    el: function () { return {}; }, heading: function () {}, button: function (row, label) { return {label: label}; },
+    open: function (spec) {
+      screens.push(spec);
+      if (!spec.key) spec.build({}, {add: function (node, run) { adds.push({label: node.label, run: run}); }});
+      return {};
+    }
+  };
+  sandbox.Arcade.open();
+  var guard = adds.filter(function (a) { return /Sky Guard/.test(a.label); })[0];
+  check('the arcade lists Sky Guard', !!guard);
+  guard.run();
+  var game = screens[screens.length - 1];
+  A.useContext(ctx);
+  [4, 461, 10009, 27, 8].forEach(function (k) { check('Back (' + k + ') is not swallowed by the game', game.key(k) === false); });
+  check('Back before starting leaves', game.back() === false);
+  check('OK starts the game', game.key(13) === true);
+  check('Back while playing pauses', game.back() === true);
+  check('Back while paused leaves', game.back() === false);
+  game.key(13);
+  check('OK carries on after a pause', game.back() === true);
+  game.key(13);
+  check('OK is taken while playing', game.key(13) === true);
 })();
 
 console.log(passed + ' passed, ' + failed + ' failed');
