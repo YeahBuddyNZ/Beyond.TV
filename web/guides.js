@@ -161,6 +161,25 @@ var Guides = (function () {
       page(TIPS, [['Um ponto grande deixa os fantasmas com medo: aí você pode pegá-los. Você tem três vidas.', 'A big dot makes the ghosts scared: then you can catch them. You have three lives.', 'Un punto grande asusta a los fantasmas: entonces puedes atraparlos. Tienes tres vidas.', 'Ein großer Punkt macht den Geistern Angst: Dann kannst du sie fangen. Du hast drei Leben.', 'Большая точка пугает призраков: тогда их можно ловить. У вас три жизни.']])
     ]},
 
+    rcland: {icon: '🏎', name: ['Terra do Controle Remoto do Milo', 'Milo\'s Remote Control Land', 'La Tierra Teledirigida de Milo', 'Milos Fernsteuer-Land', 'Страна машинок Майло'], pages: [
+      page(AIM, [
+        ['Escolha uma máquina e dirija pelo parque: pule das rampas, dê mortais e quebre tudo.', 'Pick a machine and drive round the park: jump off ramps, do flips and smash things.', 'Elige una máquina y conduce por el parque: salta de las rampas, haz volteretas y rompe cosas.', 'Such dir eine Maschine aus und fahr durch den Park: über Rampen springen, Saltos machen, Sachen zerlegen.', 'Выберите машину и катайтесь по парку: прыгайте с трамплинов, делайте сальто и всё крушите.'],
+        ['Os desafios no canto mostram o que fazer a seguir.', 'The challenges in the corner show you what to try next.', 'Los retos de la esquina te dicen qué probar después.', 'Die Aufgaben in der Ecke zeigen dir, was du als Nächstes probieren kannst.', 'Задания в углу подскажут, что попробовать дальше.']]),
+      page(REMOTE, [
+        ['▲ vai mais rápido, ▼ mais devagar. Do parado, ▼ dá ré.', '▲ goes faster, ▼ slower. Stopped, ▼ goes backwards.', '▲ más rápido, ▼ más lento. Parado, ▼ va marcha atrás.', '▲ schneller, ▼ langsamer. Im Stand fährt ▼ rückwärts.', '▲ быстрее, ▼ медленнее. Стоя на месте, ▼ едет назад.'],
+        ['◀ ▶ vira um pouco a cada toque.', '◀ ▶ turns a bit with each press.', '◀ ▶ gira un poco con cada pulsación.', '◀ ▶ lenkt mit jedem Drücken ein Stück.', '◀ ▶ поворачивает понемногу с каждым нажатием.'],
+        ['OK pula. A escavadeira bate a pá e quebra tudo em volta.', 'OK jumps. The digger slams its bucket and smashes everything round it.', 'OK salta. La excavadora golpea con la pala y rompe todo alrededor.', 'OK springt. Der Bagger haut mit der Schaufel und zerlegt alles drumherum.', 'OK прыгает. Экскаватор бьёт ковшом и крушит всё вокруг.'],
+        ARCADE_BACK]),
+      page(['Truques', 'Tricks', 'Trucos', 'Tricks', 'Трюки'], [
+        ['No ar: ▲ ou OK dá um mortal, ▼ um mortal para trás, ◀ ▶ um giro.', 'In the air: ▲ or OK does a front flip, ▼ a back flip, ◀ ▶ a spin.', 'En el aire: ▲ u OK hace una voltereta, ▼ una hacia atrás, ◀ ▶ un giro.', 'In der Luft: ▲ oder OK macht einen Salto, ▼ einen Rückwärtssalto, ◀ ▶ einen Dreher.', 'В воздухе: ▲ или OK делает сальто, ▼ сальто назад, ◀ ▶ вращение.'],
+        ['Termine o truque antes de cair. Parou na metade? Capota, e tenta de novo.', 'Finish the trick before you land. Stop halfway and you wipe out, then try again.', 'Termina el truco antes de caer. ¿A medias? Vuelcas, y lo intentas otra vez.', 'Mach den Trick fertig, bevor du landest. Halb fertig? Du kippst um und versuchst es nochmal.', 'Закончите трюк до приземления. Не успели? Перевернётесь, и попробуете снова.'],
+        ['Quebrar, pegar estrelas e acertar truques seguidos faz um combo: x2, x3, até x5.', 'Smashing, stars and tricks one after another build a combo: x2, x3, all the way to x5.', 'Romper, coger estrellas y hacer trucos seguidos forma un combo: x2, x3, hasta x5.', 'Zerlegen, Sterne und Tricks hintereinander ergeben eine Kombo: x2, x3, bis x5.', 'Крушите, собирайте звёзды и делайте трюки подряд: будет комбо x2, x3, до x5.']]),
+      page(TIPS, [
+        ['Mais rápido na rampa, mais alto o pulo. Os turbos roxos dão um empurrão.', 'The faster you hit a ramp, the higher you fly. The purple turbo pads give you a push.', 'Cuanto más rápido llegas a la rampa, más alto vuelas. Los turbos morados te empujan.', 'Je schneller du auf die Rampe fährst, desto höher fliegst du. Die lila Turbofelder geben Schwung.', 'Чем быстрее на трамплин, тем выше полёт. Фиолетовые турбо подталкивают.'],
+        ['Pedras e carros velhos são duros: use o caminhão monstro, a escavadeira ou o trator.', 'Rocks and old cars are tough: try the monster truck, the digger or the bulldozer.', 'Las rocas y los coches viejos son duros: prueba el camión monstruo, la excavadora o el bulldozer.', 'Felsen und alte Autos sind hart: Nimm den Monstertruck, den Bagger oder die Planierraupe.', 'Камни и старые машины прочные: берите монстр-трак, экскаватор или бульдозер.'],
+        ['O mapa no canto mostra as estrelas que faltam.', 'The map in the corner shows the stars still to find.', 'El mapa de la esquina muestra las estrellas que faltan.', 'Die Karte in der Ecke zeigt die Sterne, die noch fehlen.', 'Карта в углу показывает оставшиеся звёзды.']])
+    ]},
+
     crew: {icon: '🌙', name: ['Tripulação do Foguete', 'Launch Crew', 'Tripulación del Cohete', 'Startcrew', 'Стартовая команда'], pages: [
       page(AIM, [['Leve o foguete Beyond até a Lua e aprenda a reconhecer mensagens golpistas no caminho.', 'Fly the Beyond rocket to the Moon, and learn to spot scam messages on the way.', 'Lleva el cohete Beyond a la Luna y aprende a reconocer mensajes trampa por el camino.', 'Flieg die Beyond-Rakete zum Mond und lerne unterwegs, Betrugsnachrichten zu erkennen.', 'Долетите на ракете Beyond до Луны и научитесь по пути замечать сообщения мошенников.']]),
       page(REMOTE, [
@@ -243,7 +262,7 @@ var Guides = (function () {
   };
 
   /** The order on the How to play screen: the same as the Games screen. */
-  var ORDER = ['karaoke', 'ludo', 'chess', 'chant', 'snap', 'likely', 'rather', 'dare', 'eel', 'paddle', 'guard', 'dots',
+  var ORDER = ['karaoke', 'ludo', 'chess', 'chant', 'snap', 'likely', 'rather', 'dare', 'rcland', 'eel', 'paddle', 'guard', 'dots',
     'crew', 'lunch', 'party', 'lights', 'quiz', 'question', 'tidy', 'bedtime'];
 
   function nameOf(id) { return GUIDES[id] ? L(GUIDES[id].name) : ''; }
