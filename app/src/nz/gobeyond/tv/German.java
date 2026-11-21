@@ -229,6 +229,7 @@ final class German {
             case "Build it": return "Bau es!";
             case "Build a road": return "Eine Straße bauen";
             case "Build a bridge": return "Eine Brücke bauen";
+            case "Plan a town": return "Eine Stadt planen";
             case "The games need Android System WebView.": return "Die Spiele brauchen Android System WebView.";
             case "Bedtime breathing": return "Atmen vor dem Schlafen";
             case "Breathe in": return "Einatmen";
