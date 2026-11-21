@@ -130,6 +130,9 @@ var UI = (function () {
 
   function closeAll() { while (stack.length) close(stack[stack.length - 1]); }
 
+  /** Done with a game: back to the screen it was started from (a layer opened with hub: true, the Games screen), else out. */
+  function leaveGame() { while (stack.length && !stack[stack.length - 1].spec.hub) close(stack[stack.length - 1]); }
+
   function paint(screen) {
     for (var i = 0; i < screen.items.length; i++) setClass(screen.items[i].node, 'focus', i === screen.focus);
     var f = screen.items[screen.focus];
@@ -255,6 +258,7 @@ var UI = (function () {
     el: el, setClass: setClass, hasClass: hasClass, dots: dots, sym: sym, avatar: avatar,
     open: open, close: close, closeAll: closeAll, key: key,
     active: function () { return stack.length > 0; },
+    leaveGame: leaveGame,
     top: function () { return stack.length ? stack[stack.length - 1].api : null; },
     heading: heading, button: button, keyboard: keyboard, toast: toast
   };

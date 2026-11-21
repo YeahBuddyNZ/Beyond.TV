@@ -73,6 +73,8 @@ for f in table.html table-host.js table.js sfx.js ludo.js chess.js chesscoach.js
     ask.html ask-host.js ask.js notes.js; do
   cp "web/$f" out/assets/
 done
+# The Games screen's pictures (tools/game_art.js), shared with LG and Samsung.
+mkdir -p out/assets/games && cp web/games/*.jpg out/assets/games/
 "$BT/aapt2" compile --dir app/res -o out/res.zip
 # Fonts uncompressed: Android reads them straight from the APK.
 "$BT/aapt2" link -o out/base.apk -I "$AJ" --manifest app/AndroidManifest.xml --java out/gen out/res.zip \

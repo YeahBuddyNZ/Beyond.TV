@@ -758,9 +758,19 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .bt-karaoke-pick .bt-box { top: 110px; }
 /* The Games screen's five rows (since Remote Control Land): a smaller pad on top and wider, closer buttons, so the longest
    name fits and the line about Beyond Family stays on the screen. */
-.bt-games-main .sun { font-size: 84px; margin-bottom: 12px; }
-.bt-games-main .cakes { max-width: 1560px; margin-top: 16px; }
-.bt-games-main .cakes .bt-button { width: 480px; margin-bottom: 14px; }
+/* The Games screen (ADR 0047): three groups of pictures, five to a row at most. */
+.bt-games-hub .gh-top { position: absolute; left: 132px; top: 60px; }
+.bt-games-hub .gh-groups { position: absolute; left: 126px; top: 166px; }
+.bt-games-hub .gh-name { font-family: Sora, Inter, sans-serif; font-weight: 600; font-size: 30px; color: rgba(247, 246, 242, 0.75); margin: 0 0 14px 6px; }
+.bt-games-hub .gh-row { white-space: nowrap; height: 178px; margin-bottom: 40px; }
+.bt-games-hub .gh-tile { display: inline-block; vertical-align: top; position: relative; width: 316px; height: 178px; margin-right: 22px; border-radius: 22px; overflow: hidden;
+  background: #2C2458; box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35); -webkit-transition: -webkit-transform 0.2s; transition: transform 0.2s; }
+.bt-games-hub .gh-pic { position: absolute; left: 0; top: 0; width: 316px; height: 178px; background-size: 316px 178px; }
+.bt-games-hub .gh-label { position: absolute; left: 0; right: 0; bottom: 0; padding: 34px 16px 12px; font-size: 24px; line-height: 1.15; font-weight: 600; color: #fff;
+  white-space: normal; background: -webkit-linear-gradient(top, rgba(13, 12, 24, 0), rgba(13, 12, 24, 0.85));
+  background: linear-gradient(to bottom, rgba(13, 12, 24, 0), rgba(13, 12, 24, 0.85)); }
+.bt-games-hub .gh-tile.focus { -webkit-transform: scale(1.1); transform: scale(1.1); box-shadow: 0 0 0 5px #9E7BFF, 0 18px 40px rgba(0, 0, 0, 0.55); z-index: 2; }
+.bt-games-hub .gh-note { position: absolute; left: 132px; right: 132px; bottom: 40px; font-size: 24px; color: rgba(247, 246, 242, 0.6); }
 .bt-karaoke-pick .songs { max-width: 1700px; margin-left: auto; margin-right: auto; }
 .bt-karaoke-pick .songs .bt-button { margin-bottom: 16px; }
 .bt-karaoke-pick .bt-keyboard { margin: 40px auto 0; }

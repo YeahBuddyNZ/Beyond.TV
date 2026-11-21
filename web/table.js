@@ -160,6 +160,8 @@ var Table = (function () {
         var go = UI.button(foot, tr('Escolher um jogo', 'Pick a game', 'Elegir un juego'), null, chosen.length ? 'primary' : '');
         api.add(go, function () {
           if (!chosen.length) { toast(tr('Escolha quem vai jogar primeiro.', 'Pick who\'s playing first.', 'Elige quién juega primero.')); return; }
+          // The game list takes this screen's place, so Back from it goes back one, to the Games screen.
+          api.close();
           games();
         });
       }
@@ -183,9 +185,12 @@ var Table = (function () {
 
   function game(id) { for (var i = 0; i < GAMES.length; i++) if (GAMES[i].id === id) return GAMES[i]; return null; }
 
+  var gamesOpen = null;
   function games() {
-    UI.open({
+    if (gamesOpen) return;
+    gamesOpen = UI.open({
       cls: 'bt-table bt-table-games',
+      closed: function () { gamesOpen = null; },
       build: function (layer, api) {
         UI.heading(UI.el('div', 'tg-top', layer), tr('Qual jogo?', 'Which game?', '¿Qué juego?'), chosen.map(nameOf).join(', '));
         var list = UI.el('div', 'tg-games' + (GAMES.length > 4 ? ' five' : ''), layer);
@@ -208,6 +213,7 @@ var Table = (function () {
           'On the way: Go Fish, and a colours-and-numbers card game.',
           'En camino: Go Fish y un juego de cartas de colores y números.'));
         var foot = UI.el('div', 'tg-foot low', layer);
+        api.add(UI.button(foot, tr('Quem vai jogar?', 'Who\'s playing?', '¿Quién juega?'), null, 'quiet'), function () { api.close(); who(); });
         api.add(UI.button(foot, tr('Começar do zero', 'Start fresh', 'Empezar de cero'), null, 'quiet'), function () { fresh(); });
       }
     });
@@ -399,7 +405,7 @@ var Table = (function () {
         var foot = UI.el('div', 'bt-buttons tg-again', layer);
         api.add(UI.button(foot, tr('Jogar de novo', 'Play again', 'Jugar otra vez'), null, 'primary'), function () { api.close(); result.again(); }, {first: true});
         api.add(UI.button(foot, tr('Outro jogo', 'Another game', 'Otro juego')), function () { api.close(); games(); });
-        api.add(UI.button(foot, tr('Pronto', 'Done', 'Listo')), function () { UI.closeAll(); if (host() && host().close) host().close(); });
+        api.add(UI.button(foot, tr('Pronto', 'Done', 'Listo')), function () { UI.leaveGame(); if (!UI.active() && host() && host().close) host().close(); });
       }
     });
   }
