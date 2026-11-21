@@ -266,5 +266,33 @@ var freed = 0;
 });
 check('the jet ski drives out of the barrels whichever way it points, turning once', freed === 16);
 
+// Kyle, 21/11/2026: healthy snacks for points, sugary ones take points off (and off a race's stunts).
+[0, 5].forEach(function (mi) {
+  var sg = R.newGame(mi, {}), objs = sg.world.objs;
+  var good = objs.filter(function (o) { return o.kind === 'snack'; }), bad = objs.filter(function (o) { return o.kind === 'sweet'; });
+  check((mi ? 'the lake' : 'the park') + ' has healthy and sugary snacks', good.length >= 6 && bad.length >= 3);
+  sg.started = true;
+  sg.car.x = good[0].x; sg.car.y = good[0].y; R.step(sg, 1 / 60);
+  check('a healthy snack scores', sg.score >= 150 && !good[0].alive);
+  sg.score = 100; sg.combo.n = 3; sg.pops = [];
+  sg.car.x = bad[0].x; sg.car.y = bad[0].y; R.step(sg, 1 / 60);
+  check('a sugary one takes points off, never below nothing, and ends the combo', sg.score === 0 && sg.combo.n === 0 && !bad[0].alive);
+});
+[R.newGame(0, {}).world, R.newGame(5, {}).world].forEach(function (sw, wi) {
+  var bad = [];
+  sw.objs.forEach(function (o) {
+    if (o.kind !== 'snack' && o.kind !== 'sweet') return;
+    var near = sw.objs.some(function (q) { return q !== o && q.kind !== 'tree' && Math.abs(q.x - o.x) < o.r + q.r + 50 && Math.abs(q.y - o.y) < o.r + q.r + 50; });
+    var onRamp = sw.ramps.some(function (r) { var dx = o.x - r.x, dy = o.y - r.y, a = dx * r.ca + dy * r.sa, b = -dx * r.sa + dy * r.ca; return !r.wave && a > -60 && a < r.len + 60 && Math.abs(b) < r.wid / 2 + 60; });
+    if (near || onRamp) bad.push(o.x + ',' + o.y);
+  });
+  if (bad.length) console.log('crowded snacks', wi, bad.join(' '));
+  check((wi ? 'the lake' : 'the park') + ': every snack has room round it', !bad.length);
+});
+var rs = R.newGame(0, {}); R.newRace(rs, 1); rs.race.count = 0; rs.stunts = 500;
+var sw = rs.world.objs.filter(function (o) { return o.kind === 'sweet'; })[0];
+rs.car.x = sw.x; rs.car.y = sw.y; R.step(rs, 1 / 60);
+check('in a race a sugary snack takes stunt points off', rs.stunts === 350);
+
 console.log(passed + ' passed, ' + failed + ' failed');
 process.exit(failed ? 1 : 0);
