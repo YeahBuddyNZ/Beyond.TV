@@ -226,6 +226,8 @@ final class German {
             case "Party time": return "Partyzeit";
             case "Round the house": return "Rund ums Haus";
             case "Milo's Remote Control Land": return "Milos Fernsteuer-Land";
+            case "Build it": return "Bau es!";
+            case "Build a road": return "Eine Straße bauen";
             case "The games need Android System WebView.": return "Die Spiele brauchen Android System WebView.";
             case "Bedtime breathing": return "Atmen vor dem Schlafen";
             case "Breathe in": return "Einatmen";

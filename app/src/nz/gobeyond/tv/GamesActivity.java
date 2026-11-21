@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,9 +20,9 @@ import java.io.InputStream;
 
 /**
  * Games, from the remote (ADR 0021): every game and family activity starts here on the TV, no phone needed. Karaoke,
- * board and card games against the robots, silly party games, Milo's Remote Control Land and the light show (all TableActivity), a party, quiz night, the dinner
+ * board and card games against the robots, silly party games, Milo's Remote Control Land, Build it and the light show (all TableActivity), a party, quiz night, the dinner
  * question, the tidy-up race, bedtime breathing and How to play. Quiz night and the dinner question need Beyond Family, because everyone answers on their
- * phones. Same as Games.open in web/games.js: a picture for each, in three groups (ADR 0047). A game opens on top of
+ * phones. Same as Games.open in web/games.js: a picture for each, in groups (ADR 0047; four since Build it, ADR 0052, so they scroll). A game opens on top of
  * this screen and it stays open, so Back from a game comes back here, one step, not out to the home screen.
  */
 public class GamesActivity extends Activity {
@@ -50,14 +51,19 @@ public class GamesActivity extends Activity {
         column.setOrientation(LinearLayout.VERTICAL);
         column.setClipChildren(false);
         column.setClipToPadding(false);
-        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(-1, -2);
-        lp.leftMargin = Math.round(126 * k);
-        lp.topMargin = Math.round(168 * k);
-        root.addView(column, lp);
+        column.setPadding(Math.round(126 * k), Math.round(44 * k), 0, Math.round(40 * k));
+        // Four groups since Build it (ADR 0052), more than a screen: the list scrolls to the focused row by itself.
+        ScrollView scroll = new ScrollView(this);
+        scroll.setVerticalScrollBarEnabled(false);
+        scroll.setFillViewport(true);
+        scroll.addView(column, new FrameLayout.LayoutParams(-1, -2));
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(-1, -1);
+        lp.topMargin = Math.round(124 * k);
+        root.addView(scroll, lp);
         root.setClipChildren(false);
 
         boolean linked = Family.linked(this);
-        // Three groups, in the same order as Games.open in web/games.js (ADR 0047). Each: picture (web/games/<id>.jpg), name, what it opens.
+        // The groups, in the same order as Games.open in web/games.js (ADR 0047). Each: picture (web/games/<id>.jpg), name, what it opens.
         Object[][][] groups = {
                 {{Ui.tr("Vamos jogar", "Let's play", "¡A jugar!")},
                         // Milo's Remote Control Land (web/rcland.js, ADR 0046), in TableActivity's WebView like the arcade.
@@ -67,6 +73,9 @@ public class GamesActivity extends Activity {
                         {"silly", Ui.tr("Jogos bobos", "Silly games", "Juegos locos"), (Runnable) () -> TableActivity.open(this, "silly")},
                         // A guide to every game (web/guides.js, ADR 0043), read in TableActivity's WebView like the board games.
                         {"guides", Ui.tr("Como jogar", "How to play", "Cómo jugar"), (Runnable) () -> TableActivity.open(this, "guides")}},
+                // Build it (web/builder.js, ADR 0052): real building jobs with the machines, in TableActivity's WebView.
+                {{Ui.tr("Construir", "Build it", "A construir")},
+                        {"road", Ui.tr("Construir uma estrada", "Build a road", "Construir una carretera"), (Runnable) () -> TableActivity.open(this, "road")}},
                 {{Ui.tr("Hora da festa", "Party time", "Hora de fiesta")},
                         {"karaoke", Ui.tr("Karaokê", "Karaoke", "Karaoke"), (Runnable) () -> KaraokePickActivity.open(this)},
                         {"party", Ui.tr("Festa", "Party", "Fiesta"), (Runnable) () -> PartyPickActivity.open(this)},
@@ -102,16 +111,15 @@ public class GamesActivity extends Activity {
             }
         }
         if (!linked) {
+            // In the list after the last group, so it scrolls with them and never covers a row.
             TextView hint = FeedbackActivity.text(this, Ui.tr(
                     "Quiz da noite e a pergunta do jantar precisam do Beyond Family: todos respondem no celular. Conecte em Configurações.",
                     "Quiz night and the dinner question need Beyond Family, because everyone answers on their phone. Link it in Settings.",
                     "La noche de quiz y la pregunta de la cena necesitan Beyond Family: todos responden en el teléfono. Conéctalo en Ajustes."),
                     Ui.regular, 24 * k, 0x99FFFFFF);
             hint.setGravity(Gravity.START);
-            FrameLayout.LayoutParams hp = new FrameLayout.LayoutParams(-1, -2, Gravity.BOTTOM);
-            hp.leftMargin = hp.rightMargin = Math.round(132 * k);
-            hp.bottomMargin = Math.round(36 * k);
-            root.addView(hint, hp);
+            hint.setPadding(Math.round(6 * k), 0, Math.round(132 * k), 0);
+            column.addView(hint, new LinearLayout.LayoutParams(-1, -2));
         }
 
         setContentView(root);

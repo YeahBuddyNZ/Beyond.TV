@@ -1,5 +1,5 @@
 // Draws the Games screen's thumbnails (web/games/<id>.jpg, 560 x 316), one little scene per game, in Beyond's
-// colours. The TVs show the pictures, so no TV needs an emoji font. Run: node tools/game_art.js
+// colours. The TVs show the pictures, so no TV needs an emoji font. Run: node tools/game_art.js (or name some: node tools/game_art.js road)
 // Needs Playwright's Chromium and the Noto Color Emoji font.
 'use strict';
 var fs = require('fs');
@@ -35,6 +35,9 @@ var SCENES = {
     art: [['🧹', 220, 170, 150, -24], ['🧺', 420, 210, 100, 0], ['⏱️', 450, 80, 64, 10], ['⭐', 90, 80, 40, 0]]},
   bedtime: {bg: ['#0D0C18', '#2C2458'], stars: true,
     art: [['🌙', 290, 150, 150, -10], ['☁️', 120, 240, 90, 0], ['⭐', 460, 90, 40, 0], ['⭐', 100, 80, 30, 0]]},
+  // Build it (builder.js, ADR 0052).
+  road: {sky: ['#6EC6FF', '#BDE6FF'], ground: '#5DAA4F', road: true,
+    art: [['🏗️', 450, 96, 110, 0], ['👷', 200, 150, 120, -6], ['🚧', 380, 236, 74, 0], ['🚛', 90, 246, 64, 0]]},
   guides: {bg: ['#F7F6F2', '#E7E3F7'], burst: '#FFFFFF',
     art: [['📖', 260, 175, 160, -6], ['💡', 450, 90, 80, 12], ['⭐', 90, 90, 40, 0]]}
 };
@@ -60,6 +63,12 @@ function draw(s) {
     c.fillStyle = '#C99B63'; c.fillRect(0, 262, W, 26);
   } else {
     c.fillStyle = grad(s.bg[0], s.bg[1]); c.fillRect(0, 0, W, H);
+  }
+  if (s.road) {
+    // A road half built: asphalt on the left, gravel on the right, white dashes down the middle.
+    c.fillStyle = '#2B2A33'; c.fillRect(0, 248, W * 0.55, 44);
+    c.fillStyle = '#A9A49A'; c.fillRect(W * 0.55, 248, W * 0.45, 44);
+    c.fillStyle = '#F7F6F2'; for (i = 10; i < W * 0.5; i += 70) c.fillRect(i, 267, 40, 6);
   }
   if (s.ramp) {
     c.fillStyle = '#8F5E37'; c.beginPath(); c.moveTo(30, 262); c.lineTo(230, 262); c.lineTo(230, 176); c.closePath(); c.fill();
@@ -131,7 +140,8 @@ function draw(s) {
   var p = await browser.newPage({viewport: {width: W, height: H}});
   await p.setContent(page());
   await p.evaluate(function () { return document.fonts.load('40px "Noto Color Emoji"', '🎤'); });
-  var names = Object.keys(SCENES);
+  // node tools/game_art.js road: only the pictures named, so the others stay as they are.
+  var names = process.argv.length > 2 ? process.argv.slice(2) : Object.keys(SCENES);
   for (var i = 0; i < names.length; i++) {
     await p.evaluate(draw, SCENES[names[i]]);
     var shot = await p.locator('#c').screenshot({type: 'jpeg', quality: 82});
