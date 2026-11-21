@@ -55,3 +55,4 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0045](0045-launch-crew-on-the-tv.md) | Launch Crew in the arcade |
 | [0046](0046-remote-control-land.md) | Milo's Remote Control Land: a driving game for the remote |
 | [0047](0047-games-screen-pictures-and-back.md) | The Games screen: pictures in groups, and Back goes back one |
+| [0048](0048-remote-control-land-cameras-and-the-lake.md) | Remote Control Land: three cameras and a lake with four water sports |

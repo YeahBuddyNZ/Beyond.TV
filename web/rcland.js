@@ -6,6 +6,9 @@
  * pauses. Bests and finished challenges stay on this TV, nothing is sent. Google TV runs this same file in
  * TableActivity's WebView (start "rcland"). The words are the game's own, in all five languages, like guides.js.
  * Plain ES5: one canvas, plain shapes, nothing to download.
+ * Since ADR 0048: three cameras (from above, chase and first person, the last two drawn in 3D by hand on the same
+ * canvas), and a lake with four water sports (jet ski, speedboat, surfboard and water skis), waves to fly off and its
+ * own challenges.
  */
 var RCLand = (function () {
   'use strict';
@@ -26,9 +29,18 @@ var RCLand = (function () {
 
   var TITLE = ['Terra do Controle Remoto do Milo', 'Milo\'s Remote Control Land', 'La Tierra Teledirigida de Milo', 'Milos Fernsteuer-Land', 'Страна машинок Майло'];
   var PICK = ['Escolha sua máquina', 'Pick your machine', 'Elige tu máquina', 'Such dir deine Maschine aus', 'Выберите машину'];
-  var PICK_HELP = ['◀ ▶ escolher  ·  OK dirigir  ·  ▼ Como jogar  ·  Voltar sair', '◀ ▶ pick  ·  OK to drive  ·  ▼ How to play  ·  Back to leave',
-    '◀ ▶ elegir  ·  OK conducir  ·  ▼ Cómo jugar  ·  Atrás salir', '◀ ▶ wählen  ·  OK fahren  ·  ▼ Wie man spielt  ·  Zurück verlassen',
-    '◀ ▶ выбрать  ·  OK ехать  ·  ▼ Как играть  ·  «Назад» выйти'];
+  var PICK_HELP = ['◀ ▶ escolher  ·  ▲ ▼ terra, água ou câmera  ·  OK dirigir  ·  Voltar sair', '◀ ▶ pick  ·  ▲ ▼ land, water or camera  ·  OK to drive  ·  Back to leave',
+    '◀ ▶ elegir  ·  ▲ ▼ tierra, agua o cámara  ·  OK conducir  ·  Atrás salir', '◀ ▶ wählen  ·  ▲ ▼ Land, Wasser oder Kamera  ·  OK losfahren  ·  Zurück verlassen',
+    '◀ ▶ выбрать  ·  ▲ ▼ суша, вода или камера  ·  OK ехать  ·  «Назад» выйти'];
+  var ON_LAND = ['Na terra', 'On land', 'En tierra', 'An Land', 'На суше'];
+  var ON_WATER = ['Na água', 'On the water', 'En el agua', 'Auf dem Wasser', 'На воде'];
+  var CAMERA = ['Câmera', 'Camera', 'Cámara', 'Kamera', 'Камера'];
+  /** The three cameras: 0 from above, 1 chase (behind the machine), 2 first person (in the driver's seat). */
+  var VIEWS = [['De cima', 'From above', 'Desde arriba', 'Von oben', 'Сверху'], ['Atrás', 'Chase', 'Detrás', 'Hinterher', 'Сзади'],
+    ['Primeira pessoa', 'First person', 'Primera persona', 'Ich-Sicht', 'От первого лица']];
+  var TOO_TOUGH_WATER = ['Duro demais! Tente a lancha.', 'Too tough! Try the speedboat.', '¡Demasiado duro! Prueba la lancha.', 'Zu hart! Probier das Rennboot.', 'Слишком прочно! Попробуйте катер.'];
+  var SPLASHDOWN = ['Caiu na água! Aterrisse reto.', 'Splashdown! Land the right way up.', '¡Al agua! Aterriza derecho.', 'Platsch! Lande richtig herum.', 'Плюх! Приземляйтесь ровно.'];
+  var WAVE = ['Onda!', 'Wave!', '¡Ola!', 'Welle!', 'Волна!'];
   var STAT_NAMES = [['Velocidade', 'Speed', 'Velocidad', 'Tempo', 'Скорость'], ['Pulo', 'Jump', 'Salto', 'Sprung', 'Прыжок'], ['Força', 'Smash', 'Fuerza', 'Kraft', 'Сила']];
   var SCORE = ['Pontos', 'Score', 'Puntos', 'Punkte', 'Очки'];
   var BEST = ['Recorde', 'Best', 'Récord', 'Rekord', 'Рекорд'];
@@ -55,6 +67,7 @@ var RCLand = (function () {
   var SQUASH = ['Esmagado!', 'Squashed!', '¡Aplastado!', 'Geplättet!', 'Всмятку!'];
   var PAUSED = ['Pausado', 'Paused', 'En pausa', 'Pause', 'Пауза'];
   var MENU = [['Continuar dirigindo', 'Keep driving', 'Seguir conduciendo', 'Weiterfahren', 'Продолжить'],
+    CAMERA,
     ['Trocar de máquina', 'Change machine', 'Cambiar de máquina', 'Maschine wechseln', 'Сменить машину'],
     ['Como jogar', 'How to play', 'Cómo jugar', 'Wie man spielt', 'Как играть'],
     ['Sair', 'Leave', 'Salir', 'Verlassen', 'Выйти']];
@@ -83,8 +96,22 @@ var RCLand = (function () {
       about: ['Leve no ar: os mortais mais rápidos.', 'Light in the air: the quickest flips.', 'Ligero en el aire: las volteretas más rápidas.', 'Leicht in der Luft: die schnellsten Saltos.', 'Лёгкий в воздухе: самые быстрые сальто.']},
     {id: 'dozer', colour: MOSS, top: 430, accel: 300, turn: 3.6, jump: 0.85, flip: 9, power: 3, len: 72, wid: 54,
       name: ['Trator de esteira', 'Bulldozer', 'Bulldozer', 'Planierraupe', 'Бульдозер'],
-      about: ['Lento mas forte: passa direto pelas pedras.', 'Slow but strong: ploughs straight through rocks.', 'Lento pero fuerte: atraviesa las rocas.', 'Langsam, aber stark: schiebt Felsen einfach weg.', 'Медленный, но сильный: проходит сквозь камни.']}
+      about: ['Lento mas forte: passa direto pelas pedras.', 'Slow but strong: ploughs straight through rocks.', 'Lento pero fuerte: atraviesa las rocas.', 'Langsam, aber stark: schiebt Felsen einfach weg.', 'Медленный, но сильный: проходит сквозь камни.']},
+    // On the water (the lake). grip: how quickly it stops sliding sideways after a turn.
+    {id: 'jetski', water: true, colour: '#5CC4AE', top: 760, accel: 560, turn: 5.4, jump: 1.15, flip: 13.5, power: 1, len: 58, wid: 30, grip: 3,
+      name: ['Jet ski', 'Jet ski', 'Moto de agua', 'Jetski', 'Гидроцикл'],
+      about: ['Rápido e ágil: os melhores truques na água.', 'Quick and twisty: the best tricks on the water.', 'Rápida y ágil: los mejores trucos en el agua.', 'Schnell und wendig: die besten Tricks auf dem Wasser.', 'Быстрый и вертлявый: лучшие трюки на воде.']},
+    {id: 'boat', water: true, colour: CORAL, top: 880, accel: 430, turn: 3.6, jump: 0.9, flip: 10, power: 2, len: 86, wid: 38, grip: 2,
+      name: ['Lancha', 'Speedboat', 'Lancha rápida', 'Rennboot', 'Катер'],
+      about: ['A mais rápida do lago. Quebra barris com a proa.', 'The fastest on the lake. Smashes barrels with its bow.', 'La más rápida del lago. Rompe barriles con la proa.', 'Das schnellste auf dem See. Zerlegt Fässer mit dem Bug.', 'Самый быстрый на озере. Разбивает бочки носом.']},
+    {id: 'surf', water: true, colour: EMBER, top: 540, accel: 400, turn: 5.8, jump: 1.25, flip: 15, power: 1, len: 50, wid: 20, grip: 3.5, surf: true,
+      name: ['Prancha de surfe', 'Surfboard', 'Tabla de surf', 'Surfbrett', 'Доска для сёрфинга'],
+      about: ['Pegue uma onda e ela te leva: suba e voe lá de cima.', 'Catch a wave and it carries you: ride up it and fly off the top.', 'Coge una ola y te lleva: súbela y vuela desde arriba.', 'Erwisch eine Welle, sie trägt dich: reite hoch und flieg oben ab.', 'Поймайте волну, и она понесёт: взлетайте с гребня.']},
+    {id: 'ski', water: true, colour: VIOLET, top: 720, accel: 460, turn: 4.6, jump: 1.4, flip: 12, power: 1, len: 40, wid: 24, grip: 2.5, towed: true,
+      name: ['Esqui aquático', 'Water skis', 'Esquí acuático', 'Wasserski', 'Водные лыжи'],
+      about: ['Um barquinho puxa você. Saltos enormes nas rampas.', 'A little boat pulls you along. Huge jumps off the ski ramps.', 'Una lancha pequeña tira de ti. Saltos enormes en las rampas.', 'Ein kleines Boot zieht dich. Riesensprünge über die Schanzen.', 'Вас тянет катер. Огромные прыжки с трамплинов.']}
   ];
+  var LAND_COUNT = 5;
 
   // MARK: - Challenges, in order: three are on screen at a time
 
@@ -108,7 +135,29 @@ var RCLand = (function () {
     {stat: 'stars', need: 15, text: ['Pegue 15 estrelas', 'Collect 15 stars', 'Coge 15 estrellas', 'Sammle 15 Sterne', 'Соберите 15 звёзд']},
     {stat: 'smash', need: 200, text: ['Quebre 200 coisas', 'Smash 200 things', 'Rompe 200 cosas', 'Zerleg 200 Sachen', 'Разбейте 200 вещей']}
   ];
+  // On the lake: its own list, its counts kept apart (stat names start with w, see stat()).
+  var WATER_GOALS = [
+    {stat: 'wramp', need: 1, text: ['Pule de uma rampa de esqui', 'Jump off a ski ramp', 'Salta desde una rampa de esquí', 'Spring über eine Schanze', 'Прыгните с трамплина']},
+    {stat: 'wsmash', need: 10, text: ['Bata em 10 coisas', 'Bump 10 things', 'Choca con 10 cosas', 'Ramm 10 Sachen', 'Сбейте 10 вещей']},
+    {stat: 'whoops', need: 3, text: ['Passe por 3 aros', 'Go through 3 hoops', 'Pasa por 3 aros', 'Fahr durch 3 Ringe', 'Пройдите через 3 кольца']},
+    {stat: 'wfront', need: 1, text: ['Dê um mortal', 'Do a front flip', 'Haz una voltereta', 'Mach einen Salto', 'Сделайте сальто']},
+    {stat: 'wsurf', need: 1, text: ['Voe de uma onda', 'Fly off a wave', 'Vuela desde una ola', 'Flieg von einer Welle ab', 'Взлетите с волны']},
+    {stat: 'wducks', need: 5, text: ['Bata em 5 patinhos', 'Bump 5 rubber ducks', 'Choca con 5 patitos', 'Ramm 5 Quietscheentchen', 'Сбейте 5 резиновых уточек']},
+    {stat: 'wstars', need: 3, text: ['Pegue 3 estrelas', 'Collect 3 stars', 'Coge 3 estrellas', 'Sammle 3 Sterne', 'Соберите 3 звезды']},
+    {stat: 'wback', need: 1, text: ['Dê um mortal para trás', 'Do a back flip', 'Haz una voltereta atrás', 'Mach einen Rückwärtssalto', 'Сделайте сальто назад']},
+    {stat: 'wspin', need: 1, text: ['Gire no ar', 'Spin round in the air', 'Gira en el aire', 'Dreh dich in der Luft', 'Покрутитесь в воздухе']},
+    {stat: 'wballoons', need: 3, text: ['Estoure 3 balões', 'Pop 3 balloons', 'Revienta 3 globos', 'Lass 3 Ballons platzen', 'Лопните 3 шарика']},
+    {stat: 'wbarrels', need: 3, text: ['Quebre 3 barris', 'Smash 3 barrels', 'Rompe 3 barriles', 'Zerleg 3 Fässer', 'Разбейте 3 бочки']},
+    {stat: 'wdouble', need: 1, text: ['Dê dois mortais num pulo', 'Land two flips in one jump', 'Haz dos volteretas en un salto', 'Schaff zwei Saltos in einem Sprung', 'Два сальто за один прыжок']},
+    {stat: 'wcombo', need: 5, text: ['Faça um combo x5', 'Get a x5 combo', 'Consigue un combo x5', 'Schaff eine x5-Kombo', 'Наберите комбо x5']},
+    {stat: 'wbigair', need: 1, text: ['Voe por um segundo e meio', 'Fly for a second and a half', 'Vuela un segundo y medio', 'Flieg eineinhalb Sekunden', 'Летите полторы секунды']},
+    {stat: 'wsmash', need: 50, text: ['Bata em 50 coisas', 'Bump 50 things', 'Choca con 50 cosas', 'Ramm 50 Sachen', 'Сбейте 50 вещей']},
+    {stat: 'wtriple', need: 1, text: ['Três truques num pulo', 'Three tricks in one jump', 'Tres trucos en un salto', 'Drei Tricks in einem Sprung', 'Три трюка за прыжок']},
+    {stat: 'wstars', need: 12, text: ['Pegue 12 estrelas', 'Collect 12 stars', 'Coge 12 estrellas', 'Sammle 12 Sterne', 'Соберите 12 звёзд']},
+    {stat: 'whoops', need: 12, text: ['Passe por 12 aros', 'Go through 12 hoops', 'Pasa por 12 aros', 'Fahr durch 12 Ringe', 'Пройдите через 12 колец']}
+  ];
   for (var gi = 0; gi < GOALS.length; gi++) GOALS[gi].id = GOALS[gi].stat + GOALS[gi].need;
+  for (gi = 0; gi < WATER_GOALS.length; gi++) WATER_GOALS[gi].id = WATER_GOALS[gi].stat + WATER_GOALS[gi].need;
 
   // MARK: - Saved on this TV
 
@@ -117,7 +166,9 @@ var RCLand = (function () {
     return {};
   }
   function save(g) {
-    var s = {best: Math.max(g.best, g.score), stats: g.stats, done: g.done, last: g.mi};
+    var s = load();
+    s[g.water ? 'bestWater' : 'best'] = Math.max(g.best, g.score);
+    s.stats = g.stats; s.done = g.done; s.last = g.mi; s.view = g.view;
     try { window.localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) {}
   }
 
@@ -138,15 +189,22 @@ var RCLand = (function () {
     rock: {r: 36, h: 60, tough: 3, pts: 120},
     tree: {r: 42, h: 9999, tough: 99, pts: 0},
     balloon: {r: 26, h: 0, tough: 0, pts: 150, float: true},
-    star: {r: 30, h: 0, tough: 0, pts: 200, float: true}
+    star: {r: 30, h: 0, tough: 0, pts: 200, float: true},
+    // The lake.
+    buoy: {r: 16, h: 34, tough: 1, pts: 40},
+    duck: {r: 16, h: 26, tough: 1, pts: 60},
+    barrel: {r: 22, h: 40, tough: 2, pts: 120},
+    island: {r: 150, h: 9999, tough: 99, pts: 0},
+    hoop: {r: 42, h: 0, tough: 0, pts: 250, float: true}
   };
   var BLOCKS = [CORAL, BLUE, EMBER, VIOLET, '#5CC4AE'];
   var BALLOONS = [CORAL, BLUE, LILAC, EMBER, '#5CC4AE', '#E8475C'];
   var SIZES = {small: {len: 150, wid: 120, h: 40}, big: {len: 220, wid: 150, h: 75}, mega: {len: 280, wid: 170, h: 120}};
 
-  function buildWorld() {
+  function buildWorld(water) {
+    if (water) return buildLake();
     seed = 11;
-    var w = {objs: [], ramps: [], pads: [], pins: [],
+    var w = {objs: [], ramps: [], pads: [], pins: [], waves: [], edge: 40, water: false,
       pond: {x: 850, y: 660, rx: 330, ry: 190}, sand: {x: 2380, y: 380, w: 860, h: 640},
       track: {x: 250, y: 230, w: 3100, h: 2170, r: 340}};
     function add(kind, x, y, extra) {
@@ -225,6 +283,77 @@ var RCLand = (function () {
     return w;
   }
 
+  /** The lake: water from fence to fence with a beach round it, islands, ski ramps, a surf break with waves on the right. */
+  function buildLake() {
+    seed = 23;
+    var w = {objs: [], ramps: [], pads: [], pins: [], waves: [], edge: 150, water: true, pond: null, sand: null, track: null,
+      surf: {x: 2480, y: 300, w: 980, h: 2000}};
+    function add(kind, x, y, extra) {
+      var k = KINDS[kind], o = {kind: kind, x: x, y: y, r: k.r, h: k.h, tough: k.tough, pts: k.pts, float: !!k.float,
+        z: 0, alive: true, back: 0, pop: 0, a: srand() * TAU, c: '', hx: x, hy: y};
+      if (extra) for (var e in extra) if (extra.hasOwnProperty(e)) o[e] = extra[e];
+      w.objs.push(o);
+      return o;
+    }
+    function ramp(x, y, a, size) {
+      var z = SIZES[size];
+      var r = {x: x, y: y, a: a, ca: Math.cos(a), sa: Math.sin(a), len: z.len, wid: z.wid, h: z.h, size: size, float: true};
+      w.ramps.push(r);
+      return r;
+    }
+    var U = -Math.PI / 2, i;
+
+    // The start: a ski ramp straight ahead, with stars to catch in the air and hoops beyond it.
+    ramp(1800, 1840, U, 'big');
+    add('star', 1800, 1460, {z: 140}); add('star', 1800, 1250, {z: 230}); add('star', 1800, 1050, {z: 250});
+    add('hoop', 1800, 760, {z: 40}); add('hoop', 1800, 520, {z: 40}); add('hoop', 1800, 280, {z: 40});
+
+    // Islands with palm trees (solid: steer round them).
+    add('island', 900, 640, {r: 190}); add('island', 2120, 1420, {r: 120}); add('island', 470, 1560, {r: 110});
+
+    // A flock of rubber ducks, a buoy slalom along the bottom and barrels for the speedboat.
+    for (i = 0; i < 9; i++) add('duck', 1100 + (i % 3) * 70 + (Math.floor(i / 3) % 2) * 30, 1200 + Math.floor(i / 3) * 70);
+    for (i = 0; i < 9; i++) add('buoy', 1000 + i * 150, 2240 + (i % 2 ? 70 : -70));
+    for (i = 0; i < 6; i++) add('barrel', 2200 + (i % 3) * 60, 760 + Math.floor(i / 3) * 60);
+    for (i = 0; i < 4; i++) add('barrel', 700 + (i % 2) * 60, 2140 + Math.floor(i / 2) * 60);
+    for (i = 0; i < 6; i++) add('buoy', 1450 + i * 90, 380);
+
+    // The mega ramp on the left, with hoops high in the air beyond it.
+    ramp(560, 2250, U, 'mega');
+    add('hoop', 560, 1880, {z: 170}); add('hoop', 560, 1640, {z: 210});
+    add('star', 560, 1420, {z: 150});
+    ramp(1300, 900, Math.PI, 'small');
+    add('hoop', 1060, 900, {z: 80});
+    ramp(2350, 2150, U, 'big');
+    add('star', 2350, 1800, {z: 200});
+
+    // Hoops and stars to go through on the water.
+    var low = [[400, 400], [1300, 1650], [2600, 2350], [1550, 1500]];
+    for (i = 0; i < low.length; i++) add('hoop', low[i][0], low[i][1], {z: 40});
+    var stars = [[300, 900], [1300, 300], [2050, 2150], [2900, 700], [3050, 1300], [2850, 1900], [1500, 1950]];
+    for (i = 0; i < stars.length; i++) add('star', stars[i][0], stars[i][1], {z: i > 2 && i < 6 ? 90 : 25});
+    var balloons = [[1100, 520], [700, 1100], [1600, 2050], [2450, 1100], [3150, 1000], [2700, 2100]];
+    for (i = 0; i < balloons.length; i++) add('balloon', balloons[i][0], balloons[i][1], {z: 120, c: BALLOONS[i % BALLOONS.length]});
+
+    // The surf break: waves rolling right towards the beach. Each is a ramp that moves (wave: speed).
+    var sf = w.surf;
+    for (i = 0; i < 4; i++) {
+      var wv = ramp(sf.x + i * 240, sf.y + sf.h / 2, 0, 'small');
+      wv.len = 170; wv.wid = sf.h; wv.h = 55; wv.wave = 140; wv.float = false;
+      w.waves.push(wv);
+    }
+    return w;
+  }
+
+  /** The waves roll on, and start again at the back of the surf break. */
+  function rollWaves(w, dt) {
+    for (var i = 0; i < w.waves.length; i++) {
+      var r = w.waves[i];
+      r.x += r.wave * dt;
+      if (r.x > w.surf.x + w.surf.w - r.len) r.x -= w.waves.length * 240;
+    }
+  }
+
   /** The ground's height under a point: 0, or up a ramp. Sets world.under to the ramp. */
   function groundAt(w, x, y) {
     var best = 0;
@@ -246,8 +375,8 @@ var RCLand = (function () {
     }
     return null;
   }
-  function inPond(w, x, y) { var p = w.pond, a = (x - p.x) / p.rx, b = (y - p.y) / p.ry; return a * a + b * b < 1; }
-  function inSand(w, x, y) { var s = w.sand; return x > s.x && x < s.x + s.w && y > s.y && y < s.y + s.h; }
+  function inPond(w, x, y) { if (!w.pond) return false; var p = w.pond, a = (x - p.x) / p.rx, b = (y - p.y) / p.ry; return a * a + b * b < 1; }
+  function inSand(w, x, y) { if (!w.sand) return false; var s = w.sand; return x > s.x && x < s.x + s.w && y > s.y && y < s.y + s.h; }
 
   // MARK: - A game
 
@@ -257,22 +386,25 @@ var RCLand = (function () {
     if (saved.stats) for (k in saved.stats) if (saved.stats.hasOwnProperty(k)) stats[k] = saved.stats[k];
     var done = {};
     if (saved.done) for (k in saved.done) if (saved.done.hasOwnProperty(k)) done[k] = saved.done[k];
+    var m = MACHINES[mi];
     return {
-      m: MACHINES[mi], mi: mi, world: buildWorld(), t: 0, score: 0, best: saved.best || 0, stats: stats, done: done,
-      car: {x: 1800, y: 2060, z: 0, vz: 0, h: -Math.PI / 2, want: -Math.PI / 2, speed: 0, gear: 0, steer: 0, air: false,
+      m: m, mi: mi, water: !!m.water, view: saved.view > 0 && saved.view < VIEWS.length ? saved.view : 0, camT: 0,
+      world: buildWorld(m.water), t: 0, score: 0, best: (m.water ? saved.bestWater : saved.best) || 0, stats: stats, done: done,
+      car: {x: 1800, y: 2060, z: 0, vz: 0, h: -Math.PI / 2, want: -Math.PI / 2, speed: 0, gear: 0, steer: 0, air: false, vx: 0, vy: 0, ramp: null,
         kx: 0, ky: 0, boost: 0, wipe: 0, roll: 0, trick: null, queue: [], tricks: [], takeoff: 0, rampVz: 0, onRamp: false,
         slam: 0, slamCd: 0, wet: false, padCd: 0, safe: 0, trail: 0, run: 0, bonk: 0},
       combo: {n: 0, t: 0}, parts: [], pi: 0, pops: [], skids: [], si: 0,
-      cam: {x: 1800, y: 1940, zoom: 1.15, shake: 0}, flash: 0, started: false, tough: 0, banner: null
+      cam: {x: 1800, y: 1940, zoom: 1.15, shake: 0, yaw: -Math.PI / 2}, flash: 0, started: false, tough: 0, banner: null
     };
   }
 
-  function stat(g, k, n) { g.stats[k] = (g.stats[k] || 0) + (n === undefined ? 1 : n); }
+  /** Counts for the challenges. On the lake they are kept apart: smash there is wsmash. */
+  function stat(g, k, n) { k = (g.water ? 'w' : '') + k; g.stats[k] = (g.stats[k] || 0) + (n === undefined ? 1 : n); }
 
-  /** The three challenges on screen: the first ones not yet done. */
+  /** The three challenges on screen: the first ones not yet done, on land or on the lake. */
   function current(g) {
-    var out = [];
-    for (var i = 0; i < GOALS.length && out.length < 3; i++) if (!g.done[GOALS[i].id]) out.push(GOALS[i]);
+    var out = [], list = g.water ? WATER_GOALS : GOALS;
+    for (var i = 0; i < list.length && out.length < 3; i++) if (!g.done[list[i].id]) out.push(list[i]);
     return out;
   }
   function checkGoals(g) {
@@ -296,7 +428,8 @@ var RCLand = (function () {
     c.n++; c.t = 3;
     var mult = comboMult(c.n), got = pts * mult;
     if (mult > was && c.n > 1) sfx('combo');
-    if (mult > (g.stats.combo || 0)) g.stats.combo = mult;
+    var ck = g.water ? 'wcombo' : 'combo';
+    if (mult > (g.stats[ck] || 0)) g.stats[ck] = mult;
     g.score += got;
     pop(g, (label ? label + '  ' : '') + '+' + got, x, y, z, colour || PAPER, big);
     checkGoals(g);
@@ -339,7 +472,8 @@ var RCLand = (function () {
   var PIECES = {
     cone: ['#F07A2A', PAPER], crate: ['#C18A52', '#8A5A3B', '#E3B676'], pin: [PAPER, '#E8475C'],
     melon: ['#2E8B3E', '#E8475C', '#F26D7D', '#1C5E2A'], castle: ['#EBCB8B', '#D9B26F', '#F5DFA8'],
-    junk: ['#8A8F98', '#A0614A', '#5B5E66', EMBER], rock: ['#8D8A86', '#6E6B68', '#B5B1AC']
+    junk: ['#8A8F98', '#A0614A', '#5B5E66', EMBER], rock: ['#8D8A86', '#6E6B68', '#B5B1AC'],
+    buoy: ['#F07A2A', PAPER], duck: ['#F2C94C', EMBER, PAPER], barrel: ['#C0392B', '#8A2A20', '#5B5E66']
   };
 
   function smash(g, o, slammed) {
@@ -347,11 +481,14 @@ var RCLand = (function () {
     o.alive = false;
     o.back = 25 + Math.random() * 12;
     var colours = o.kind === 'block' ? [o.c, PAPER] : PIECES[o.kind] || [PAPER];
-    var big = o.kind === 'junk' || o.kind === 'rock' || o.kind === 'castle';
+    var big = o.kind === 'junk' || o.kind === 'rock' || o.kind === 'castle' || o.kind === 'barrel';
     burst(g, o.x, o.y, o.h * 0.5, big ? 22 : 12, colours, big ? 320 : 260, big ? 420 : 340, big ? 12 : 8, o.kind === 'crate' ? 4 : 0);
     if (o.kind === 'castle' || o.kind === 'rock') burst(g, o.x, o.y, 10, 10, ['rgba(235,203,139,0.7)', 'rgba(255,255,255,0.5)'], 120, 80, 16, 1);
     if (o.kind === 'junk') burst(g, o.x, o.y, 30, 10, [EMBER, '#FFD27A'], 380, 300, 4, 1);
-    sfx(big ? 'crunch' : 'smash');
+    if (g.water) burst(g, o.x, o.y, 4, 12, ['#BFE6FF', PAPER], 220, 380, 7, 1);
+    if (o.kind === 'duck') stat(g, 'ducks');
+    if (o.kind === 'barrel') stat(g, 'barrels');
+    sfx(o.kind === 'duck' ? 'pop' : big ? 'crunch' : 'smash');
     shake(g, big ? 12 : 5);
     stat(g, 'smash');
     var label = '';
@@ -378,6 +515,12 @@ var RCLand = (function () {
       burst(g, o.x, o.y, o.z, 14, [EMBER, '#FFD27A', PAPER], 260, 200, 9, 2);
       sfx('star');
       award(g, o.pts, o.x, o.y, o.z, '★', EMBER);
+    } else if (o.kind === 'hoop') {
+      stat(g, 'hoops');
+      part(g, o.x, o.y, o.z, 0, 0, 0, 0.4, LILAC, 50, 3);
+      burst(g, o.x, o.y, o.z, 12, [LILAC, PAPER, EMBER], 260, 160, 7, 2);
+      sfx('star');
+      award(g, o.pts, o.x, o.y, o.z, '◎', LILAC);
     } else {
       stat(g, 'balloons');
       burst(g, o.x, o.y, o.z, 10, [o.c, PAPER], 300, 160, 8, 0);
@@ -421,7 +564,8 @@ var RCLand = (function () {
     shake(g, 18);
     sfx('crash');
     burst(g, car.x, car.y, 10, 18, ['rgba(201,155,99,0.8)', '#5B5E66', g.m.colour, EMBER], 300, 300, 10, 0);
-    pop(g, L(WIPEOUT), car.x, car.y, 90, CORAL, true);
+    if (g.water) burst(g, car.x, car.y, 4, 26, ['#BFE6FF', '#7CC4F2', PAPER], 280, 460, 9, 1);
+    pop(g, L(g.water ? SPLASHDOWN : WIPEOUT), car.x, car.y, 90, CORAL, true);
   }
 
   /** Coming down: tricks that finished score, one stopped halfway is a wipeout. */
@@ -435,9 +579,10 @@ var RCLand = (function () {
       if (car.tricks[i] === 'front') front++; else if (car.tricks[i] === 'back') back++; else spin++;
     }
     var n = front + back + spin;
-    sfx('land');
+    sfx(g.water ? 'splash' : 'land');
     shake(g, Math.min(10, 2 + air * 5));
-    burst(g, car.x, car.y, 2, 10, ['rgba(255,255,255,0.55)', 'rgba(201,155,99,0.6)'], 160, 40, 14, 1);
+    if (g.water) burst(g, car.x, car.y, 3, 20, ['#BFE6FF', '#7CC4F2', PAPER], 240, 380, 8, 1);
+    else burst(g, car.x, car.y, 2, 10, ['rgba(255,255,255,0.55)', 'rgba(201,155,99,0.6)'], 160, 40, 14, 1);
     if (air >= 1.5) stat(g, 'bigair');
     if (!n) {
       if (air > 0.9) award(g, Math.round(air * 10) * 10, car.x, car.y, 60, L(BIG_AIR), LILAC);
@@ -463,8 +608,16 @@ var RCLand = (function () {
 
   // MARK: - The remote
 
+  /** Colour buttons, 1 2 3, C or V change the camera too, where a remote or keyboard has them. The pause menu always can. */
+  var CAMERA_KEYS = {403: 1, 404: 1, 405: 1, 406: 1, 49: 1, 50: 1, 51: 1, 67: 1, 86: 1};
+  function nextView(g, d) {
+    g.view = (g.view + (d || 1) + VIEWS.length) % VIEWS.length;
+    g.camT = 2.2;
+  }
+
   function drive(g, k) {
     var car = g.car;
+    if (CAMERA_KEYS[k]) { if (k >= 49 && k <= 51) { g.view = k - 49; g.camT = 2.2; } else nextView(g); return; }
     if (car.wipe > 0) return;
     if (car.air) {
       if (car.queue.length >= 3) return;
@@ -497,6 +650,8 @@ var RCLand = (function () {
     if (car.padCd > 0) car.padCd -= dt;
     if (car.safe > 0) car.safe -= dt;
     if (car.bonk > 0) car.bonk -= dt;
+    if (g.camT > 0) g.camT -= dt;
+    if (w.waves.length) rollWaves(w, dt);
 
     if (car.wipe > 0) {
       car.wipe -= dt; car.roll += dt * 14;
@@ -511,6 +666,8 @@ var RCLand = (function () {
     var wet = !car.air && inPond(w, car.x, car.y), sandy = !car.air && inSand(w, car.x, car.y);
     if (wet) target *= 0.55;
     if (sandy && m.power < 3) target *= 0.75;
+    // The surfboard rides a wave faster than it can paddle.
+    if (m.surf && !car.air && car.ramp && car.ramp.wave) target = Math.max(target, top * 1.5);
     if (!car.air) {
       var a = m.accel * dt * (Math.abs(target) < Math.abs(car.speed) ? 1.7 : 1);
       if (car.speed < target) car.speed = Math.min(target, car.speed + a); else car.speed = Math.max(target, car.speed - a);
@@ -525,13 +682,21 @@ var RCLand = (function () {
       }
     }
 
-    var vx = Math.cos(car.h) * car.speed + car.kx, vy = Math.sin(car.h) * car.speed + car.ky;
+    // On land the wheels grip; on water the machine slides on after a turn and catches up (grip).
+    var vx, vy;
+    if (m.water) {
+      if (!car.air) {
+        var gr = Math.min(1, dt * m.grip);
+        car.vx += (Math.cos(car.h) * car.speed - car.vx) * gr; car.vy += (Math.sin(car.h) * car.speed - car.vy) * gr;
+      }
+      vx = car.vx + car.kx; vy = car.vy + car.ky;
+    } else { vx = Math.cos(car.h) * car.speed + car.kx; vy = Math.sin(car.h) * car.speed + car.ky; car.vx = vx; car.vy = vy; }
     car.kx *= Math.pow(0.02, dt); car.ky *= Math.pow(0.02, dt);
     var nx = car.x + vx * dt, ny = car.y + vy * dt;
     var gh = groundAt(w, nx, ny), ramp = w.under;
-    if (!car.air && gh > car.z + 22) {
-      // The side or the back of a ramp: it's a wall from there.
-      car.speed = -car.speed * 0.3; car.kx = -vx * 0.3; car.ky = -vy * 0.3;
+    if (!car.air && gh > car.z + 22 && !(ramp && ramp.wave)) {
+      // The side or the back of a ramp: it's a wall from there. A wave just lifts you.
+      car.speed = -car.speed * 0.3; car.kx = -vx * 0.3; car.ky = -vy * 0.3; car.vx *= -0.3; car.vy *= -0.3;
       nx = car.x; ny = car.y; gh = groundAt(w, nx, ny); ramp = w.under;
       if (car.bonk <= 0) { sfx('bonk'); car.bonk = 0.4; }
       shake(g, 4);
@@ -540,10 +705,10 @@ var RCLand = (function () {
     car.run += Math.abs(car.speed) * dt;
 
     // The fence round the park.
-    var cr = m.wid * 0.55, edge = 40 + cr;
+    var cr = m.wid * 0.55, edge = w.edge + cr;
     if (car.x < edge || car.x > WW - edge || car.y < edge || car.y > WH - edge) {
       car.x = Math.max(edge, Math.min(WW - edge, car.x)); car.y = Math.max(edge, Math.min(WH - edge, car.y));
-      car.speed = -car.speed * 0.3;
+      car.speed = -car.speed * 0.3; car.vx *= -0.3; car.vy *= -0.3;
       if (car.bonk <= 0) { sfx('bonk'); car.bonk = 0.4; shake(g, 6); }
     }
 
@@ -566,12 +731,17 @@ var RCLand = (function () {
     } else if (car.wipe <= 0) {
       if (car.onRamp && gh < car.z - 6) {
         car.air = true; car.vz = car.rampVz; car.takeoff = g.t; car.tricks = [];
-        if (car.vz > 150) { stat(g, 'ramp'); sfx('jump'); checkGoals(g); }
+        if (car.vz > 150) {
+          if (car.ramp && car.ramp.wave) { stat(g, 'surf'); pop(g, L(WAVE), car.x, car.y, 80, '#BFE6FF', true); }
+          else stat(g, 'ramp');
+          sfx('jump'); checkGoals(g);
+        }
       } else car.z = gh;
     }
     car.onRamp = !!ramp && !car.air;
+    car.ramp = car.onRamp ? ramp : null;
     if (car.onRamp) {
-      var along = vx * ramp.ca + vy * ramp.sa;
+      var along = vx * ramp.ca + vy * ramp.sa - (ramp.wave || 0);
       car.rampVz = Math.max(0, along) * ramp.h / ramp.len * KICK * m.jump;
     }
 
@@ -595,9 +765,11 @@ var RCLand = (function () {
       if (car.trail <= 0 && Math.abs(car.speed) > 140) {
         car.trail = 0.05;
         var bx2 = car.x - Math.cos(car.h) * m.len * 0.5, by2 = car.y - Math.sin(car.h) * m.len * 0.5;
-        var col = wet ? '#BFE6FF' : sandy ? 'rgba(235,203,139,0.7)' : 'rgba(201,155,99,0.45)';
+        var spray = wet || g.water;
+        var col = spray ? '#BFE6FF' : sandy ? 'rgba(235,203,139,0.7)' : 'rgba(201,155,99,0.45)';
+        if (g.water) col = Math.random() < 0.5 ? 'rgba(255,255,255,0.85)' : '#BFE6FF';
         part(g, bx2 + (Math.random() - 0.5) * m.wid, by2 + (Math.random() - 0.5) * m.wid, 3, -Math.cos(car.h) * 40, -Math.sin(car.h) * 40,
-          wet ? 220 : 40, 0.5, col, wet ? 6 : 12, 1);
+          spray ? 220 : 40, 0.5, col, spray ? 6 : 12, 1);
       }
     }
     if (car.boost > 0 && Math.random() < 0.6) {
@@ -631,9 +803,9 @@ var RCLand = (function () {
       var d = Math.sqrt(d2) || 1, ux = dx / d, uy = dy / d;
       car.x = o.x - ux * (rr + 1); car.y = o.y - uy * (rr + 1);
       var into = vx * ux + vy * uy;
-      if (into > 0) { car.speed = -car.speed * 0.35; car.kx -= ux * into * 0.4; car.ky -= uy * into * 0.4; }
+      if (into > 0) { car.speed = -car.speed * 0.35; car.kx -= ux * into * 0.4; car.ky -= uy * into * 0.4; car.vx *= 0.2; car.vy *= 0.2; }
       if (car.bonk <= 0) { sfx('bonk'); car.bonk = 0.4; shake(g, 7); }
-      if (o.tough < 99 && g.tough <= 0) { g.tough = 5; pop(g, L(TOO_TOUGH), o.x, o.y, 90, PAPER); }
+      if (o.tough < 99 && g.tough <= 0) { g.tough = 5; pop(g, L(g.water ? TOO_TOUGH_WATER : TOO_TOUGH), o.x, o.y, 90, PAPER); }
     }
 
     // Particles, words and skid marks.
@@ -658,6 +830,11 @@ var RCLand = (function () {
     var zoom = 1.15 - 0.14 * Math.min(1, Math.abs(car.speed) / m.top) - Math.min(0.22, car.z / 900);
     cam.zoom += (zoom - cam.zoom) * Math.min(1, dt * 2);
     if (cam.shake > 0) cam.shake = Math.max(0, cam.shake - dt * 40);
+    // The chase camera swings round behind the machine, a little behind its turns.
+    var dyaw = car.h - cam.yaw;
+    while (dyaw > Math.PI) dyaw -= TAU;
+    while (dyaw < -Math.PI) dyaw += TAU;
+    cam.yaw += dyaw * Math.min(1, dt * 3.5);
   }
 
   // MARK: - Drawing
@@ -708,8 +885,60 @@ var RCLand = (function () {
   }
 
   /** A machine seen from above, nose to +x. under: drawn upside down (the chassis). arm: the digger's bucket, 0 to 1. */
+  /** The water machines from above: a hull (or a board) and whoever rides it. */
+  function rider(x, colour) {
+    oval(x - 2, 0, 9, 12, '#2B3A55');
+    disc(x, 0, 9, colour); disc(x + 2, 0, 6, '#E8B58A');
+    c.fillStyle = '#3B2A1E'; c.beginPath(); c.arc(x + 1, 0, 6, Math.PI * 0.5, Math.PI * 1.5); c.fill();
+  }
+  function hull(L2, Wd, colour) {
+    c.fillStyle = colour;
+    c.beginPath(); c.moveTo(L2 / 2, 0); c.quadraticCurveTo(L2 * 0.2, -Wd / 2, -L2 * 0.45, -Wd * 0.45); c.lineTo(-L2 / 2, -Wd * 0.38);
+    c.lineTo(-L2 / 2, Wd * 0.38); c.lineTo(-L2 * 0.45, Wd * 0.45); c.quadraticCurveTo(L2 * 0.2, Wd / 2, L2 / 2, 0); c.fill();
+  }
+  function waterMachine(m, under, run) {
+    var L2 = m.len, Wd = m.wid;
+    if (under) { hull(L2, Wd, '#2B2A33'); c.fillStyle = '#55534B'; c.fillRect(-L2 * 0.4, -2, L2 * 0.8, 4); return; }
+    if (m.id === 'jetski') {
+      hull(L2, Wd, m.colour);
+      box(-L2 * 0.42, -Wd * 0.26, L2 * 0.5, Wd * 0.52, 6, '#22221F');
+      c.fillStyle = PAPER; c.fillRect(L2 * 0.1, -Wd * 0.5, 4, Wd);
+      rider(-L2 * 0.12, CORAL);
+    } else if (m.id === 'boat') {
+      hull(L2, Wd, PAPER);
+      hull(L2 * 0.9, Wd * 0.8, m.colour);
+      box(-L2 * 0.3, -Wd * 0.3, L2 * 0.42, Wd * 0.6, 6, PAPER);
+      box(L2 * 0.08, -Wd * 0.3, 7, Wd * 0.6, 3, LILAC);
+      box(-L2 * 0.58, -Wd * 0.22, 10, Wd * 0.44, 3, '#22221F');
+      rider(-L2 * 0.12, BLUE);
+    } else if (m.id === 'surf') {
+      oval(0, 0, L2 / 2, Wd / 2, m.colour);
+      c.fillStyle = PAPER; c.fillRect(-L2 * 0.45, -2, L2 * 0.9, 4);
+      rider(-2, '#5CC4AE');
+    } else {
+      box(-L2 / 2, -Wd / 2, L2, 7, 3, m.colour); box(-L2 / 2, Wd / 2 - 7, L2, 7, 3, m.colour);
+      c.strokeStyle = '#22221F'; c.lineWidth = 3;
+      c.beginPath(); c.moveTo(4, -6); c.lineTo(L2 * 0.6, 0); c.lineTo(4, 6); c.stroke();
+      rider(-2, EMBER);
+    }
+  }
+  /** The wake behind a water machine on the move. */
+  function wake(L2, Wd, run) {
+    c.fillStyle = 'rgba(255,255,255,0.5)';
+    var wob = Math.sin(run / 30) * 3;
+    c.beginPath(); c.moveTo(-L2 * 0.5, -Wd * 0.4); c.lineTo(-L2 * 0.9, -Wd * 0.7 + wob); c.lineTo(-L2 * 0.9, Wd * 0.7 - wob); c.lineTo(-L2 * 0.5, Wd * 0.4); c.fill();
+  }
+  /** The little boat that tows the water skier, from above. */
+  function towBoat(x, y, h, run) {
+    c.save(); c.translate(x, y); c.rotate(h);
+    wake(70, 32, run);
+    waterMachine({id: 'boat', len: 70, wid: 32, colour: BLUE}, false, run);
+    c.restore();
+  }
+
   function machine(m, steer, under, run, arm) {
     var L2 = m.len, Wd = m.wid;
+    if (m.water) { waterMachine(m, under, run); return; }
     if (m.id === 'digger' || m.id === 'dozer') tracks(L2, Wd, run);
     else if (m.id === 'truck') {
       wheel(L2 * 0.32, -Wd * 0.42, 26, 17, steer); wheel(L2 * 0.32, Wd * 0.42, 26, 17, steer);
@@ -774,22 +1003,38 @@ var RCLand = (function () {
     }
   }
 
+  // Ramp colours: wooden in the park, white and red ski jumps floating on the lake. [back, sides, foot, top, lines]
+  var WOOD = ['#7A4E2E', '#8F5E37', '#D9A36A', '#F2C98E', 'rgba(122,78,46,0.35)'];
+  var SKI = ['#B23A2A', '#D85A30', '#E9EEF2', '#FFFFFF', 'rgba(55,138,221,0.35)'];
+
+  /** A wave from above: blue water rising to white foam on its crest. */
+  function drawWave(r) {
+    var y0 = r.y - r.wid / 2;
+    var grad = c.createLinearGradient(r.x, 0, r.x + r.len, 0);
+    grad.addColorStop(0, 'rgba(62,155,214,0)'); grad.addColorStop(0.7, '#7CC4F2'); grad.addColorStop(1, '#E9F6FF');
+    c.fillStyle = grad; c.fillRect(r.x, y0, r.len, r.wid);
+    c.fillStyle = PAPER; c.fillRect(r.x + r.len - 10, y0, 14, r.wid);
+    c.fillStyle = 'rgba(30,90,140,0.25)'; c.fillRect(r.x + r.len + 4, y0, 22, r.wid);
+  }
+
   function drawRamp(r) {
+    if (r.wave) { drawWave(r); return; }
+    var pal = r.float ? SKI : WOOD;
     // Corners: base left and right on the ground, top left and right up in the air.
     var px = -r.sa * r.wid / 2, py = r.ca * r.wid / 2, tx = r.x + r.ca * r.len, ty = r.y + r.sa * r.len, up = r.h * ZT;
-    c.fillStyle = 'rgba(0,0,0,0.18)';
+    c.fillStyle = r.float ? 'rgba(20,60,110,0.25)' : 'rgba(0,0,0,0.18)';
     c.beginPath(); c.moveTo(r.x + px, r.y + py); c.lineTo(r.x - px, r.y - py); c.lineTo(tx - px + 10, ty - py + 12); c.lineTo(tx + px + 10, ty + py + 12); c.fill();
-    c.fillStyle = '#7A4E2E';
+    c.fillStyle = pal[0];
     c.beginPath(); c.moveTo(tx + px, ty + py); c.lineTo(tx - px, ty - py); c.lineTo(tx - px, ty - py - up); c.lineTo(tx + px, ty + py - up); c.fill();
-    c.fillStyle = '#8F5E37';
+    c.fillStyle = pal[1];
     c.beginPath(); c.moveTo(r.x + px, r.y + py); c.lineTo(tx + px, ty + py); c.lineTo(tx + px, ty + py - up); c.fill();
     c.beginPath(); c.moveTo(r.x - px, r.y - py); c.lineTo(tx - px, ty - py); c.lineTo(tx - px, ty - py - up); c.fill();
     var grad = c.createLinearGradient(r.x, r.y, tx, ty - up);
-    grad.addColorStop(0, '#D9A36A'); grad.addColorStop(1, '#F2C98E');
+    grad.addColorStop(0, pal[2]); grad.addColorStop(1, pal[3]);
     c.fillStyle = grad;
     c.beginPath(); c.moveTo(r.x + px, r.y + py); c.lineTo(r.x - px, r.y - py); c.lineTo(tx - px, ty - py - up); c.lineTo(tx + px, ty + py - up); c.fill();
     // Planks and arrows up the slope.
-    c.strokeStyle = 'rgba(122,78,46,0.35)'; c.lineWidth = 2;
+    c.strokeStyle = pal[4]; c.lineWidth = 2;
     for (var k = 1; k < 6; k++) {
       var f = k / 6, cx = r.x + r.ca * r.len * f, cy = r.y + r.sa * r.len * f - up * f;
       c.beginPath(); c.moveTo(cx + px, cy + py); c.lineTo(cx - px, cy - py); c.stroke();
@@ -817,13 +1062,32 @@ var RCLand = (function () {
     c.restore();
   }
 
+  function palm(x, y, k) {
+    oval(x + 14 * k, y + 16 * k, 46 * k, 30 * k, 'rgba(0,0,0,0.18)');
+    c.fillStyle = '#2E8B3E';
+    for (var i = 0; i < 6; i++) {
+      var a = i * TAU / 6 + 0.3;
+      c.beginPath(); c.moveTo(x, y);
+      c.quadraticCurveTo(x + Math.cos(a + 0.4) * 34 * k, y + Math.sin(a + 0.4) * 34 * k, x + Math.cos(a) * 58 * k, y + Math.sin(a) * 58 * k);
+      c.quadraticCurveTo(x + Math.cos(a - 0.3) * 26 * k, y + Math.sin(a - 0.3) * 26 * k, x, y); c.fill();
+    }
+    disc(x, y, 9 * k, '#8A5A3B');
+  }
+
   function drawObj(o, t) {
     var s = o.pop > 0 ? 1 - o.pop * 1.6 : 1;
     if (s <= 0.05) return;
     if (o.float) {
       var bob = Math.sin(t * 2 + o.a) * 8, y = o.y - (o.z + bob) * ZT;
       oval(o.x, o.y + 4, o.r * 0.7, o.r * 0.35, 'rgba(0,0,0,0.16)');
-      if (o.kind === 'balloon') {
+      if (o.kind === 'hoop') {
+        // Bobbing above the water on a post, edge on from above.
+        c.fillStyle = 'rgba(247,246,242,0.8)'; c.fillRect(o.x - 2, y, 4, o.y - y);
+        c.save(); c.translate(o.x, y); c.scale(s, s);
+        c.strokeStyle = EMBER; c.lineWidth = 9; oval(0, 0, o.r, o.r * 0.42, 'rgba(158,123,255,0.25)');
+        c.beginPath(); c.save(); c.scale(1, 0.42); c.arc(0, 0, o.r, 0, TAU); c.restore(); c.stroke();
+        c.restore();
+      } else if (o.kind === 'balloon') {
         c.strokeStyle = 'rgba(255,255,255,0.7)'; c.lineWidth = 1.5;
         c.beginPath(); c.moveTo(o.x, y + o.r); c.quadraticCurveTo(o.x + 8, y + o.r + 20, o.x, o.y); c.stroke();
         oval(o.x, y, o.r * 0.85 * s, o.r * s, o.c);
@@ -879,6 +1143,22 @@ var RCLand = (function () {
       c.lineTo(r * 0.6 * k, r * 0.8 * k); c.lineTo(-r * 0.5 * k, r * 0.8 * k); c.closePath(); c.fill();
       c.fillStyle = '#B5B1AC';
       c.beginPath(); c.moveTo(-r * 0.6 * k, -r * 0.8 * k); c.lineTo(r * 0.4 * k, -r * 0.9 * k); c.lineTo(r * 0.1 * k, -r * 0.2 * k); c.lineTo(-r * 0.5 * k, -r * 0.2 * k); c.fill();
+    } else if (o.kind === 'buoy') {
+      oval(0, 0, r * 1.5, r * 1.1, 'rgba(255,255,255,0.35)');
+      disc(0, 0, r, '#F07A2A'); disc(0, 0, r * 0.6, PAPER); disc(0, 0, r * 0.3, '#F07A2A');
+    } else if (o.kind === 'duck') {
+      c.rotate(o.a);
+      oval(0, 0, r * 1.4, r * 1.05, 'rgba(255,255,255,0.3)');
+      oval(-2, 0, r * 1.1, r * 0.8, '#F2C94C'); disc(r * 0.6, 0, r * 0.5, '#F7D96A');
+      c.fillStyle = EMBER; c.beginPath(); c.moveTo(r * 1.0, -4); c.lineTo(r * 1.45, 0); c.lineTo(r * 1.0, 4); c.fill();
+      disc(r * 0.7, -4, 2, '#22221F'); disc(r * 0.7, 4, 2, '#22221F');
+    } else if (o.kind === 'barrel') {
+      oval(0, 0, r * 1.35, r * 1.2, 'rgba(255,255,255,0.3)');
+      disc(0, 0, r, '#C0392B'); c.strokeStyle = '#5B5E66'; c.lineWidth = 4;
+      c.beginPath(); c.arc(0, 0, r * 0.7, 0, TAU); c.stroke(); disc(0, 0, r * 0.18, '#8A2A20');
+    } else if (o.kind === 'island') {
+      // The sand is drawn with the water (drawLake); here a palm tree or two.
+      palm(-r * 0.15, -r * 0.1, 1); if (r > 130) palm(r * 0.3, r * 0.2, 0.8);
     } else if (o.kind === 'junk') {
       c.rotate(o.a);
       box(-r * 0.95 + 6, -r * 0.55 + 7, r * 1.9, r * 1.1, 10, 'rgba(0,0,0,0.22)');
@@ -890,8 +1170,36 @@ var RCLand = (function () {
     c.restore();
   }
 
+  /** The lake from above: a beach all round, water, the surf break's lighter water, islands, ripples. */
+  function drawLake(g, x0, y0, x1, y1) {
+    var w = g.world, t = g.t, i, j, e = w.edge - 40;
+    c.fillStyle = '#EBCB8B'; c.fillRect(-400, -400, WW + 800, WH + 800);
+    c.fillStyle = '#5DAA4F'; c.fillRect(-400, -400, WW + 800, 330); c.fillRect(-400, WH - 330 + 400, WW + 800, 330);
+    c.fillStyle = '#D9B26F'; rr(e - 14, e - 14, WW - 2 * e + 28, WH - 2 * e + 28, 70); c.fill();
+    var grad = c.createLinearGradient(0, 0, 0, WH);
+    grad.addColorStop(0, '#3E9BD6'); grad.addColorStop(1, '#2D84C4');
+    c.fillStyle = grad; rr(e, e, WW - 2 * e, WH - 2 * e, 60); c.fill();
+    var sf = w.surf;
+    c.fillStyle = 'rgba(124,196,242,0.35)'; c.fillRect(sf.x, sf.y, sf.w, sf.h);
+    // Little ripples, the same every time, drifting a bit.
+    c.strokeStyle = 'rgba(255,255,255,0.28)'; c.lineWidth = 3;
+    for (i = Math.floor(x0 / 150); i <= Math.floor(x1 / 150); i++) for (j = Math.floor(y0 / 150); j <= Math.floor(y1 / 150); j++) {
+      var hsh = ((i * 73856093) ^ (j * 19349663)) >>> 0, fx = i * 150 + hsh % 110 + Math.sin(t + i) * 6, fy = j * 150 + (hsh >> 8) % 110;
+      if (fx < e + 20 || fy < e + 20 || fx > WW - e - 20 || fy > WH - e - 20 || hsh % 3) continue;
+      c.beginPath(); c.moveTo(fx - 14, fy); c.quadraticCurveTo(fx - 7, fy - 6, fx, fy); c.quadraticCurveTo(fx + 7, fy + 6, fx + 14, fy); c.stroke();
+    }
+    for (i = 0; i < w.objs.length; i++) {
+      var o = w.objs[i];
+      if (o.kind !== 'island') continue;
+      oval(o.x, o.y, o.r + 26, o.r * 0.9 + 22, 'rgba(255,255,255,0.35)');
+      oval(o.x, o.y, o.r, o.r * 0.9, '#EBCB8B');
+      oval(o.x - o.r * 0.1, o.y - o.r * 0.1, o.r * 0.62, o.r * 0.55, '#7DBB5E');
+    }
+  }
+
   function drawGround(g, x0, y0, x1, y1) {
     var w = g.world, t = g.t, i, j;
+    if (w.water) { drawLake(g, x0, y0, x1, y1); return; }
     c.fillStyle = '#5DAA4F'; c.fillRect(0, 0, WW, WH);
     c.fillStyle = '#66B357';
     var sx = Math.max(0, Math.floor(x0 / 220)), ex = Math.min(Math.ceil(WW / 220), Math.ceil(x1 / 220));
@@ -942,6 +1250,13 @@ var RCLand = (function () {
     for (i = Math.max(0, Math.floor(y0 / 90)); i * 90 < Math.min(WH, y1); i++) { c.fillRect(16, i * 90 + 20, 26, 12); c.fillRect(WW - 42, i * 90 + 20, 26, 12); }
   }
 
+  /** Where the tow boat is: a rope's length ahead of the skier, on the water. */
+  function towAt(car) {
+    var h = Math.atan2(car.vy, car.vx);
+    if (!car.vx && !car.vy) h = car.h;
+    return {x: car.x + Math.cos(h) * 190, y: car.y + Math.sin(h) * 190, h: h};
+  }
+
   function drawCar(g) {
     var car = g.car, m = g.m;
     if (car.safe > 0 && Math.floor(car.safe * 10) % 2) return;
@@ -962,8 +1277,15 @@ var RCLand = (function () {
     c.rotate(car.h + yaw);
     var cp = Math.cos(pitch), sx = Math.abs(cp) < 0.12 ? (cp < 0 ? -0.12 : 0.12) : cp;
     c.scale(sx * sc, sc);
+    if (m.water && !car.air && Math.abs(car.speed) > 100) wake(m.len, m.wid, car.run);
     machine(m, car.steer * 0.8, cp < 0, car.run, car.slam);
     c.restore();
+    if (m.towed && car.wipe <= 0) {
+      var tb = towAt(car);
+      c.strokeStyle = 'rgba(247,246,242,0.85)'; c.lineWidth = 2;
+      c.beginPath(); c.moveTo(car.x + Math.cos(car.h) * 10, car.y + Math.sin(car.h) * 10 - lift); c.lineTo(tb.x - Math.cos(tb.h) * 34, tb.y - Math.sin(tb.h) * 34); c.stroke();
+      towBoat(tb.x, tb.y, tb.h, car.run);
+    }
     if (car.wipe > 0) {
       for (var i = 0; i < 4; i++) {
         var a = g.t * 6 + i * TAU / 4;
@@ -993,8 +1315,491 @@ var RCLand = (function () {
     c.globalAlpha = 1;
   }
 
+  // MARK: - The chase and first person cameras: the same world in 3D, drawn by hand on the canvas
+
+  var F3 = 760, NEAR = 4;
+  var V = {x: 0, y: 0, z: 0, cy: 1, sy: 0, cp: 1, sp: 0, yaw: 0};
+  var P = {f: 0, r: 0, u: 0}, Q = {x: 0, y: 0, s: 0, f: 0};
+  var CF = [], CR = [], CU = [], OF = [], OR = [], OU = [], ITEMS = [];
+
+  /** A point in the world to the camera's own space (forward, right, up), into P. */
+  function toCam(px, py, pz) {
+    var dx = px - V.x, dy = py - V.y, dz = pz - V.z, f = dx * V.cy + dy * V.sy;
+    P.r = -dx * V.sy + dy * V.cy;
+    P.f = f * V.cp - dz * V.sp;
+    P.u = f * V.sp + dz * V.cp;
+    return P;
+  }
+  /** A point in the world to the screen, into Q (s: pixels per world unit there). False if it is behind the camera. */
+  function proj(px, py, pz) {
+    toCam(px, py, pz);
+    if (P.f < NEAR) return false;
+    Q.f = P.f; Q.s = F3 / P.f; Q.x = W / 2 + P.r * Q.s; Q.y = H / 2 - P.u * Q.s;
+    return true;
+  }
+  /** A flat shape in the world (x, y, z, x, y, z...), cut where it passes behind the camera, then filled. */
+  function poly3(pts, fill) {
+    var n = pts.length / 3, i, m = 0;
+    for (i = 0; i < n; i++) { toCam(pts[i * 3], pts[i * 3 + 1], pts[i * 3 + 2]); CF[i] = P.f; CR[i] = P.r; CU[i] = P.u; }
+    for (i = 0; i < n; i++) {
+      var j = (i + 1) % n, ain = CF[i] >= NEAR, bin = CF[j] >= NEAR;
+      if (ain) { OF[m] = CF[i]; OR[m] = CR[i]; OU[m] = CU[i]; m++; }
+      if (ain !== bin) {
+        var t = (NEAR - CF[i]) / (CF[j] - CF[i]);
+        OF[m] = NEAR; OR[m] = CR[i] + (CR[j] - CR[i]) * t; OU[m] = CU[i] + (CU[j] - CU[i]) * t; m++;
+      }
+    }
+    if (m < 3) return;
+    c.beginPath();
+    for (i = 0; i < m; i++) {
+      var sx = W / 2 + OR[i] * F3 / OF[i], sy = H / 2 - OU[i] * F3 / OF[i];
+      if (i) c.lineTo(sx, sy); else c.moveTo(sx, sy);
+    }
+    c.closePath();
+    c.fillStyle = fill; c.fill();
+  }
+  function rect3(x0, y0, x1, y1, z, fill) { poly3([x0, y0, z, x1, y0, z, x1, y1, z, x0, y1, z], fill); }
+  function ellipse3(x, y, rx, ry, z, fill) {
+    var pts = [];
+    for (var i = 0; i < 20; i++) { var a = i * TAU / 20; pts.push(x + Math.cos(a) * rx, y + Math.sin(a) * ry, z); }
+    poly3(pts, fill);
+  }
+  function turned3(x, y, a, len, wid, z, fill) {
+    var ca = Math.cos(a), sa = Math.sin(a), lx = ca * len / 2, ly = sa * len / 2, wx = -sa * wid / 2, wy = ca * wid / 2;
+    poly3([x - lx - wx, y - ly - wy, z, x + lx - wx, y + ly - wy, z, x + lx + wx, y + ly + wy, z, x - lx + wx, y - ly + wy, z], fill);
+  }
+
+  // Colours in light and shade, worked out once each.
+  var SHADES = {};
+  function shade(hex, k) {
+    k = Math.round(k * 20) / 20;
+    var key = hex + k;
+    if (!SHADES[key]) {
+      var n = parseInt(hex.slice(1), 16);
+      SHADES[key] = 'rgb(' + Math.min(255, Math.round((n >> 16 & 255) * k)) + ',' + Math.min(255, Math.round((n >> 8 & 255) * k)) + ',' + Math.min(255, Math.round((n & 255) * k)) + ')';
+    }
+    return SHADES[key];
+  }
+
+  /** Where the camera is and where it looks. Returns the roll (a wipeout tumbles the first person view). */
+  var EYE = {race: 26, truck: 50, digger: 56, buggy: 32, dozer: 52, jetski: 50, boat: 42, surf: 50, ski: 46};
+  function setView(g) {
+    var car = g.car, m = g.m, yaw, pitch, roll = 0, tk = car.trick, flip = 0, spin = 0;
+    if (tk) {
+      if (tk.k === 'front') flip = tk.p * TAU; else if (tk.k === 'back') flip = -tk.p * TAU;
+      else spin = (tk.k === 'spinL' ? -1 : 1) * tk.p * TAU;
+    }
+    if (g.view === 2) {
+      yaw = car.h + spin;
+      pitch = 0.1 + flip;
+      // Up a ramp the nose points up, so you look up it.
+      if (car.ramp) pitch -= Math.atan2(car.ramp.h, car.ramp.len) * Math.cos(car.h - car.ramp.a);
+      if (car.wipe > 0) { roll = car.roll; pitch += Math.sin(car.roll) * 0.5; }
+      V.x = car.x + Math.cos(car.h) * m.len * 0.12; V.y = car.y + Math.sin(car.h) * m.len * 0.12;
+      V.z = car.z + (EYE[m.id] || 30) + (g.water ? Math.sin(car.run / 40) * 2 : 0);
+    } else {
+      yaw = g.cam.yaw; pitch = 0.24;
+      var back = 250 + Math.abs(car.speed) * 0.08;
+      V.x = car.x - Math.cos(yaw) * back; V.y = car.y - Math.sin(yaw) * back; V.z = car.z * 0.85 + 120;
+    }
+    V.yaw = yaw; V.cy = Math.cos(yaw); V.sy = Math.sin(yaw); V.cp = Math.cos(pitch); V.sp = Math.sin(pitch);
+    return roll;
+  }
+
+  /** The sky, hills on the horizon all the way round, and clouds that stay put as you turn. */
+  function sky3(g) {
+    var grad = c.createLinearGradient(0, -200, 0, H);
+    grad.addColorStop(0, '#4FA8EA'); grad.addColorStop(1, '#D4EEFF');
+    c.fillStyle = grad; c.fillRect(-400, -400, W + 800, H + 800);
+    if (!proj(V.x + V.cy * 1e5, V.y + V.sy * 1e5, 0)) return;
+    var hy = Q.y, x, a, i;
+    for (i = 0; i < 6; i++) {
+      var d = i * TAU / 6 + 0.4 - V.yaw;
+      d = d - Math.round(d / TAU) * TAU;
+      if (Math.abs(d) > 1.1) continue;
+      var cx = W / 2 + Math.tan(d) * F3, cy = hy - 150 - (i % 3) * 40, k = 1 + (i % 2) * 0.4;
+      c.fillStyle = 'rgba(255,255,255,0.85)';
+      c.beginPath(); c.arc(cx, cy, 30 * k, 0, TAU); c.arc(cx + 34 * k, cy - 12 * k, 36 * k, 0, TAU); c.arc(cx + 70 * k, cy, 26 * k, 0, TAU); c.fill();
+    }
+    c.fillStyle = g.water ? '#5E9E62' : '#4A8C40';
+    c.beginPath(); c.moveTo(-400, hy + 40);
+    for (x = -400; x <= W + 400; x += 40) {
+      a = V.yaw + Math.atan((x - W / 2) / F3);
+      c.lineTo(x, hy - 22 - Math.sin(a * 3) * 16 - Math.sin(a * 7 + 1) * 9 - Math.sin(a * 13) * 4);
+    }
+    c.lineTo(W + 400, hy + 40); c.closePath(); c.fill();
+  }
+
+  /** The track round the park as a ring of flat pieces. */
+  function ring3(t, off, fill) {
+    var pts = t.pts || (t.pts = (function () {
+      var out = [], cs = [[t.x + t.w - t.r, t.y + t.r, -Math.PI / 2], [t.x + t.w - t.r, t.y + t.h - t.r, 0], [t.x + t.r, t.y + t.h - t.r, Math.PI / 2], [t.x + t.r, t.y + t.r, Math.PI]];
+      for (var k = 0; k < 4; k++) for (var s = 0; s <= 6; s++) { var a = cs[k][2] + s / 6 * Math.PI / 2; out.push([cs[k][0] + Math.cos(a) * t.r, cs[k][1] + Math.sin(a) * t.r, Math.cos(a), Math.sin(a)]); }
+      return out;
+    })());
+    for (var i = 0; i < pts.length; i++) {
+      var p = pts[i], q = pts[(i + 1) % pts.length];
+      poly3([p[0] + p[2] * off, p[1] + p[3] * off, 0, q[0] + q[2] * off, q[1] + q[3] * off, 0, q[0] - q[2] * off, q[1] - q[3] * off, 0, p[0] - p[2] * off, p[1] - p[3] * off, 0], fill);
+    }
+  }
+
+  function ground3(g) {
+    var w = g.world, i, big = 6000, o;
+    if (w.water) {
+      rect3(-big, -big, WW + big, WH + big, 0, '#5DAA4F');
+      rect3(-300, -300, WW + 300, WH + 300, 0, '#EBCB8B');
+      var e = w.edge - 40;
+      rect3(e - 16, e - 16, WW - e + 16, WH - e + 16, 0, '#D9B26F');
+      rect3(e, e, WW - e, WH - e, 0, '#3E9BD6');
+      for (i = 0; e + i * 200 < WH - e; i += 2) rect3(e, e + i * 200, WW - e, Math.min(WH - e, e + i * 200 + 100), 0, '#3A94CF');
+      var sf = w.surf;
+      rect3(sf.x, sf.y, sf.x + sf.w, sf.y + sf.h, 0, 'rgba(124,196,242,0.35)');
+      for (i = 0; i < w.objs.length; i++) {
+        o = w.objs[i];
+        if (o.kind !== 'island') continue;
+        ellipse3(o.x, o.y, o.r + 24, o.r + 24, 0, 'rgba(255,255,255,0.4)');
+        ellipse3(o.x, o.y, o.r, o.r, 0, '#EBCB8B');
+        ellipse3(o.x, o.y, o.r * 0.6, o.r * 0.6, 0, '#7DBB5E');
+      }
+      return;
+    }
+    rect3(-big, -big, WW + big, WH + big, 0, '#5DAA4F');
+    for (i = 1; i * 220 < WW; i += 2) rect3(i * 220, 0, i * 220 + 220, WH, 0, '#66B357');
+    ring3(w.track, 75, '#B5844F');
+    ring3(w.track, 65, '#C99B63');
+    var s = w.sand;
+    rect3(s.x - 18, s.y - 18, s.x + s.w + 18, s.y + s.h + 18, 0, '#8A5A3B');
+    rect3(s.x, s.y, s.x + s.w, s.y + s.h, 0, '#EBCB8B');
+    var p = w.pond;
+    ellipse3(p.x, p.y, p.rx + 16, p.ry + 14, 0, '#8FC07A');
+    ellipse3(p.x, p.y, p.rx, p.ry, 0, '#3E9BD6');
+    ellipse3(p.x - p.rx * 0.15, p.y - p.ry * 0.15, p.rx * 0.75, p.ry * 0.65, 0, '#55AEE3');
+    for (i = 0; i < w.pads.length; i++) {
+      var pd = w.pads[i];
+      turned3(pd.x, pd.y, pd.a, pd.len, pd.wid, 0, '#2C2458');
+      turned3(pd.x, pd.y, pd.a, pd.len * 0.7, pd.wid * 0.4, 0, 'rgba(158,123,255,' + (0.5 + Math.sin(g.t * 8) * 0.3) + ')');
+    }
+    // The fence, as a low wooden wall round the park.
+    var fz = 34, f0 = 24, f1x = WW - 24, f1y = WH - 24;
+    poly3([f0, f0, 0, f1x, f0, 0, f1x, f0, fz, f0, f0, fz], '#8A5A3B');
+    poly3([f0, f1y, 0, f1x, f1y, 0, f1x, f1y, fz, f0, f1y, fz], '#8A5A3B');
+    poly3([f0, f0, 0, f0, f1y, 0, f0, f1y, fz, f0, f0, fz], '#7A4E2E');
+    poly3([f1x, f0, 0, f1x, f1y, 0, f1x, f1y, fz, f1x, f0, fz], '#7A4E2E');
+  }
+
+  /** A ramp (or a wave) as a solid wedge: only the faces turned towards the camera, which never overlap. */
+  function wedge3(r) {
+    var pal = r.wave ? ['#E9F6FF', '#5AAAE0', '#3E9BD6', '#7CC4F2'] : r.float ? SKI : WOOD;
+    var px = -r.sa * r.wid / 2, py = r.ca * r.wid / 2, tx = r.x + r.ca * r.len, ty = r.y + r.sa * r.len, h = r.h;
+    var b1x = r.x + px, b1y = r.y + py, b2x = r.x - px, b2y = r.y - py, t1x = tx + px, t1y = ty + py, t2x = tx - px, t2y = ty - py;
+    // Back face (towards the top end).
+    if ((V.x - tx) * r.ca + (V.y - ty) * r.sa > 0) poly3([t1x, t1y, 0, t2x, t2y, 0, t2x, t2y, h, t1x, t1y, h], pal[0]);
+    // The sides.
+    if ((V.x - r.x) * px + (V.y - r.y) * py > 0) poly3([b1x, b1y, 0, t1x, t1y, 0, t1x, t1y, h], pal[1]);
+    else poly3([b2x, b2y, 0, t2x, t2y, 0, t2x, t2y, h], pal[1]);
+    // The slope: seen from above it, i.e. from in front or high enough.
+    if (-(V.x - r.x) * r.ca * h - (V.y - r.y) * r.sa * h + V.z * r.len > 0) {
+      poly3([b1x, b1y, 0, b2x, b2y, 0, t2x, t2y, h, t1x, t1y, h], r.wave ? pal[3] : pal[3]);
+      // A coloured lip along the top, and foam on a wave.
+      var k = 0.86;
+      poly3([b1x + (t1x - b1x) * k, b1y + (t1y - b1y) * k, h * k, b2x + (t2x - b2x) * k, b2y + (t2y - b2y) * k, h * k, t2x, t2y, h, t1x, t1y, h],
+        r.wave ? PAPER : r.float ? CORAL : r.size === 'mega' ? CORAL : EMBER);
+    }
+  }
+
+  /** The machines in 3D: boxes [front, back... as x0, x1, y0, y1, z0, z1, colour], x forward, y right, z up. */
+  var MODELS = {};
+  function wheels4(x, y0, y1, h, len) {
+    var d = '#1E1D24';
+    return [[x - len, x + len, y0, y1, 0, h, d], [x - len, x + len, -y1, -y0, 0, h, d], [-x - len, -x + len, y0, y1, 0, h, d], [-x - len, -x + len, -y1, -y0, 0, h, d]];
+  }
+  function person(x, colour, z0) {
+    return [[x - 4, x + 4, -7, 7, z0, z0 + 18, '#2B3A55'], [x - 5, x + 5, -8, 8, z0 + 18, z0 + 36, colour], [x - 4, x + 3, -4, 4, z0 + 36, z0 + 44, '#E8B58A']];
+  }
+  function model(id) {
+    if (MODELS[id]) return MODELS[id];
+    var m = null, d = '#1E1D24', b;
+    for (var i = 0; i < MACHINES.length; i++) if (MACHINES[i].id === id) m = MACHINES[i];
+    var col = m ? m.colour : BLUE;
+    if (id === 'race') b = wheels4(19, 12, 21, 14, 7).concat([[-32, 32, -13, 13, 4, 13, col], [-32, 32, -3, 3, 13, 14, PAPER], [-10, 6, -8, 8, 13, 21, '#22221F'], [-36, -28, -18, 18, 18, 22, '#22221F'], [-32, -30, -2, 2, 13, 18, '#22221F']]);
+    else if (id === 'truck') b = wheels4(24, 16, 30, 26, 13).concat([[-31, 31, -16, 16, 20, 34, col], [-8, 16, -13, 13, 34, 48, LILAC], [14, 16, -11, 11, 36, 46, '#3B2A86']]);
+    else if (id === 'digger' || id === 'dozer') {
+      b = [[-30, 28, -26, -14, 0, 14, d], [-30, 28, 14, 26, 0, 14, d], [-26, 16, -17, 17, 14, 34, col]];
+      if (id === 'digger') b = b.concat([[-12, 8, -14, 4, 34, 54, '#2B3A55'], [10, 46, 2, 10, 28, 36, '#C98A1E'], [42, 54, -8, 20, 4, 30, '#5B5E66']]);
+      else b = b.concat([[-16, 4, -12, 12, 34, 52, '#7FC7B6'], [-16, 4, -12, 12, 52, 54, '#1E3D36'], [28, 34, -30, 30, 0, 26, '#C9C5BE'], [16, 28, -16, -12, 8, 14, '#5B5E66'], [16, 28, 12, 16, 8, 14, '#5B5E66']]);
+    } else if (id === 'buggy') b = wheels4(18, 14, 23, 16, 8).concat([[-24, 24, -11, 11, 10, 16, col], [-12, 4, -8, 8, 16, 22, '#22221F'], [-16, -12, -11, 11, 16, 34, col], [-16, 4, -11, -8, 32, 34, col], [-16, 4, 8, 11, 32, 34, col]]);
+    else if (id === 'jetski') b = [[-28, 26, -12, 12, 0, 12, col], [-22, 4, -7, 7, 12, 17, '#22221F'], [8, 12, -15, 15, 20, 23, PAPER]].concat(person(-8, CORAL, 12));
+    else if (id === 'boat' || id === 'tow') {
+      var hc = id === 'tow' ? BLUE : col;
+      b = [[-42, 40, -18, 18, 0, 14, PAPER], [-42, 40, -19, 19, 5, 9, hc], [6, 9, -15, 15, 14, 26, LILAC], [-50, -42, -5, 5, 4, 22, '#22221F']].concat(person(-10, id === 'tow' ? CORAL : BLUE, 14));
+    } else if (id === 'surf') b = [[-25, 25, -10, 10, 0, 4, col], [-3, 3, -20, 20, 32, 36, '#E8B58A']].concat(person(0, '#5CC4AE', 4));
+    else b = [[-20, 22, -11, -6, 0, 3, col], [-20, 22, 6, 11, 0, 3, col], [8, 20, -2, 2, 30, 33, '#E8B58A'], [18, 21, -8, 8, 29, 34, '#22221F']].concat(person(-2, EMBER, 3));
+    return (MODELS[id] = b);
+  }
+
+  var FACES = [[0, 0, 1, 4, 5, 7, 6, 1.12], [0, 0, -1, 0, 2, 3, 1, 0.5], [1, 0, 0, 1, 3, 7, 5, 0.92], [-1, 0, 0, 0, 4, 6, 2, 0.78], [0, 1, 0, 2, 6, 7, 3, 0.7], [0, -1, 0, 0, 1, 5, 4, 0.86]];
+  var CX = [], CY = [], CZ = [];
+  /** Draws a model at x, y, z turned by yaw, flipped by pitch (nose down first), rolled; it turns round its middle. */
+  function model3(b, x, y, z, yaw, pitch, roll) {
+    var cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch), cr = Math.cos(roll), sr = Math.sin(roll), mid = 16;
+    function rot(lx, ly, lz, out, k) {
+      var x1 = lx * cp + lz * sp, z1 = lz * cp - lx * sp, y2 = ly * cr - z1 * sr, z2 = ly * sr + z1 * cr;
+      out[0] = x1 * cy - y2 * sy; out[1] = x1 * sy + y2 * cy; out[2] = z2;
+      if (k) { out[0] += x; out[1] += y; out[2] += z + mid; }
+    }
+    var faces = [], v = [0, 0, 0], i, f, k;
+    for (i = 0; i < b.length; i++) {
+      var bx = b[i];
+      for (k = 0; k < 8; k++) { rot(k & 1 ? bx[1] : bx[0], k & 2 ? bx[3] : bx[2], (k & 4 ? bx[5] : bx[4]) - mid, v, true); CX[k] = v[0]; CY[k] = v[1]; CZ[k] = v[2]; }
+      for (f = 0; f < 6; f++) {
+        var F = FACES[f];
+        rot(F[0], F[1], F[2], v, false);
+        var a = F[3], ccx = (CX[a] + CX[F[5]]) / 2, ccy = (CY[a] + CY[F[5]]) / 2, ccz = (CZ[a] + CZ[F[5]]) / 2;
+        if (v[0] * (V.x - ccx) + v[1] * (V.y - ccy) + v[2] * (V.z - ccz) <= 0) continue;
+        var light = 0.55 + 0.45 * Math.max(0, v[2] * 0.8 - v[0] * 0.3 - v[1] * 0.3);
+        faces.push({d: toCam(ccx, ccy, ccz).f, pts: [CX[a], CY[a], CZ[a], CX[F[4]], CY[F[4]], CZ[F[4]], CX[F[5]], CY[F[5]], CZ[F[5]], CX[F[6]], CY[F[6]], CZ[F[6]]],
+          fill: shade(bx[6], light * F[7] / 0.9)});
+      }
+    }
+    faces.sort(function (p, q) { return q.d - p.d; });
+    for (i = 0; i < faces.length; i++) poly3(faces[i].pts, faces[i].fill);
+  }
+
+  /** The things in the park, as flat pictures standing up and facing the camera. y is up the picture, in world units. */
+  function side(o, t) {
+    var r = o.r, k;
+    if (o.kind === 'tree') {
+      oval(0, 0, 40, 10, 'rgba(0,0,0,0.2)');
+      box(-8, -64, 16, 64, 4, '#8A5A3B');
+      disc(0, -92, 44, '#2E7D46'); disc(-24, -74, 30, '#3E9A55'); disc(24, -78, 28, '#358C4D'); disc(-4, -122, 28, '#3E9A55');
+    } else if (o.kind === 'crate') {
+      box(-26, -52, 52, 52, 4, '#C18A52');
+      c.strokeStyle = '#8A5A3B'; c.lineWidth = 4; c.strokeRect(-22, -48, 44, 44);
+      c.beginPath(); c.moveTo(-22, -48); c.lineTo(22, -4); c.moveTo(22, -48); c.lineTo(-22, -4); c.stroke();
+    } else if (o.kind === 'cone') {
+      box(-16, -4, 32, 4, 2, '#C2561A');
+      c.fillStyle = '#F07A2A'; c.beginPath(); c.moveTo(-13, -4); c.lineTo(0, -32); c.lineTo(13, -4); c.fill();
+      c.fillStyle = PAPER; c.fillRect(-8, -18, 16, 5);
+    } else if (o.kind === 'pin') {
+      oval(0, -14, 10, 14, PAPER); disc(0, -30, 6, PAPER); c.fillStyle = '#E8475C'; c.fillRect(-6, -26, 12, 4);
+    } else if (o.kind === 'melon') {
+      oval(0, -13, 20, 13, '#2E8B3E'); c.strokeStyle = '#1C5E2A'; c.lineWidth = 3;
+      c.beginPath(); c.moveTo(-12, -22); c.quadraticCurveTo(-2, -13, -12, -3); c.moveTo(4, -25); c.quadraticCurveTo(12, -13, 4, -1); c.stroke();
+    } else if (o.kind === 'block') {
+      box(-20, -40, 40, 40, 5, o.c); box(-15, -35, 30, 30, 3, 'rgba(255,255,255,0.25)');
+    } else if (o.kind === 'castle') {
+      box(-32, -38, 64, 38, 4, '#D9B26F');
+      box(-36, -56, 20, 56, 3, '#EBCB8B'); box(16, -56, 20, 56, 3, '#EBCB8B'); box(-10, -24, 20, 24, 8, '#B58F55');
+      c.fillStyle = CORAL; c.fillRect(25, -78, 3, 22); c.fillRect(28, -78, 12, 8);
+    } else if (o.kind === 'rock') {
+      k = o.s || 1;
+      c.fillStyle = '#8D8A86';
+      c.beginPath(); c.moveTo(-36 * k, 0); c.lineTo(-28 * k, -38 * k); c.lineTo(4 * k, -56 * k); c.lineTo(32 * k, -30 * k); c.lineTo(38 * k, 0); c.closePath(); c.fill();
+      c.fillStyle = '#B5B1AC'; c.beginPath(); c.moveTo(-28 * k, -38 * k); c.lineTo(4 * k, -56 * k); c.lineTo(8 * k, -30 * k); c.lineTo(-20 * k, -24 * k); c.fill();
+    } else if (o.kind === 'junk') {
+      box(-46, -36, 92, 26, 8, o.c); box(-26, -54, 50, 20, 7, o.c); box(-20, -50, 38, 13, 4, 'rgba(30,30,36,0.55)');
+      disc(-28, -10, 11, '#1E1D24'); disc(28, -10, 11, '#1E1D24'); disc(-28, -10, 4, '#5B5E66'); disc(28, -10, 4, '#5B5E66');
+    } else if (o.kind === 'balloon') {
+      c.strokeStyle = 'rgba(255,255,255,0.8)'; c.lineWidth = 1.5;
+      c.beginPath(); c.moveTo(0, r); c.quadraticCurveTo(8, r + 20, 0, r + 44); c.stroke();
+      oval(0, 0, r * 0.85, r, o.c); oval(-r * 0.3, -r * 0.35, r * 0.22, r * 0.3, 'rgba(255,255,255,0.5)');
+    } else if (o.kind === 'star') {
+      c.scale(Math.cos(t * 3 + o.a), 1);
+      disc(0, 0, r * 0.9, 'rgba(232,163,61,0.25)');
+      c.fillStyle = EMBER; starPath(0, 0, r * 0.8); c.fill();
+      c.fillStyle = '#FFD27A'; starPath(0, -2, r * 0.45); c.fill();
+    } else if (o.kind === 'hoop') {
+      c.fillStyle = 'rgba(247,246,242,0.85)'; c.fillRect(-2, r, 4, Math.max(0, o.z - r));
+      disc(0, 0, r, 'rgba(158,123,255,0.18)');
+      c.strokeStyle = EMBER; c.lineWidth = 8; c.beginPath(); c.arc(0, 0, r, 0, TAU); c.stroke();
+      c.strokeStyle = '#FFD27A'; c.lineWidth = 3; c.beginPath(); c.arc(0, 0, r - 2, Math.PI * 1.1, Math.PI * 1.6); c.stroke();
+    } else if (o.kind === 'buoy') {
+      c.translate(0, Math.sin(t * 2 + o.a) * 3);
+      box(-12, -36, 24, 38, 10, '#F07A2A'); c.fillStyle = PAPER; c.fillRect(-12, -24, 24, 8);
+    } else if (o.kind === 'duck') {
+      c.translate(0, Math.sin(t * 2 + o.a) * 2);
+      oval(0, -8, 19, 11, '#F2C94C'); disc(10, -24, 9, '#F7D96A');
+      c.fillStyle = EMBER; c.beginPath(); c.moveTo(17, -26); c.lineTo(26, -22); c.lineTo(17, -19); c.fill();
+      disc(12, -27, 2, '#22221F');
+    } else if (o.kind === 'barrel') {
+      c.translate(0, Math.sin(t * 2 + o.a) * 2);
+      box(-20, -40, 40, 42, 8, '#C0392B'); c.fillStyle = '#5B5E66'; c.fillRect(-20, -32, 40, 4); c.fillRect(-20, -12, 40, 4);
+    } else if (o.kind === 'island') {
+      // A palm tree in the middle of the island.
+      c.strokeStyle = '#8A5A3B'; c.lineWidth = 12; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(0, -10); c.quadraticCurveTo(-6, -80, 18, -150); c.stroke();
+      c.fillStyle = '#2E8B3E';
+      for (var i = 0; i < 6; i++) {
+        var a = -Math.PI / 2 + (i - 2.5) * 0.55, ex = 18 + Math.cos(a) * 80, ey = -150 + Math.sin(a) * 40 + 30;
+        c.beginPath(); c.moveTo(18, -150); c.quadraticCurveTo(18 + Math.cos(a) * 50, -170 + Math.sin(a) * 30, ex, ey);
+        c.quadraticCurveTo(18 + Math.cos(a) * 36, -148, 18, -146); c.fill();
+      }
+    }
+  }
+
+  function sprite3(o, t) {
+    var sc = o.pop > 0 ? 1 - o.pop * 1.6 : 1;
+    if (sc <= 0.05) return;
+    var z = o.float ? o.z + Math.sin(t * 2 + o.a) * 8 : 0;
+    if (!proj(o.x, o.y, z)) return;
+    var bx = Q.x, by = Q.y, s = Q.s * sc, ang = 0;
+    // Stand it up the way the world's up is on screen (it isn't, upside down in a flip).
+    if (proj(o.x, o.y, z + 60)) ang = Math.atan2(Q.x - bx, by - Q.y);
+    c.save(); c.translate(bx, by); if (ang) c.rotate(ang); c.scale(s, s);
+    side(o, t);
+    c.restore();
+  }
+
+  function byDepth(a, b) { return b.d - a.d; }
+
+  function render3d(g) {
+    var roll = setView(g), cam = g.cam, w = g.world, car = g.car, m = g.m, i, n = 0, o;
+    var shx = cam.shake ? (Math.random() - 0.5) * cam.shake : 0, shy = cam.shake ? (Math.random() - 0.5) * cam.shake : 0;
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    c.save();
+    c.translate(W / 2 + shx, H / 2 + shy); if (roll) c.rotate(-roll); c.translate(-W / 2, -H / 2);
+    sky3(g);
+    ground3(g);
+    // Skid marks and the machine's shadow lie on the ground.
+    c.lineCap = 'round';
+    for (i = 0; i < g.skids.length; i++) {
+      var sk = g.skids[i];
+      if (sk.life <= 0 || !proj(sk.x1, sk.y1, 0)) continue;
+      var ax = Q.x, ay = Q.y, as = Q.s;
+      if (!proj(sk.x2, sk.y2, 0)) continue;
+      c.strokeStyle = 'rgba(40,30,20,' + Math.min(0.35, sk.life * 0.1) + ')'; c.lineWidth = 7 * (as + Q.s) / 2;
+      c.beginPath(); c.moveTo(ax, ay); c.lineTo(Q.x, Q.y); c.stroke();
+    }
+    var gz = groundAt(w, car.x, car.y), shs = Math.max(0.35, 1 - (car.z - gz) / 400);
+    if (g.view === 1) turned3(car.x, car.y, car.h, m.len * shs, m.wid * shs, gz + 1, 'rgba(0,0,0,' + (0.28 * shs) + ')');
+    // Everything standing up, furthest first.
+    function add(kind, ref, x, y, z, near) {
+      toCam(x, y, z);
+      if (P.f < near || P.f > 3600 || Math.abs(P.r) > P.f * 1.3 + 400) return;
+      var it = ITEMS[n] || (ITEMS[n] = {});
+      it.d = P.f; it.k = kind; it.o = ref; n++;
+    }
+    for (i = 0; i < w.objs.length; i++) { o = w.objs[i]; if (o.alive || o.pop > 0) add(0, o, o.x, o.y, o.float ? o.z : 0, 30); }
+    // A ramp sorts by its far end, so whatever is on it or just in front draws over it.
+    for (i = 0; i < w.ramps.length; i++) {
+      o = w.ramps[i];
+      var fa = toCam(o.x, o.y, 0).f, fb = toCam(o.x + o.ca * o.len, o.y + o.sa * o.len, 0).f;
+      if (fa > fb) add(1, o, o.x, o.y, 0, -o.len - o.wid / 2); else add(1, o, o.x + o.ca * o.len, o.y + o.sa * o.len, 0, -o.len - o.wid / 2);
+    }
+    if (g.view === 1) add(2, car, car.x, car.y, car.z, 10);
+    var tb = m.towed && car.wipe <= 0 ? towAt(car) : null;
+    if (tb) add(3, tb, tb.x, tb.y, 0, 20);
+    var list = ITEMS.slice(0, n).sort(byDepth);
+    for (i = 0; i < list.length; i++) {
+      var it = list[i];
+      if (it.k === 0) sprite3(it.o, g.t);
+      else if (it.k === 1) wedge3(it.o);
+      else if (it.k === 2) car3(g);
+      else model3(model('tow'), it.o.x, it.o.y, 0, it.o.h, 0, 0);
+    }
+    if (tb && proj(car.x + Math.cos(car.h) * 14, car.y + Math.sin(car.h) * 14, car.z + 32)) {
+      var rx = Q.x, ry = Q.y;
+      if (proj(tb.x - Math.cos(tb.h) * 46, tb.y - Math.sin(tb.h) * 46, 20)) {
+        c.strokeStyle = 'rgba(247,246,242,0.9)'; c.lineWidth = 2; c.beginPath(); c.moveTo(rx, ry); c.lineTo(Q.x, Q.y); c.stroke();
+      }
+    }
+    // Spray, dust, bits and the words that pop up.
+    for (i = 0; i < g.parts.length; i++) {
+      var p = g.parts[i];
+      if (!proj(p.x, p.y, p.z) || Q.f < 90) continue;
+      var sz = Math.min(90, p.s * Q.s * (p.k === 1 ? 1 : 0.6));
+      c.globalAlpha = Math.min(1, p.life / p.max * 1.6);
+      if (p.k === 1) disc(Q.x, Q.y, sz * 0.5, p.c);
+      else if (p.k === 2) { c.fillStyle = p.c; starPath(Q.x, Q.y, sz); c.fill(); }
+      else if (p.k === 3) { c.strokeStyle = p.c; c.lineWidth = 6; c.beginPath(); c.arc(Q.x, Q.y, sz * (1.4 - p.life / p.max), 0, TAU); c.stroke(); }
+      else { c.save(); c.translate(Q.x, Q.y); c.rotate(p.rot); c.fillStyle = p.c; c.fillRect(-sz / 2, -sz / 2, sz, p.k === 0 ? sz : sz * 0.4); c.restore(); }
+    }
+    c.globalAlpha = 1;
+    for (i = 0; i < g.pops.length; i++) {
+      var pp = g.pops[i], k = pp.t / 1.6;
+      if (!proj(pp.x, pp.y, pp.z + 40)) continue;
+      c.globalAlpha = k > 0.7 ? (1 - k) / 0.3 : 1;
+      text(pp.s, Q.x, Math.max(130, Q.y - k * 90), (pp.big ? 40 : 28) * (k < 0.15 ? 0.6 + k / 0.15 * 0.4 : 1), pp.c, 'center', '800', 'rgba(13,12,24,0.75)');
+      c.globalAlpha = 1;
+    }
+    c.restore();
+    if (g.view === 2) bonnet(g);
+  }
+
+  /** The machine in the chase view, tipping through its flips and spins like the picture from above. */
+  function car3(g) {
+    var car = g.car, m = g.m, tk = car.trick, pitch = 0, yaw = car.h, roll = 0;
+    if (car.safe > 0 && Math.floor(car.safe * 10) % 2) return;
+    if (tk) {
+      if (tk.k === 'front') pitch = tk.p * TAU; else if (tk.k === 'back') pitch = -tk.p * TAU;
+      else yaw += (tk.k === 'spinL' ? -1 : 1) * tk.p * TAU;
+    }
+    if (car.ramp) pitch -= Math.atan2(car.ramp.h, car.ramp.len) * Math.cos(car.h - car.ramp.a);
+    if (car.wipe > 0) { roll = car.roll; yaw += car.roll * 0.3; }
+    var b = model(m.id);
+    if (m.id === 'digger' && car.slam > 0) {
+      // The arm swings down for a slam.
+      var dip = Math.sin(car.slam / 0.4 * Math.PI) * 20;
+      b = b.slice(0, b.length - 2).concat([[10, 46, 2, 10, 28 - dip, 36 - dip, '#C98A1E'], [42, 54, -8, 20, Math.max(0, 4 - dip), 30 - dip, '#5B5E66']]);
+    }
+    model3(b, car.x, car.y, car.z, yaw, pitch, roll);
+    if (car.wipe > 0 && proj(car.x, car.y, car.z + 70)) {
+      for (var i = 0; i < 4; i++) {
+        var a = g.t * 6 + i * TAU / 4;
+        c.fillStyle = EMBER; starPath(Q.x + Math.cos(a) * 34 * Q.s * 3, Q.y + Math.sin(a) * 12 * Q.s * 3, 8); c.fill();
+      }
+    }
+  }
+
+  /** First person: the front of your own machine at the bottom of the screen, bobbing as you go. */
+  function bonnet(g) {
+    var m = g.m, car = g.car, id = m.id, bob = Math.sin(car.run / 25) * (car.air ? 0 : 3), y = H + bob, cx = W / 2;
+    c.save();
+    if (car.wipe > 0) { c.restore(); return; }
+    if (id === 'surf' || id === 'ski') {
+      c.fillStyle = m.colour;
+      var tips = id === 'surf' ? [0] : [-150, 150];
+      for (var i = 0; i < tips.length; i++) {
+        var tx = cx + tips[i];
+        c.beginPath(); c.moveTo(tx - (id === 'surf' ? 170 : 50), y); c.quadraticCurveTo(tx - 40, y - 140, tx, y - 170); c.quadraticCurveTo(tx + 40, y - 140, tx + (id === 'surf' ? 170 : 50), y); c.fill();
+      }
+      if (id === 'surf') { c.fillStyle = PAPER; c.fillRect(cx - 5, y - 150, 10, 150); }
+      else {
+        // The tow rope's handle in your hands.
+        box(cx - 120, y - 120, 240, 16, 8, '#22221F');
+        c.strokeStyle = 'rgba(247,246,242,0.9)'; c.lineWidth = 3;
+        c.beginPath(); c.moveTo(cx - 100, y - 112); c.lineTo(cx, y - 250); c.lineTo(cx + 100, y - 112); c.stroke();
+      }
+      c.restore();
+      return;
+    }
+    var top = id === 'truck' ? 150 : id === 'race' ? 80 : 110, half = id === 'race' ? 260 : 330;
+    c.fillStyle = id === 'boat' ? PAPER : m.colour;
+    c.beginPath(); c.moveTo(cx - half - 120, y); c.quadraticCurveTo(cx - half, y - top, cx, y - top - 20); c.quadraticCurveTo(cx + half, y - top, cx + half + 120, y); c.fill();
+    if (id === 'race') { c.fillStyle = PAPER; c.beginPath(); c.moveTo(cx - 30, y); c.lineTo(cx - 8, y - top - 16); c.lineTo(cx + 8, y - top - 16); c.lineTo(cx + 30, y); c.fill(); }
+    if (id === 'truck') {
+      c.fillStyle = EMBER;
+      for (var f = -1; f <= 1; f++) { c.beginPath(); c.moveTo(cx + f * 120 - 40, y); c.lineTo(cx + f * 120, y - top + 10); c.lineTo(cx + f * 120 + 40, y); c.fill(); }
+    }
+    if (id === 'boat') { c.fillStyle = m.colour; c.fillRect(cx - 600, y - 40, 1200, 26); c.fillStyle = 'rgba(158,123,255,0.35)'; c.fillRect(0, y - top - 80, W, 70); }
+    if (id === 'jetski') { box(cx - 230, y - top - 50, 460, 18, 9, '#22221F'); box(cx - 250, y - top - 58, 50, 34, 10, '#3A3942'); box(cx + 200, y - top - 58, 50, 34, 10, '#3A3942'); }
+    if (id === 'dozer') { box(cx - 520, y - 70, 1040, 26, 6, '#C9C5BE'); c.fillStyle = EMBER; c.fillRect(cx - 520, y - 70, 1040, 8); }
+    if (id === 'digger') {
+      var reach = car.slam > 0 ? Math.sin(car.slam / 0.4 * Math.PI) * 90 : 0;
+      c.strokeStyle = '#C98A1E'; c.lineWidth = 34; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(cx + 200, y); c.lineTo(cx + 90, y - 300 + reach); c.stroke();
+      box(cx + 40, y - 330 + reach, 110, 80, 12, '#5B5E66');
+    }
+    if (id === 'buggy') {
+      c.strokeStyle = m.colour; c.lineWidth = 22; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(60, y); c.lineTo(150, 40); c.lineTo(W - 150, 40); c.lineTo(W - 60, y); c.stroke();
+    }
+    c.restore();
+  }
+
   function render(g) {
     var cam = g.cam, z = cam.zoom, car = g.car;
+    if (g.view > 0) { render3d(g); overlay(g); return; }
     var shx = cam.shake ? (Math.random() - 0.5) * cam.shake : 0, shy = cam.shake ? (Math.random() - 0.5) * cam.shake : 0;
     c.setTransform(1, 0, 0, 1, 0, 0);
     c.fillStyle = '#3F7F3B'; c.fillRect(0, 0, W, H);
@@ -1013,7 +1818,7 @@ var RCLand = (function () {
     for (i = 0; i < w.ramps.length; i++) drawRamp(w.ramps[i]);
     for (i = 0; i < w.objs.length; i++) {
       o = w.objs[i];
-      if (!o.alive || o.float || o.kind === 'tree' || o.x < x0 - 60 || o.x > x1 + 60 || o.y < y0 - 60 || o.y > y1 + 60) continue;
+      if (!o.alive || o.float || o.kind === 'tree' || o.x < x0 - o.r - 60 || o.x > x1 + o.r + 60 || o.y < y0 - o.r - 60 || o.y > y1 + o.r + 60) continue;
       drawObj(o, g.t);
     }
     drawCar(g);
@@ -1029,6 +1834,12 @@ var RCLand = (function () {
       text(pp.s, pp.x, pp.y - pp.z * ZT - 40 - k * 90, size, pp.c, 'center', '800', 'rgba(13,12,24,0.75)');
       c.globalAlpha = 1;
     }
+    overlay(g);
+  }
+
+  /** Over every camera: speed lines on a turbo, then the scores and challenges. */
+  function overlay(g) {
+    var car = g.car, i;
     c.setTransform(1, 0, 0, 1, 0, 0);
     if (car.boost > 0) {
       c.strokeStyle = 'rgba(255,255,255,0.35)'; c.lineWidth = 3;
@@ -1083,14 +1894,20 @@ var RCLand = (function () {
     // A map of the park.
     var mw = 220, mh = mw * WH / WW, mx = W - mw - 24, my = H - mh - 24, sc = mw / WW;
     box(mx - 6, my - 6, mw + 12, mh + 12, 12, 'rgba(13,12,24,0.55)');
-    box(mx, my, mw, mh, 8, 'rgba(93,170,79,0.7)');
     var w = g.world;
-    c.strokeStyle = 'rgba(201,155,99,0.9)'; c.lineWidth = 4;
-    rr(mx + w.track.x * sc, my + w.track.y * sc, w.track.w * sc, w.track.h * sc, w.track.r * sc); c.stroke();
-    box(mx + w.sand.x * sc, my + w.sand.y * sc, w.sand.w * sc, w.sand.h * sc, 3, '#EBCB8B');
-    oval(mx + w.pond.x * sc, my + w.pond.y * sc, w.pond.rx * sc, w.pond.ry * sc, '#3E9BD6');
+    if (w.water) {
+      box(mx, my, mw, mh, 8, 'rgba(235,203,139,0.85)');
+      box(mx + (w.edge - 40) * sc, my + (w.edge - 40) * sc, mw - 2 * (w.edge - 40) * sc, mh - 2 * (w.edge - 40) * sc, 6, 'rgba(62,155,214,0.9)');
+      for (i = 0; i < w.objs.length; i++) if (w.objs[i].kind === 'island') disc(mx + w.objs[i].x * sc, my + w.objs[i].y * sc, w.objs[i].r * sc, '#7DBB5E');
+    } else {
+      box(mx, my, mw, mh, 8, 'rgba(93,170,79,0.7)');
+      c.strokeStyle = 'rgba(201,155,99,0.9)'; c.lineWidth = 4;
+      rr(mx + w.track.x * sc, my + w.track.y * sc, w.track.w * sc, w.track.h * sc, w.track.r * sc); c.stroke();
+      box(mx + w.sand.x * sc, my + w.sand.y * sc, w.sand.w * sc, w.sand.h * sc, 3, '#EBCB8B');
+      oval(mx + w.pond.x * sc, my + w.pond.y * sc, w.pond.rx * sc, w.pond.ry * sc, '#3E9BD6');
+    }
     c.fillStyle = '#F2C98E';
-    for (i = 0; i < w.ramps.length; i++) c.fillRect(mx + w.ramps[i].x * sc - 3, my + w.ramps[i].y * sc - 3, 6, 6);
+    for (i = 0; i < w.ramps.length; i++) if (!w.ramps[i].wave) c.fillRect(mx + w.ramps[i].x * sc - 3, my + w.ramps[i].y * sc - 3, 6, 6);
     for (i = 0; i < w.objs.length; i++) if (w.objs[i].alive && w.objs[i].kind === 'star') disc(mx + w.objs[i].x * sc, my + w.objs[i].y * sc, 3, EMBER);
     c.save(); c.translate(mx + car.x * sc, my + car.y * sc); c.rotate(car.h);
     c.fillStyle = PAPER; c.beginPath(); c.moveTo(8, 0); c.lineTo(-6, -6); c.lineTo(-6, 6); c.closePath(); c.fill();
@@ -1104,6 +1921,13 @@ var RCLand = (function () {
     var hy = big ? H - 168 : H - 43;
     box(W / 2 - tw / 2, hy - (big ? 26 : 21), tw, big ? 52 : 42, 26, big ? 'rgba(110,61,219,0.88)' : 'rgba(13,12,24,0.5)');
     text(hint, W / 2, hy, big ? 26 : 20, PAPER, 'center', '700');
+    // Which camera, for a moment after it changes.
+    if (g.camT > 0) {
+      c.globalAlpha = Math.min(1, g.camT / 0.4);
+      box(W / 2 - 160, H - 252, 320, 50, 25, 'rgba(13,12,24,0.75)');
+      text(L(CAMERA) + ': ' + L(VIEWS[g.view]), W / 2, H - 227, 22, PAPER, 'center', '700');
+      c.globalAlpha = 1;
+    }
     // A challenge just done.
     if (g.banner) {
       var bt = g.banner.t, e = bt > 2.7 ? (3 - bt) / 0.3 : bt < 0.4 ? bt / 0.4 : 1;
@@ -1132,56 +1956,75 @@ var RCLand = (function () {
     for (var i = 0; i < 4; i++) disc(x + i * 22, y, 7, cols[i]);
   }
 
-  function drawPick(sel, t, bests) {
+  /** The picker: land or water machines (the row ▲ ▼ moves between), then the camera. row: 0 land, 1 water, 2 camera. */
+  function drawPick(sel, t, bests, row, view) {
+    row = row || 0; view = view || 0;
     c.setTransform(1, 0, 0, 1, 0, 0);
     backdrop(t);
-    dots(W / 2 - 33, 52);
-    text(L(TITLE), W / 2, 104, 46, PAPER, 'center', '800');
-    text(L(PICK), W / 2, 150, 24, 'rgba(247,246,242,0.7)', 'center', '600');
-    var cw = 220, gap = 22, x0 = (W - (cw * 5 + gap * 4)) / 2;
-    for (var i = 0; i < MACHINES.length; i++) {
-      var m = MACHINES[i], on = i === sel, x = x0 + i * (cw + gap), y = 200, ch = 360;
+    dots(W / 2 - 33, 36);
+    text(L(TITLE), W / 2, 82, 42, PAPER, 'center', '800');
+    var water = sel >= LAND_COUNT, i;
+    // Land and water, as two tabs.
+    var tabs = [ON_LAND, ON_WATER];
+    for (i = 0; i < 2; i++) {
+      var on = (i === 1) === water, tx = W / 2 - 230 + i * 240;
+      box(tx, 118, 220, 44, 22, on ? (row < 2 ? VIOLET : 'rgba(110,61,219,0.55)') : 'rgba(247,246,242,0.08)');
+      text(L(tabs[i]), tx + 110, 141, 20, on ? PAPER : 'rgba(247,246,242,0.6)', 'center', on ? '800' : '600');
+    }
+    var first = water ? LAND_COUNT : 0, count = water ? MACHINES.length - LAND_COUNT : LAND_COUNT;
+    var cw = 220, gap = 22, x0 = (W - (cw * count + gap * (count - 1))) / 2;
+    for (i = 0; i < count; i++) {
+      var mi = first + i, m = MACHINES[mi], here = mi === sel, x = x0 + i * (cw + gap), y = 186, ch = 330, lit = here && row < 2;
       c.save();
-      if (on) { c.translate(x + cw / 2, y + ch / 2); c.scale(1.06, 1.06); c.translate(-(x + cw / 2), -(y + ch / 2)); }
-      if (on) { box(x - 6, y - 6, cw + 12, ch + 12, 30, 'rgba(158,123,255,0.55)'); }
-      box(x, y, cw, ch, 26, on ? '#241E4A' : 'rgba(247,246,242,0.07)');
-      oval(x + cw / 2, y + 120, 82, 30, 'rgba(0,0,0,0.25)');
-      c.save(); c.translate(x + cw / 2, y + 100 + (on ? Math.sin(t * 4) * 4 : 0)); c.rotate(on ? t * 0.9 : -Math.PI / 2 + 0.5); c.scale(1.7, 1.7);
-      machine(m, on ? Math.sin(t * 2) * 0.3 : 0, false, t * 60, on && m.slam ? (t % 1.6 < 0.4 ? t % 1.6 : 0) : 0);
+      if (here) { c.translate(x + cw / 2, y + ch / 2); c.scale(1.05, 1.05); c.translate(-(x + cw / 2), -(y + ch / 2)); }
+      if (lit) box(x - 6, y - 6, cw + 12, ch + 12, 30, 'rgba(158,123,255,0.55)');
+      box(x, y, cw, ch, 26, here ? '#241E4A' : 'rgba(247,246,242,0.07)');
+      oval(x + cw / 2, y + 112, 82, 30, m.water ? 'rgba(62,155,214,0.45)' : 'rgba(0,0,0,0.25)');
+      c.save(); c.translate(x + cw / 2, y + 92 + (here ? Math.sin(t * 4) * 4 : 0)); c.rotate(here ? t * 0.9 : -Math.PI / 2 + 0.5); c.scale(1.7, 1.7);
+      machine(m, here ? Math.sin(t * 2) * 0.3 : 0, false, t * 60, here && m.slam ? (t % 1.6 < 0.4 ? t % 1.6 : 0) : 0);
       c.restore();
-      text(L(m.name), x + cw / 2, y + 200, 22, PAPER, 'center', '800');
-      var vals = [m.top / 780, m.jump / 1.35, m.power / 3];
-      for (var s = 0; s < 3; s++) {
-        var by = y + 240 + s * 36;
-        text(L(STAT_NAMES[s]), x + 18, by, 15, 'rgba(247,246,242,0.65)', 'left', '600');
+      text(L(m.name), x + cw / 2, y + 188, 22, PAPER, 'center', '800');
+      var vals = [Math.min(1, m.top / 880), Math.min(1, m.jump / 1.4), m.power / 3];
+      for (var s2 = 0; s2 < 3; s2++) {
+        var by = y + 228 + s2 * 34;
+        text(L(STAT_NAMES[s2]), x + 18, by, 15, 'rgba(247,246,242,0.65)', 'left', '600');
         box(x + 100, by - 6, 100, 12, 6, 'rgba(247,246,242,0.12)');
-        box(x + 100, by - 6, 100 * vals[s], 12, 6, on ? EMBER : 'rgba(247,246,242,0.45)');
+        box(x + 100, by - 6, 100 * vals[s2], 12, 6, here ? EMBER : 'rgba(247,246,242,0.45)');
       }
       c.restore();
     }
-    var m2 = MACHINES[sel];
-    text(L(m2.about), W / 2, 612, 24, PAPER, 'center', '600');
-    if (bests) text(L(BEST) + ' ' + bests, W / 2, 646, 18, 'rgba(247,246,242,0.55)', 'center', '600');
-    text(L(PICK_HELP), W / 2, 690, 20, LILAC, 'center', '700');
+    text(L(MACHINES[sel].about), W / 2, 548, 22, PAPER, 'center', '600');
+    if (bests) text(L(BEST) + ' ' + bests, W / 2, 578, 17, 'rgba(247,246,242,0.55)', 'center', '600');
+    // The camera.
+    text(L(CAMERA), W / 2 - 360, 626, 20, row === 2 ? LILAC : 'rgba(247,246,242,0.6)', 'right', '700');
+    for (i = 0; i < VIEWS.length; i++) {
+      var vx = W / 2 - 340 + i * 230, chosen = i === view;
+      box(vx, 604, 210, 44, 22, chosen ? (row === 2 ? VIOLET : 'rgba(110,61,219,0.55)') : 'rgba(247,246,242,0.08)');
+      if (chosen && row === 2) { c.strokeStyle = LILAC; c.lineWidth = 3; rr(vx, 604, 210, 44, 22); c.stroke(); }
+      text(L(VIEWS[i]), vx + 105, 627, 19, chosen ? PAPER : 'rgba(247,246,242,0.6)', 'center', chosen ? '800' : '600');
+    }
+    text(L(PICK_HELP), W / 2, 690, 19, LILAC, 'center', '700');
   }
 
   function drawPause(g, at) {
     c.setTransform(1, 0, 0, 1, 0, 0);
     c.fillStyle = 'rgba(13,12,24,0.9)'; c.fillRect(0, 0, W, H);
-    dots(W / 2 - 33, 120);
-    text(L(PAUSED), W / 2, 180, 64, PAPER, 'center', '800');
+    dots(W / 2 - 33, 100);
+    text(L(PAUSED), W / 2, 160, 60, PAPER, 'center', '800');
     for (var i = 0; i < MENU.length; i++) {
-      var on = i === at, y = 270 + i * 82;
-      box(W / 2 - 220, y, 440, 64, 32, on ? VIOLET : 'rgba(247,246,242,0.1)');
-      if (on) { c.strokeStyle = LILAC; c.lineWidth = 3; rr(W / 2 - 220, y, 440, 64, 32); c.stroke(); }
-      text(L(MENU[i]), W / 2, y + 33, 28, PAPER, 'center', on ? '800' : '600');
+      var on = i === at, y = 226 + i * 76;
+      box(W / 2 - 240, y, 480, 62, 31, on ? VIOLET : 'rgba(247,246,242,0.1)');
+      if (on) { c.strokeStyle = LILAC; c.lineWidth = 3; rr(W / 2 - 240, y, 480, 62, 31); c.stroke(); }
+      // The camera item shows which one, and ◀ ▶ change it right there.
+      var label = i === 1 ? L(CAMERA) + ':  ◀ ' + L(VIEWS[g.view]) + ' ▶' : L(MENU[i]);
+      text(label, W / 2, y + 32, 27, PAPER, 'center', on ? '800' : '600');
     }
-    text(L(PAUSE_HELP), W / 2, 640, 22, LILAC, 'center', '700');
+    text(L(PAUSE_HELP), W / 2, 650, 22, LILAC, 'center', '700');
   }
 
   // MARK: - The screen
 
-  var g = null, state = '', sel = 0, menu = 0, canvas = null, live = false, last = 0, clock = 0, motorAt = 0;
+  var g = null, state = '', sel = 0, menu = 0, prow = 0, view = 0, canvas = null, live = false, last = 0, clock = 0, motorAt = 0;
   var raf = window.requestAnimationFrame || window.webkitRequestAnimationFrame || function (f) { return setTimeout(function () { f(Date.now()); }, 16); };
 
   function isBack(k) { return k === 27 || k === 8 || k === 4 || k === 461 || k === 10009 || (window.TV && TV.keys && k === TV.keys.back); }
@@ -1199,7 +2042,7 @@ var RCLand = (function () {
         Sfx.motor(g.car.wipe > 0 ? 0.1 : Math.min(1, Math.abs(g.car.speed) / g.m.top + (g.car.air ? 0.3 : 0)) + 0.05);
       }
     } else if (state === 'paused' && g) { render(g); drawPause(g, menu); }
-    else if (state === 'pick') drawPick(sel, clock, load().best || 0);
+    else if (state === 'pick') { var sv = load(); drawPick(sel, clock, (sel >= LAND_COUNT ? sv.bestWater : sv.best) || 0, prow, view); }
     raf(frame);
   }
 
@@ -1207,20 +2050,38 @@ var RCLand = (function () {
 
   function start() {
     g = newGame(sel);
+    g.view = view;
     state = 'play';
     save(g);
   }
 
   function choose(api) {
     if (menu === 0) state = 'play';
-    else if (menu === 1) { save(g); state = 'pick'; }
-    else if (menu === 2) { if (window.Guides) Guides.show('rcland'); }
+    else if (menu === 1) nextView(g);
+    else if (menu === 2) { view = g.view; save(g); prow = sel >= LAND_COUNT ? 1 : 0; state = 'pick'; }
+    else if (menu === 3) { if (window.Guides) Guides.show('rcland'); }
     else api.close();
+  }
+
+  /** ◀ ▶ in the picker: a machine in this row (land or water), or the camera. */
+  function pickSide(d) {
+    if (prow === 2) { view = (view + d + VIEWS.length) % VIEWS.length; return; }
+    var first = prow ? LAND_COUNT : 0, count = prow ? MACHINES.length - LAND_COUNT : LAND_COUNT;
+    sel = first + (sel - first + d + count) % count;
+  }
+  /** ▲ ▼ in the picker: land, water, camera. Moving between land and water picks the first machine there. */
+  function pickRow(d) {
+    var to = Math.max(0, Math.min(2, prow + d));
+    if (to === prow) return;
+    if (to < 2 && (to === 1) !== (sel >= LAND_COUNT)) sel = to ? LAND_COUNT : 0;
+    prow = to;
   }
 
   function open() {
     var saved = load();
     sel = saved.last >= 0 && saved.last < MACHINES.length ? saved.last : 0;
+    view = saved.view > 0 && saved.view < VIEWS.length ? saved.view : 0;
+    prow = sel >= LAND_COUNT ? 1 : 0;
     state = 'pick'; menu = 0; g = null; last = 0;
     UI.open({
       cls: 'bt-rcland',
@@ -1235,16 +2096,17 @@ var RCLand = (function () {
         // Back goes to back() below (UI's own handling), so it always pauses or leaves.
         if (isBack(k)) return false;
         if (state === 'pick') {
-          if (k === LEFT) { sel = (sel + MACHINES.length - 1) % MACHINES.length; sfx('hop'); }
-          else if (k === RIGHT) { sel = (sel + 1) % MACHINES.length; sfx('hop'); }
+          if (k === LEFT || k === RIGHT) { pickSide(k === LEFT ? -1 : 1); sfx('hop'); }
+          else if (k === UP || k === DOWN) { pickRow(k === UP ? -1 : 1); sfx('hop'); }
           else if (k === OK) { sfx('six'); start(); }
-          else if (k === DOWN && window.Guides) Guides.show('rcland');
+          else if (CAMERA_KEYS[k]) { view = k >= 49 && k <= 51 ? k - 49 : (view + 1) % VIEWS.length; sfx('hop'); }
           return true;
         }
         if (state === 'paused') {
           if (k === UP) { menu = (menu + MENU.length - 1) % MENU.length; sfx('hop'); }
           else if (k === DOWN) { menu = (menu + 1) % MENU.length; sfx('hop'); }
           else if (k === OK) choose(canvas.parentNode.rcApi);
+          else if (menu === 1 && (k === LEFT || k === RIGHT)) { nextView(g, k === LEFT ? -1 : 1); sfx('hop'); }
           return true;
         }
         if (state === 'play' && g) drive(g, k);
@@ -1266,6 +2128,7 @@ var RCLand = (function () {
 
   return {open: open, rules: {MACHINES: MACHINES, GOALS: GOALS, KINDS: KINDS, buildWorld: buildWorld, groundAt: groundAt,
     comboMult: comboMult, newGame: newGame, step: step, drive: drive, current: current, L: L,
+    WATER_GOALS: WATER_GOALS, LAND_COUNT: LAND_COUNT, VIEWS: VIEWS, rollWaves: rollWaves, towAt: towAt,
     // For the tests and a preview in a browser: draw on a stand-in canvas, and the game on screen.
     useContext: function (ctx) { c = ctx; }, render: render, drawPick: drawPick, drawPause: drawPause, playing: function () { return g; }}};
 })();
