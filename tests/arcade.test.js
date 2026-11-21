@@ -92,5 +92,37 @@ var KEYS = [37, 38, 39, 40, 13];
   check('losing does not make the robot quicker', (JSON.parse(store['btv.arcade'] || '{}').paddle || 1) === 1);
 })();
 
+// The remote in a game (Kyle, 21/11/2026: Back and OK did nothing in Sky Guard). Back must reach back(), which
+// pauses a game being played and leaves one that's paused, ready or over; OK starts and carries on.
+(function () {
+  var screens = [], adds = [];
+  sandbox.TV = {keys: {left: 37, up: 38, right: 39, down: 40, ok: 13, back: 4}};
+  sandbox.setInterval = function () { return 1; };
+  sandbox.clearInterval = function () {};
+  sandbox.UI = {
+    el: function () { return {}; }, heading: function () {}, button: function (row, label) { return {label: label}; },
+    open: function (spec) {
+      screens.push(spec);
+      if (!spec.key) spec.build({}, {add: function (node, run) { adds.push({label: node.label, run: run}); }});
+      return {};
+    }
+  };
+  sandbox.Arcade.open();
+  var guard = adds.filter(function (a) { return /Sky Guard/.test(a.label); })[0];
+  check('the arcade lists Sky Guard', !!guard);
+  guard.run();
+  var game = screens[screens.length - 1];
+  A.useContext(ctx);
+  [4, 461, 10009, 27, 8].forEach(function (k) { check('Back (' + k + ') is not swallowed by the game', game.key(k) === false); });
+  check('Back before starting leaves', game.back() === false);
+  check('OK starts the game', game.key(13) === true);
+  check('Back while playing pauses', game.back() === true);
+  check('Back while paused leaves', game.back() === false);
+  game.key(13);
+  check('OK carries on after a pause', game.back() === true);
+  game.key(13);
+  check('OK is taken while playing', game.key(13) === true);
+})();
+
 console.log(passed + ' passed, ' + failed + ' failed');
 process.exit(failed ? 1 : 0);
