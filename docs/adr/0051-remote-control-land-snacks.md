@@ -1,4 +1,4 @@
-# 0050. Remote Control Land: healthy snacks score, sugary ones cost
+# 0051. Remote Control Land: healthy snacks score, sugary ones cost
 
 Date: 21/11/2026. Status: accepted. Adds to ADR 0046 and ADR 0049.
 

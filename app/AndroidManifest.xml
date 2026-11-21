@@ -19,6 +19,9 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <!-- The light show's "The TV's sound" (ADR 0044): Visualizer on the whole output needs it. No prompt. -->
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <!-- The light show's "Wave to make ripples" (ADR 0050): a USB webcam, asked only when someone turns it on. Small
+         grey frames are compared on the TV to find movement; nothing is shown, kept or sent. -->
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <!-- Android 11+: without this list the app can't "see" the other apps (getLeanbackLaunchIntentForPackage
          returns null). The shelf and streaming apps, the live TV apps and, through the <intent>, every TV app
@@ -61,6 +64,9 @@
     <uses-feature android:name="android.software.leanback" android:required="false" />
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
     <uses-feature android:name="android.hardware.microphone" android:required="false" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.any" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.external" android:required="false" />
 
     <application
         android:name=".App"
