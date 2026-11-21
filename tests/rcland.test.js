@@ -247,5 +247,24 @@ try {
 } catch (e) { drawn = false; console.log(e.stack); }
 check('every screen draws', drawn && calls > 100);
 
+// Kyle, 21/11/2026: the jet ski got stuck in the barrels. Small machines push floating barrels aside, from any side,
+// and slide along a ramp's side instead of sticking to it.
+var freed = 0;
+[0, 1, 2, 3, 4, 5, 6, 7].forEach(function (n) {
+  [2260, 730].forEach(function (cx, ci) {
+    var bg = R.newGame(5, {}), cy = ci ? 2170 : 790;
+    bg.started = true;
+    bg.car.x = cx; bg.car.y = cy; bg.car.h = bg.car.want = n * Math.PI / 4;
+    R.drive(bg, UP); R.drive(bg, UP); R.drive(bg, UP);
+    for (var t = 0; t < 4; t += 1 / 60) R.step(bg, 1 / 60);
+    // Pointing at a wall? Turn, like a player would.
+    R.drive(bg, LEFT); R.drive(bg, LEFT);
+    for (t = 0; t < 3; t += 1 / 60) R.step(bg, 1 / 60);
+    var dx = bg.car.x - cx, dy = bg.car.y - cy;
+    if (dx * dx + dy * dy > 150 * 150) freed++;
+  });
+});
+check('the jet ski drives out of the barrels whichever way it points, turning once', freed === 16);
+
 console.log(passed + ' passed, ' + failed + ' failed');
 process.exit(failed ? 1 : 0);

@@ -217,7 +217,8 @@ var RCLand = (function () {
     // The lake.
     buoy: {r: 16, h: 34, tough: 1, pts: 40},
     duck: {r: 16, h: 26, tough: 1, pts: 60},
-    barrel: {r: 22, h: 40, tough: 2, pts: 120},
+    // Barrels float: a machine too small to smash one pushes it out of the way rather than getting stuck between them.
+    barrel: {r: 22, h: 40, tough: 2, pts: 120, push: true},
     island: {r: 150, h: 9999, tough: 99, pts: 0},
     hoop: {r: 42, h: 0, tough: 0, pts: 250, float: true}
   };
@@ -232,7 +233,7 @@ var RCLand = (function () {
       pond: {x: 850, y: 660, rx: 330, ry: 190}, sand: {x: 2380, y: 380, w: 860, h: 640},
       track: {x: 250, y: 230, w: 3100, h: 2170, r: 340}};
     function add(kind, x, y, extra) {
-      var k = KINDS[kind], o = {kind: kind, x: x, y: y, r: k.r, h: k.h, tough: k.tough, pts: k.pts, float: !!k.float,
+      var k = KINDS[kind], o = {kind: kind, x: x, y: y, r: k.r, h: k.h, tough: k.tough, pts: k.pts, float: !!k.float, push: !!k.push,
         z: 0, alive: true, back: 0, pop: 0, a: srand() * TAU, c: '', hx: x, hy: y};
       if (extra) for (var e in extra) if (extra.hasOwnProperty(e)) o[e] = extra[e];
       w.objs.push(o);
@@ -313,7 +314,7 @@ var RCLand = (function () {
     var w = {objs: [], ramps: [], pads: [], pins: [], waves: [], edge: 150, water: true, pond: null, sand: null, track: null,
       surf: {x: 2480, y: 300, w: 980, h: 2000}};
     function add(kind, x, y, extra) {
-      var k = KINDS[kind], o = {kind: kind, x: x, y: y, r: k.r, h: k.h, tough: k.tough, pts: k.pts, float: !!k.float,
+      var k = KINDS[kind], o = {kind: kind, x: x, y: y, r: k.r, h: k.h, tough: k.tough, pts: k.pts, float: !!k.float, push: !!k.push,
         z: 0, alive: true, back: 0, pop: 0, a: srand() * TAU, c: '', hx: x, hy: y};
       if (extra) for (var e in extra) if (extra.hasOwnProperty(e)) o[e] = extra[e];
       w.objs.push(o);
@@ -788,10 +789,19 @@ var RCLand = (function () {
     var gh = groundAt(w, nx, ny), ramp = w.under;
     if (!car.air && gh > car.z + 22 && !(ramp && ramp.wave)) {
       // The side or the back of a ramp: it's a wall from there. A wave just lifts you.
-      car.speed = -car.speed * 0.3; car.kx = -vx * 0.3; car.ky = -vy * 0.3; car.vx *= -0.3; car.vy *= -0.3;
-      nx = car.x; ny = car.y; gh = groundAt(w, nx, ny); ramp = w.under;
+      // A glancing blow slides along the wall, so nobody gets stuck against one; a head-on one bounces back.
+      var sx = groundAt(w, nx, car.y) <= car.z + 22, sy = groundAt(w, car.x, ny) <= car.z + 22;
+      var along = sx && (!sy || Math.abs(vx) >= Math.abs(vy)) ? 0 : sy ? 1 : -1;
+      if (along >= 0 && Math.abs(along ? vy : vx) > Math.abs(along ? vx : vy) * 0.35) {
+        if (along) { nx = car.x; car.vx = 0; } else { ny = car.y; car.vy = 0; }
+        car.speed *= 0.97;
+      } else {
+        car.speed = -car.speed * 0.3; car.kx = -vx * 0.3; car.ky = -vy * 0.3; car.vx *= -0.3; car.vy *= -0.3;
+        nx = car.x; ny = car.y;
+        shake(g, 4);
+      }
+      gh = groundAt(w, nx, ny); ramp = w.under;
       if (car.bonk <= 0) { sfx('bonk'); car.bonk = 0.4; }
-      shake(g, 4);
     }
     car.x = nx; car.y = ny;
     car.run += Math.abs(car.speed) * dt;
@@ -891,8 +901,16 @@ var RCLand = (function () {
       if (o.float) { if (Math.abs(car.z + 15 - o.z) < 65 && car.wipe <= 0) collect(g, o); continue; }
       if (car.z > o.h) continue;
       if (o.tough <= m.power) { smash(g, o, false); continue; }
-      // Too tough for this machine: bounce off it.
       var d = Math.sqrt(d2) || 1, ux = dx / d, uy = dy / d;
+      // A floating barrel drifts away from the machine and slows it a little.
+      if (o.push) {
+        o.x += ux * (rr - d + 2); o.y += uy * (rr - d + 2);
+        car.speed *= 0.9;
+        if (car.bonk <= 0) { sfx('bonk'); car.bonk = 0.4; }
+        if (g.tough <= 0) { g.tough = 5; pop(g, L(TOO_TOUGH_WATER), o.x, o.y, 90, PAPER); }
+        continue;
+      }
+      // Too tough for this machine: bounce off it.
       car.x = o.x - ux * (rr + 1); car.y = o.y - uy * (rr + 1);
       var into = vx * ux + vy * uy;
       if (into > 0) { car.speed = -car.speed * 0.35; car.kx -= ux * into * 0.4; car.ky -= uy * into * 0.4; car.vx *= 0.2; car.vy *= 0.2; }
