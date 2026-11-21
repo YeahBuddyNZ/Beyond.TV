@@ -186,5 +186,69 @@ check('the looks drew something', calls > 1000);
 check('every look has a name', L.LOOKS.concat([L.CALM]).every(function (l) { return typeof l.name() === 'string' && l.name().length > 0; }));
 check('four looks', L.LOOKS.length === 4);
 
+// ADR 0050. An asleep microphone (the remote's, exact silence) against a quiet room (a real one always hisses).
+var sl = L.sleepy();
+check('not asleep straight away', !sl(0, 0));
+check('exact silence for three seconds is asleep', sl(0, 3100));
+sl = L.sleepy();
+sl(0, 0); sl(0.0004, 500);
+check('a quiet room that hisses is awake', !sl(0, 3500));
+sl = L.sleepy();
+check('a TV that can\'t say is never asleep', !sl(-1, 0) && !sl(-1, 5000));
+
+// Tap along: the speed of the taps, kept between 60 and 180, starting again after a pause.
+var tp = L.tapper();
+check('one tap gives no speed yet', tp(1000) === 0);
+check('two taps half a second apart are 120', tp(1500) === 120);
+check('more taps keep averaging', tp(2000) === 120);
+tp = L.tapper();
+tp(0);
+check('very slow taps stay at 60 or more', tp(1900) === 60);
+tp = L.tapper();
+tp(0);
+check('very quick taps stay at 180 or less', tp(100) === 180);
+tp = L.tapper();
+tp(0); tp(500);
+check('a long pause starts counting again', tp(4000) === 0);
+
+// Keep the beat: a kick right on the beat, quiet just before the next one, and every look moves to it.
+var bf = filled(0), bw = filled(128, 2048);
+L.beatFrame(0, 120, bf, bw, BINS, NYQ);
+var onBeat = L.bands(L.gate(BINS)(bf, BINS), BINS, NYQ);
+check('the made-up kick is in the lows', onBeat.bass > 0.5);
+check('and moves the wave', max(bw) > 160);
+L.beatFrame(480, 120, bf, bw, BINS, NYQ);
+check('and has died away just before the next beat', L.bands(L.gate(BINS)(bf, BINS), BINS, NYQ).bass < onBeat.bass * 0.3);
+var kb = L.beats(), hits = 0;
+for (i = 0; i < 120; i++) {
+  L.beatFrame(i * 33, 120, bf, bw, BINS, NYQ);
+  if (kb(L.bands(L.gate(BINS)(bf, BINS), BINS, NYQ).bass, i * 33)) hits++;
+}
+check('about two beats a second are heard as beats', hits >= 6 && hits <= 10);
+
+// Movement: a still picture is nothing, noise is nothing, a hand on the left lights the left (mirrored on screen).
+var CW = 64, CH = 36, cellsOut = new Float32Array(16 * 9);
+function frameOf(v) { var a = new Uint8Array(CW * CH); for (var q = 0; q < a.length; q++) a[q] = v; return a; }
+var still = frameOf(100);
+check('a still room has no movement', L.motion(still, frameOf(100), CW, CH, 16, 9, cellsOut) === 0);
+var noisy = frameOf(100);
+for (i = 0; i < noisy.length; i++) noisy[i] = 100 + (i % 7) - 3;
+check('camera noise is not movement', L.motion(still, noisy, CW, CH, 16, 9, cellsOut) === 0);
+var hand = frameOf(100);
+for (var y = 10; y < 20; y++) for (var x = 0; x < 8; x++) hand[y * CW + x] = 220;
+var amount = L.motion(still, hand, CW, CH, 16, 9, cellsOut);
+check('a hand moving is movement', amount > 0 && amount < 0.1);
+check('on the camera\'s left it ripples the right of the picture, as in a mirror', cellsOut[3 * 16 + 15] > 0.5 && cellsOut[3 * 16 + 0] === 0);
+
+// Ripples: drawn over a look, spread faster with music, and gone in the end.
+L.useContext(ctx, false);
+var rp = [{x: 100, y: 100, r: 8, life: 1, v: 1, c: '#fff'}], loudF = {b: {level: 0.8}, hit: false}, quietF = {b: {level: 0}, hit: false};
+L.drawRipples(loudF, rp);
+var rq = [{x: 100, y: 100, r: 8, life: 1, v: 1, c: '#fff'}];
+L.drawRipples(quietF, rq);
+check('ripples spread faster with music', rp[0].r > rq[0].r);
+for (i = 0; i < 100; i++) L.drawRipples(quietF, rq);
+check('and fade away', rq.length === 0);
+
 console.log(passed + ' passed, ' + failed + ' failed');
 process.exit(failed ? 1 : 0);
