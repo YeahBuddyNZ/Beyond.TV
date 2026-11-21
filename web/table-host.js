@@ -1,6 +1,6 @@
 /*
  * The board and card games on Google TV (TableActivity, ADR 0024): table.html runs the same games as LG and Samsung in
- * a WebView, and this stands in for the home screen around them. The silly games (laughs.js), school lunches (lunch.js), the arcade (arcade.js), Remote Control Land (rcland.js), Build it (builder.js), the light show (lights.js), Look around (skylook.js) and How to play (guides.js) run here too. Who's playing comes from the TV's People, the levels
+ * a WebView, and this stands in for the home screen around them. The silly games (laughs.js), school lunches (lunch.js), the arcade (arcade.js), Remote Control Land (rcland.js), Candy Land (candy.js), Build it (builder.js), the light show (lights.js), Look around (skylook.js) and How to play (guides.js) run here too. Who's playing comes from the TV's People, the levels
  * are kept in the app's own files (BeyondTable.load and save), and the remote's keys arrive through TableHost.key.
  * Not loaded on LG or Samsung. Plain ES5.
  */
@@ -51,6 +51,6 @@ var TableHost = (function () {
   // In a browser, table.html?start=road opens a game straight away, to try it.
   var first = bridge && bridge.start ? bridge.start() : ((/[?&]start=(\w+)/.exec(location.search) || [])[1] || '');
   if (first === 'road' || first === 'bridge' || first === 'town') Builder.open(first);
-  else if (first === 'silly') Laughs.open(); else if (first === 'lunch') Lunch.open(); else if (first === 'arcade') Arcade.open(); else if (first === 'rcland') RCLand.open(); else if (first === 'sky') SkyLook.open(); else if (first === 'lights') Lights.open(); else if (first === 'guides') Guides.list(); else Table.open();
+  else if (first === 'silly') Laughs.open(); else if (first === 'lunch') Lunch.open(); else if (first === 'arcade') Arcade.open(); else if (first === 'rcland') RCLand.open(); else if (first === 'candy') Candy.open(); else if (first === 'sky') SkyLook.open(); else if (first === 'lights') Lights.open(); else if (first === 'guides') Guides.list(); else Table.open();
   return {key: key};
 })();

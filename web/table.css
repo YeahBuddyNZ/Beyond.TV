@@ -242,6 +242,10 @@
 .bt-layer.bt-builder { background: #0D0C18; }
 .bt-layer.bt-builder::before { display: none; }
 .bt-builder .bd-canvas { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+/* London's Candy Land (candy.js): the same, in pastels. */
+.bt-layer.bt-candy { background: #FFD9EE; }
+.bt-layer.bt-candy::before { display: none; }
+.bt-candy .cd-canvas { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
 
 /* School lunches (lunch.js, ADR 0038). Only transform and opacity animate. */
 .ln-note { position: absolute; left: 0; right: 0; top: 790px; text-align: center; font-size: 26px; color: rgba(247, 246, 242, 0.55); }

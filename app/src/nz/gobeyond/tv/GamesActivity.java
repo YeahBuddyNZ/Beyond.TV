@@ -20,7 +20,7 @@ import java.io.InputStream;
 
 /**
  * Games, from the remote (ADR 0021): every game and family activity starts here on the TV, no phone needed. Karaoke,
- * board and card games against the robots, silly party games, Milo's Remote Control Land, Build it and the light show (all TableActivity), a party, quiz night, the dinner
+ * board and card games against the robots, silly party games, Milo's Remote Control Land, London's Candy Land, Build it and the light show (all TableActivity), a party, quiz night, the dinner
  * question, the tidy-up race, bedtime breathing and How to play. Quiz night and the dinner question need Beyond Family, because everyone answers on their
  * phones. Same as Games.open in web/games.js: a picture for each, in groups (ADR 0047; four since Build it, ADR 0052, so they scroll). A game opens on top of
  * this screen and it stays open, so Back from a game comes back here, one step, not out to the home screen.
@@ -68,6 +68,8 @@ public class GamesActivity extends Activity {
                 {{Ui.tr("Vamos jogar", "Let's play", "¡A jugar!")},
                         // Milo's Remote Control Land (web/rcland.js, ADR 0046), in TableActivity's WebView like the arcade.
                         {"rcland", Ui.tr("Terra do Controle Remoto do Milo", "Milo's Remote Control Land", "La Tierra Teledirigida de Milo"), (Runnable) () -> TableActivity.open(this, "rcland")},
+                        // London's Candy Land (web/candy.js, ADR 0053), in the same WebView.
+                        {"candy", Ui.tr("A Terra dos Doces da London", "London's Candy Land", "La Tierra de los Dulces de London"), (Runnable) () -> TableActivity.open(this, "candy")},
                         {"arcade", Ui.tr("Fliperama", "Arcade", "Arcade"), (Runnable) () -> TableActivity.open(this, "arcade")},
                         {"table", Ui.tr("Jogos de tabuleiro e cartas", "Board and card games", "Juegos de mesa y cartas"), (Runnable) () -> TableActivity.open(this)},
                         {"silly", Ui.tr("Jogos bobos", "Silly games", "Juegos locos"), (Runnable) () -> TableActivity.open(this, "silly")},
