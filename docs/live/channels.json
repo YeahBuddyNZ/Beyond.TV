@@ -1,65 +1,165 @@
 {
-  "about": "Free 24/7 news channels Beyond TV plays from each channel's own official YouTube live stream. Read by web/livetv.js and LiveTvActivity.java; edit here to add or drop one without an app update.",
+  "about": "Free 24/7 channels Beyond TV plays from each channel's own official YouTube live stream. group: featured, news, more or kids (kids profiles see kids only). Read by web/livetv.js and LiveTvActivity.java; edit here to add or drop one without an app update. tools/live_now.py writes now.json (the live video and logo of each) when the website builds.",
   "channels": [
-    {
-      "id": "abc-au",
-      "name": "ABC News",
-      "from": "Australia",
-      "youtube": "UCVgO39Bk5sMo66-6o6Spn6Q"
-    },
     {
       "id": "sky-news",
       "name": "Sky News",
       "from": "UK",
-      "youtube": "UCoMdktPbSTixAyNGwb-UYkQ"
+      "youtube": "UCoMdktPbSTixAyNGwb-UYkQ",
+      "group": "featured",
+      "colour": "#FFFFFF"
+    },
+    {
+      "id": "abc-us",
+      "name": "ABC News Live",
+      "from": "USA",
+      "youtube": "UCBi2mrWuNuyYy4gbM6fU18Q",
+      "group": "featured",
+      "colour": "#FFFFFF"
+    },
+    {
+      "id": "nbc-now",
+      "name": "NBC News NOW",
+      "from": "USA",
+      "youtube": "UCeY0bbntWzzVIaj2z3QigXg",
+      "group": "featured",
+      "colour": "#082038"
     },
     {
       "id": "aljazeera",
       "name": "Al Jazeera",
       "from": "Qatar",
-      "youtube": "UCNye-wNBqNL5ZzHSJj3l8Bg"
-    },
-    {
-      "id": "dw",
-      "name": "DW News",
-      "from": "Germany",
-      "youtube": "UCknLrEdhRCp1aegoMqRaCZg"
-    },
-    {
-      "id": "france24",
-      "name": "France 24",
-      "from": "France",
-      "youtube": "UCQfwfsi5VrQ8yKZ-UWmAEFg"
-    },
-    {
-      "id": "nhk",
-      "name": "NHK World",
-      "from": "Japan",
-      "youtube": "UCSPEjw8F2nQDtmUKPFNF7_A"
-    },
-    {
-      "id": "cna",
-      "name": "CNA",
-      "from": "Singapore",
-      "youtube": "UC83jt4dlz1Gjl58fzQrrKZg"
+      "youtube": "UCNye-wNBqNL5ZzHSJj3l8Bg",
+      "group": "featured",
+      "colour": "#A8312D"
     },
     {
       "id": "livenow-fox",
       "name": "LiveNOW from FOX",
       "from": "USA",
-      "youtube": "UCJg9wBPyKMNA5sRDnvzmkdg"
+      "youtube": "UCJg9wBPyKMNA5sRDnvzmkdg",
+      "group": "featured",
+      "colour": "#FFFFFF"
+    },
+    {
+      "id": "abc-au",
+      "name": "ABC News",
+      "from": "Australia",
+      "youtube": "UCVgO39Bk5sMo66-6o6Spn6Q",
+      "group": "featured",
+      "colour": "#1E5AEC"
+    },
+    {
+      "id": "cnn",
+      "name": "CNN Headlines",
+      "from": "USA",
+      "youtube": "UCupvZG-5ko_eiXAupbDfxWw",
+      "group": "news",
+      "colour": "#CC0001"
+    },
+    {
+      "id": "dw",
+      "name": "DW News",
+      "from": "Germany",
+      "youtube": "UCknLrEdhRCp1aegoMqRaCZg",
+      "group": "news",
+      "colour": "#06A7F7"
+    },
+    {
+      "id": "france24",
+      "name": "France 24",
+      "from": "France",
+      "youtube": "UCQfwfsi5VrQ8yKZ-UWmAEFg",
+      "group": "news",
+      "colour": "#FFFFFF"
+    },
+    {
+      "id": "nhk",
+      "name": "NHK World",
+      "from": "Japan",
+      "youtube": "UCSPEjw8F2nQDtmUKPFNF7_A",
+      "group": "news",
+      "colour": "#FFFFFF"
+    },
+    {
+      "id": "cna",
+      "name": "CNA",
+      "from": "Singapore",
+      "youtube": "UC83jt4dlz1Gjl58fzQrrKZg",
+      "group": "news",
+      "colour": "#FFFFFF"
     },
     {
       "id": "euronews",
       "name": "Euronews",
       "from": "Europe",
-      "youtube": "UCSrZ3UV4jOidv8ppoVuvW9Q"
+      "youtube": "UCSrZ3UV4jOidv8ppoVuvW9Q",
+      "group": "news",
+      "colour": "#0173F0"
     },
     {
       "id": "bloomberg",
       "name": "Bloomberg",
       "from": "USA",
-      "youtube": "UCIALMKvObZNtJ6AmdCLP7Lg"
+      "youtube": "UCIALMKvObZNtJ6AmdCLP7Lg",
+      "group": "news",
+      "colour": "#FFFFFF"
+    },
+    {
+      "id": "trt",
+      "name": "TRT World",
+      "from": "Turkey",
+      "youtube": "UC7fWeaHhqgM4Ry-RMpM2YYw",
+      "group": "news",
+      "colour": "#14B5C9"
+    },
+    {
+      "id": "wion",
+      "name": "WION",
+      "from": "India",
+      "youtube": "UC_gUM8rL-Lrg6O3adPW9K1g",
+      "group": "news",
+      "colour": "#FFFFFF"
+    },
+    {
+      "id": "gb-news",
+      "name": "GB News",
+      "from": "UK",
+      "youtube": "UC0vn8ISa4LKMunLbzaXLnOQ",
+      "group": "news",
+      "colour": "#CFDCE4"
+    },
+    {
+      "id": "fox-weather",
+      "name": "FOX Weather",
+      "from": "USA",
+      "youtube": "UC1FbPiXx59_ltnFVx7IxWow",
+      "group": "more",
+      "colour": "#FFFFFF"
+    },
+    {
+      "id": "nasa",
+      "name": "NASA",
+      "from": "Space station",
+      "youtube": "UCLA_DiR1FfKNvjuUpBHmylQ",
+      "group": "more",
+      "colour": "#FFFFFF"
+    },
+    {
+      "id": "lofi",
+      "name": "Lofi Girl",
+      "from": "Music",
+      "youtube": "UCSJ4gkVC6NrvII8umztf0Ow",
+      "group": "more",
+      "colour": "#FFFFFF"
+    },
+    {
+      "id": "pbs-kids",
+      "name": "PBS KIDS",
+      "from": "Kids",
+      "youtube": "UCrNnk0wFBnCS1awGjq_ijGQ",
+      "group": "kids",
+      "colour": "#FFFFFF"
     }
   ]
 }

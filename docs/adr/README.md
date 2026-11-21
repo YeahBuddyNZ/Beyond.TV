@@ -60,3 +60,4 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0050](0050-light-show-hears-the-room.md) | The light show hears the room, keeps the beat, and ripples when you wave |
 | [0051](0051-remote-control-land-snacks.md) | Remote Control Land: healthy snacks score, sugary ones cost |
 | [0052](0052-build-it-builder-games.md) | Build it: builder games, starting with a road |
+| [0053](0053-live-tv-tiles-and-live-videos.md) | Live TV: logo tiles, more channels, and the video that is live now |

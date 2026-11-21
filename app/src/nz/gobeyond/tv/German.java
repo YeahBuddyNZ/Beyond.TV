@@ -494,6 +494,9 @@ final class German {
             case "Here in Aotearoa": return "Hier in Aotearoa";
             case "On your TV": return "Auf deinem Fernseher";
             case "Your aerial": return "Deine Antenne";
+            case "Featured": return "Empfohlen";
+            case "Weather, space and music": return "Wetter, Weltraum und Musik";
+            case "For kids": return "Für Kinder";
             case "World news, free": return "Weltnachrichten, kostenlos";
             case "More free channels": return "Mehr kostenlose Sender";
             case "Pick Live TV in Plex": return "Wähle in Plex Live-TV";
