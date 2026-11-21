@@ -10,7 +10,7 @@ var Games = (function () {
   function linked() { return !!(window.Family && Family.linked()); }
 
   /**
-   * The Games screen: a picture for each game, in three groups. Same groups and order as GamesActivity.java; the pictures
+   * The Games screen: a picture for each game, in groups (four since Build it, so the lower ones scroll up into view). Same groups and order as GamesActivity.java; the pictures
    * are web/games/<id>.jpg (tools/game_art.js), which build.sh also puts in the APK.
    */
   function groups() {
@@ -21,6 +21,9 @@ var Games = (function () {
         ['table', tr('Jogos de tabuleiro e cartas', 'Board and card games', 'Juegos de mesa y cartas'), function () { Table.open(); }],
         ['silly', tr('Jogos bobos', 'Silly games', 'Juegos locos'), function () { Laughs.open(); }],
         ['guides', tr('Como jogar', 'How to play', 'Cómo jugar'), function () { Guides.list(); }]]},
+      // Build it (builder.js, ADR 0052): real building jobs, with the machines.
+      {name: tr('Construir', 'Build it', 'A construir'), games: [
+        ['road', tr('Construir uma estrada', 'Build a road', 'Construir una carretera'), function () { Builder.open('road'); }]]},
       {name: tr('Hora da festa', 'Party time', 'Hora de fiesta'), games: [
         ['karaoke', tr('Karaokê', 'Karaoke', 'Karaoke'), function () { Karaoke.choose(); }],
         ['party', tr('Festa', 'Party', 'Fiesta'), function () { Party.choose(); }],
@@ -34,6 +37,8 @@ var Games = (function () {
     ];
   }
 
+  var heading = null, groupList = null;
+
   function open() {
     UI.open({
       cls: 'bt-games-hub',
@@ -43,6 +48,7 @@ var Games = (function () {
         var top = UI.el('div', 'gh-top', layer);
         UI.heading(top, tr('Jogos', 'Games', 'Juegos'));
         var all = groups(), first = true, list = UI.el('div', 'gh-groups', layer);
+        heading = top; groupList = list;
         for (var g = 0; g < all.length; g++) {
           var group = UI.el('div', 'gh-group', list);
           UI.el('div', 'gh-name', group, all[g].name);
@@ -59,10 +65,21 @@ var Games = (function () {
             })(all[g].games[i]);
           }
         }
-        if (!linked()) UI.el('div', 'gh-note', layer, tr(
+        // In the list after the last group, so it scrolls with them and never covers a row.
+        if (!linked()) UI.el('div', 'gh-note', list, tr(
           'Quiz da noite e a pergunta do jantar precisam do Beyond Family: todos respondem no celular. Conecte em Configurações.',
           'Quiz night and the dinner question need Beyond Family, because everyone answers on their phone. Link it in Settings.',
           'La noche de quiz y la pregunta de la cena necesitan Beyond Family: todos responden en el teléfono. Conéctalo en Ajustes.'));
+      },
+      // More groups than fit: the list slides up so the focused row is on screen, and the heading steps aside.
+      focused: function (node) {
+        // The tile's row, then its group: the group's bottom must be on screen.
+        var group = node.parentNode && node.parentNode.parentNode;
+        if (!group || !groupList) return;
+        var next = group.nextSibling, bottom = next && next.className === 'gh-note' ? groupList.offsetHeight : group.offsetTop + group.offsetHeight;
+        var shift = Math.max(0, 166 + bottom - 1040);
+        groupList.style.webkitTransform = groupList.style.transform = shift ? 'translateY(-' + shift + 'px)' : '';
+        heading.style.opacity = shift > 40 ? '0' : '';
       }
     });
   }

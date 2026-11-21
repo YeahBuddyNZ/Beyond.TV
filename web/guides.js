@@ -194,6 +194,21 @@ var Guides = (function () {
         ['Com dois jogadores, vocês se revezam: o jogador 1 corre, depois passa o controle para o jogador 2.', 'With two players you take turns: player 1 races, then passes the remote to player 2.', 'Con dos jugadores os turnáis: corre el jugador 1 y luego pasa el mando al jugador 2.', 'Zu zweit wechselt ihr euch ab: Spieler 1 fährt, dann bekommt Spieler 2 die Fernbedienung.', 'Вдвоём играют по очереди: сначала игрок 1, потом пульт переходит игроку 2.']]),
     ]},
 
+    road: {icon: '🚧', name: ['Construir uma estrada', 'Build a road', 'Construir una carretera', 'Eine Straße bauen', 'Построить дорогу'], pages: [
+      page(AIM, [
+        ['Construa uma estrada de verdade, do terreno vazio até os primeiros carros passarem.', 'Build a real road, from an empty paddock to the first cars driving on it.', 'Construye una carretera de verdad, desde el campo vacío hasta que pasen los primeros coches.', 'Bau eine echte Straße, von der leeren Weide bis zu den ersten Autos darauf.', 'Постройте настоящую дорогу: от пустого поля до первых машин на ней.'],
+        ['A lista de trabalhos em cima mostra cada passo, na ordem em que é feito de verdade.', 'The job list along the top shows every step, in the order it is done for real.', 'La lista de trabajos de arriba muestra cada paso, en el orden en que se hace de verdad.', 'Die Arbeitsliste oben zeigt jeden Schritt, in der echten Reihenfolge.', 'Список работ вверху показывает каждый шаг в том порядке, как это делают по-настоящему.']]),
+      page(REMOTE, [
+        ['Primeiro escolha a máquina certa: ◀ ▶ e OK. Errou? Ela conta o que faz, e você tenta outra.', 'First pick the right machine: ◀ ▶ and OK. Wrong one? It tells you what it does, and you try another.', 'Primero elige la máquina correcta: ◀ ▶ y OK. ¿Te equivocaste? Te dice lo que hace, y pruebas otra.', 'Wähl zuerst die richtige Maschine: ◀ ▶ und OK. Falsch? Sie sagt dir, was sie macht, und du probierst eine andere.', 'Сначала выберите нужную машину: ◀ ▶ и OK. Не та? Она расскажет, что умеет, и вы выберете другую.'],
+        ['Depois ◀ ▶ leva a máquina pela estrada, e OK faz o trabalho dela ali.', 'Then ◀ ▶ drives the machine along the road, and OK does its job right there.', 'Luego ◀ ▶ lleva la máquina por la carretera, y OK hace su trabajo ahí.', 'Dann fährt ◀ ▶ die Maschine die Straße entlang, und OK erledigt dort ihre Arbeit.', 'Потом ◀ ▶ ведёт машину вдоль дороги, а OK делает её работу в этом месте.'],
+        ['Na pavimentadora, ▲ ▼ mudam a velocidade. No pintor de faixas, OK pinta quando o spray passa por uma marca.', 'On the paver, ▲ ▼ change the speed. On the line marker, OK paints as the sprayer passes a mark.', 'En la pavimentadora, ▲ ▼ cambian la velocidad. En el pintalíneas, OK pinta cuando el pulverizador pasa por una marca.', 'Beim Fertiger ändern ▲ ▼ das Tempo. Beim Markierer sprüht OK, wenn die Düse über eine Marke fährt.', 'На асфальтоукладчике ▲ ▼ меняют скорость. На разметчике OK красит, когда распылитель над меткой.'],
+        ARCADE_BACK]),
+      page(TIPS, [
+        ['Três estrelas por trabalho: máquina certa na primeira, e trabalho caprichado.', 'Three stars a job: the right machine first time, and tidy work.', 'Tres estrellas por trabajo: la máquina correcta a la primera, y trabajo bien hecho.', 'Drei Sterne pro Arbeit: gleich die richtige Maschine und saubere Arbeit.', 'Три звезды за работу: нужная машина с первого раза и аккуратная работа.'],
+        ['Pedras grandes e árvores precisam de mais de um empurrão. O caminhão leva a terra quando enche.', 'Big rocks and trees need more than one shove. The truck takes the dirt away when it is full.', 'Las rocas grandes y los árboles necesitan más de un empujón. El camión se lleva la tierra cuando se llena.', 'Große Felsen und Bäume brauchen mehr als einen Schub. Der Laster fährt die Erde weg, wenn er voll ist.', 'Большие камни и деревья не сдвинуть с одного раза. Самосвал увозит землю, когда наполнится.'],
+        ['A frente da estrada é cortada, para você ver as camadas embaixo: terra, cascalho e asfalto.', 'The front of the road is cut away so you can see the layers underneath: soil, gravel and asphalt.', 'El frente de la carretera está cortado para que veas las capas de abajo: tierra, grava y asfalto.', 'Die Vorderseite der Straße ist aufgeschnitten, damit du die Schichten siehst: Erde, Kies und Asphalt.', 'Передний край дороги срезан, чтобы видеть слои под ней: землю, щебень и асфальт.']])
+    ]},
+
     crew: {icon: '🌙', name: ['Tripulação do Foguete', 'Launch Crew', 'Tripulación del Cohete', 'Startcrew', 'Стартовая команда'], pages: [
       page(AIM, [['Leve o foguete Beyond até a Lua e aprenda a reconhecer mensagens golpistas no caminho.', 'Fly the Beyond rocket to the Moon, and learn to spot scam messages on the way.', 'Lleva el cohete Beyond a la Luna y aprende a reconocer mensajes trampa por el camino.', 'Flieg die Beyond-Rakete zum Mond und lerne unterwegs, Betrugsnachrichten zu erkennen.', 'Долетите на ракете Beyond до Луны и научитесь по пути замечать сообщения мошенников.']]),
       page(REMOTE, [
@@ -279,7 +294,7 @@ var Guides = (function () {
   };
 
   /** The order on the How to play screen: the same as the Games screen. */
-  var ORDER = ['karaoke', 'ludo', 'chess', 'chant', 'snap', 'likely', 'rather', 'dare', 'rcland', 'eel', 'paddle', 'guard', 'dots',
+  var ORDER = ['karaoke', 'ludo', 'chess', 'chant', 'snap', 'likely', 'rather', 'dare', 'rcland', 'road', 'eel', 'paddle', 'guard', 'dots',
     'crew', 'lunch', 'party', 'lights', 'quiz', 'question', 'tidy', 'bedtime'];
 
   function nameOf(id) { return GUIDES[id] ? L(GUIDES[id].name) : ''; }

@@ -225,6 +225,8 @@ final class Russian {
             case "Party time": return "Время вечеринки";
             case "Round the house": return "Дома";
             case "Milo's Remote Control Land": return "Страна машинок Майло";
+            case "Build it": return "Строим!";
+            case "Build a road": return "Построить дорогу";
             case "The games need Android System WebView.": return "Для игр нужен Android System WebView.";
             case "Bedtime breathing": return "Дыхание перед сном";
             case "Breathe in": return "Вдох";
