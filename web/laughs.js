@@ -374,7 +374,7 @@ var Laughs = (function () {
     return say(l[0], l[1], l[2], name);
   }
 
-  function done() { stop(); UI.closeAll(); if (host() && host().close) host().close(); }
+  function done() { stop(); UI.leaveGame(); if (!UI.active() && host() && host().close) host().close(); }
 
   /** Closes this layer and opens the next one in the same game, without ending the game in between. */
   function swap(api, then) {

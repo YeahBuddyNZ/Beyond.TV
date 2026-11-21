@@ -221,6 +221,9 @@ final class Russian {
             case "Silly games": return "Весёлые игры";
             case "Light show": return "Световое шоу";
             case "Arcade": return "Аркада";
+            case "Let's play": return "Играем";
+            case "Party time": return "Время вечеринки";
+            case "Round the house": return "Дома";
             case "Milo's Remote Control Land": return "Страна машинок Майло";
             case "The games need Android System WebView.": return "Для игр нужен Android System WebView.";
             case "Bedtime breathing": return "Дыхание перед сном";

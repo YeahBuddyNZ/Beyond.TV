@@ -228,9 +228,18 @@ public class FeedbackActivity extends Activity {
         private final Paint mark = new Paint(Paint.ANTI_ALIAS_FLAG);
         private final long born = SystemClock.uptimeMillis();
         private long last;
+        // Where the four dots go, on a 1920 wide screen: top centre, or beside a heading (the Games screen).
+        private final float markX, markY, markSize;
 
         Backdrop(Context c) {
+            this(c, 960, 150, 110);
+        }
+
+        Backdrop(Context c, float markX, float markY, float markSize) {
             super(c);
+            this.markX = markX;
+            this.markY = markY;
+            this.markSize = markSize;
         }
 
         @Override protected void onSizeChanged(int w, int h, int ow, int oh) {
@@ -241,7 +250,7 @@ public class FeedbackActivity extends Activity {
             float k = getWidth() / 1920f, seconds = (SystemClock.uptimeMillis() - born) / 1000f;
             float period = Breath.period(0, false);
             glow.draw(c, seconds, clock.at(seconds, period), 1, 1);
-            Breath.mark(c, mark, getWidth() / 2f, 150 * k, 110 * k, seconds, period, 1);
+            Breath.mark(c, mark, markX * k, markY * k, markSize * k, seconds, period, 1);
             long now = SystemClock.uptimeMillis();
             postInvalidateDelayed(Math.max(16, 66 - (now - last)));
             last = now;

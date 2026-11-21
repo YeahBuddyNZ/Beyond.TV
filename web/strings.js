@@ -532,6 +532,9 @@ var I18N = (function () {
     "Shooting stars": "Sternschnuppen",
     // The arcade (arcade.js)
     "Arcade": "Spielhalle",
+    "Let's play": "Los, spielen!",
+    "Party time": "Partyzeit",
+    "Round the house": "Rund ums Haus",
     "Milo's Remote Control Land": "Milos Fernsteuer-Land",
     "Just the arrows and OK.": "Nur die Pfeiltasten und OK.",
     "Bests: ": "Bestwerte: ",
@@ -1339,6 +1342,9 @@ var I18N = (function () {
     "Shooting stars": "Падающие звёзды",
     // The arcade (arcade.js)
     "Arcade": "Аркада",
+    "Let's play": "Играем",
+    "Party time": "Время вечеринки",
+    "Round the house": "Дома",
     "Milo's Remote Control Land": "Страна машинок Майло",
     "Just the arrows and OK.": "Только стрелки и OK.",
     "Bests: ": "Рекорды: ",

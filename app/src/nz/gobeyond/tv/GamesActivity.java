@@ -3,20 +3,26 @@ package nz.gobeyond.tv;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
-import android.util.TypedValue;
 import android.view.Gravity;
-import android.widget.Button;
+import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Games, from the remote (ADR 0021): every game and family activity starts here on the TV, no phone needed. Karaoke,
  * board and card games against the robots, silly party games, Milo's Remote Control Land and the light show (all TableActivity), a party, quiz night, the dinner
  * question, the tidy-up race, bedtime breathing and How to play. Quiz night and the dinner question need Beyond Family, because everyone answers on their
- * phones. Same as Games.open in web/games.js.
+ * phones. Same as Games.open in web/games.js: a picture for each, in three groups (ADR 0047). A game opens on top of
+ * this screen and it stays open, so Back from a game comes back here, one step, not out to the home screen.
  */
 public class GamesActivity extends Activity {
     static void open(Context c) {
@@ -32,87 +38,125 @@ public class GamesActivity extends Activity {
         float k = getResources().getDisplayMetrics().widthPixels / 1920f;
 
         FrameLayout root = new FrameLayout(this);
-        root.addView(new FeedbackActivity.Backdrop(this), new FrameLayout.LayoutParams(-1, -1));
+        // The four dots beside the heading, as on LG and Samsung, so the pictures have the whole screen below.
+        root.addView(new FeedbackActivity.Backdrop(this, 160, 92, 50), new FrameLayout.LayoutParams(-1, -1));
+        TextView title = FeedbackActivity.text(this, Ui.tr("Jogos", "Games", "Juegos"), Ui.displaySemibold, 60 * k, 0xFFFFFFFF);
+        FrameLayout.LayoutParams tp = new FrameLayout.LayoutParams(-2, -2);
+        tp.leftMargin = Math.round(206 * k);
+        tp.topMargin = Math.round(52 * k);
+        root.addView(title, tp);
+
         LinearLayout column = new LinearLayout(this);
         column.setOrientation(LinearLayout.VERTICAL);
-        column.setGravity(Gravity.CENTER_HORIZONTAL);
-        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(Math.round(1400 * k), -2, Gravity.CENTER_HORIZONTAL);
-        // Below the four dots the backdrop draws at the top (Breath.mark, down to about 220).
-        lp.topMargin = Math.round(250 * k);
+        column.setClipChildren(false);
+        column.setClipToPadding(false);
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(-1, -2);
+        lp.leftMargin = Math.round(126 * k);
+        lp.topMargin = Math.round(168 * k);
         root.addView(column, lp);
-
-        column.addView(FeedbackActivity.text(this, Ui.emoji("🎮") + " " + Ui.tr("Jogos", "Games", "Juegos"),
-                Ui.displaySemibold, 64 * k, 0xFFFFFFFF));
-        TextView sub = FeedbackActivity.text(this, Ui.tr("O que vamos fazer?", "What shall we do?", "¿Qué hacemos?"),
-                Ui.regular, 32 * k, 0xCCFFFFFF);
-        sub.setPadding(0, Math.round(12 * k), 0, Math.round(32 * k));
-        column.addView(sub);
+        root.setClipChildren(false);
 
         boolean linked = Family.linked(this);
-        Object[][] games = {
-                {"🎤", Ui.tr("Karaokê", "Karaoke", "Karaoke"), (Runnable) () -> go(() -> KaraokePickActivity.open(this))},
-                {"🎲", Ui.tr("Jogos de tabuleiro e cartas", "Board and card games", "Juegos de mesa y cartas"), (Runnable) () -> go(() -> TableActivity.open(this))},
-                {"🤪", Ui.tr("Jogos bobos", "Silly games", "Juegos locos"), (Runnable) () -> go(() -> TableActivity.open(this, "silly"))},
-                // Milo's Remote Control Land (web/rcland.js, ADR 0046), in TableActivity's WebView like the arcade.
-                {"🏎", Ui.tr("Terra do Controle Remoto do Milo", "Milo's Remote Control Land", "La Tierra Teledirigida de Milo"), (Runnable) () -> go(() -> TableActivity.open(this, "rcland"))},
-                {"🕹", Ui.tr("Fliperama", "Arcade", "Arcade"), (Runnable) () -> go(() -> TableActivity.open(this, "arcade"))},
-                {"🥪", Ui.tr("Lanches da escola", "School lunches", "Almuerzos del cole"), (Runnable) () -> go(() -> TableActivity.open(this, "lunch"))},
-                {"🎉", Ui.tr("Festa", "Party", "Fiesta"), (Runnable) () -> go(() -> PartyPickActivity.open(this))},
-                {"✨", Ui.tr("Show de luzes", "Light show", "Show de luces"), (Runnable) () -> go(() -> TableActivity.open(this, "lights"))},
-                {"🏆", Ui.tr("Quiz da noite", "Quiz night", "Noche de quiz"), (Runnable) () -> family("quiz")},
-                {"🍽", Ui.tr("Pergunta do jantar", "Dinner question", "Pregunta de la cena"), (Runnable) () -> family("question")},
-                {"🧹", Ui.tr("Corrida da arrumação", "Tidy-up race", "Carrera de ordenar"), (Runnable) () -> go(() -> TidyActivity.open(this, 10))},
-                {"🌙", Ui.tr("Respirar para dormir", "Bedtime breathing", "Respirar para dormir"), (Runnable) () -> go(() -> BedtimeActivity.open(this, 15))},
-                // A guide to every game (web/guides.js, ADR 0043), read in TableActivity's WebView like the board games.
-                {"📖", Ui.tr("Como jogar", "How to play", "Cómo jugar"), (Runnable) () -> TableActivity.open(this, "guides")},
+        // Three groups, in the same order as Games.open in web/games.js (ADR 0047). Each: picture (web/games/<id>.jpg), name, what it opens.
+        Object[][][] groups = {
+                {{Ui.tr("Vamos jogar", "Let's play", "¡A jugar!")},
+                        // Milo's Remote Control Land (web/rcland.js, ADR 0046), in TableActivity's WebView like the arcade.
+                        {"rcland", Ui.tr("Terra do Controle Remoto do Milo", "Milo's Remote Control Land", "La Tierra Teledirigida de Milo"), (Runnable) () -> TableActivity.open(this, "rcland")},
+                        {"arcade", Ui.tr("Fliperama", "Arcade", "Arcade"), (Runnable) () -> TableActivity.open(this, "arcade")},
+                        {"table", Ui.tr("Jogos de tabuleiro e cartas", "Board and card games", "Juegos de mesa y cartas"), (Runnable) () -> TableActivity.open(this)},
+                        {"silly", Ui.tr("Jogos bobos", "Silly games", "Juegos locos"), (Runnable) () -> TableActivity.open(this, "silly")},
+                        // A guide to every game (web/guides.js, ADR 0043), read in TableActivity's WebView like the board games.
+                        {"guides", Ui.tr("Como jogar", "How to play", "Cómo jugar"), (Runnable) () -> TableActivity.open(this, "guides")}},
+                {{Ui.tr("Hora da festa", "Party time", "Hora de fiesta")},
+                        {"karaoke", Ui.tr("Karaokê", "Karaoke", "Karaoke"), (Runnable) () -> KaraokePickActivity.open(this)},
+                        {"party", Ui.tr("Festa", "Party", "Fiesta"), (Runnable) () -> PartyPickActivity.open(this)},
+                        {"lights", Ui.tr("Show de luzes", "Light show", "Show de luces"), (Runnable) () -> TableActivity.open(this, "lights")},
+                        {"quiz", Ui.tr("Quiz da noite", "Quiz night", "Noche de quiz"), (Runnable) () -> family("quiz")},
+                        {"dinner", Ui.tr("Pergunta do jantar", "Dinner question", "Pregunta de la cena"), (Runnable) () -> family("question")}},
+                {{Ui.tr("Em casa", "Round the house", "En casa")},
+                        {"lunch", Ui.tr("Lanches da escola", "School lunches", "Almuerzos del cole"), (Runnable) () -> TableActivity.open(this, "lunch")},
+                        {"tidy", Ui.tr("Corrida da arrumação", "Tidy-up race", "Carrera de ordenar"), (Runnable) () -> TidyActivity.open(this, 10)},
+                        {"bedtime", Ui.tr("Respirar para dormir", "Bedtime breathing", "Respirar para dormir"), (Runnable) () -> BedtimeActivity.open(this, 15)}},
         };
-        LinearLayout row = null;
-        Button first = null;
-        // Five rows of three since Remote Control Land: a little shorter, so the hint below still fits on the screen.
-        boolean five = games.length > 12;
-        for (int i = 0; i < games.length; i++) {
-            if (i % 3 == 0) {
-                row = new LinearLayout(this);
-                LinearLayout.LayoutParams rp = new LinearLayout.LayoutParams(-1, Math.round((five ? 84 : 96) * k));
-                rp.bottomMargin = Math.round((five ? 16 : 22) * k);
-                column.addView(row, rp);
+        View first = null;
+        int tw = Math.round(316 * k), th = Math.round(178 * k);
+        for (Object[][] group : groups) {
+            TextView name = FeedbackActivity.text(this, (String) group[0][0], Ui.displaySemibold, 30 * k, 0xBFFFFFFF);
+            name.setGravity(Gravity.START);
+            name.setPadding(Math.round(6 * k), 0, 0, Math.round(14 * k));
+            column.addView(name, new LinearLayout.LayoutParams(-2, -2));
+            LinearLayout row = new LinearLayout(this);
+            row.setClipChildren(false);
+            row.setClipToPadding(false);
+            LinearLayout.LayoutParams rp = new LinearLayout.LayoutParams(-1, th);
+            rp.bottomMargin = Math.round(40 * k);
+            column.addView(row, rp);
+            for (int i = 1; i < group.length; i++) {
+                View tile = tile((String) group[i][0], (String) group[i][1], k);
+                final Runnable run = (Runnable) group[i][2];
+                tile.setOnClickListener(v -> run.run());
+                LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(tw, th);
+                bp.rightMargin = Math.round(22 * k);
+                row.addView(tile, bp);
+                if (first == null) first = tile;
             }
-            final Runnable run = (Runnable) games[i][2];
-            Button b = FeedbackActivity.button(this, Ui.emoji((String) games[i][0]) + "  " + games[i][1], k, i == 0);
-            b.setOnClickListener(v -> run.run());
-            // An even grid: every button takes a third of the row and the full row height, and stays on one line.
-            // The longest names ("Bedtime breathing", German's "Atmen vor dem Schlafen") shrink a little rather than
-            // wrap; maxLines rather than singleLine, which autosizing ignores on Android 8.
-            b.setPadding(Math.round(20 * k), 0, Math.round(20 * k), 0);
-            b.setMinHeight(0);
-            b.setMinimumHeight(0);
-            b.setGravity(Gravity.CENTER);
-            b.setMaxLines(1);
-            b.setEllipsize(android.text.TextUtils.TruncateAt.END);
-            b.setAutoSizeTextTypeUniformWithConfiguration(Math.round(18 * k), Math.round(28 * k), 1, TypedValue.COMPLEX_UNIT_PX);
-            LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(0, -1, 1);
-            bp.leftMargin = bp.rightMargin = Math.round(10 * k);
-            row.addView(b, bp);
-            if (first == null) first = b;
         }
         if (!linked) {
             TextView hint = FeedbackActivity.text(this, Ui.tr(
                     "Quiz da noite e a pergunta do jantar precisam do Beyond Family: todos respondem no celular. Conecte em Configurações.",
                     "Quiz night and the dinner question need Beyond Family, because everyone answers on their phone. Link it in Settings.",
                     "La noche de quiz y la pregunta de la cena necesitan Beyond Family: todos responden en el teléfono. Conéctalo en Ajustes."),
-                    Ui.regular, 26 * k, 0xA6FFFFFF);
-            hint.setGravity(Gravity.CENTER);
-            hint.setPadding(0, Math.round(26 * k), 0, 0);
-            column.addView(hint, new LinearLayout.LayoutParams(-1, -2));
+                    Ui.regular, 24 * k, 0x99FFFFFF);
+            hint.setGravity(Gravity.START);
+            FrameLayout.LayoutParams hp = new FrameLayout.LayoutParams(-1, -2, Gravity.BOTTOM);
+            hp.leftMargin = hp.rightMargin = Math.round(132 * k);
+            hp.bottomMargin = Math.round(36 * k);
+            root.addView(hint, hp);
         }
 
         setContentView(root);
         first.requestFocus();
     }
 
-    private void go(Runnable open) {
-        open.run();
-        finish();
+    /** One game: its picture, its name over the bottom, a little bigger with a lilac ring when it has the focus. */
+    private View tile(String id, String label, float k) {
+        FrameLayout tile = new FrameLayout(this);
+        float radius = 22 * k;
+        GradientDrawable shape = new GradientDrawable();
+        shape.setColor(0xFF2C2458);
+        shape.setCornerRadius(radius);
+        tile.setBackground(shape);
+        tile.setClipToOutline(true);
+        tile.setFocusable(true);
+        tile.setClickable(true);
+        ImageView pic = new ImageView(this);
+        pic.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        try (InputStream in = getAssets().open("games/" + id + ".jpg")) {
+            pic.setImageBitmap(BitmapFactory.decodeStream(in));
+        } catch (IOException ignored) { /* the name still shows */ }
+        tile.addView(pic, new FrameLayout.LayoutParams(-1, -1));
+        TextView name = FeedbackActivity.text(this, label, Ui.semibold, 24 * k, 0xFFFFFFFF);
+        name.setGravity(Gravity.START | Gravity.BOTTOM);
+        name.setMaxLines(2);
+        name.setLineSpacing(0, 0.95f);
+        name.setPadding(Math.round(16 * k), Math.round(34 * k), Math.round(16 * k), Math.round(12 * k));
+        name.setBackground(new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, new int[] {0x000D0C18, 0xD90D0C18}));
+        tile.addView(name, new FrameLayout.LayoutParams(-1, -2, Gravity.BOTTOM));
+        // The ring sits on top of the picture, inside the rounded corners.
+        GradientDrawable ring = new GradientDrawable();
+        ring.setColor(0);
+        ring.setCornerRadius(radius);
+        ring.setStroke(Math.round(5 * k), Glow.LILAC);
+        View over = new View(this);
+        over.setBackground(ring);
+        over.setVisibility(View.INVISIBLE);
+        tile.addView(over, new FrameLayout.LayoutParams(-1, -1));
+        tile.setOnFocusChangeListener((v, focused) -> {
+            over.setVisibility(focused ? View.VISIBLE : View.INVISIBLE);
+            v.animate().scaleX(focused ? 1.1f : 1).scaleY(focused ? 1.1f : 1).setDuration(160).start();
+            v.setElevation(focused ? 12 * k : 0);
+        });
+        return tile;
     }
 
     /** Quiz night or the dinner question: Beyond Family starts it, and its command opens the game on every TV. */

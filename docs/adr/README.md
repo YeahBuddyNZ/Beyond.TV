@@ -54,3 +54,4 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0044](0044-light-show-follows-real-sound.md) | The light show follows real sound, and can hear the TV |
 | [0045](0045-launch-crew-on-the-tv.md) | Launch Crew in the arcade |
 | [0046](0046-remote-control-land.md) | Milo's Remote Control Land: a driving game for the remote |
+| [0047](0047-games-screen-pictures-and-back.md) | The Games screen: pictures in groups, and Back goes back one |
