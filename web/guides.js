@@ -161,6 +161,22 @@ var Guides = (function () {
       page(TIPS, [['Um ponto grande deixa os fantasmas com medo: aí você pode pegá-los. Você tem três vidas.', 'A big dot makes the ghosts scared: then you can catch them. You have three lives.', 'Un punto grande asusta a los fantasmas: entonces puedes atraparlos. Tienes tres vidas.', 'Ein großer Punkt macht den Geistern Angst: Dann kannst du sie fangen. Du hast drei Leben.', 'Большая точка пугает призраков: тогда их можно ловить. У вас три жизни.']])
     ]},
 
+    crew: {icon: '🌙', name: ['Tripulação do Foguete', 'Launch Crew', 'Tripulación del Cohete', 'Startcrew', 'Стартовая команда'], pages: [
+      page(AIM, [['Leve o foguete Beyond até a Lua e aprenda a reconhecer mensagens golpistas no caminho.', 'Fly the Beyond rocket to the Moon, and learn to spot scam messages on the way.', 'Lleva el cohete Beyond a la Luna y aprende a reconocer mensajes trampa por el camino.', 'Flieg die Beyond-Rakete zum Mond und lerne unterwegs, Betrugsnachrichten zu erkennen.', 'Долетите на ракете Beyond до Луны и научитесь по пути замечать сообщения мошенников.']]),
+      page(REMOTE, [
+        ['Esquerda e direita escolhem um astronauta, OK embarca. Embarque os seis.', 'Left and right pick a crew member, OK boards them. Get all six on.', 'Izquierda y derecha eligen a un tripulante, OK lo sube. Sube a los seis.', 'Links und rechts wählen ein Crewmitglied, OK lässt es einsteigen. Alle sechs müssen rein.', 'Влево и вправо выбирают космонавта, OK сажает его. Посадите всех шестерых.'],
+        ['A agulha do tanque sobe e desce. Aperte OK quando ela estiver no verde.', 'The fuel needle goes up and down. Press OK when it is in the green.', 'La aguja del tanque sube y baja. Pulsa OK cuando esté en el verde.', 'Die Tanknadel geht hoch und runter. Drück OK, wenn sie im Grünen ist.', 'Стрелка топлива ходит вверх и вниз. Нажмите OK, когда она на зелёном.'],
+        ['Uma faísca aparece no foguete: aperte a seta que aponta para ela.', 'A spark pops on the rocket: press the arrow that points at it.', 'Aparece una chispa en el cohete: pulsa la flecha que apunta hacia ella.', 'Ein Funke erscheint an der Rakete: Drück den Pfeil, der darauf zeigt.', 'На ракете вспыхивает искра: нажмите стрелку, которая на неё указывает.'],
+        ['No voo, esquerda e direita mudam de faixa e OK destrói a mensagem da sua faixa.', 'In flight, left and right change lanes and OK zaps the message in your lane.', 'En vuelo, izquierda y derecha cambian de carril y OK destruye el mensaje de tu carril.', 'Im Flug wechseln links und rechts die Spur, und OK schaltet die Nachricht in deiner Spur aus.', 'В полёте влево и вправо меняют полосу, а OK сбивает сообщение на вашей полосе.'],
+        ARCADE_BACK]),
+      page(RULES, [
+        ['Destrua os golpes. Deixe as mensagens de verdade de quem você conhece chegarem ao foguete.', 'Zap the scams. Let real messages from people you know reach the rocket.', 'Destruye las trampas. Deja que los mensajes de verdad de gente que conoces lleguen al cohete.', 'Schalte Betrug aus. Lass echte Nachrichten von Leuten, die du kennst, zur Rakete.', 'Сбивайте обман. Настоящие сообщения от знакомых пусть долетят до ракеты.'],
+        ['Cada mensagem certa vale uma estrela. Errar não tira nada.', 'Every message you get right is a star. Getting one wrong takes nothing away.', 'Cada mensaje acertado es una estrella. Fallar no quita nada.', 'Jede richtige Nachricht ist ein Stern. Ein Fehler nimmt nichts weg.', 'Каждое верное сообщение это звезда. Ошибка ничего не отнимает.']]),
+      page(TIPS, [
+        ['Golpes apressam você, oferecem prêmios ou pedem segredos, como senhas, a escola ou o cartão da mamãe.', 'Scams rush you, offer prizes or ask for secrets, like passwords, your school or Mum\'s card.', 'Las trampas te meten prisa, ofrecen premios o piden secretos, como contraseñas, tu cole o la tarjeta de mamá.', 'Betrüger drängeln, versprechen Preise oder fragen nach Geheimnissen wie Passwörtern, deiner Schule oder Mamas Karte.', 'Мошенники торопят, обещают призы или просят секреты: пароли, вашу школу или мамину карту.'],
+        ['Na dúvida, pergunte a um adulto.', 'When in doubt, ask a grown-up.', 'Si dudas, pregunta a un adulto.', 'Im Zweifel frag einen Erwachsenen.', 'Если сомневаетесь, спросите взрослого.']])
+    ]},
+
     lunch: {icon: '🥪', name: ['Lanches da escola', 'School lunches', 'Almuerzos del cole', 'Pausenbrot', 'Школьные обеды'], pages: [
       page(AIM, [['Cada criança escolhe cinco lanches, um para cada dia de aula.', 'Each kid picks five lunches, one for each school day.', 'Cada niño elige cinco almuerzos, uno para cada día de cole.', 'Jedes Kind sucht fünf Pausenbrote aus, eins für jeden Schultag.', 'Каждый ребёнок выбирает пять обедов, по одному на каждый учебный день.']]),
       page(REMOTE, [
@@ -228,7 +244,7 @@ var Guides = (function () {
 
   /** The order on the How to play screen: the same as the Games screen. */
   var ORDER = ['karaoke', 'ludo', 'chess', 'chant', 'snap', 'likely', 'rather', 'dare', 'eel', 'paddle', 'guard', 'dots',
-    'lunch', 'party', 'lights', 'quiz', 'question', 'tidy', 'bedtime'];
+    'crew', 'lunch', 'party', 'lights', 'quiz', 'question', 'tidy', 'bedtime'];
 
   function nameOf(id) { return GUIDES[id] ? L(GUIDES[id].name) : ''; }
 
