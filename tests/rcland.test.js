@@ -117,6 +117,64 @@ R.MACHINES.forEach(function (m, mi) {
   check(m.id + ' got somewhere', game.stats.smash > 0 || game.score > 0);
 });
 
+// The lake (ADR 0048): four water machines, their own challenges, everything on the water inside the beach.
+var waterOnes = R.MACHINES.filter(function (m) { return m.water; });
+check('four water machines after the five on land', waterOnes.length === 4 && R.LAND_COUNT === 5 && R.MACHINES.slice(0, 5).every(function (m) { return !m.water; }));
+var wids = {};
+R.WATER_GOALS.forEach(function (g) {
+  check(g.id + ' (lake) has words in five languages', five(g.text) && noDash(g.text));
+  check(g.id + ' (lake) is a challenge once', !wids[g.id] && !ids[g.id] && g.stat.charAt(0) === 'w');
+  wids[g.id] = true;
+});
+R.VIEWS.forEach(function (v) { check('camera ' + v[1] + ' in five languages', five(v)); });
+var lake = R.buildWorld(true);
+check('the lake is water, with its own things', lake.water && lake.objs.some(function (o) { return o.kind === 'duck'; }) && lake.waves.length === 4);
+check('everything on the lake is inside the beach', lake.objs.every(function (o) { return o.x - (o.kind === 'island' ? o.r : 0) > lake.edge - 40 && o.x < 3600 - lake.edge && o.y > lake.edge - 40 && o.y < 2600 - lake.edge; }));
+var lakeWay = lake.objs.filter(function (o) { return !o.float && Math.abs(o.x - 1800) < o.r + 30 && o.y > 1000 && o.y < 2200; });
+check('the way from the start up the ski ramp is clear', lakeWay.length === 0);
+var wx0 = lake.waves[0].x;
+R.rollWaves(lake, 1);
+check('the waves roll in', lake.waves[0].x > wx0 || lake.waves.some(function (r) { return r.x < wx0; }));
+
+// The jet ski flies off the ski ramp, and the challenge counts on the lake, not on land.
+g = R.newGame(5, {});
+check('a water machine starts on the lake', g.water && g.world.water);
+R.drive(g, UP); R.drive(g, UP); R.drive(g, UP);
+flew = false;
+for (i = 0; i < 60 * 6 && !flew; i++) { R.step(g, 1 / 60); if (g.car.air) flew = true; }
+run(g, 3);
+check('the ski ramp sends the jet ski flying', flew && (g.stats.wramp || 0) >= 1 && !g.stats.ramp);
+
+// The surfboard catches a wave and flies off it.
+g = R.newGame(7, {});
+var wave = g.world.waves[0];
+g.car.x = wave.x - 60; g.car.y = wave.y; g.car.h = g.car.want = 0;
+R.drive(g, UP); R.drive(g, UP); R.drive(g, UP);
+for (i = 0; i < 60 * 8 && !(g.stats.wsurf); i++) R.step(g, 1 / 60);
+check('riding a wave and flying off it counts', (g.stats.wsurf || 0) >= 1);
+
+// Every water machine survives a long time of random presses, inside the beach.
+waterOnes.forEach(function (m) {
+  var game = R.newGame(R.MACHINES.indexOf(m), {}), ok = true, keys = [LEFT, UP, RIGHT, DOWN, OK, UP, UP];
+  for (var s = 0; s < 60 * 90; s++) {
+    if (s % 20 === 0) R.drive(game, keys[Math.floor(Math.random() * keys.length)]);
+    R.step(game, 1 / 60);
+    var cr = game.car;
+    if (!isFinite(cr.x) || !isFinite(cr.y) || !isFinite(cr.z) || cr.x < 100 || cr.x > 3500 || cr.y < 100 || cr.y > 2500) ok = false;
+  }
+  check(m.id + ' survives ninety seconds of random presses', ok);
+});
+
+// The cameras: the colour buttons and 1 2 3 change it, and it is kept for next time.
+g = R.newGame(0, {});
+R.drive(g, 51);
+check('3 picks first person', g.view === 2 && g.camT > 0);
+R.drive(g, 403);
+check('a colour button goes round the cameras', g.view === 0);
+check('the camera is kept for next time', R.newGame(0, {view: 1}).view === 1 && R.newGame(0, {view: 9}).view === 0);
+var tow = R.towAt({x: 100, y: 100, h: 0, vx: 0, vy: 0});
+check('the water skier is towed from ahead', tow.x > 100 && tow.y === 100);
+
 // Drawing doesn't throw: every frame kind on a stand-in canvas.
 var calls = 0;
 var fake = new Proxy({}, {
@@ -134,6 +192,16 @@ try {
   g = R.newGame(1, {});
   R.drive(g, UP); run(g, 2); R.render(g);
   R.drawPick(2, 1.3, 1234); R.drawPause(g, 1);
+  // Chase and first person, on land and on the lake, and in the middle of a flip.
+  [0, 2, 5, 6, 7, 8].forEach(function (mi) {
+    [1, 2].forEach(function (v) {
+      var gg = R.newGame(mi, {}); gg.view = v;
+      R.drive(gg, UP); R.drive(gg, UP); run(gg, 1.5); R.render(gg);
+      gg.car.air = true; gg.car.trick = {k: 'front', p: 0.5}; R.render(gg);
+      gg.car.trick = null; gg.car.wipe = 0.5; gg.car.roll = 2; R.render(gg);
+    });
+  });
+  R.drawPick(6, 1.3, 50, 1, 1); R.drawPick(0, 1.3, 0, 2, 2);
 } catch (e) { drawn = false; console.log(e.stack); }
 check('every screen draws', drawn && calls > 100);
 
