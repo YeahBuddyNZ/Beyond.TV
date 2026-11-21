@@ -1,9 +1,10 @@
 /*
  * Build it (ADR 0052): builder games for the remote. Build a road the way it is done for real, one job after another
  * (survey, clear, dig, drains, gravel, roll, asphalt, lines, open), picking the right machine for each job and then
- * driving it. More jobs (a bridge, a town) plug in beside it. Played with the remote alone: the arrows and OK, and Back
+ * driving it. Build a bridge: pick a shape and a material for the gap, the load and the money, then a truck tests it
+ * (ADR 0053). More jobs (a town) plug in beside them. Played with the remote alone: the arrows and OK, and Back
  * pauses (Back again leaves, back to Games). Bests stay on this TV, nothing is sent. Google TV runs this same file in
- * TableActivity's WebView (start "road"). The words are the game's own, in all five languages, like rcland.js.
+ * TableActivity's WebView (start "road" or "bridge"). The words are the game's own, in all five languages, like rcland.js.
  * Plain ES5: one 1280 by 720 canvas, plain shapes, nothing to download, no emoji (older TVs have no emoji font).
  */
 var Builder = (function () {
@@ -677,7 +678,7 @@ var Builder = (function () {
     c.font = '700 22px Sora, Inter, Arial, sans-serif';
     var w = Math.min(980, c.measureText(g.msg.text).width + 60);
     var lines = Math.ceil((c.measureText(g.msg.text).width + 60) / 980);
-    var h = 30 + lines * 29, y = g.phase === 'pick' ? 540 : 100;
+    var h = 30 + lines * 29, y = g.phase === 'pick' || g.phase === 'levels' ? 540 : 100;
     box(W / 2 - w / 2, y, w, h, 22, 'rgba(13,12,24,0.86)');
     wrap(g.msg.text, W / 2, y + 15 + 14, w - 48, 22, g.msg.colour, '700');
     c.globalAlpha = 1;
@@ -775,10 +776,434 @@ var Builder = (function () {
     text(L(PAUSE_HELP), W / 2, 660, 22, LILAC, 'center', '700');
   }
 
+  // MARK: - Build a bridge: the words
+
+  var BRIDGE_TITLE = ['Construir uma ponte', 'Build a bridge', 'Construir un puente', 'Eine Brücke bauen', 'Построить мост'];
+  var SHAPES = [
+    {id: 'beam', name: ['Viga', 'Beam', 'Viga', 'Balken', 'Балка'],
+      fact: ['Uma viga é a ponte mais simples: uma tábua forte sobre o vão. Ótima para vãos curtos.', 'A beam is the simplest bridge: a strong plank across the gap. Great for short gaps.', 'Una viga es el puente más sencillo: una tabla fuerte sobre el hueco. Ideal para huecos cortos.', 'Ein Balken ist die einfachste Brücke: ein starkes Brett über die Lücke. Super für kurze Lücken.', 'Балка: самый простой мост, крепкая доска через пролёт. Хороша для коротких пролётов.']},
+    {id: 'piers', name: ['Viga com pilares', 'Beam on legs', 'Viga con pilares', 'Balken mit Pfeilern', 'Балка на опорах'],
+      fact: ['Pilares no meio deixam cada pedaço curto, então uma viga atravessa um rio mais largo.', 'Legs in the middle make each piece short, so a beam can cross a wider river.', 'Los pilares del medio dejan cada tramo corto, así una viga cruza un río más ancho.', 'Pfeiler in der Mitte machen jedes Stück kurz, so schafft ein Balken einen breiteren Fluss.', 'Опоры посередине делают каждый пролёт коротким, и балка перекрывает реку пошире.']},
+    {id: 'arch', name: ['Arco', 'Arch', 'Arco', 'Bogen', 'Арка'],
+      fact: ['Um arco empurra o peso para as pontas e aperta a pedra e o concreto, que adoram ser apertados.', 'An arch pushes the weight out to the ends, squashing the stone and concrete, which they are very good at.', 'Un arco empuja el peso hacia los extremos y aprieta la piedra y el hormigón, que lo aguantan muy bien.', 'Ein Bogen drückt das Gewicht zu den Enden und presst Stein und Beton zusammen, das können sie sehr gut.', 'Арка передаёт вес к краям и сжимает камень и бетон, а сжатие они держат отлично.']},
+    {id: 'truss', name: ['Treliça', 'Truss', 'Celosía', 'Fachwerk', 'Ферма'],
+      fact: ['Triângulos não se deformam, então a treliça é forte e leve. Os trens adoram.', 'Triangles cannot be pushed out of shape, so a truss is strong and light. Railways love them.', 'Los triángulos no se deforman, así que la celosía es fuerte y ligera. A los trenes les encantan.', 'Dreiecke lassen sich nicht verbiegen, darum ist ein Fachwerk stark und leicht. Die Bahn liebt sie.', 'Треугольники не теряют форму, поэтому ферма прочная и лёгкая. Железные дороги их обожают.']},
+    {id: 'suspension', name: ['Pênsil', 'Suspension', 'Colgante', 'Hängebrücke', 'Висячий'],
+      fact: ['Cabos grandes pendem de torres altas e seguram a estrada. Atravessam os vãos mais largos.', 'Big cables hang from tall towers and hold the road up. They cross the widest gaps of all.', 'Cables grandes cuelgan de torres altas y sostienen la carretera. Cruzan los huecos más anchos.', 'Dicke Seile hängen an hohen Türmen und halten die Straße. Sie schaffen die breitesten Lücken.', 'Толстые тросы висят на высоких башнях и держат дорогу. Так перекрывают самые широкие пролёты.']}
+  ];
+  var MATERIALS = [
+    {id: 'wood', colour: '#A0693A', name: ['Madeira', 'Wood', 'Madera', 'Holz', 'Дерево']},
+    {id: 'concrete', colour: '#B8B4AA', name: ['Concreto', 'Concrete', 'Hormigón', 'Beton', 'Бетон']},
+    {id: 'steel', colour: '#5B6270', name: ['Aço', 'Steel', 'Acero', 'Stahl', 'Сталь']}
+  ];
+  /** What each shape in each material can do: [longest span in metres, heaviest load, cost]. null: it can't be built. */
+  var STRENGTH = {
+    beam: {wood: [8, 2, 1], concrete: [25, 3, 2], steel: [30, 3, 3]},
+    piers: {wood: [8, 2, 3], concrete: [25, 3, 4], steel: [30, 3, 5]},
+    arch: {wood: [20, 2, 2], concrete: [60, 4, 4], steel: [80, 4, 5]},
+    truss: {wood: [30, 3, 3], concrete: null, steel: [120, 5, 5]},
+    suspension: {wood: [100, 0.5, 2], concrete: null, steel: [1500, 4, 9]}
+  };
+  var LOADS = {people: 0.5, car: 1, truck: 3, train: 5};
+  var VEHICLES = {people: ['Pessoas a pé', 'People walking', 'Gente a pie', 'Fußgänger', 'Пешеходы'], car: ['Carros', 'Cars', 'Coches', 'Autos', 'Машины'],
+    truck: ['Caminhões', 'Trucks', 'Camiones', 'Laster', 'Грузовики'], train: ['Trens', 'Trains', 'Trenes', 'Züge', 'Поезда']};
+  var BRIDGES = [
+    {id: 'creek', span: 6, load: 'car', piers: true, budget: 2, scene: 'creek',
+      name: ['O riacho da fazenda', 'The farm creek', 'El arroyo de la granja', 'Der Bach am Hof', 'Ручей на ферме']},
+    {id: 'river', span: 24, load: 'truck', piers: true, budget: 4, scene: 'river',
+      name: ['O rio largo', 'The wide river', 'El río ancho', 'Der breite Fluss', 'Широкая река']},
+    {id: 'gorge', span: 50, load: 'truck', piers: false, why: 'deep', budget: 5, scene: 'gorge',
+      name: ['O desfiladeiro fundo', 'The deep gorge', 'El desfiladero', 'Die tiefe Schlucht', 'Глубокое ущелье']},
+    {id: 'rail', span: 70, load: 'train', piers: false, why: 'deep', budget: 6, scene: 'rail',
+      name: ['A ferrovia', 'The railway', 'El ferrocarril', 'Die Eisenbahn', 'Железная дорога']},
+    {id: 'harbour', span: 400, load: 'truck', piers: false, why: 'ships', budget: 10, scene: 'harbour',
+      name: ['O porto', 'The harbour', 'El puerto', 'Der Hafen', 'Гавань']},
+    {id: 'track', span: 60, load: 'people', piers: false, why: 'deep', budget: 2, scene: 'mountain',
+      name: ['A trilha na montanha', 'The mountain track', 'El sendero de montaña', 'Der Bergpfad', 'Горная тропа']}
+  ];
+  var GAP = ['Vão', 'Gap', 'Hueco', 'Lücke', 'Пролёт'];
+  var CARRIES = ['Leva', 'Carries', 'Lleva', 'Trägt', 'Везёт'];
+  var MONEY = ['Dinheiro', 'Money', 'Dinero', 'Geld', 'Деньги'];
+  var COST = ['Custa', 'Costs', 'Cuesta', 'Kostet', 'Стоит'];
+  var SHAPE = ['Forma', 'Shape', 'Forma', 'Form', 'Форма'];
+  var MATERIAL = ['Material', 'Material', 'Material', 'Material', 'Материал'];
+  var TEST = ['Testar!', 'Test it!', '¡Probar!', 'Testen!', 'Испытать!'];
+  var PLAN_HELP = ['▲ ▼ linha  ·  ◀ ▶ escolher  ·  OK testar  ·  Voltar pontes', '▲ ▼ row  ·  ◀ ▶ choose  ·  OK test it  ·  Back to the bridges',
+    '▲ ▼ fila  ·  ◀ ▶ elegir  ·  OK probar  ·  Atrás puentes', '▲ ▼ Zeile  ·  ◀ ▶ wählen  ·  OK testen  ·  Zurück zu den Brücken', '▲ ▼ ряд  ·  ◀ ▶ выбрать  ·  OK испытать  ·  «Назад» к мостам'];
+  var LEVELS_HELP = ['◀ ▶ escolher uma ponte  ·  OK construir  ·  Voltar menu', '◀ ▶ pick a bridge  ·  OK to build  ·  Back for the menu',
+    '◀ ▶ elige un puente  ·  OK construir  ·  Atrás menú', '◀ ▶ Brücke wählen  ·  OK bauen  ·  Zurück zum Menü', '◀ ▶ выбрать мост  ·  OK строить  ·  «Назад» меню'];
+  var LOCKED = ['Termine a anterior primeiro', 'Finish the one before first', 'Termina el anterior primero', 'Erst die davor schaffen', 'Сначала пройдите предыдущий'];
+  var HELD = ['Aguentou!', 'It held!', '¡Aguantó!', 'Sie hält!', 'Выдержал!'];
+  var FELL = ['Caiu!', 'It fell down!', '¡Se cayó!', 'Eingestürzt!', 'Рухнул!'];
+  var CANT = ['Não dá para construir', 'Can\'t build that', 'No se puede construir', 'Geht so nicht', 'Так не построить'];
+  var TOO_DEAR = ['Caro demais', 'Costs too much', 'Demasiado caro', 'Zu teuer', 'Слишком дорого'];
+  var TEST_TRUCK = ['Tudo bem: era um caminhão de teste de controle remoto!', 'All good: it was a remote-control test truck!', 'Tranquilo: ¡era un camión de prueba teledirigido!', 'Alles gut: Es war ein ferngesteuerter Testlaster!', 'Всё в порядке: это был радиоуправляемый тестовый грузовик!'];
+  var WHY_SPAN = ['Comprido demais para esta ponte: ela envergou no meio até quebrar. Tente uma forma mais forte, pilares no meio ou aço.', 'Too long for this bridge: it bent in the middle until it broke. Try a stronger shape, legs in the middle, or steel.',
+    'Demasiado largo para este puente: se dobló en el medio hasta romperse. Prueba una forma más fuerte, pilares o acero.', 'Zu lang für diese Brücke: Sie hat sich in der Mitte gebogen, bis sie brach. Probier eine stärkere Form, Pfeiler oder Stahl.',
+    'Слишком длинно для этого моста: он прогнулся посередине и сломался. Попробуйте форму прочнее, опоры или сталь.'];
+  var WHY_LOAD = ['Pesado demais! Arcos e treliças de aço aguentam cargas pesadas.', 'Too heavy! This bridge cannot carry that much. Arches and steel trusses carry heavy loads.',
+    '¡Demasiado peso! Este puente no aguanta tanto. Los arcos y las celosías de acero aguantan mucho peso.', 'Zu schwer! So viel trägt diese Brücke nicht. Bögen und Stahlfachwerke tragen schwere Lasten.',
+    'Слишком тяжело! Этот мост столько не выдержит. Арки и стальные фермы держат большой вес.'];
+  var WHY_DEEP = ['O rio aqui é fundo e rápido demais para pilares no meio. Escolha uma forma que atravesse o vão inteiro.', 'The water here is too deep and fast for legs in the middle. Pick a shape that crosses the whole gap.',
+    'El agua aquí es demasiado honda y rápida para pilares en medio. Elige una forma que cruce todo el hueco.', 'Das Wasser ist hier zu tief und zu schnell für Pfeiler. Nimm eine Form, die die ganze Lücke überspannt.',
+    'Здесь слишком глубоко и быстро для опор посередине. Выберите форму, которая перекроет весь пролёт.'];
+  var WHY_SHIPS = ['Navios passam por aqui, então não pode haver pilares no meio.', 'Ships sail through here, so there can be no legs in the middle.', 'Por aquí pasan barcos, así que no puede haber pilares en medio.', 'Hier fahren Schiffe durch, also darf in der Mitte nichts stehen.', 'Здесь ходят корабли, поэтому опор посередине быть не может.'];
+  var WHY_PULL = ['Concreto aguenta ser apertado, mas racha quando esticado. Treliças e pontes pênseis puxam suas partes: precisam de aço (ou corda).', 'Concrete is strong when squashed but cracks when stretched. Trusses and suspension bridges pull on their parts, so they need steel (or rope).',
+    'El hormigón aguanta que lo aprieten pero se agrieta si lo estiran. Las celosías y los puentes colgantes tiran de sus piezas: necesitan acero (o cuerda).', 'Beton hält Druck aus, reißt aber unter Zug. Fachwerk und Hängebrücken ziehen an ihren Teilen, sie brauchen Stahl (oder Seil).',
+    'Бетон держит сжатие, но трескается при растяжении. Фермы и висячие мосты тянут свои части, им нужна сталь (или канат).'];
+  var WHY_DEAR = ['Aguenta! Mas custa mais do que o dinheiro que você tem. Ache uma ponte mais barata que também aguente.', 'It would hold, but it costs more money than you have. Can you find a cheaper bridge that still holds?',
+    '¡Aguantaría! Pero cuesta más dinero del que tienes. ¿Encuentras un puente más barato que también aguante?', 'Sie würde halten, kostet aber mehr Geld, als du hast. Findest du eine billigere Brücke, die auch hält?',
+    'Он бы выдержал, но стоит больше, чем у вас есть. Найдёте мост дешевле, который тоже выдержит?'];
+  var NEXT_BRIDGE = ['OK próxima ponte', 'OK next bridge', 'OK siguiente puente', 'OK nächste Brücke', 'OK следующий мост'];
+  var TRY_AGAIN = ['OK tentar de novo', 'OK try again', 'OK intentar otra vez', 'OK nochmal', 'OK ещё раз'];
+  var ALL_BRIDGES = ['Todas as pontes de pé! Você é engenheiro de pontes.', 'Every bridge standing! You\'re a bridge engineer.', '¡Todos los puentes en pie! Eres ingeniero de puentes.', 'Alle Brücken stehen! Du bist Brückenbauer.', 'Все мосты стоят! Вы инженер мостов.'];
+
+  // MARK: - Build a bridge: the rules
+
+  function newBridge() {
+    var sv = load(), stars = sv.bridgeStars || [], at = 0;
+    while (at < BRIDGES.length - 1 && stars[at]) at++;
+    return {job: 'bridge', phase: 'levels', level: at, shape: 0, mat: 0, row: 0, tries: 0, stars: stars.slice(),
+      t: 0, tt: 0, result: null, fx: [], msg: null};
+  }
+
+  function unlocked(g, i) { return i === 0 || !!g.stars[i - 1]; }
+
+  /**
+   * What happens with this shape and material at this bridge: {ok, kind, ratio, cost}. kind: 'held', 'span', 'load'
+   * (it falls in the test), 'deep' or 'ships' (no legs allowed here), 'pull' (concrete can't be stretched), 'dear'.
+   */
+  function judge(level, shapeId, matId) {
+    var b = BRIDGES[level], s = STRENGTH[shapeId][matId];
+    if (!s) return {ok: false, kind: 'pull', ratio: 0, cost: 0};
+    var span = shapeId === 'piers' ? b.span / 3 : b.span, load = LOADS[b.load];
+    var cost = s[2];
+    if (shapeId === 'piers' && !b.piers) return {ok: false, kind: b.why || 'deep', ratio: 0, cost: cost};
+    var bySpan = span / s[0], byLoad = load / s[1], ratio = Math.max(bySpan, byLoad);
+    if (ratio > 1) return {ok: false, kind: bySpan >= byLoad ? 'span' : 'load', ratio: ratio, cost: cost};
+    if (cost > b.budget) return {ok: false, kind: 'dear', ratio: ratio, cost: cost};
+    return {ok: true, kind: 'held', ratio: ratio, cost: cost};
+  }
+
+  function costNow(g) { var s = STRENGTH[SHAPES[g.shape].id][MATERIALS[g.mat].id]; return s ? s[2] : 0; }
+
+  function testBridge(g) {
+    g.result = judge(g.level, SHAPES[g.shape].id, MATERIALS[g.mat].id);
+    g.tries++;
+    // Only a bridge that can be built gets driven over; the others get their answer straight away.
+    if (g.result.kind === 'held' || g.result.kind === 'span' || g.result.kind === 'load') { g.phase = 'test'; g.tt = 0; g.broke = -1; sfx('six'); }
+    else { g.phase = 'result'; g.tt = 0; sfx('bonk'); }
+  }
+
+  function bridgeKey(g, k) {
+    if (g.phase === 'levels') {
+      if (k === LEFT || k === RIGHT) { g.level = (g.level + (k === LEFT ? BRIDGES.length - 1 : 1)) % BRIDGES.length; sfx('hop'); }
+      else if (k === OK) {
+        if (!unlocked(g, g.level)) { say(g, L(LOCKED), EMBER); sfx('bonk'); return; }
+        g.phase = 'plan'; g.row = 0; g.tries = 0; g.shape = 0; g.mat = 0; sfx('six');
+      }
+      return;
+    }
+    if (g.phase === 'plan') {
+      if (k === UP) g.row = Math.max(0, g.row - 1);
+      else if (k === DOWN) g.row = Math.min(2, g.row + 1);
+      else if (k === LEFT || k === RIGHT) {
+        var d = k === LEFT ? -1 : 1;
+        if (g.row === 0) g.shape = (g.shape + d + SHAPES.length) % SHAPES.length;
+        else if (g.row === 1) g.mat = (g.mat + d + MATERIALS.length) % MATERIALS.length;
+      } else if (k === OK) { testBridge(g); return; }
+      sfx('hop');
+      return;
+    }
+    if (g.phase === 'result' && k === OK && g.tt > 0.4) {
+      if (g.result.ok) {
+        if (g.level < BRIDGES.length - 1) { g.level++; g.phase = 'plan'; g.row = 0; g.tries = 0; g.shape = 0; g.mat = 0; }
+        else g.phase = 'levels';
+      } else { g.phase = 'plan'; g.row = 0; }
+    }
+  }
+
+  /** Back in a bridge goes up one: from the plan or the answer to the list of bridges. */
+  function bridgeBack(g) {
+    if (g.phase === 'plan' || g.phase === 'result') { g.phase = 'levels'; return true; }
+    return false;
+  }
+
+  var TEST_TIME = 5;
+  function bridgeStep(g, dt) {
+    g.t += dt; g.tt += dt;
+    if (g.msg) { g.msg.t -= dt; if (g.msg.t <= 0) g.msg = null; }
+    for (var i = g.fx.length - 1; i >= 0; i--) {
+      var p = g.fx[i];
+      p.t += dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 600 * dt;
+      if (p.t > p.life) g.fx.splice(i, 1);
+    }
+    if (g.phase !== 'test') return;
+    var r = g.result, pos = vehicleAt(g);
+    // A bridge too weak breaks as the load reaches the middle.
+    if (!r.ok && g.broke < 0 && pos > 0.42) { g.broke = g.tt; sfx('crash'); g.shake = 0.6; }
+    if (g.shake > 0) g.shake = Math.max(0, g.shake - dt);
+    if (g.broke >= 0 && g.tt - g.broke > 1.1 && !g.splashed) { g.splashed = true; sfx('splash'); fx(g, 640, WATER_Y, '#BFE3F5', 30, 360); }
+    if ((r.ok && g.tt > TEST_TIME) || (g.broke >= 0 && g.tt - g.broke > 2.4)) {
+      g.phase = 'result'; g.tt = 0; g.splashed = false;
+      if (r.ok) {
+        var s = Math.max(1, 4 - g.tries);
+        g.stars[g.level] = Math.max(g.stars[g.level] || 0, s);
+        var sv = load(); sv.bridgeStars = g.stars; save(sv);
+        sfx('win'); fx(g, 640, DECK_Y - 40, EMBER, 24, 400); fx(g, 640, DECK_Y - 40, LILAC, 24, 400);
+      } else sfx('lose');
+    }
+  }
+
+  /** How far across the load is, 0 to 1 (it waits a moment while the bridge goes up). */
+  function vehicleAt(g) { return Math.max(0, Math.min(1.2, (g.tt - 0.8) / (TEST_TIME - 1.4))); }
+
+  // MARK: - Build a bridge: drawing
+
+  var BL = 250, BR = 1030, DECK_Y = 330, WATER_Y = 540;
+
+  function bridgeScene(g) {
+    var b = BRIDGES[g.level], t = g.t, sc = b.scene;
+    var sky = c.createLinearGradient(0, 0, 0, H);
+    var skies = {creek: ['#6EC6FF', '#CDEBFF'], river: ['#6EC6FF', '#CDEBFF'], gorge: ['#F2B880', '#FCE3C4'], rail: ['#7FB7E8', '#D7ECFA'],
+      harbour: ['#4E86C6', '#BFDDF5'], mountain: ['#8FB4E0', '#E4EEF8']};
+    sky.addColorStop(0, skies[sc][0]); sky.addColorStop(1, skies[sc][1]);
+    c.fillStyle = sky; c.fillRect(0, 0, W, H);
+    // Far away: hills, mountains or a city.
+    if (sc === 'mountain' || sc === 'gorge') {
+      var peaks = sc === 'mountain' ? '#7A8FB0' : '#C98A5A';
+      for (var p = 0; p < 6; p++) poly([p * 260 - 100, 330, p * 260 + 30, 120 + (p % 2) * 60, p * 260 + 160, 330], peaks);
+      if (sc === 'mountain') for (p = 0; p < 6; p++) poly([p * 260 - 4, 156 + (p % 2) * 60, p * 260 + 30, 120 + (p % 2) * 60, p * 260 + 64, 156 + (p % 2) * 60], PAPER);
+    } else if (sc === 'harbour') {
+      // The city on the far shore, low on the horizon behind the bridge.
+      for (var bld = 0; bld < 26; bld++) { var bh = 50 + (bld * 53) % 130; box(bld * 50 - 10, 440 - bh, 40, bh, 2, ['#8DA6C4', '#7C93B3', '#A3B7D0'][bld % 3]); }
+    } else {
+      c.fillStyle = '#86C67A'; c.beginPath(); c.moveTo(0, 360);
+      for (var x = 0; x <= W; x += 40) c.lineTo(x, 300 - Math.sin(x / 150) * 30);
+      c.lineTo(W, 360); c.closePath(); c.fill();
+    }
+    // The water (or the gorge floor) and the two banks.
+    var deep = sc === 'gorge' || sc === 'mountain' ? 640 : sc === 'harbour' ? 440 : WATER_Y;
+    c.fillStyle = sc === 'harbour' ? '#2F6FA8' : '#3E9BD6'; c.fillRect(0, deep, W, H - deep);
+    c.fillStyle = 'rgba(255,255,255,0.35)';
+    for (var w = 0; w < 12; w++) c.fillRect((w * 137 + t * (30 + w % 3 * 10)) % W, deep + 14 + (w % 4) * 22, 26, 3);
+    var bank = sc === 'gorge' ? '#B5683A' : sc === 'mountain' ? '#7D7468' : sc === 'harbour' ? '#8A8478' : '#6E9E4F';
+    poly([0, DECK_Y + 8, BL, DECK_Y + 8, BL - 30, deep + 4, BL - 70, H, 0, H], bank);
+    poly([W, DECK_Y + 8, BR, DECK_Y + 8, BR + 30, deep + 4, BR + 70, H, W, H], bank);
+    c.fillStyle = sc === 'harbour' ? '#5B6270' : sc === 'mountain' ? '#9A948A' : '#5DAA4F';
+    c.fillRect(0, DECK_Y, BL, 10); c.fillRect(BR, DECK_Y, W - BR, 10);
+    // The road or rails leading up to the gap.
+    c.fillStyle = b.load === 'train' ? '#6B4A2F' : b.load === 'people' ? '#B08A5A' : '#3B3A44';
+    c.fillRect(0, DECK_Y - 4, BL, 6); c.fillRect(BR, DECK_Y - 4, W - BR, 6);
+    if (sc === 'harbour') {
+      // A ship sailing through, the reason there are no legs in the middle.
+      var sx = (t * 40) % (W + 400) - 200;
+      var sy = deep + 40;
+      poly([sx - 90, sy + 40, sx + 90, sy + 40, sx + 70, sy + 76, sx - 70, sy + 76], CORAL);
+      box(sx - 40, sy - 10, 70, 50, 4, PAPER); box(sx + 10, sy - 40, 14, 34, 2, '#26252B');
+    }
+  }
+
+  /** The deck's height at x: the bridge bends a little under the load, more the closer it is to its limit. */
+  function deckY(g, x, shapeId) {
+    if (g.phase !== 'test' || !g.result) return DECK_Y;
+    var r = g.result, pos = vehicleAt(g), vx = BL + (BR - BL) * pos;
+    var u = (x - BL) / (BR - BL), near = Math.max(0, 1 - Math.abs(x - vx) / 360);
+    var bend = Math.min(1.4, r.ratio) * (shapeId === 'piers' ? 6 : 18) * near * (pos > 0 && pos < 1 ? 1 : 0);
+    if (shapeId === 'piers') bend *= Math.abs(Math.sin(u * Math.PI * 3));
+    else bend *= Math.sin(u * Math.PI);
+    if (g.broke >= 0) {
+      // Broken in the middle: each half swings down from its own bank.
+      var fall = Math.min(1, (g.tt - g.broke) / 0.9), half = u < 0.5 ? u : 1 - u;
+      return DECK_Y + bend + fall * fall * half * (BR - BL) * 0.9;
+    }
+    return DECK_Y + bend;
+  }
+
+  function drawBridge(g, shapeId, matId) {
+    var col = MATERIALS[g.mat].colour, dark = matId === 'wood' ? '#7A4E2E' : matId === 'concrete' ? '#8E8A80' : '#3E434D';
+    var rope = matId === 'wood' && shapeId === 'suspension', i, x, n = 24;
+    var grow = g.phase === 'test' ? Math.min(1, g.tt / 0.7) : 1;
+    c.globalAlpha = 0.25 + 0.75 * grow;
+    // Legs and towers stand on the ground; everything else hangs off the deck.
+    if (shapeId === 'piers') {
+      for (i = 1; i <= 2; i++) {
+        x = BL + (BR - BL) * i / 3;
+        box(x - 16, deckY(g, x, shapeId), 32, WATER_Y + 40 - DECK_Y, 4, dark);
+        if (!BRIDGES[g.level].piers && g.phase !== 'test') { line(x - 26, DECK_Y + 40, x + 26, DECK_Y + 120, 7, CORAL); line(x + 26, DECK_Y + 40, x - 26, DECK_Y + 120, 7, CORAL); }
+      }
+    }
+    if (shapeId === 'arch') {
+      c.strokeStyle = col; c.lineWidth = 22; c.beginPath();
+      for (i = 0; i <= n; i++) { x = BL + (BR - BL) * i / n; var ay = WATER_Y + 10 - Math.sin(i / n * Math.PI) * (WATER_Y - DECK_Y - 18) + (deckY(g, x, shapeId) - DECK_Y); if (i) c.lineTo(x, ay); else c.moveTo(x, ay); }
+      c.stroke();
+      for (i = 1; i < 12; i++) {
+        x = BL + (BR - BL) * i / 12;
+        var top = deckY(g, x, shapeId), bot = WATER_Y + 10 - Math.sin(i / 12 * Math.PI) * (WATER_Y - DECK_Y - 18) + (top - DECK_Y);
+        line(x, top + 8, x, bot, 6, dark);
+      }
+    }
+    if (shapeId === 'truss') {
+      var tops = [];
+      for (i = 0; i <= 10; i++) { x = BL + (BR - BL) * i / 10; tops.push([x, deckY(g, x, shapeId)]); }
+      for (i = 0; i < 10; i++) {
+        var a = tops[i], b2 = tops[i + 1];
+        line(a[0], a[1] - 90, b2[0], b2[1] - 90, 8, col);
+        line(a[0], a[1], a[0], a[1] - 90, 6, col);
+        if (i < 5) line(a[0], a[1] - 90, b2[0], b2[1], 6, col); else line(a[0], a[1], b2[0], b2[1] - 90, 6, col);
+      }
+      line(tops[10][0], tops[10][1], tops[10][0], tops[10][1] - 90, 6, col);
+    }
+    if (shapeId === 'suspension') {
+      var tl = BL + 110, tr = BR - 110, ttop = rope ? DECK_Y - 70 : 120;
+      if (!rope) { box(tl - 16, ttop, 32, WATER_Y + 40 - ttop, 4, dark); box(tr - 16, ttop, 32, WATER_Y + 40 - ttop, 4, dark); }
+      c.strokeStyle = rope ? '#7A4E2E' : '#2B2F38'; c.lineWidth = rope ? 4 : 6; c.beginPath();
+      c.moveTo(BL - 60, DECK_Y); c.lineTo(tl, ttop);
+      for (i = 0; i <= n; i++) { x = tl + (tr - tl) * i / n; var u = i / n, cy = ttop + (1 - Math.pow(2 * u - 1, 2)) * (DECK_Y - 20 - ttop) + (deckY(g, x, shapeId) - DECK_Y); c.lineTo(x, cy); }
+      c.lineTo(BR + 60, DECK_Y); c.stroke();
+      for (i = 1; i < n; i++) {
+        x = tl + (tr - tl) * i / n; var u2 = i / n, hy = ttop + (1 - Math.pow(2 * u2 - 1, 2)) * (DECK_Y - 20 - ttop) + (deckY(g, x, shapeId) - DECK_Y);
+        line(x, hy, x, deckY(g, x, shapeId), 2, rope ? '#7A4E2E' : '#2B2F38');
+      }
+    }
+    // The deck, in pieces so it can bend and break.
+    for (i = 0; i < n; i++) {
+      var x0 = BL + (BR - BL) * i / n, x1 = BL + (BR - BL) * (i + 1) / n, y0 = deckY(g, x0, shapeId), y1 = deckY(g, x1, shapeId);
+      var th = rope ? 8 : shapeId === 'beam' || shapeId === 'piers' ? 26 : 16;
+      poly([x0, y0 - 4, x1 + 1, y1 - 4, x1 + 1, y1 + th, x0, y0 + th], col);
+      c.fillStyle = 'rgba(0,0,0,0.18)'; c.fillRect(x0, Math.min(y0, y1) + th - 4, x1 - x0 + 1, 4);
+      if (rope && i % 2 === 0) line(x0 + 4, y0 - 2, x0 + 4, y0 + 6, 2, '#5B3A20');
+    }
+    c.globalAlpha = 1;
+  }
+
+  /** The load: walkers, a car, a truck or a train, driving left to right. */
+  function drawLoad(g) {
+    var b = BRIDGES[g.level], kind = b.load, pos = g.phase === 'test' ? vehicleAt(g) : -0.1;
+    var x = BL + (BR - BL) * pos, shapeId = SHAPES[g.shape].id, y = pos <= 0 ? DECK_Y - 4 : pos >= 1 ? DECK_Y - 4 : deckY(g, Math.min(BR, Math.max(BL, x)), shapeId) - 4;
+    if (g.phase === 'test' && g.broke >= 0) {
+      // Over the edge it goes, nose first, into the water.
+      var f = g.tt - g.broke, bx = BL + (BR - BL) * 0.45;
+      x = bx + f * 60; y = DECK_Y + 200 * f * f;
+      if (y > WATER_Y + 30) return;
+    }
+    if (g.phase !== 'test') x = BL - 140;
+    c.save(); c.translate(x, y);
+    if (g.broke >= 0) c.rotate(Math.min(0.8, (g.tt - g.broke) * 0.8));
+    if (kind === 'car') car(0, 0, CORAL);
+    else if (kind === 'truck') {
+      wheel(-50, -12, 13); wheel(-20, -12, 13); wheel(42, -12, 13);
+      box(-74, -70, 100, 52, 4, '#E9EEF2'); box(-74, -70, 100, 10, 3, VIOLET); box(30, -60, 40, 44, 6, BLUE); box(38, -54, 22, 16, 3, '#BFE3F5');
+    } else if (kind === 'train') {
+      for (var k = 0; k < 3; k++) {
+        var cx = -k * 130;
+        box(cx - 60, -64, 120, 50, 8, k ? '#5CC4AE' : CORAL); box(cx - 50, -56, 100, 16, 4, '#BFE3F5');
+        wheel(cx - 38, -10, 11); wheel(cx + 38, -10, 11);
+      }
+      box(40, -84, 18, 24, 3, '#26252B');
+    } else {
+      for (var q = 0; q < 2; q++) {
+        var hx = -q * 36, step2 = Math.sin(g.t * 8 + q) * 6;
+        line(hx - 4, -18, hx - 4 + step2, 0, 4, '#2C3E66'); line(hx + 4, -18, hx + 4 - step2, 0, 4, '#2C3E66');
+        box(hx - 9, -44, 18, 28, 6, q ? EMBER : CORAL); disc(hx, -52, 9, '#E0B08A'); box(hx - 12, -46, 6, 22, 3, MOSS);
+      }
+    }
+    c.restore();
+  }
+
+  function chips(labels, at, focus, x0, y, w) {
+    for (var i = 0; i < labels.length; i++) {
+      var x = x0 + i * (w + 12), on = i === at;
+      box(x, y, w, 44, 22, on ? (focus ? VIOLET : 'rgba(110,61,219,0.55)') : 'rgba(247,246,242,0.1)');
+      if (on && focus) { c.strokeStyle = LILAC; c.lineWidth = 3; rr(x, y, w, 44, 22); c.stroke(); }
+      text(labels[i], x + w / 2, y + 23, 19, on ? PAPER : 'rgba(247,246,242,0.7)', 'center', on ? '800' : '600');
+    }
+  }
+
+  function drawInfo(g) {
+    var b = BRIDGES[g.level];
+    box(14, 12, W - 28, 74, 20, 'rgba(13,12,24,0.78)');
+    text((g.level + 1) + '. ' + L(b.name), 34, 49, 28, PAPER, 'left', '800');
+    var facts = L(GAP) + ' ' + b.span + ' m   ·   ' + L(CARRIES) + ': ' + L(VEHICLES[b.load]) + '   ·   ' + L(MONEY) + ' $' + b.budget + 'M';
+    text(facts, W - 34, 49, 20, 'rgba(247,246,242,0.85)', 'right', '700');
+    for (var i = 0; i < 3; i++) starShape(W / 2 + 60 + i * 30, 49, 11, i < (g.stars[g.level] || 0) ? EMBER : 'rgba(247,246,242,0.18)');
+  }
+
+  function drawPlan(g) {
+    var y0 = H - 196;
+    box(14, y0, W - 28, 182, 24, 'rgba(13,12,24,0.86)');
+    text(L(SHAPE), 40, y0 + 34, 18, g.row === 0 ? LILAC : 'rgba(247,246,242,0.6)', 'left', '700');
+    chips(SHAPES.map(function (s) { return L(s.name); }), g.shape, g.row === 0, 170, y0 + 12, 170);
+    text(L(MATERIAL), 40, y0 + 90, 18, g.row === 1 ? LILAC : 'rgba(247,246,242,0.6)', 'left', '700');
+    chips(MATERIALS.map(function (m) { return L(m.name); }), g.mat, g.row === 1, 170, y0 + 68, 170);
+    // What it costs, against the money there is.
+    var cost = costNow(g), b = BRIDGES[g.level];
+    text(L(COST) + ' $' + (cost || '?') + 'M', 880, y0 + 90, 22, cost > b.budget ? CORAL : '#5CC4AE', 'center', '800');
+    var on = g.row === 2;
+    box(1010, y0 + 64, 230, 52, 26, on ? EMBER : 'rgba(232,163,61,0.35)');
+    if (on) { c.strokeStyle = PAPER; c.lineWidth = 3; rr(1010, y0 + 64, 230, 52, 26); c.stroke(); }
+    text(L(TEST), 1125, y0 + 91, 24, on ? INK : PAPER, 'center', '800');
+    text(L(PLAN_HELP), W / 2, y0 + 150, 19, LILAC, 'center', '700');
+  }
+
+  function drawResult(g) {
+    var r = g.result, s = SHAPES[g.shape];
+    var title = r.ok ? L(HELD) : r.kind === 'span' || r.kind === 'load' ? L(FELL) : r.kind === 'dear' ? L(TOO_DEAR) : L(CANT);
+    var why = r.ok ? L(s.fact) : L({span: WHY_SPAN, load: WHY_LOAD, deep: WHY_DEEP, ships: WHY_SHIPS, pull: WHY_PULL, dear: WHY_DEAR}[r.kind]);
+    if (r.kind === 'span' || r.kind === 'load') why += ' ' + L(TEST_TRUCK);
+    box(W / 2 - 420, 150, 840, 330, 32, 'rgba(13,12,24,0.92)');
+    text(title, W / 2, 206, 44, r.ok ? EMBER : CORAL, 'center', '800');
+    if (r.ok) for (var i = 0; i < 3; i++) starShape(W / 2 - 60 + i * 60, 262, 24, i < Math.max(1, 4 - g.tries) ? EMBER : 'rgba(247,246,242,0.15)');
+    wrap(why, W / 2, r.ok ? 316 : 280, 760, 23, PAPER, '600');
+    var last = r.ok && g.level === BRIDGES.length - 1;
+    text(last ? L(ALL_BRIDGES) : r.ok ? L(NEXT_BRIDGE) : L(TRY_AGAIN), W / 2, 448, 22, LILAC, 'center', '700');
+  }
+
+  function drawLevels(g) {
+    c.fillStyle = 'rgba(13,12,24,0.7)'; c.fillRect(0, 0, W, H);
+    dots(W / 2 - 33, 90);
+    text(L(BRIDGE_TITLE), W / 2, 146, 46, PAPER, 'center', '800');
+    var cw = 180, gap = 18, x0 = (W - (cw * 6 + gap * 5)) / 2;
+    for (var i = 0; i < BRIDGES.length; i++) {
+      var b = BRIDGES[i], x = x0 + i * (cw + gap), y = 230, here = i === g.level, open = unlocked(g, i);
+      if (here) box(x - 6, y - 6, cw + 12, 252, 26, 'rgba(158,123,255,0.6)');
+      box(x, y, cw, 240, 22, here ? '#241E4A' : '#1A1733');
+      if (open) text(String(i + 1), x + cw / 2, y + 50, 46, PAPER, 'center', '800');
+      wrap(L(b.name), x + cw / 2, y + 106, cw - 24, 19, open ? PAPER : 'rgba(247,246,242,0.35)', '700');
+      text(b.span + ' m', x + cw / 2, y + 168, 17, 'rgba(247,246,242,0.6)', 'center', '600');
+      for (var s = 0; s < 3; s++) starShape(x + cw / 2 - 34 + s * 34, y + 208, 13, s < (g.stars[i] || 0) ? EMBER : 'rgba(247,246,242,0.15)');
+      // Locked: a padlock where the number goes.
+      if (!open) { box(x + cw / 2 - 18, y + 36, 36, 28, 6, 'rgba(247,246,242,0.35)'); c.strokeStyle = 'rgba(247,246,242,0.35)'; c.lineWidth = 5; c.beginPath(); c.arc(x + cw / 2, y + 36, 11, Math.PI, 0); c.stroke(); }
+    }
+    drawHint(L(LEVELS_HELP));
+  }
+
+  function renderBridge(g) {
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    if (g.shake) c.translate(Math.sin(g.t * 70) * 6 * g.shake, 0);
+    bridgeScene(g);
+    if (g.phase !== 'levels') drawBridge(g, SHAPES[g.shape].id, MATERIALS[g.mat].id);
+    drawLoad(g);
+    for (var i = 0; i < g.fx.length; i++) {
+      var p = g.fx[i]; c.globalAlpha = Math.max(0, 1 - p.t / p.life);
+      c.fillStyle = p.c; c.fillRect(p.x - p.s / 2, p.y - p.s / 2, p.s, p.s);
+    }
+    c.globalAlpha = 1;
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    if (g.phase === 'levels') drawLevels(g);
+    else {
+      drawInfo(g);
+      if (g.phase === 'plan') drawPlan(g);
+      else if (g.phase === 'result') drawResult(g);
+    }
+    drawMsg(g);
+  }
+
   // MARK: - The jobs
 
   var JOBS = {
-    road: {make: newRoad, key: roadKey, step: roadStep, render: renderRoad, guide: 'road'}
+    road: {make: newRoad, key: roadKey, step: roadStep, render: renderRoad, guide: 'road'},
+    bridge: {make: newBridge, key: bridgeKey, step: bridgeStep, render: renderBridge, back: bridgeBack, guide: 'bridge'}
   };
 
   // MARK: - The screen
@@ -814,7 +1239,7 @@ var Builder = (function () {
     else api.close();
   }
 
-  /** Opens a job: 'road' (more to come). */
+  /** Opens a job: 'road' or 'bridge'. */
   function open(which) {
     job = JOBS[which] || JOBS.road;
     menu = 0; last = 0;
@@ -842,6 +1267,7 @@ var Builder = (function () {
       },
       back: function () {
         // In a job, Back pauses; on the pause screen or the last card it leaves, back to Games.
+        if (state === 'play' && g && job.back && job.back(g)) return true;
         if (state === 'play' && g && g.phase !== 'finish') { state = 'paused'; menu = 0; hush(); return true; }
         return false;
       },
@@ -856,6 +1282,8 @@ var Builder = (function () {
 
   return {open: open, rules: {TOOLS: TOOLS, TOOL_IDS: TOOL_IDS, ROAD_STEPS: ROAD_STEPS, newRoad: newRoad, offer: offer,
     roadKey: roadKey, roadStep: roadStep, stepDone: stepDone, L: L,
+    SHAPES: SHAPES, MATERIALS: MATERIALS, STRENGTH: STRENGTH, BRIDGES: BRIDGES, newBridge: newBridge, judge: judge,
+    bridgeKey: bridgeKey, bridgeStep: bridgeStep, bridgeBack: bridgeBack, renderBridge: renderBridge,
     // For the tests and a preview in a browser: draw on a stand-in canvas, and the game on screen.
     useContext: function (ctx) { c = ctx; }, renderRoad: renderRoad, drawPause: drawPause, playing: function () { return g; }}};
 })();

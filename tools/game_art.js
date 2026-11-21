@@ -38,6 +38,8 @@ var SCENES = {
   // Build it (builder.js, ADR 0052).
   road: {sky: ['#6EC6FF', '#BDE6FF'], ground: '#5DAA4F', road: true,
     art: [['🏗️', 450, 96, 110, 0], ['👷', 200, 150, 120, -6], ['🚧', 380, 236, 74, 0], ['🚛', 90, 246, 64, 0]]},
+  bridge: {sky: ['#6EC6FF', '#CDEBFF'], ground: '#3E9BD6', bridge: true,
+    art: [['🚚', 300, 120, 70, 0], ['⛵', 120, 250, 56, 0], ['👷', 480, 150, 80, 0]]},
   guides: {bg: ['#F7F6F2', '#E7E3F7'], burst: '#FFFFFF',
     art: [['📖', 260, 175, 160, -6], ['💡', 450, 90, 80, 12], ['⭐', 90, 90, 40, 0]]}
 };
@@ -69,6 +71,15 @@ function draw(s) {
     c.fillStyle = '#2B2A33'; c.fillRect(0, 248, W * 0.55, 44);
     c.fillStyle = '#A9A49A'; c.fillRect(W * 0.55, 248, W * 0.45, 44);
     c.fillStyle = '#F7F6F2'; for (i = 10; i < W * 0.5; i += 70) c.fillRect(i, 267, 40, 6);
+  }
+  if (s.bridge) {
+    // Water under a steel arch bridge, a bank at each end.
+    c.fillStyle = '#3E9BD6'; c.fillRect(0, 210, W, H - 210);
+    c.fillStyle = '#5DAA4F'; c.beginPath(); c.moveTo(0, 160); c.lineTo(70, 160); c.lineTo(40, H); c.lineTo(0, H); c.fill();
+    c.beginPath(); c.moveTo(W, 160); c.lineTo(W - 70, 160); c.lineTo(W - 40, H); c.lineTo(W, H); c.fill();
+    c.strokeStyle = '#5B6270'; c.lineWidth = 12; c.beginPath(); c.moveTo(60, 250); c.quadraticCurveTo(W / 2, 40, W - 60, 250); c.stroke();
+    c.lineWidth = 4; for (i = 1; i < 10; i++) { var bx = 70 + i * (W - 140) / 10, t = (bx - 60) / (W - 120), ay = 250 - 4 * t * (1 - t) * 105; c.beginPath(); c.moveTo(bx, 156); c.lineTo(bx, ay); c.stroke(); }
+    c.fillStyle = '#3E434D'; c.fillRect(0, 148, W, 14);
   }
   if (s.ramp) {
     c.fillStyle = '#8F5E37'; c.beginPath(); c.moveTo(30, 262); c.lineTo(230, 262); c.lineTo(230, 176); c.closePath(); c.fill();
