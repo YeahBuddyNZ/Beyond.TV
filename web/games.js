@@ -23,7 +23,8 @@ var Games = (function () {
         ['guides', tr('Como jogar', 'How to play', 'Cómo jugar'), function () { Guides.list(); }]]},
       // Build it (builder.js, ADR 0052): real building jobs, with the machines.
       {name: tr('Construir', 'Build it', 'A construir'), games: [
-        ['road', tr('Construir uma estrada', 'Build a road', 'Construir una carretera'), function () { Builder.open('road'); }]]},
+        ['road', tr('Construir uma estrada', 'Build a road', 'Construir una carretera'), function () { Builder.open('road'); }],
+        ['bridge', tr('Construir uma ponte', 'Build a bridge', 'Construir un puente'), function () { Builder.open('bridge'); }]]},
       {name: tr('Hora da festa', 'Party time', 'Hora de fiesta'), games: [
         ['karaoke', tr('Karaokê', 'Karaoke', 'Karaoke'), function () { Karaoke.choose(); }],
         ['party', tr('Festa', 'Party', 'Fiesta'), function () { Party.choose(); }],

@@ -123,5 +123,58 @@ for (var trial = 0; trial < 20; trial++) {
   check('random presses keep it sane (' + trial + ')', g.step >= 0 && g.step < R.ROAD_STEPS.length && g.at >= 0 && g.at < 8 && !isNaN(g.x));
 }
 
+// Build a bridge: every bridge can be built, the cheap answer is never the only test, and the words are all there.
+R.SHAPES.forEach(function (sh) { check(sh.id + ' has a name and a fact in five languages', five(sh.name) && five(sh.fact) && noDash(sh.fact)); });
+R.MATERIALS.forEach(function (m) { check(m.id + ' has a name in five languages', five(m.name)); });
+var winners = [];
+R.BRIDGES.forEach(function (b, i) {
+  check(b.id + ' has a name in five languages', five(b.name));
+  var wins = [];
+  R.SHAPES.forEach(function (sh) { R.MATERIALS.forEach(function (m) { if (R.judge(i, sh.id, m.id).ok) wins.push(sh.id + '/' + m.id); }); });
+  check(b.id + ' can be built (' + wins.join(', ') + ')', wins.length > 0);
+  check(b.id + ' is not won by everything', wins.length < 8);
+  winners.push(wins);
+});
+check('a plain wooden beam only crosses the creek', winners.filter(function (w) { return w.indexOf('beam/wood') >= 0; }).length === 1);
+check('no legs where ships go', !R.judge(4, 'piers', 'steel').ok && R.judge(4, 'piers', 'steel').kind === 'ships');
+check('wood cannot make a suspension road bridge', !R.judge(4, 'suspension', 'wood').ok);
+check('the harbour needs a suspension bridge', winners[4].every(function (w) { return w.indexOf('suspension/') === 0; }));
+check('concrete cannot hang from cables', R.judge(4, 'suspension', 'concrete').kind === 'pull');
+
+// A bridge played from the keys: a wooden beam over the creek holds, the same over the river falls.
+store = {};
+g = R.newBridge();
+check('starts on the list of bridges', g.phase === 'levels' && g.level === 0);
+R.bridgeKey(g, RIGHT); R.bridgeKey(g, OK);
+check('a locked bridge does not open', g.phase === 'levels' && g.msg);
+R.bridgeKey(g, LEFT); R.bridgeKey(g, OK);
+check('OK opens the creek', g.phase === 'plan' && g.level === 0);
+R.bridgeKey(g, DOWN); R.bridgeKey(g, DOWN); R.bridgeKey(g, OK);
+check('the test truck drives on', g.phase === 'test');
+run(g, R.bridgeStep, 7);
+check('a wooden beam holds over the creek', g.phase === 'result' && g.result.ok && g.stars[0] === 3);
+R.bridgeKey(g, OK);
+check('OK goes on to the river', g.phase === 'plan' && g.level === 1);
+R.bridgeKey(g, DOWN); R.bridgeKey(g, DOWN); R.bridgeKey(g, OK);
+run(g, R.bridgeStep, 7);
+check('a wooden beam falls over the river', g.phase === 'result' && !g.result.ok && g.broke >= 0);
+R.bridgeKey(g, OK);
+check('OK tries again', g.phase === 'plan');
+R.bridgeKey(g, RIGHT); R.bridgeKey(g, DOWN); R.bridgeKey(g, RIGHT); R.bridgeKey(g, DOWN); R.bridgeKey(g, OK);
+run(g, R.bridgeStep, 7);
+check('concrete on legs holds over the river, two stars for the second try', g.result.ok && g.stars[1] === 2);
+check('Back goes up to the list', R.bridgeBack(g) === true && g.phase === 'levels');
+check('Back from the list leaves the game', R.bridgeBack(g) === false);
+saved = JSON.parse(store['btv.builder'] || '{}');
+check('the stars stay on the TV', saved.bridgeStars && saved.bridgeStars[0] === 3 && saved.bridgeStars[1] === 2);
+check('the bridge has a guide', Guides && Guides.has ? Guides.has('bridge') : true);
+
+for (trial = 0; trial < 20; trial++) {
+  g = R.newBridge();
+  var bkeys = [LEFT, RIGHT, UP, DOWN, OK, OK];
+  for (n = 0; n < 3000; n++) { R.bridgeKey(g, bkeys[Math.floor(Math.random() * bkeys.length)]); if (n % 97 === 0) R.bridgeBack(g); R.bridgeStep(g, 1 / 30); }
+  check('random presses keep the bridge sane (' + trial + ')', g.level >= 0 && g.level < R.BRIDGES.length && g.shape >= 0 && g.shape < 5 && g.mat >= 0 && g.mat < 3);
+}
+
 console.log(passed + ' passed, ' + failed + ' failed');
 process.exit(failed ? 1 : 0);

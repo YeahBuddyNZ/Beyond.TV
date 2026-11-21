@@ -75,7 +75,8 @@ public class GamesActivity extends Activity {
                         {"guides", Ui.tr("Como jogar", "How to play", "Cómo jugar"), (Runnable) () -> TableActivity.open(this, "guides")}},
                 // Build it (web/builder.js, ADR 0052): real building jobs with the machines, in TableActivity's WebView.
                 {{Ui.tr("Construir", "Build it", "A construir")},
-                        {"road", Ui.tr("Construir uma estrada", "Build a road", "Construir una carretera"), (Runnable) () -> TableActivity.open(this, "road")}},
+                        {"road", Ui.tr("Construir uma estrada", "Build a road", "Construir una carretera"), (Runnable) () -> TableActivity.open(this, "road")},
+                        {"bridge", Ui.tr("Construir uma ponte", "Build a bridge", "Construir un puente"), (Runnable) () -> TableActivity.open(this, "bridge")}},
                 {{Ui.tr("Hora da festa", "Party time", "Hora de fiesta")},
                         {"karaoke", Ui.tr("Karaokê", "Karaoke", "Karaoke"), (Runnable) () -> KaraokePickActivity.open(this)},
                         {"party", Ui.tr("Festa", "Party", "Fiesta"), (Runnable) () -> PartyPickActivity.open(this)},

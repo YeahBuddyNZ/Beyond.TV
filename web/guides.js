@@ -209,6 +209,19 @@ var Guides = (function () {
         ['A frente da estrada é cortada, para você ver as camadas embaixo: terra, cascalho e asfalto.', 'The front of the road is cut away so you can see the layers underneath: soil, gravel and asphalt.', 'El frente de la carretera está cortado para que veas las capas de abajo: tierra, grava y asfalto.', 'Die Vorderseite der Straße ist aufgeschnitten, damit du die Schichten siehst: Erde, Kies und Asphalt.', 'Передний край дороги срезан, чтобы видеть слои под ней: землю, щебень и асфальт.']])
     ]},
 
+    bridge: {icon: '🌉', name: ['Construir uma ponte', 'Build a bridge', 'Construir un puente', 'Eine Brücke bauen', 'Построить мост'], pages: [
+      page(AIM, [
+        ['Construa seis pontes, de um riacho na fazenda até o porto, que não caiam quando o caminhão de teste passar.', 'Build six bridges, from a farm creek to the harbour, that stay up when the test truck drives over.', 'Construye seis puentes, desde un arroyo de granja hasta el puerto, que no se caigan cuando pase el camión de prueba.', 'Bau sechs Brücken, vom Bach auf der Farm bis zum Hafen, die halten, wenn der Testlaster drüberfährt.', 'Постройте шесть мостов, от ручья на ферме до гавани, которые выдержат проезд тестового грузовика.'],
+        ['Cada ponte tem um vão, uma carga e um dinheiro. Escolha o formato e o material certos sem gastar demais.', 'Each bridge has a gap, a load and a budget. Pick the right shape and material without spending too much.', 'Cada puente tiene un hueco, una carga y un presupuesto. Elige la forma y el material correctos sin gastar de más.', 'Jede Brücke hat eine Lücke, eine Last und ein Budget. Wähl die richtige Form und das richtige Material, ohne zu viel auszugeben.', 'У каждого моста есть пролёт, груз и бюджет. Выберите правильную форму и материал и не потратьте лишнего.']]),
+      page(REMOTE, [
+        ['Na lista de pontes, ◀ ▶ e OK. A próxima abre quando a anterior fica de pé.', 'On the list of bridges, ◀ ▶ and OK. The next one opens when the one before stays up.', 'En la lista de puentes, ◀ ▶ y OK. El siguiente se abre cuando el anterior aguanta.', 'In der Brückenliste ◀ ▶ und OK. Die nächste öffnet sich, wenn die vorige hält.', 'В списке мостов ◀ ▶ и OK. Следующий открывается, когда предыдущий устоял.'],
+        ['▲ ▼ escolhem a linha: formato, material ou Testar. ◀ ▶ mudam a escolha, e OK manda o caminhão.', '▲ ▼ pick the row: shape, material or Test it. ◀ ▶ change the choice, and OK sends the truck over.', '▲ ▼ eligen la fila: forma, material o Probar. ◀ ▶ cambian la opción, y OK manda el camión.', '▲ ▼ wählen die Zeile: Form, Material oder Testen. ◀ ▶ ändern die Wahl, und OK schickt den Laster los.', '▲ ▼ выбирают строку: форма, материал или «Проверить». ◀ ▶ меняют выбор, а OK отправляет грузовик.'],
+        ARCADE_BACK]),
+      page(TIPS, [
+        ['Três estrelas se ficar de pé na primeira. Caiu? Ela conta por quê, e você tenta de novo.', 'Three stars if it stays up first time. Fell down? It tells you why, and you try again.', 'Tres estrellas si aguanta a la primera. ¿Se cayó? Te dice por qué, y lo intentas otra vez.', 'Drei Sterne, wenn sie gleich hält. Eingestürzt? Sie sagt dir warum, und du versuchst es nochmal.', 'Три звезды, если устоял с первого раза. Упал? Вам объяснят почему, и можно попробовать снова.'],
+        ['Desfiladeiros fundos e portos com navios não aceitam pilares no meio. Madeira é leve e barata, perfeita para quem vai a pé.', 'Deep gorges and harbours with ships cannot have legs in the middle. Wood is light and cheap, perfect for people on foot.', 'Los barrancos hondos y los puertos con barcos no admiten pilares en el medio. La madera es ligera y barata, perfecta para gente a pie.', 'Tiefe Schluchten und Häfen mit Schiffen vertragen keine Pfeiler in der Mitte. Holz ist leicht und billig, perfekt für Fußgänger.', 'В глубоком ущелье и в гавани с кораблями нельзя ставить опоры посередине. Дерево лёгкое и дешёвое, идеально для пешеходов.']])
+    ]},
+
     crew: {icon: '🌙', name: ['Tripulação do Foguete', 'Launch Crew', 'Tripulación del Cohete', 'Startcrew', 'Стартовая команда'], pages: [
       page(AIM, [['Leve o foguete Beyond até a Lua e aprenda a reconhecer mensagens golpistas no caminho.', 'Fly the Beyond rocket to the Moon, and learn to spot scam messages on the way.', 'Lleva el cohete Beyond a la Luna y aprende a reconocer mensajes trampa por el camino.', 'Flieg die Beyond-Rakete zum Mond und lerne unterwegs, Betrugsnachrichten zu erkennen.', 'Долетите на ракете Beyond до Луны и научитесь по пути замечать сообщения мошенников.']]),
       page(REMOTE, [
@@ -294,7 +307,7 @@ var Guides = (function () {
   };
 
   /** The order on the How to play screen: the same as the Games screen. */
-  var ORDER = ['karaoke', 'ludo', 'chess', 'chant', 'snap', 'likely', 'rather', 'dare', 'rcland', 'road', 'eel', 'paddle', 'guard', 'dots',
+  var ORDER = ['karaoke', 'ludo', 'chess', 'chant', 'snap', 'likely', 'rather', 'dare', 'rcland', 'road', 'bridge', 'eel', 'paddle', 'guard', 'dots',
     'crew', 'lunch', 'party', 'lights', 'quiz', 'question', 'tidy', 'bedtime'];
 
   function nameOf(id) { return GUIDES[id] ? L(GUIDES[id].name) : ''; }
