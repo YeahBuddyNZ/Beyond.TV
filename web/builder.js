@@ -111,6 +111,10 @@ var Builder = (function () {
   var TRUCK_FULL = ['Caminhão cheio! Ele leva a terra embora.', 'Truck full! Off it goes with the dirt.', '¡Camión lleno! Se lleva la tierra.', 'Laster voll! Er fährt die Erde weg.', 'Самосвал полон! Увозит землю.'];
   var TOO_FAST = ['Rápido demais!', 'Too fast!', '¡Demasiado rápido!', 'Zu schnell!', 'Слишком быстро!'];
   var TOO_SLOW = ['Devagar demais!', 'Too slow!', '¡Demasiado lento!', 'Zu langsam!', 'Слишком медленно!'];
+  var ASPHALT = ['Asfalto', 'Asphalt', 'Asfalto', 'Asphalt', 'Асфальт'];
+  var GRAVEL = ['Cascalho', 'Gravel', 'Grava', 'Kies', 'Щебень'];
+  var SOIL = ['Terra', 'Soil', 'Tierra', 'Erde', 'Грунт'];
+  var PIPE = ['Bueiro', 'Culvert', 'Alcantarilla', 'Durchlass', 'Труба'];
   var NICE = ['Perfeito!', 'Spot on!', '¡Perfecto!', 'Genau richtig!', 'В самый раз!'];
 
   // MARK: - Saved on this TV
@@ -504,7 +508,6 @@ var Builder = (function () {
     box(1192, BACK - 30, 16, 24, 2, PAPER);
   }
 
-  function lift(cl) { return cl.base * 9 + (cl.seal ? 6 : 0); }
 
   function drawRoad(g) {
     var t = g.t, i, cl, x0, top, front, id = ROAD_STEPS[g.step].id;
@@ -520,8 +523,7 @@ var Builder = (function () {
     soilBits();
     for (i = 0; i < N; i++) {
       cl = g.cells[i]; x0 = X0 + CW * i;
-      var up = lift(cl);
-      top = BACK + 8 - up; front = FRONT - up;
+      top = BACK + 8; front = FRONT;
       // The top of this stretch: grass, dirt, gravel, rolled gravel or asphalt.
       var grass = g.step === 0 || (g.step === 1 && (cl.thing || g.phase === 'pick'));
       var surface = cl.seal ? (cl.sealQ ? '#3B3A44' : '#2B2A33') : cl.base ? (cl.rolled >= 3 ? '#8F8A80' : '#A9A49A') : grass ? '#5DAA4F' : '#9C6B43';
@@ -532,32 +534,47 @@ var Builder = (function () {
       }
       if (cl.seal && cl.sealQ === -1) { for (var k = 0; k < 4; k++) disc(x0 + 20 + k * 28, top + 30 + (k % 2) * 14, 7, '#4A4954'); }
       if (cl.seal && cl.sealQ === 1) { c.fillStyle = 'rgba(169,164,154,0.6)'; for (var k2 = 0; k2 < 5; k2++) c.fillRect(x0 + 10 + k2 * 24, top + 12 + (k2 % 3) * 16, 12, 5); }
-      // The front face: the layers of this stretch.
-      c.fillStyle = '#6F4529'; c.fillRect(x0, front - 8, CW + 1, 10);
-      if (cl.base) { c.fillStyle = '#A9A49A'; c.fillRect(x0, front - 8, CW + 1, cl.base * 9 + 2); c.fillStyle = 'rgba(0,0,0,0.15)'; for (var b = 0; b < cl.base; b++) c.fillRect(x0, front - 8 + b * 9, CW + 1, 1); }
-      if (cl.seal) { c.fillStyle = '#26252B'; c.fillRect(x0, front - 14, CW + 1, 7); }
+      // The front face, cut away: the layers of this stretch, from the top down.
+      var ly = FRONT - 8;
+      c.fillStyle = '#6F4529'; c.fillRect(x0, ly, CW + 1, 8);
+      if (cl.seal) { c.fillStyle = '#26252B'; c.fillRect(x0, ly, CW + 1, 14); ly += 14; }
+      if (cl.base) {
+        c.fillStyle = cl.rolled >= 3 ? '#8F8A80' : '#A9A49A'; c.fillRect(x0, ly, CW + 1, cl.base * 18);
+        c.fillStyle = 'rgba(0,0,0,0.18)';
+        for (var b = 0; b < 12; b++) c.fillRect(x0 + (b * 41) % CW, ly + 4 + (b * 13) % (cl.base * 18 - 6), cl.rolled >= 3 ? 3 : 5, cl.rolled >= 3 ? 2 : 4);
+        for (var b2 = 1; b2 < cl.base; b2++) c.fillRect(x0, ly + b2 * 18, CW + 1, 1);
+      }
       // A stream across: a channel of water, or a pipe with water running through it.
       if (cl.stream) {
-        var sx = x0 + CW / 2;
+        var sx = x0 + CW / 2, py2 = FRONT + 76;
         if (!cl.pipe) {
-          c.fillStyle = '#3E9BD6'; c.fillRect(sx - 22, BACK - 2, 44, FRONT - BACK + 4);
-          c.fillStyle = 'rgba(255,255,255,0.4)';
-          for (var wv = 0; wv < 4; wv++) c.fillRect(sx - 14 + (wv % 2) * 12, BACK + ((t * 60 + wv * 22) % (FRONT - BACK)), 10, 3);
-          c.fillStyle = '#3E9BD6'; c.beginPath(); c.moveTo(sx - 30, FRONT); c.quadraticCurveTo(sx, FRONT + 44, sx + 30, FRONT); c.closePath(); c.fill();
+          c.fillStyle = '#3E9BD6'; c.beginPath(); c.moveTo(sx - 34, BACK - 2);
+          for (var sy = BACK; sy <= FRONT; sy += 20) c.lineTo(sx - 30 + Math.sin(sy / 17) * 6, sy);
+          c.lineTo(sx + 30, FRONT); for (sy = FRONT; sy >= BACK; sy -= 20) c.lineTo(sx + 30 + Math.sin(sy / 19) * 6, sy);
+          c.closePath(); c.fill();
+          c.fillStyle = 'rgba(255,255,255,0.45)';
+          for (var wv = 0; wv < 5; wv++) c.fillRect(sx - 16 + (wv % 3) * 12, BACK + ((t * 60 + wv * 31) % (FRONT - BACK)), 10, 3);
+          c.fillStyle = '#3E9BD6'; c.beginPath(); c.moveTo(sx - 34, FRONT - 8); c.quadraticCurveTo(sx, FRONT + 80, sx + 34, FRONT - 8); c.closePath(); c.fill();
         } else {
-          disc(sx, FRONT + 26 - (cl.base ? 0 : 0), 22, '#B5B1A8'); disc(sx, FRONT + 26, 15, '#3E9BD6');
-          c.fillStyle = 'rgba(255,255,255,0.5)'; c.fillRect(sx - 8 + Math.sin(t * 4) * 4, FRONT + 24, 8, 3);
-          if (!cl.base) { box(sx - 20, top + 4, 40, FRONT - BACK - 24, 10, '#B5B1A8'); }
+          disc(sx, py2, 28, '#B5B1A8'); disc(sx, py2, 20, '#3E9BD6');
+          c.fillStyle = 'rgba(255,255,255,0.55)'; c.fillRect(sx - 8 + Math.sin(t * 4) * 6, py2 - 2, 10, 3);
+          if (!cl.base) box(sx - 26, BACK + 6, 52, FRONT - BACK - 20, 14, '#B5B1A8');
         }
       }
       // A hump still to dig.
       if (cl.hump && !cl.thing) {
         c.fillStyle = '#9C6B43'; c.beginPath(); c.moveTo(x0 + 8, FRONT - 6);
-        c.quadraticCurveTo(x0 + CW / 2, FRONT - 6 - cl.hump * 34, x0 + CW - 8, FRONT - 6); c.closePath(); c.fill();
+        c.quadraticCurveTo(x0 + CW / 2, FRONT - 6 - cl.hump * 44, x0 + CW - 8, FRONT - 6); c.closePath(); c.fill();
         c.fillStyle = '#B37E52'; c.beginPath(); c.moveTo(x0 + 20, FRONT - 10);
-        c.quadraticCurveTo(x0 + CW / 2, FRONT - 6 - cl.hump * 30, x0 + CW - 30, FRONT - 14); c.closePath(); c.fill();
+        c.quadraticCurveTo(x0 + CW / 2, FRONT - 6 - cl.hump * 38, x0 + CW - 30, FRONT - 14); c.closePath(); c.fill();
       }
     }
+    // What the layers are called, by the cut-away.
+    var lx = X0 - 14, ly2 = FRONT - 1, any = function (f) { for (var q = 0; q < N; q++) if (f(g.cells[q])) return true; return false; };
+    if (any(function (q) { return q.seal; })) { text(L(ASPHALT), lx, ly2 + 6, 15, PAPER, 'right', '700'); ly2 += 14; }
+    if (any(function (q) { return q.base; })) text(L(GRAVEL), lx, ly2 + 18, 15, PAPER, 'right', '700');
+    text(L(SOIL), lx, FRONT + 130, 15, 'rgba(247,246,242,0.7)', 'right', '700');
+    if (any(function (q) { return q.pipe; })) text(L(PIPE), lx, FRONT + 76, 15, '#BFE3F5', 'right', '700');
     // The lines: white dashes down the middle (painted, or the marks still to paint).
     var midY = (BACK + FRONT) / 2 - 10;
     if (id === 'lines' || g.step > 7) {
@@ -577,7 +594,7 @@ var Builder = (function () {
       if (cl.peg && !cl.base) { box(tx - 4, py - 34, 8, 40, 2, '#D9A36A'); box(tx - 7, py - 38, 14, 12, 3, CORAL); }
       if (g.step === 0 && !cl.peg) { c.globalAlpha = 0.45 + Math.sin(t * 5) * 0.3; disc(tx, py, 12, PAPER); c.globalAlpha = 1; }
       var ty = BACK + 100;
-      c.save(); c.translate(tx + 26, ty); c.scale(1.4, 1.4);
+      c.save(); c.translate(tx + 34, ty); c.scale(1.4, 1.4);
       if (cl.thing === 'tree') tree(0, 0, cl.hp >= 2 ? 1 : 0.8);
       else if (cl.thing === 'bush') bush(0, 0);
       else if (cl.thing === 'rock') rock(0, 0, cl.hp);
@@ -596,19 +613,19 @@ var Builder = (function () {
     var groundY = FRONT - 30;
     if (g.phase === 'work' || g.phase === 'done') {
       // The machine works just behind its spot, so its blade, bucket or tray reaches what is there.
-      var mid = st.tool, x = g.x - (id === 'survey' ? 30 : 40), up = lift(g.cells[Math.max(0, Math.min(N - 1, g.at))]);
-      if (id === 'seal') { x = g.px; up = 0; }
-      if (id === 'lines') { x = g.mx; up = 15; }
+      var mid = st.tool, x = g.x - (id === 'survey' ? 30 : id === 'clear' ? 76 : 40);
+      if (id === 'seal') x = g.px;
+      if (id === 'lines') x = g.mx;
       var bob = g.moving ? Math.sin(g.t * 30) * 1.5 : 0;
       if (mid) {
-        c.save(); c.translate(x, groundY - up + bob + (g.shake ? Math.sin(g.t * 80) * 2 : 0)); c.scale(MS, MS);
+        c.save(); c.translate(x, groundY + bob + (g.shake ? Math.sin(g.t * 80) * 2 : 0)); c.scale(MS, MS);
         machine(mid, g.arm, g.t); c.restore();
       }
       // The digger's truck, waiting beside it, filling up and driving off when full.
       if (id === 'dig') {
         var tx = g.truckGo > 0 ? cellX(g.at) - 200 - (1.6 - g.truckGo) * 900 : cellX(g.at) - 200;
-        c.save(); c.translate(tx, groundY - 50); c.scale(1.1, 1.1); machine('tipper', 0, g.t);
-        for (i = 0; i < (g.truckGo > 0 ? 4 : g.truck); i++) disc(-60 + i * 22, -88, 14, '#9C6B43');
+        c.save(); c.translate(tx, groundY); c.scale(1.2, 1.2); machine('tipper', 0, g.t);
+        for (i = 0; i < (g.truckGo > 0 ? 4 : g.truck); i++) disc(-56 + i * 24, -88, 15, '#9C6B43');
         c.restore();
       }
       if (id === 'lines') {
