@@ -326,6 +326,8 @@ final class German {
             case "Tidy-up race!": return "Aufräum-Wettrennen!";
             case "Go!": return "Los!";
             case "Untick anyone who's out, then press Go!": return "Nimm raus, wer nicht mitmacht, dann drück Los!";
+            case "Nobody home? The TV turns itself off at ": return "Niemand da? Der Fernseher geht um ";
+            case " unless someone presses a button.": return " von selbst aus, wenn keiner eine Taste drückt.";
             case "Who's tidying?": return "Wer räumt auf?";
             case "Ready, set, go! When you're done, press OK on your face.": return "Auf die Plätze, fertig, los! Wer fertig ist, drückt OK auf sein Gesicht.";
             case "1st": return "1.";

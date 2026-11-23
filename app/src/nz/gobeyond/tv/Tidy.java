@@ -15,8 +15,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 
 /**
- * The tidy-up race, every night at the time a grown-up set in Beyond Family (TV > Tidy-up race). At that time the TV
- * turns itself on if it was asleep (when they said so), and the race starts (TidyActivity). Same as web/tidy.js.
+ * The tidy-up alarm, at the time and on the days a grown-up set in Beyond Family (TV > Tidy-up alarm), never while
+ * they're away (ADR 0064, TidyDays). At that time the TV turns itself on if it was asleep (when they said so), and the
+ * race starts (TidyActivity). If nobody presses a button within 5 minutes the TV turns itself back off, unless they
+ * switched that off. Same as web/tidy.js.
  *
  * The time comes from Beyond Family and is kept in a file here, so the alarm still goes off with the internet down and
  * after a restart. Turning on uses the TV's own ADB with the key it already allowed (never asking from here), as the
@@ -33,7 +35,7 @@ final class Tidy {
 
     private static File file(Context c, String name) { return new File(c.getFilesDir(), name); }
 
-    /** What Beyond Family said ({at: "19:15", minutes, wake}), or null when it's off. */
+    /** What Beyond Family said ({at: "19:15", minutes, wake, days, awayUntil, offIfNobody}), or null when it's off. */
     static JSONObject settings(Context c) {
         try {
             JSONObject t = new JSONObject(read(file(c, "tidy.json")));
@@ -61,14 +63,29 @@ final class Tidy {
         JSONObject t = settings(c);
         if (t == null) return;
         String at = t.optString("at");
-        Calendar next = Calendar.getInstance();
-        next.set(Calendar.HOUR_OF_DAY, Integer.parseInt(at.substring(0, 2)));
-        next.set(Calendar.MINUTE, Integer.parseInt(at.substring(3, 5)));
-        next.set(Calendar.SECOND, 0);
-        next.set(Calendar.MILLISECOND, 0);
-        if (next.getTimeInMillis() <= System.currentTimeMillis() + 5_000) next.add(Calendar.DAY_OF_MONTH, 1);
+        long next = TidyDays.next(Calendar.getInstance(), Integer.parseInt(at.substring(0, 2)),
+                Integer.parseInt(at.substring(3, 5)), days(t), away(t));
+        if (next == 0) return;
         // Inexact with a short window: no exact-alarm permission needed, and never more than 30 s late.
-        am.setWindow(AlarmManager.RTC_WAKEUP, next.getTimeInMillis(), 30_000L, pi);
+        am.setWindow(AlarmManager.RTC_WAKEUP, next, 30_000L, pi);
+    }
+
+    private static boolean[] days(JSONObject t) {
+        org.json.JSONArray a = t.optJSONArray("days");
+        if (a == null) return TidyDays.days(null);
+        int[] list = new int[a.length()];
+        for (int i = 0; i < list.length; i++) list[i] = a.optInt(i, -1);
+        return TidyDays.days(list);
+    }
+
+    private static String away(JSONObject t) {
+        return t.isNull("awayUntil") ? null : t.optString("awayUntil", null);
+    }
+
+    /** Turn the TV back off when nobody comes to the alarm: on unless a grown-up switched it off (ADR 0064). */
+    static boolean offIfNobody(Context c) {
+        JSONObject t = settings(c);
+        return t == null || t.optBoolean("offIfNobody", true);
     }
 
     static int minutes(Context c) {
@@ -98,6 +115,8 @@ final class Tidy {
             schedule(c);   // tomorrow's
             final JSONObject t = settings(c);
             if (t == null) return;
+            // Booked before a change of days or a time away: not today after all.
+            if (!TidyDays.goesOff(Calendar.getInstance(), days(t), away(t))) return;
             write(file(c, "tidy-due"), Long.toString(System.currentTimeMillis()));
             final PendingResult done = goAsync();
             final Context app = c.getApplicationContext();
@@ -116,11 +135,11 @@ final class Tidy {
                             if (!old && Sleep.awake(adb)) adb.shell("input keyevent 3");   // home: Beyond TV opens the race
                         }
                     }
-                    if (old) TidyActivity.open(app, minutes(app));
+                    if (old) TidyActivity.open(app, minutes(app), true);
                 } catch (Throwable e) {
                     Checkin.error(app, "tidy", String.valueOf(e.getMessage()));
                     if (Build.VERSION.SDK_INT < 29) {
-                        try { TidyActivity.open(app, minutes(app)); } catch (RuntimeException ignored) {}
+                        try { TidyActivity.open(app, minutes(app), true); } catch (RuntimeException ignored) {}
                     }
                 } finally {
                     done.finish();

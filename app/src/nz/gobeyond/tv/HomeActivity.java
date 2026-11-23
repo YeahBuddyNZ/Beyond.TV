@@ -89,7 +89,7 @@ public class HomeActivity extends Activity implements Family.Screen {
             boolean on = justOn;
             justOn = false;
             if (Tidy.takeDue(this)) {
-                TidyActivity.open(this, Tidy.minutes(this));   // the tidy-up alarm woke the TV, or sent it home
+                TidyActivity.open(this, Tidy.minutes(this), true);   // the tidy-up alarm woke the TV, or sent it home
                 return;
             }
             pressedAt = android.os.SystemClock.elapsedRealtime();
@@ -122,7 +122,7 @@ public class HomeActivity extends Activity implements Family.Screen {
         super.onNewIntent(intent);
         if (home != null) home.reset(true);
         // Home pressed by the tidy-up alarm while the home screen was already up.
-        if (home != null && Tidy.takeDue(this)) TidyActivity.open(this, Tidy.minutes(this));
+        if (home != null && Tidy.takeDue(this)) TidyActivity.open(this, Tidy.minutes(this), true);
     }
 
     private final BroadcastReceiver woke = new BroadcastReceiver() {

@@ -27,15 +27,22 @@ import java.util.List;
  * (29/10/2026): a count up, not a count down, so nobody runs out of time. Left open an hour, it closes. First, with
  * more than one face, Who's tidying?: everyone ticked, OK takes someone out, then Go. Same as web/tidy.js. Opened by
  * the nightly alarm (Tidy), a "tidy" command from Beyond Family, or the home screen when the alarm couldn't open it.
+ * Opened by the alarm, it turns the TV back off if nobody presses a button within 5 minutes (ADR 0064), so a TV that
+ * woke itself in an empty house doesn't stay on.
  */
 public class TidyActivity extends Activity {
-    private static final String MINUTES = "minutes";
+    private static final String MINUTES = "minutes", ALARM = "alarm";
     private static final int EMBER = 0xFFE8A33D;
     /** Nobody pressed anything for an hour: the race was forgotten, so it ends. */
     private static final long LONGEST = 60 * 60_000L;
 
     static void open(Context c, int minutes) {
-        c.startActivity(new Intent(c, TidyActivity.class).putExtra(MINUTES, minutes)
+        open(c, minutes, false);
+    }
+
+    /** alarm: opened by the tidy-up alarm, so nobody may be home (the 5 minute turn-off). */
+    static void open(Context c, int minutes, boolean alarm) {
+        c.startActivity(new Intent(c, TidyActivity.class).putExtra(MINUTES, minutes).putExtra(ALARM, alarm)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP));
     }
 
@@ -43,7 +50,9 @@ public class TidyActivity extends Activity {
     private float k;
     private long started;
     private boolean over, picking;
-    private TextView clock, title, sub;
+    private TextView clock, title, sub, nobody;
+    /** Waiting for anybody to press a button, else the TV turns off. */
+    private boolean waiting;
     private LinearLayout faces;
     private Button close, go;
     private ToneGenerator tone;
@@ -111,6 +120,25 @@ public class TidyActivity extends Activity {
         bp.topMargin = Math.round(50 * k);
         column.addView(close, bp);
 
+        // Opened by the alarm: a quiet line, and the TV turns off if nobody comes.
+        nobody = FeedbackActivity.text(this, "", Ui.regular, 26 * k, 0x99FFFFFF);
+        nobody.setGravity(Gravity.CENTER);
+        nobody.setVisibility(View.GONE);
+        LinearLayout.LayoutParams np = new LinearLayout.LayoutParams(-1, -2);
+        np.topMargin = Math.round(40 * k);
+        column.addView(nobody, np);
+        if (getIntent().getBooleanExtra(ALARM, false) && Tidy.offIfNobody(this)) {
+            waiting = true;
+            java.util.Calendar off = java.util.Calendar.getInstance();
+            off.add(java.util.Calendar.MILLISECOND, (int) TidyDays.OFF_AFTER);
+            String when = android.text.format.DateFormat.getTimeFormat(this).format(off.getTime());
+            nobody.setText(Ui.tr("Ninguém em casa? A TV desliga sozinha às ", "Nobody home? The TV turns itself off at ",
+                    "¿No hay nadie? La TV se apaga sola a las ") + when + Ui.tr(" se ninguém apertar um botão.",
+                    " unless someone presses a button.", " si nadie pulsa un botón."));
+            nobody.setVisibility(View.VISIBLE);
+            handler.postDelayed(turnOff, TidyDays.OFF_AFTER);
+        }
+
         setContentView(root);
         if (faces.getChildCount() > 0) faces.getChildAt(0).requestFocus();
         try {
@@ -155,6 +183,25 @@ public class TidyActivity extends Activity {
         started = SystemClock.uptimeMillis();
         Chime.play();
         tick.run();
+    }
+
+    /** Nobody came to the alarm: the TV goes back to sleep, as the sleep timer does (Sleep.offNow). */
+    private final Runnable turnOff = () -> {
+        if (!waiting) return;
+        waiting = false;
+        AppLog.w("tidy: nobody came, turning the TV off");
+        Sleep.offNow(getApplicationContext(), "tidy-off", null);
+        finish();
+    };
+
+    /** Any button at all means somebody is home: the TV stays on. */
+    @Override public boolean dispatchKeyEvent(android.view.KeyEvent e) {
+        if (waiting && e.getAction() == android.view.KeyEvent.ACTION_DOWN) {
+            waiting = false;
+            handler.removeCallbacks(turnOff);
+            nobody.setVisibility(View.GONE);
+        }
+        return super.dispatchKeyEvent(e);
     }
 
     @Override protected void onDestroy() {
