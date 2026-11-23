@@ -332,11 +332,12 @@ var Guides = (function () {
       page(TIPS, [['Ninguém fica sem tempo: quando todos terminam, a TV diz quem foi o mais rápido.', 'Nobody runs out of time: when everyone\'s done, the TV says who was fastest.', 'A nadie se le acaba el tiempo: cuando todos terminan, la tele dice quién fue el más rápido.', 'Niemandem läuft die Zeit davon: Wenn alle fertig sind, sagt der Fernseher, wer am schnellsten war.', 'Время ни у кого не кончается: когда все закончат, телевизор скажет, кто был быстрее.']])
     ]},
 
-    bedtime: {icon: '🌙', name: ['Respirar para dormir', 'Bedtime breathing', 'Respirar para dormir', 'Atmen vor dem Schlafen', 'Дыхание перед сном'], pages: [
+    bedtime: {icon: '🌙', name: ['Hora de dormir', 'Bedtime', 'Hora de dormir', 'Schlafenszeit', 'Время спать'], pages: [
       page(AIM, [['Acalmar o corpo antes de dormir.', 'Calm your body down before sleep.', 'Calmar el cuerpo antes de dormir.', 'Den Körper vor dem Schlafen beruhigen.', 'Успокоить тело перед сном.']]),
       page(REMOTE, [
+        ['Escolha um som (chuva, ondas ou ventilador) e quanto tempo, depois Boa noite.', 'Pick a sound (rain, waves or a fan) and how long, then Goodnight.', 'Elige un sonido (lluvia, olas o ventilador) y cuánto tiempo, luego Buenas noches.', 'Wähl ein Geräusch (Regen, Wellen oder Ventilator) und wie lange, dann Gute Nacht.', 'Выберите звук (дождь, волны или вентилятор) и время, затем «Спокойной ночи».'],
         ['A luz cresce: inspire. A luz diminui: expire.', 'The light grows: breathe in. It shrinks: breathe out.', 'La luz crece: inspira. Se encoge: espira.', 'Das Licht wird größer: einatmen. Es wird kleiner: ausatmen.', 'Свет растёт: вдох. Уменьшается: выдох.'],
-        ['Fica mais lento aos poucos e depois apaga. Qualquer botão traz a TV de volta.', 'It slows down bit by bit, then fades to dark. Any button brings the TV back.', 'Se va haciendo más lento y luego se apaga. Cualquier botón devuelve la tele.', 'Es wird nach und nach langsamer und dann dunkel. Jede Taste holt den Fernseher zurück.', 'Понемногу замедляется, затем гаснет. Любая кнопка возвращает телевизор.']])
+        ['Fica mais lento aos poucos, a tela e o som diminuem e a TV se desliga sozinha. Qualquer botão antes disso traz a TV de volta.', 'It slows down bit by bit, the screen and the sound fade, then the TV turns itself off. Any button before then brings the TV back.', 'Se va haciendo más lento, la pantalla y el sonido bajan y la tele se apaga sola. Cualquier botón antes de eso devuelve la tele.', 'Es wird nach und nach langsamer, Bild und Ton werden leiser, dann schaltet sich der Fernseher selbst aus. Jede Taste davor holt den Fernseher zurück.', 'Понемногу замедляется, экран и звук затихают, затем телевизор выключается сам. Любая кнопка до этого возвращает телевизор.']])
     ]}
   };
 

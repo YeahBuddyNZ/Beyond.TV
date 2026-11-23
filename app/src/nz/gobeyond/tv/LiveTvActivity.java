@@ -53,6 +53,19 @@ public class LiveTvActivity extends Activity {
         c.startActivity(new Intent(c, LiveTvActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
 
+    /** One channel full screen, by its id (Find, ADR 0057); Back from it is the channel list. */
+    static void play(Context c, String id) {
+        c.startActivity(new Intent(c, LiveTvActivity.class).putExtra("channel", id).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+    }
+
+    /** The channels that play here, in row order, from the copy kept on the TV: a kid's are the kids' ones. */
+    static List<String[]> playable(Context c) {
+        String[][] channels = onAir(kept(c), keptNow(c), System.currentTimeMillis());
+        List<String[]> play = new ArrayList<>();
+        for (String g : People.kid(c) ? new String[] {"kids"} : new String[] {"featured", "news", "more"}) play.addAll(inGroup(channels, g));
+        return play;
+    }
+
     private static final String SITE = "https://yeahbuddynz.github.io/Beyond.TV/live/";
     private static final String LIST_URL = SITE + "channels.json", NOW_URL = SITE + "now.json";
     private static final String YOUTUBE = "com.google.android.youtube.tv";
@@ -126,6 +139,9 @@ public class LiveTvActivity extends Activity {
         list = buildList(shown);
         root.addView(list, new FrameLayout.LayoutParams(-1, -1));
         setContentView(root);
+        // Asked for one channel (Find): straight to it.
+        String want = getIntent().getStringExtra("channel");
+        if (want != null) for (int i = 0; i < playable.length; i++) if (want.equals(playable[i][ID])) { watch(i); break; }
         refresh(getApplicationContext(), () -> {
             // The website had something newer: show it, unless somebody has moved on from the first tile already.
             String[][] fresh = onAir(kept(this), keptNow(this), System.currentTimeMillis());

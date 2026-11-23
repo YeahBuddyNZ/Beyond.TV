@@ -673,7 +673,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 }
 .bt-jobs-foot { margin-top: 44px; text-align: center; }
 
-/* MARK: - Bedtime breathing: one soft violet light on black, growing and shrinking with each breath */
+/* MARK: - Bedtime: one soft violet light on black, growing and shrinking with each breath */
 .bt-layer.bt-bed { background: #000; cursor: none; }
 .bt-layer.bt-bed::before { display: none; }
 .bt-bed .light, .bt-bed .glow { position: absolute; left: 50%; top: 50%; border-radius: 50%; opacity: 0; }
@@ -693,6 +693,46 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   -webkit-transition: opacity 0.8s; transition: opacity 0.8s;
 }
 .bt-bed .hold { position: absolute; left: 0; top: 0; width: 1px; height: 1px; }
+
+/* Bedtime's pick (ADR 0058): a sound, how long, then Goodnight. The one picked wears a lilac ring and a tick. */
+.bt-bed-pick .bt-box { position: absolute; left: 0; right: 0; top: 110px; text-align: center; }
+.bt-bed-pick .moon { font-size: 96px; line-height: 1; margin-bottom: 24px; }
+.bt-bed-pick .bt-heading { display: inline-block; }
+.bt-bed-pick .bt-sub { max-width: 1100px; margin: 18px auto 0; }
+.bt-bed-pick .bt-room-row .bt-button { margin: 0 10px; }
+.bt-bed-pick .bt-buttons { margin-top: 60px; text-align: center; }
+.bt-button.chosen { box-shadow: inset 0 0 0 3px #9E7BFF; }
+.bt-button.chosen.focus { box-shadow: 0 0 0 4px #9E7BFF, 0 16px 34px rgba(0, 0, 0, 0.5); }
+
+/* MARK: - Find (ADR 0057): a microphone that glows while it listens, what was heard, and the matches as big tiles. */
+.bt-find .bt-box { position: absolute; left: 120px; right: 120px; top: 90px; text-align: center; }
+.bt-find .bt-heading { display: inline-block; }
+.bt-find .mic {
+  width: 180px; height: 180px; margin: 40px auto 0; border-radius: 90px; background: rgba(110, 61, 219, 0.35);
+  -webkit-transition: -webkit-transform 0.6s ease-in-out, background-color 0.3s; transition: transform 0.6s ease-in-out, background-color 0.3s;
+}
+.bt-find .mic { position: relative; }
+.bt-find .mic .sym { position: absolute; left: 50%; top: 50%; margin: -48px 0 0 -48px; background-color: #F7F6F2; }
+.bt-find .mic.listening { background: #6E3DDB; -webkit-animation: bt-find-listen 1.6s ease-in-out infinite; animation: bt-find-listen 1.6s ease-in-out infinite; }
+@-webkit-keyframes bt-find-listen { 0%, 100% { -webkit-transform: scale(1); } 50% { -webkit-transform: scale(1.12); } }
+@keyframes bt-find-listen { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+.bt-find .said { margin-top: 30px; min-height: 64px; font-family: 'Sora', 'Inter', sans-serif; font-size: 52px; font-weight: 600; color: #F7F6F2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bt-find .said.hint { font-family: 'Inter', sans-serif; font-size: 32px; font-weight: 500; color: rgba(247, 246, 242, 0.62); }
+.bt-find .bt-buttons { margin-top: 30px; text-align: center; }
+.bt-find .bt-buttons .bt-button { margin: 0 10px; }
+.bt-find .results { margin-top: 56px; font-size: 0; white-space: nowrap; }
+.bt-find .hit {
+  display: inline-block; vertical-align: top; width: 260px; height: 190px; margin: 0 12px; padding: 26px 24px; border-radius: 28px;
+  -webkit-box-sizing: border-box; box-sizing: border-box; text-align: left; white-space: normal; background: rgba(247, 246, 242, 0.1);
+  -webkit-transition: -webkit-transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.2), background-color 0.2s, color 0.2s;
+  transition: transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.2), background-color 0.2s, color 0.2s;
+}
+.bt-find .hit .kind { font-size: 22px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #9E7BFF; }
+.bt-find .hit .name { margin-top: 14px; font-size: 32px; font-weight: 600; line-height: 1.2; overflow: hidden; max-height: 116px; }
+.bt-find .hit.show { background: rgba(110, 61, 219, 0.35); }
+.bt-find .hit.focus { background: #F7F6F2; color: #22221F; -webkit-transform: scale(1.06); transform: scale(1.06); box-shadow: 0 0 0 4px #9E7BFF, 0 16px 34px rgba(0, 0, 0, 0.5); }
+.bt-find .hit.focus .kind { color: #6135D6; }
+.bt-find .none { font-size: 32px; color: rgba(247, 246, 242, 0.62); }
 
 /* MARK: - Party mode */
 .bt-layer.bt-party { background: #0D0C18; cursor: none; overflow: hidden; }

@@ -1,8 +1,10 @@
 /*
- * Ask Beyond and the notes on Google TV (AskActivity, ADR 0025): ask.html runs the same ask.js and notes.js as LG and
+ * Ask Beyond, the notes and Find (ADR 0057) on Google TV (AskActivity, ADR 0025): ask.html runs the same ask.js and notes.js as LG and
  * Samsung in a WebView, and this stands in for the home screen around them. Beyond Family is asked through the TV
  * (BeyondAsk.call, with the TV's own id), card pictures come from TMDB through it too (the key stays in Java), and the
- * remote's keys arrive through AskHost.key. Not loaded on LG or Samsung. Plain ES5.
+ * remote's keys arrive through AskHost.key. Find matches against what the TV says it has (BeyondAsk.games, channels,
+ * apps), hears through the TV's own voice search (BeyondAsk.listen, answered in AskHost.heard) and opens what's picked
+ * through the TV. Not loaded on LG or Samsung. Plain ES5.
  */
 var AskHost = (function () {
   'use strict';
@@ -74,11 +76,57 @@ var AskHost = (function () {
   window.addEventListener('resize', fit);
   fit();
 
-  /** What the TV opened this for: the orb (with a phone's question, asked straight away) or the notes wall. */
+  // MARK: - Find
+
+  var hearing = null;
+
+  /** The TV's voice search answering: what it heard, best guess first, or nothing. */
+  function heard(list) {
+    var h = hearing;
+    hearing = null;
+    if (!h) return;
+    if (list && list.length) h.heard(list); else h.failed();
+  }
+
+  function openFind(listen) {
+    var kid = !!me.kid;
+    Find.open({
+      kid: kid,
+      items: function (done) {
+        var games = json(bridge ? bridge.games() : '[]', []), list = [], i;
+        for (i = 0; i < games.length; i++) (function (g) {
+          list.push({id: g.id, name: g.name, run: function () { if (bridge) bridge.openGame(g.id); }});
+        })(games[i]);
+        list = Find.gameItems(list);
+        list.push({kind: 'thing', id: 'sky', name: tr('Céu de hoje à noite', 'Tonight\'s sky', 'El cielo de esta noche'), also: Find.ALIASES.sky,
+          run: function () { if (bridge) bridge.openThing('sky'); }});
+        list.push({kind: 'thing', id: 'live', name: tr('TV aberta', 'Live TV', 'TV en vivo'), also: Find.ALIASES.live,
+          run: function () { if (bridge) bridge.openThing('live'); }});
+        var channels = json(bridge ? bridge.channels() : '[]', []);
+        for (i = 0; i < channels.length; i++) (function (c) {
+          list.push({kind: 'channel', id: c.id, name: c.name, run: function () { if (bridge) bridge.openChannel(c.id); }});
+        })(channels[i]);
+        var names = window.BeyondTV.watchApps();
+        for (i = 0; i < names.length; i++) (function (name) {
+          list.push({kind: 'app', name: name, run: function () { window.BeyondTV.openApp(name); }});
+        })(names[i]);
+        done(list);
+      },
+      shows: window.Family.linked() ? function (q) { Ask.open(tr('Onde posso assistir ', 'Where can we watch ', '¿Dónde puedo ver ') + q + '?'); }
+        : kid ? null : function (q) {
+          if (!bridge || !bridge.shows(q)) window.BeyondTV.toast(tr('Procure no app da série: ', 'Look in the show\'s app for: ', 'Busca en la app de la serie: ') + q);
+        },
+      listen: bridge && bridge.canListen() ? function (h, f) { hearing = {heard: h, failed: f}; bridge.listen(); } : null
+    }, {listen: listen});
+  }
+
+  /** What the TV opened this for: the orb (with a phone's question, asked straight away), the notes wall, or Find. */
   function start() {
     if (bridge) me = json(bridge.watcher(), me);
-    var mode = bridge ? bridge.mode() : 'ask';
-    if (mode === 'notes') {
+    var mode = bridge ? bridge.mode() : (/[?&]find/.test(location.search) ? 'find' : 'ask');
+    if (mode === 'find') {
+      openFind(bridge ? bridge.text() === 'listen' : false);
+    } else if (mode === 'notes') {
       Notes.set(bridge ? json(bridge.notes(), []) : []);
       Notes.open();
     } else {
@@ -105,5 +153,5 @@ var AskHost = (function () {
   if (!bridge) document.addEventListener('keydown', function (e) { key(e.keyCode === 27 ? 4 : e.keyCode); e.preventDefault(); });
 
   start();
-  return {key: key, done: done, start: start};
+  return {key: key, done: done, start: start, heard: heard};
 })();

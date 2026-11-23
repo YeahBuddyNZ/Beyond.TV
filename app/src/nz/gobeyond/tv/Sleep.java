@@ -94,20 +94,27 @@ final class Sleep {
             if (!NOW.equals(intent.getAction())) return;
             write(c, 0);
             final PendingResult done = goAsync();
-            final Context app = c.getApplicationContext();
-            new Thread(() -> {
-                try (Adb adb = Adb.connect(app, 0, null)) {
-                    // 223 is the sleep key; a TV that ignores it gets the power key, which always turns it off.
-                    adb.shell("input keyevent 223");
-                    Thread.sleep(2500);
-                    if (awake(adb)) adb.shell("input keyevent 26");
-                } catch (Throwable t) {
-                    Checkin.error(app, "sleep", String.valueOf(t.getMessage()));
-                } finally {
-                    done.finish();
-                }
-            }, "sleep").start();
+            offNow(c.getApplicationContext(), "sleep", done::finish);
         }
+    }
+
+    /**
+     * Turns the TV off now through its own ADB: the sleep key, then the power key on TVs that ignore it. On a thread;
+     * then() runs after (or null). The sleep timer and Bedtime (ADR 0058) both end here.
+     */
+    static void offNow(final Context app, final String why, final Runnable then) {
+        new Thread(() -> {
+            try (Adb adb = Adb.connect(app, 0, null)) {
+                // 223 is the sleep key; a TV that ignores it gets the power key, which always turns it off.
+                adb.shell("input keyevent 223");
+                Thread.sleep(2500);
+                if (awake(adb)) adb.shell("input keyevent 26");
+            } catch (Throwable t) {
+                Checkin.error(app, why, String.valueOf(t.getMessage()));
+            } finally {
+                if (then != null) then.run();
+            }
+        }, why).start();
     }
 
     /** True while the screen is still on (dumpsys power says so on every Android TV we have tried). */

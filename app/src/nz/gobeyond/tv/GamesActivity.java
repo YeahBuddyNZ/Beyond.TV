@@ -21,7 +21,7 @@ import java.io.InputStream;
 /**
  * Games, from the remote (ADR 0021): every game and family activity starts here on the TV, no phone needed. Karaoke,
  * board and card games against the robots, silly party games, Milo's Remote Control Land, London's Candy Land, Build it and the light show (all TableActivity), a party, quiz night, the dinner
- * question, the tidy-up race, bedtime breathing and How to play. Quiz night and the dinner question need Beyond Family, because everyone answers on their
+ * question, the tidy-up race, Bedtime (ADR 0058) and How to play. Quiz night and the dinner question need Beyond Family, because everyone answers on their
  * phones. Same as Games.open in web/games.js: a picture for each, in groups (ADR 0047; four since Build it, ADR 0052, so they scroll). A game opens on top of
  * this screen and it stays open, so Back from a game comes back here, one step, not out to the home screen.
  */
@@ -29,8 +29,6 @@ public class GamesActivity extends Activity {
     static void open(Context c) {
         c.startActivity(new Intent(c, GamesActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
-
-    private boolean busy;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,34 +61,7 @@ public class GamesActivity extends Activity {
         root.setClipChildren(false);
 
         boolean linked = Family.linked(this);
-        // The groups, in the same order as Games.open in web/games.js (ADR 0047). Each: picture (web/games/<id>.jpg), name, what it opens.
-        Object[][][] groups = {
-                {{Ui.tr("Vamos jogar", "Let's play", "¡A jugar!")},
-                        // Milo's Remote Control Land (web/rcland.js, ADR 0046), in TableActivity's WebView like the arcade.
-                        {"rcland", Ui.tr("Terra do Controle Remoto do Milo", "Milo's Remote Control Land", "La Tierra Teledirigida de Milo"), (Runnable) () -> TableActivity.open(this, "rcland")},
-                        // London's Candy Land (web/candy.js, ADR 0053), in the same WebView.
-                        {"candy", Ui.tr("A Terra dos Doces da London", "London's Candy Land", "La Tierra de los Dulces de London"), (Runnable) () -> TableActivity.open(this, "candy")},
-                        {"arcade", Ui.tr("Fliperama", "Arcade", "Arcade"), (Runnable) () -> TableActivity.open(this, "arcade")},
-                        {"table", Ui.tr("Jogos de tabuleiro e cartas", "Board and card games", "Juegos de mesa y cartas"), (Runnable) () -> TableActivity.open(this)},
-                        {"silly", Ui.tr("Jogos bobos", "Silly games", "Juegos locos"), (Runnable) () -> TableActivity.open(this, "silly")},
-                        // A guide to every game (web/guides.js, ADR 0043), read in TableActivity's WebView like the board games.
-                        {"guides", Ui.tr("Como jogar", "How to play", "Cómo jugar"), (Runnable) () -> TableActivity.open(this, "guides")}},
-                // Build it (web/builder.js, ADR 0052): real building jobs with the machines, in TableActivity's WebView.
-                {{Ui.tr("Construir", "Build it", "A construir")},
-                        {"road", Ui.tr("Construir uma estrada", "Build a road", "Construir una carretera"), (Runnable) () -> TableActivity.open(this, "road")},
-                        {"bridge", Ui.tr("Construir uma ponte", "Build a bridge", "Construir un puente"), (Runnable) () -> TableActivity.open(this, "bridge")},
-                        {"town", Ui.tr("Planejar uma cidade", "Plan a town", "Planear un pueblo"), (Runnable) () -> TableActivity.open(this, "town")}},
-                {{Ui.tr("Hora da festa", "Party time", "Hora de fiesta")},
-                        {"karaoke", Ui.tr("Karaokê", "Karaoke", "Karaoke"), (Runnable) () -> KaraokePickActivity.open(this)},
-                        {"party", Ui.tr("Festa", "Party", "Fiesta"), (Runnable) () -> PartyPickActivity.open(this)},
-                        {"lights", Ui.tr("Show de luzes", "Light show", "Show de luces"), (Runnable) () -> TableActivity.open(this, "lights")},
-                        {"quiz", Ui.tr("Quiz da noite", "Quiz night", "Noche de quiz"), (Runnable) () -> family("quiz")},
-                        {"dinner", Ui.tr("Pergunta do jantar", "Dinner question", "Pregunta de la cena"), (Runnable) () -> family("question")}},
-                {{Ui.tr("Em casa", "Round the house", "En casa")},
-                        {"lunch", Ui.tr("Lanches da escola", "School lunches", "Almuerzos del cole"), (Runnable) () -> TableActivity.open(this, "lunch")},
-                        {"tidy", Ui.tr("Corrida da arrumação", "Tidy-up race", "Carrera de ordenar"), (Runnable) () -> TidyActivity.open(this, 10)},
-                        {"bedtime", Ui.tr("Respirar para dormir", "Bedtime breathing", "Respirar para dormir"), (Runnable) () -> BedtimeActivity.open(this, 15)}},
-        };
+        Object[][][] groups = groups(this);
         View first = null;
         int tw = Math.round(316 * k), th = Math.round(178 * k);
         for (Object[][] group : groups) {
@@ -128,6 +99,53 @@ public class GamesActivity extends Activity {
 
         setContentView(root);
         first.requestFocus();
+    }
+
+    /**
+     * The groups, in the same order as Games.open in web/games.js (ADR 0047). Each: picture (web/games/<id>.jpg), name,
+     * what it opens from `a`. Find (AskActivity, ADR 0057) opens a game from the same list.
+     */
+    static Object[][][] groups(Activity a) {
+        return new Object[][][] {
+                {{Ui.tr("Vamos jogar", "Let's play", "¡A jugar!")},
+                        // Milo's Remote Control Land (web/rcland.js, ADR 0046), in TableActivity's WebView like the arcade.
+                        {"rcland", Ui.tr("Terra do Controle Remoto do Milo", "Milo's Remote Control Land", "La Tierra Teledirigida de Milo"), (Runnable) () -> TableActivity.open(a, "rcland")},
+                        // London's Candy Land (web/candy.js, ADR 0053), in the same WebView.
+                        {"candy", Ui.tr("A Terra dos Doces da London", "London's Candy Land", "La Tierra de los Dulces de London"), (Runnable) () -> TableActivity.open(a, "candy")},
+                        {"arcade", Ui.tr("Fliperama", "Arcade", "Arcade"), (Runnable) () -> TableActivity.open(a, "arcade")},
+                        {"table", Ui.tr("Jogos de tabuleiro e cartas", "Board and card games", "Juegos de mesa y cartas"), (Runnable) () -> TableActivity.open(a)},
+                        {"silly", Ui.tr("Jogos bobos", "Silly games", "Juegos locos"), (Runnable) () -> TableActivity.open(a, "silly")},
+                        // A guide to every game (web/guides.js, ADR 0043), read in TableActivity's WebView like the board games.
+                        {"guides", Ui.tr("Como jogar", "How to play", "Cómo jugar"), (Runnable) () -> TableActivity.open(a, "guides")}},
+                // Build it (web/builder.js, ADR 0052): real building jobs with the machines, in TableActivity's WebView.
+                {{Ui.tr("Construir", "Build it", "A construir")},
+                        {"road", Ui.tr("Construir uma estrada", "Build a road", "Construir una carretera"), (Runnable) () -> TableActivity.open(a, "road")},
+                        {"bridge", Ui.tr("Construir uma ponte", "Build a bridge", "Construir un puente"), (Runnable) () -> TableActivity.open(a, "bridge")},
+                        {"town", Ui.tr("Planejar uma cidade", "Plan a town", "Planear un pueblo"), (Runnable) () -> TableActivity.open(a, "town")}},
+                {{Ui.tr("Hora da festa", "Party time", "Hora de fiesta")},
+                        {"karaoke", Ui.tr("Karaokê", "Karaoke", "Karaoke"), (Runnable) () -> KaraokePickActivity.open(a)},
+                        {"party", Ui.tr("Festa", "Party", "Fiesta"), (Runnable) () -> PartyPickActivity.open(a)},
+                        {"lights", Ui.tr("Show de luzes", "Light show", "Show de luces"), (Runnable) () -> TableActivity.open(a, "lights")},
+                        {"quiz", Ui.tr("Quiz da noite", "Quiz night", "Noche de quiz"), (Runnable) () -> family(a, "quiz")},
+                        {"dinner", Ui.tr("Pergunta do jantar", "Dinner question", "Pregunta de la cena"), (Runnable) () -> family(a, "question")}},
+                {{Ui.tr("Em casa", "Round the house", "En casa")},
+                        {"lunch", Ui.tr("Lanches da escola", "School lunches", "Almuerzos del cole"), (Runnable) () -> TableActivity.open(a, "lunch")},
+                        {"tidy", Ui.tr("Corrida da arrumação", "Tidy-up race", "Carrera de ordenar"), (Runnable) () -> TidyActivity.open(a, 10)},
+                        {"bedtime", Ui.tr("Hora de dormir", "Bedtime", "Hora de dormir"), (Runnable) () -> BedtimeActivity.open(a, 0)}},
+        };
+    }
+
+    /** Opens one game by its id from `a`; false when there's no such game. */
+    static boolean start(Activity a, String id) {
+        for (Object[][] group : groups(a)) {
+            for (int i = 1; i < group.length; i++) {
+                if (group[i][0].equals(id)) {
+                    ((Runnable) group[i][2]).run();
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /** One game: its picture, its name over the bottom, a little bigger with a lilac ring when it has the focus. */
@@ -172,18 +190,21 @@ public class GamesActivity extends Activity {
     }
 
     /** Quiz night or the dinner question: Beyond Family starts it, and its command opens the game on every TV. */
-    private void family(String kind) {
-        if (!Family.linked(this)) {
-            Toast.makeText(this, Ui.tr("Conecte o Beyond Family primeiro, em Configurações.",
+    private static boolean busy;
+
+    /** Quiz night or the dinner question: Beyond Family starts it, and its command opens the game on every TV. */
+    static void family(Activity a, String kind) {
+        if (!Family.linked(a)) {
+            Toast.makeText(a, Ui.tr("Conecte o Beyond Family primeiro, em Configurações.",
                     "Link Beyond Family first, in Settings.", "Conecta Beyond Family primero, en Ajustes."), Toast.LENGTH_LONG).show();
             return;
         }
         if (busy) return;
         busy = true;
-        Family.game(this, kind, "start", err -> {
+        Family.game(a, kind, "start", err -> {
             busy = false;
-            if (err != null) Toast.makeText(this, err, Toast.LENGTH_SHORT).show();
-            else finish();
+            if (err != null) Toast.makeText(a, err, Toast.LENGTH_SHORT).show();
+            else a.finish();
         });
     }
 }

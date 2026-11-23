@@ -197,10 +197,26 @@ var LiveTV = (function () {
     return t;
   }
 
+  /** The channels that play right here, in row order: a kid's are the kids' ones. */
+  function playableOf(channels) {
+    var kid = window.Profiles && Profiles.kid(), out = kid ? inGroup(channels, 'kids') : [];
+    if (!kid) for (var g = 0; g < 3; g++) out = out.concat(inGroup(channels, GROUPS[g]));
+    return out;
+  }
+
+  /** What's on air from the copy kept on the TV, straight away (Find, find.js, can't wait for the website). */
+  function keptNow() { return playableOf(onAir(pickList(null, read(KEY)), read(NOW_KEY), Date.now())); }
+
+  /** One channel full screen, by its id (Find). Up and down still change channel. */
+  function play(id) {
+    var list = keptNow();
+    for (var i = 0; i < list.length; i++) if (list[i].id === id) return watch(list, i);
+    return null;
+  }
+
   function screen(host, channels) {
     var kid = window.Profiles && Profiles.kid(), rows = sources(host.apps);
-    var playable = kid ? inGroup(channels, 'kids') : [];
-    if (!kid) for (var g = 0; g < 3; g++) playable = playable.concat(inGroup(channels, GROUPS[g]));
+    var playable = playableOf(channels);
     var box = null, shift = 0;
     UI.open({
       cls: 'bt-live',
@@ -358,7 +374,7 @@ var LiveTV = (function () {
     return api;
   }
 
-  return {open: open, rules: {pickList: pickList, onAir: onAir, inGroup: inGroup, sources: sources, step: step,
+  return {open: open, channels: keptNow, play: play, rules: {pickList: pickList, onAir: onAir, inGroup: inGroup, sources: sources, step: step,
     embedUrl: embedUrl, logoUrl: logoUrl, NEWS: NEWS}};
 })();
 

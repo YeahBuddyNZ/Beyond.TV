@@ -7,6 +7,31 @@ var I18N = (function () {
 
   var lang = 'en';
   var german = {
+    // Find and Bedtime (find.js, bedtime.js)
+    "Channel": "Sender",
+    "Shows and movies": "Serien und Filme",
+    "In Beyond™ TV": "In Beyond™ TV",
+    "Type what you're after": "Schreib, was du suchst",
+    "A game, a channel, a show": "Ein Spiel, ein Sender, eine Serie",
+    "Say a game, a channel or a show": "Sag ein Spiel, einen Sender oder eine Sendung",
+    "Say a game, a channel, an app or a show": "Sag ein Spiel, einen Sender, eine App oder eine Serie",
+    "Go ahead, I'm listening…": "Sprich los, ich höre zu…",
+    "I didn't catch that. Try again, or type it.": "Das hab ich nicht verstanden. Versuch es nochmal oder schreib es.",
+    "Try “Candy Land”, “PBS KIDS” or “Bluey”": "Probier „Candy Land“, „PBS KIDS“ oder „Bluey“",
+    "Try “Candy Land”, “Sky News” or “Bluey”": "Probier „Candy Land“, „Sky News“ oder „Bluey“",
+    "Say it again": "Nochmal sagen",
+    "Talk": "Sprechen",
+    "Nothing by that name here. Try another word.": "Hier gibt es nichts mit diesem Namen. Versuch ein anderes Wort.",
+    "Look for “": "Suchen nach „",
+    "Where can we watch ": "Wo läuft ",
+    "Look in the show's app for: ": "Such in der App der Serie nach: ",
+    "Waves": "Wellen",
+    "Fan": "Ventilator",
+    "Quiet": "Stille",
+    "The screen dims, a calm sound plays, then the TV turns itself off.": "Der Bildschirm wird dunkler, ein ruhiges Geräusch läuft, dann schaltet sich der Fernseher selbst aus.",
+    "Sound": "Geräusch",
+    "For how long": "Wie lange",
+    "Goodnight": "Gute Nacht",
     // How to play and Learn chess (guides.js, chesscoach.js)
     "How to play": "Wie man spielt",
     "▼ How to play": "▼ Wie man spielt",
@@ -829,6 +854,30 @@ var I18N = (function () {
   }
 
   var russian = {
+    // Find and Bedtime (find.js, bedtime.js)
+    "Channel": "Канал",
+    "Shows and movies": "Сериалы и фильмы",
+    "In Beyond™ TV": "В Beyond™ TV",
+    "Type what you're after": "Напишите, что ищете",
+    "A game, a channel, a show": "Игра, канал, сериал",
+    "Say a game, a channel or a show": "Назовите игру, канал или передачу",
+    "Say a game, a channel, an app or a show": "Назовите игру, канал, приложение или сериал",
+    "Go ahead, I'm listening…": "Говорите, я слушаю…",
+    "I didn't catch that. Try again, or type it.": "Не расслышал. Попробуйте ещё раз или напишите.",
+    "Try “Candy Land”, “PBS KIDS” or “Bluey”": "Попробуйте «Candy Land», «PBS KIDS» или «Bluey»",
+    "Try “Candy Land”, “Sky News” or “Bluey”": "Попробуйте «Candy Land», «Sky News» или «Bluey»",
+    "Say it again": "Сказать ещё раз",
+    "Nothing by that name here. Try another word.": "Здесь нет ничего с таким названием. Попробуйте другое слово.",
+    "Look for “": "Искать «",
+    "Where can we watch ": "Где посмотреть ",
+    "Look in the show's app for: ": "Ищите в приложении сериала: ",
+    "Waves": "Волны",
+    "Fan": "Вентилятор",
+    "Quiet": "Тишина",
+    "The screen dims, a calm sound plays, then the TV turns itself off.": "Экран темнеет, звучит спокойный звук, затем телевизор выключается сам.",
+    "Sound": "Звук",
+    "For how long": "Как долго",
+    "Goodnight": "Спокойной ночи",
     // How to play and Learn chess (guides.js, chesscoach.js)
     "How to play": "Как играть",
     "▼ How to play": "▼ Как играть",

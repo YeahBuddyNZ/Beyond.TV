@@ -70,7 +70,7 @@ EOF
 # rules and one robot for every TV. Ask Beyond and the notes from a phone are too (AskActivity, ADR 0025).
 rm -rf out/assets && mkdir -p out/assets && cp -R app/assets/. out/assets/
 for f in table.html table-host.js table.js sfx.js ludo.js chess.js chesscoach.js snap.js laughs.js lunch.js guides.js arcade.js rcland.js candy.js builder.js lights.js skydata.js sky.js skylook.js strings.js ui.js home.css beyond.css table.css \
-    ask.html ask-host.js ask.js notes.js; do
+    ask.html ask-host.js ask.js notes.js find.js; do
   cp "web/$f" out/assets/
 done
 # The Games screen's pictures (tools/game_art.js), shared with LG and Samsung.
