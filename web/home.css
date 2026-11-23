@@ -1186,6 +1186,28 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .bt-live-help .line { margin-top: 44px; max-width: 1400px; }
 .bt-live-help .what { font-family: 'Sora', 'Inter', sans-serif; font-weight: 600; font-size: 38px; }
 .bt-live-help .bt-buttons { margin-top: 60px; text-align: left; }
+/* Channels (ADR 0065): the guide over the picture, numbers on tiles, the banner while surfing, Choose channels. */
+.bt-layer.bt-live.over { background: rgba(13, 12, 24, 0.93); }
+.bt-layer.bt-live.over::before { opacity: 0.55; }
+.bt-live-tile .num { position: absolute; left: 10px; top: 10px; min-width: 24px; padding: 2px 9px; border-radius: 12px; background: rgba(13, 12, 24, 0.78); color: #F7F6F2; font-size: 20px; font-weight: 600; line-height: 26px; text-align: center; }
+.bt-live-tile.off .face { opacity: 0.35; }
+.bt-live-tile.off .from { color: #E8A33D; }
+.bt-live .help .bt-button { margin-right: 20px; }
+.bt-live-choose .grid { margin-top: 30px; }
+.bt-live-choose .grid .bt-live-tile { margin-bottom: 30px; }
+.bt-live-player .banner { position: absolute; left: 60px; bottom: 60px; max-width: 1200px; padding: 22px 34px 22px 26px; border-radius: 26px; background: rgba(13, 12, 24, 0.86); color: #F7F6F2; white-space: nowrap; -webkit-transition: opacity 0.6s; transition: opacity 0.6s; }
+.bt-live-player .banner .num { display: inline-block; vertical-align: middle; min-width: 86px; font-family: 'Sora', 'Inter', sans-serif; font-weight: 700; font-size: 60px; text-align: center; color: #9E7BFF; }
+.bt-live-player .banner .logo { display: inline-block; vertical-align: middle; width: 96px; height: 96px; margin: 0 24px 0 14px; border-radius: 20px; }
+.bt-live-player .banner .words { display: inline-block; vertical-align: middle; max-width: 900px; white-space: normal; }
+.bt-live-player .banner .who { font-family: 'Sora', 'Inter', sans-serif; font-weight: 600; font-size: 36px; }
+.bt-live-player .banner .line { margin-top: 6px; font-size: 24px; color: rgba(247, 246, 242, 0.85); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bt-live-player .banner .line.next { color: rgba(247, 246, 242, 0.6); }
+.bt-live-player .banner .live { display: inline-block; padding: 1px 10px; margin-right: 4px; border-radius: 8px; background: #6E3DDB; color: #FFF; font-size: 20px; font-weight: 600; }
+.bt-live-player .card { position: absolute; left: 0; top: 330px; width: 1920px; text-align: center; }
+.bt-live-player .card .bt-live-tile { margin: 0; }
+.bt-live-player .card .name, .bt-live-player .card .from { display: none; }
+.bt-live-player .card .bt-sub { margin-top: 24px; font-size: 34px; }
+.bt-live-player .hint { -webkit-transition: opacity 0.6s; transition: opacity 0.6s; }
 .bt-live-player .channel { position: absolute; left: 60px; bottom: 60px; padding: 18px 34px; border-radius: 20px; background: rgba(13, 12, 24, 0.82); font-size: 34px; color: #F7F6F2; -webkit-transition: opacity 0.6s; transition: opacity 0.6s; }
 .bt-live-player .channel b { font-family: 'Sora', 'Inter', sans-serif; font-weight: 600; }
 .bt-live-player .channel span { color: rgba(247, 246, 242, 0.7); }

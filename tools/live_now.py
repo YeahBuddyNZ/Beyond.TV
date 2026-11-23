@@ -11,6 +11,13 @@ It also keeps each channel's own picture in docs/live/logos/<id>.jpg for the Liv
 Now and next (ADR 0058): it also keeps the live video's title (what is on now) and, when the channel has
 scheduled one, the next stream's title and start time, read from that video's own page.
 
+Mix channels (ADR 0065): a channel in channels.json with "mix" (a list of official YouTube channels) instead of
+"youtube" is ours, made of those channels' own latest uploads: NZ Music from the artists' own channels, NZ News from
+1News and RNZ, and so on. For each, the newest few videos of every channel in it (embeddable, between a minute and three
+hours) go in now.json under "mixes", taken in turn, so the TVs can play them one after another, picked by the clock so
+every TV is at the same place, like a real channel. Only what those channels put up themselves, played in YouTube's own
+player: never anything copied or kept by us.
+
 Usage: python3 tools/live_now.py docs/live
 """
 import json, os, re, sys, time, urllib.request
@@ -135,6 +142,88 @@ def next_up(upcoming, ahead=24 * 3600):
     return {'title': soonest[1], 'at': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(soonest[0]))}
 
 
+def length(text):
+    """Seconds from "4:25" or "1:12:31"; 0 when it isn't a length."""
+    if not text or not re.match(r'^\d+(?::\d{2}){1,2}$', text):
+        return 0
+    secs = 0
+    for part in text.split(':'):
+        secs = secs * 60 + int(part)
+    return secs
+
+
+def uploads(cid, most=5):
+    """The newest uploads of one channel that play in YouTube's own player elsewhere: [{'v', 't', 's'}]."""
+    data = initial_data(get('https://www.youtube.com/channel/%s/videos' % cid))
+    if data is None:
+        raise ValueError('no channel data on the page')
+    found = []
+
+    def look(o):
+        if isinstance(o, dict):
+            if 'lockupViewModel' in o:
+                l = o['lockupViewModel']
+                m = re.search(r'"text": "(\d+(?::\d{2}){1,2})"', json.dumps(l))
+                found.append((l.get('contentId'), lockup_title(l), length(m.group(1)) if m else 0))
+                return
+            if 'videoRenderer' in o:
+                v = o['videoRenderer']
+                runs = (v.get('title') or {}).get('runs') or [{}]
+                found.append((v.get('videoId'), runs[0].get('text', ''), length((v.get('lengthText') or {}).get('simpleText'))))
+                return
+            for x in o.values():
+                look(x)
+        elif isinstance(o, list):
+            for x in o:
+                look(x)
+
+    look(data)
+    out = []
+    for vid, title, secs in found:
+        if len(out) >= most:
+            break
+        # Trailers and teasers are too short to watch, live streams and replays have no length here.
+        if not vid or not re.match(r'^[A-Za-z0-9_-]{11}$', vid) or secs < 60 or secs > 3 * 3600:
+            continue
+        if not embeddable(vid):
+            continue
+        out.append({'v': vid, 't': clean_title(title), 's': secs})
+        time.sleep(0.2)
+    return out
+
+
+def embeddable(vid):
+    """YouTube's oEmbed answers 401 for a video its owner keeps off other sites, 404 for one that is gone."""
+    try:
+        urllib.request.urlopen(urllib.request.Request(
+            'https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/watch?v=' + vid,
+            headers={'User-Agent': UA}), timeout=15).read(4096)
+        return True
+    except Exception:
+        return False
+
+
+def mix(c, before):
+    """A mix channel's videos, one from each of its channels in turn, newest first; at most 60."""
+    lists = []
+    for cid in c['mix']:
+        try:
+            lists.append(uploads(cid))
+        except Exception as e:
+            print('%s %s: %s' % (c['id'], cid, e), file=sys.stderr)
+        time.sleep(0.3)
+    out, seen = [], set()
+    for i in range(max([len(l) for l in lists] or [0])):
+        for l in lists:
+            if i < len(l) and l[i]['v'] not in seen and len(out) < 60:
+                seen.add(l[i]['v'])
+                out.append(l[i])
+    # Too few read this time (YouTube turned us away): keep what it had.
+    if len(out) < 4 and len(before.get(c['id']) or []) > len(out):
+        return before[c['id']]
+    return out
+
+
 def save_logo(url, path):
     req = urllib.request.Request(url, headers={'User-Agent': UA})
     data = urllib.request.urlopen(req, timeout=25).read(300 * 1024)
@@ -148,9 +237,15 @@ def main(folder):
     channels = json.load(open(os.path.join(folder, 'channels.json')))['channels']
     os.makedirs(os.path.join(folder, 'logos'), exist_ok=True)
     try:
-        before = json.load(open(os.path.join(folder, 'now.json'))).get('channels', {})
+        old = json.load(open(os.path.join(folder, 'now.json')))
     except (OSError, ValueError):
-        before = {}
+        old = {}
+    before, mixes_before = old.get('channels', {}), old.get('mixes', {})
+    mixes = {}
+    for c in [c for c in channels if c.get('mix')]:
+        mixes[c['id']] = mix(c, mixes_before)
+        print('%-14s %d videos' % (c['id'], len(mixes[c['id']])))
+    channels = [c for c in channels if c.get('youtube')]
     now, read = {}, 0
     for c in channels:
         try:
@@ -177,8 +272,10 @@ def main(folder):
         print('Only %d of %d channels read: keeping the old now.json' % (read, len(channels)), file=sys.stderr)
         return
     out = {'about': 'Written by tools/live_now.py when the website builds: the live video each channel is streaming now, '
-                    'its title, and the next scheduled stream when there is one (ADR 0058).',
-           'at': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), 'channels': now}
+                    'its title, and the next scheduled stream when there is one (ADR 0058); for each mix channel, the latest '
+                    'videos of the channels in it: v the video, t its title, s its length in seconds (ADR 0065).',
+           'at': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), 'channels': now,
+           'mixes': {k: v for k, v in mixes.items() if v}}
     with open(os.path.join(folder, 'now.json'), 'w') as f:
         json.dump(out, f, indent=1)
         f.write('\n')

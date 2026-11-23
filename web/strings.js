@@ -46,6 +46,16 @@ var I18N = (function () {
     "Learn chess": "Schach lernen",
     "Step by step: every piece, every rule, then a game with a coach.": "Schritt für Schritt: jede Figur, jede Regel, dann eine Partie mit Trainer.",
     "Lessons done: {n} of {m}": "Lektionen geschafft: {n} von {m}",
+    // Channels (livetv.js, ADR 0065)
+    "Press OK to open ": "OK drücken zum Öffnen: ",
+    "The channels from your aerial": "Die Sender über deine Antenne",
+    "An app on your TV": "Eine App auf deinem Fernseher",
+    "There's no channel ": "Es gibt keinen Sender ",
+    "▲ ▼ change channel   ·   OK for the guide": "▲ ▼ Sender wechseln   ·   OK für die Übersicht",
+    "Made in Aotearoa": "Aus Aotearoa",
+    "Choose channels": "Sender auswählen",
+    "Turn off the ones you don't watch. Changing channel skips them.": "Schalte die aus, die ihr nicht schaut. Beim Umschalten werden sie übersprungen.",
+    "Keep at least one channel on": "Lass mindestens einen Sender an",
     // Live TV (livetv.js)
     "Pick a channel": "Such dir einen Sender aus",
     "Free channels, no subscription": "Kostenlose Sender, ohne Abo",
@@ -942,6 +952,16 @@ var I18N = (function () {
     "Learn chess": "Учимся шахматам",
     "Step by step: every piece, every rule, then a game with a coach.": "Шаг за шагом: каждая фигура, каждое правило, потом партия с тренером.",
     "Lessons done: {n} of {m}": "Пройдено уроков: {n} из {m}",
+    // Channels (livetv.js, ADR 0065)
+    "Press OK to open ": "Нажмите OK, чтобы открыть ",
+    "The channels from your aerial": "Каналы с вашей антенны",
+    "An app on your TV": "Приложение на вашем телевизоре",
+    "There's no channel ": "Нет канала ",
+    "▲ ▼ change channel   ·   OK for the guide": "▲ ▼ переключить канал   ·   OK открывает список",
+    "Made in Aotearoa": "Сделано в Аотеароа",
+    "Choose channels": "Выбрать каналы",
+    "Turn off the ones you don't watch. Changing channel skips them.": "Выключите те, что вы не смотрите. При переключении они пропускаются.",
+    "Keep at least one channel on": "Оставьте хотя бы один канал",
     // Live TV (livetv.js)
     "Pick a channel": "Выберите канал",
     "Free channels, no subscription": "Бесплатные каналы, без подписки",

@@ -506,6 +506,17 @@ final class German {
             case "Couldn't tell Beyond Family just now.": return "Beyond Family ließ sich gerade nicht erreichen.";
             case "Thanks, ": return "Danke, ";
             case "! It's ticked off in Beyond Family.": return "! Es ist in Beyond Family abgehakt.";
+            // Channels (LiveTvActivity, ADR 0065)
+            case "Press OK to open ": return "OK drücken zum Öffnen: ";
+            case "The channels from your aerial": return "Die Sender über deine Antenne";
+            case "An app on your TV": return "Eine App auf deinem Fernseher";
+            case "There's no channel ": return "Es gibt keinen Sender ";
+            case "▲ ▼ change channel   ·   OK for the guide": return "▲ ▼ Sender wechseln   ·   OK für die Übersicht";
+            case "Made in Aotearoa": return "Aus Aotearoa";
+            case "Choose channels": return "Sender auswählen";
+            case "Turn off the ones you don't watch. Changing channel skips them.": return "Schalte die aus, die ihr nicht schaut. Beim Umschalten werden sie übersprungen.";
+            case "Keep at least one channel on": return "Lass mindestens einen Sender an";
+            case "Open channels in the YouTube app (smoother on older TVs)": return "Sender in der YouTube-App öffnen (flüssiger auf älteren Fernsehern)";
             // Live TV (LiveTvActivity)
             case "Pick a channel": return "Such dir einen Sender aus";
             case "Free channels, no subscription": return "Kostenlose Sender, ohne Abo";

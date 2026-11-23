@@ -466,6 +466,21 @@ var TV = (function () {
     /** Key codes: the arrows, OK and the TV's Back (LG and Orsay 461, Tizen 10009). */
     keys: {left: 37, up: 38, right: 39, down: 40, ok: 13, back: samsung ? 10009 : 461},
 
+    /**
+     * Samsung only passes on the number keys and CH+ / CH- once asked (Live TV, ADR 0065): on while Live TV is open,
+     * off after, so the TV's own channel keys work everywhere else. LG passes them on anyway.
+     */
+    wantKeys: function (on) {
+      if (!samsung) return;
+      var names = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'ChannelUp', 'ChannelDown'];
+      for (var i = 0; i < names.length; i++) {
+        try {
+          if (on) window.tizen.tvinputdevice.registerKey(names[i]);
+          else window.tizen.tvinputdevice.unregisterKey(names[i]);
+        } catch (e) {}
+      }
+    },
+
     /** A key code from the remote as the rest of the app knows it (Orsay's remote sends its own). */
     code: function (k) { return orsay && ORSAY_KEYS[k] ? ORSAY_KEYS[k] : k; }
   };
