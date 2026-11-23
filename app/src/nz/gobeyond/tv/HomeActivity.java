@@ -165,8 +165,19 @@ public class HomeActivity extends Activity implements Family.Screen {
             return true;
         }
         if (RemoteKeys.onKey(this, event)) return true;
+        // The remote's search button, where the TV hands it to the home screen: Find, listening (ADR 0062).
+        if (event.getKeyCode() == KeyEvent.KEYCODE_SEARCH) {
+            if (event.getAction() == KeyEvent.ACTION_UP) AskActivity.find(this, true);
+            return true;
+        }
         if (home != null && home.onKey(event)) return true;
         return super.dispatchKeyEvent(event);
+    }
+
+    /** The remote's microphone on TVs that ask the app in front first: Find, listening (ADR 0062). */
+    @Override public boolean onSearchRequested() {
+        AskActivity.find(this, true);
+        return true;
     }
 
     // MARK: - A message from Beyond Family

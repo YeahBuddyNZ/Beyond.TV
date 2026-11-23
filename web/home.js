@@ -270,13 +270,15 @@
         if (!ok) toast(tr('Abra gobeyond.nz/election no navegador da TV.', 'Open gobeyond.nz/election in the TV\'s browser.', 'Abre gobeyond.nz/election en el navegador de la TV.'));
       });
     }});
+    // Find (find.js, ADR 0062): say a game, a channel, an app or a show, and open it with OK. For everyone, kids included.
+    list.push({icon: 'mic', label: tr('Encontrar', 'Find', 'Buscar'), run: function () { openFind(false); }});
     // Live TV (livetv.js, ADR 0042): the aerial, the free-to-air apps and free world news on one screen.
     list.push({icon: 'live_tv', label: tr('TV aberta', 'Live TV', 'TV en vivo'), run: openLive});
     if (!kid) list.push({icon: 'hdmi', label: tr('Entradas HDMI', 'HDMI Inputs', 'Entradas HDMI'), run: function () {
       st.zone = Z.SHELF; openDrawer(); st.drawer = 1 < drawerInputs ? 1 : 0; updateFocus();
     }});
-    // Bedtime breathing, in the evening: a night light that breathes, then fades to dark.
-    if (Data.isNight(Date.now())) list.push({icon: 'bedtime', label: tr('Respirar para dormir', 'Bedtime breathing', 'Respirar para dormir'), run: function () { Bedtime.start(15); }});
+    // Bedtime (ADR 0063), in the evening: a night light that breathes, a calm sound, then the TV turns itself off.
+    if (Data.isNight(Date.now())) list.push({icon: 'bedtime', label: tr('Hora de dormir', 'Bedtime', 'Hora de dormir'), run: function () { Bedtime.choose(); }});
     // Games, for anyone with the remote: karaoke, a party, quiz night and the rest, no phone needed (games.js).
     list.push({icon: 'gamepad', label: tr('Jogos', 'Games', 'Juegos'), run: function () { Games.open(); }});
     // Tonight's sky: a star chart for here and the moon (sky.js). For everyone, kids included.
@@ -743,7 +745,7 @@
       rows.push([mo.emoji, mo.name + ', ' + Math.round(mo.lit * 100) + '% ' + tr('iluminada', 'lit', 'iluminada'),
         tr('O botão da estrela, lá em cima', 'The star button, up the top', 'El botón de la estrella, arriba')]);
     }
-    if (night) rows.push(['🌙', tr('Respirar para dormir', 'Bedtime breathing', 'Respirar para dormir'), tr('No botão da lua, lá em cima', 'The moon button, up the top', 'En el botón de la luna, arriba')]);
+    if (night) rows.push(['🌙', tr('Hora de dormir', 'Bedtime', 'Hora de dormir'), tr('No botão da lua, lá em cima', 'The moon button, up the top', 'En el botón de la luna, arriba')]);
     if (!linked && !kid) rows.push(['✨', tr('Conecte o Beyond Family', 'Link Beyond Family', 'Conecta Beyond Family'), tr('E os planos da casa aparecem aqui', "And your home's plans show up here", 'Y los planes de casa aparecen aquí')]);
     // A note up takes the space under the card, so the card keeps to one line (renderNotes).
     var room = Notes.count() ? 1 : linked ? 3 : 4;
@@ -1176,7 +1178,39 @@
   }
 
   /** The Live TV screen, with this TV's aerial and apps. Plex opens Plex itself here, for its free channels. */
-  function openLive(play) {
+  /**
+   * Find (find.js, ADR 0062): what's on this TV for it to match. The Games screen, Tonight's sky and Live TV, the
+   * channels that play here, and the apps Ask Beyond may point at (a kid's own shelf). A show goes to Ask Beyond when
+   * Beyond Family is linked, else to YouTube for grown-ups.
+   */
+  function openFind(listen) {
+    var kid = Profiles.kid();
+    Find.open({
+      kid: kid,
+      items: function (done) {
+        var list = Find.gameItems(Games.list()), i;
+        list.push({kind: 'thing', id: 'sky', name: tr('Céu de hoje à noite', 'Tonight\'s sky', 'El cielo de esta noche'), also: Find.ALIASES.sky, run: function () { Sky.open(); }});
+        list.push({kind: 'thing', id: 'live', name: tr('TV aberta', 'Live TV', 'TV en vivo'), also: Find.ALIASES.live, run: openLive});
+        var channels = LiveTV.channels();
+        for (i = 0; i < channels.length; i++) (function (c) {
+          list.push({kind: 'channel', id: c.id, name: c.name, run: function () { openLive(c.id); }});
+        })(channels[i]);
+        var names = watchApps();
+        for (i = 0; i < names.length; i++) (function (name) {
+          list.push({kind: 'app', name: name, run: function () { openApp(name); }});
+        })(names[i]);
+        done(list);
+      },
+      shows: Family.linked() ? function (q) { Ask.open(tr('Onde posso assistir ', 'Where can we watch ', '¿Dónde puedo ver ') + q + '?'); }
+        : kid ? null : function (q) {
+          var yt = openApp('YouTube');
+          toast(yt ? tr('Procure no YouTube: ', 'Search YouTube for: ', 'Busca en YouTube: ') + q
+            : tr('Procure no app da série: ', 'Look in the show\'s app for: ', 'Busca en la app de la serie: ') + q);
+        }
+    }, {listen: listen});
+  }
+
+    function openLive(play) {
     var live = liveTV();
     LiveTV.open({
       play: typeof play === 'string' ? play : null,

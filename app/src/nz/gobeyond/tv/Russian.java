@@ -13,6 +13,16 @@ final class Russian {
 
     static String text(String english) {
         switch (english) {
+            // Find and Bedtime (ADR 0062, ADR 0063)
+            case "Find": return "Найти";
+            case "Say a game, a channel or a show": return "Назовите игру, канал или передачу";
+            case "Waves": return "Волны";
+            case "Fan": return "Вентилятор";
+            case "Quiet": return "Тишина";
+            case "The screen dims, a calm sound plays, then the TV turns itself off.": return "Экран темнеет, звучит спокойный звук, затем телевизор выключается сам.";
+            case "Sound": return "Звук";
+            case "For how long": return "Как долго";
+            case "Goodnight": return "Спокойной ночи";
             case "Live TV": return "Телеканалы";
             case "All Apps": return "Приложения";
             case "Found your music. It's on the home screen now, up in the corner.": return "Ваша музыка найдена. Она теперь в углу главного экрана.";

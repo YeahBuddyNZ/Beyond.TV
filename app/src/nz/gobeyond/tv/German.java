@@ -6,6 +6,17 @@ final class German {
 
     static String text(String english) {
         switch (english) {
+            // Find and Bedtime (ADR 0062, ADR 0063)
+            case "Find": return "Finden";
+            case "Say a game, a channel or a show": return "Sag ein Spiel, einen Sender oder eine Sendung";
+            case "Rain": return "Regen";
+            case "Waves": return "Wellen";
+            case "Fan": return "Ventilator";
+            case "Quiet": return "Stille";
+            case "The screen dims, a calm sound plays, then the TV turns itself off.": return "Der Bildschirm wird dunkler, ein ruhiges Geräusch läuft, dann schaltet sich der Fernseher selbst aus.";
+            case "Sound": return "Geräusch";
+            case "For how long": return "Wie lange";
+            case "Goodnight": return "Gute Nacht";
             case "Live TV": return "Live-TV";
             case "All Apps": return "Alle Apps";
             case "Found your music. It's on the home screen now, up in the corner.": return "Deine Musik ist gefunden. Sie ist jetzt oben in der Ecke des Startbildschirms.";

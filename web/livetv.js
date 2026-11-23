@@ -239,6 +239,16 @@ var LiveTV = (function () {
     return t;
   }
 
+  /** The channels that play right here, in row order: a kid's are the kids' ones. */
+  function playableOf(channels) {
+    var kid = window.Profiles && Profiles.kid(), out = kid ? inGroup(channels, 'kids') : [];
+    if (!kid) for (var g = 0; g < 3; g++) out = out.concat(inGroup(channels, GROUPS[g]));
+    return out;
+  }
+
+  /** What's on air from the copy kept on the TV, straight away (Find, find.js, can't wait for the website). */
+  function keptNow() { return playableOf(onAir(pickList(null, read(KEY)), read(NOW_KEY), Date.now())); }
+
   function who() { return window.Profiles && Profiles.current() ? Profiles.current().id || '' : ''; }
 
   function clock(at) {
@@ -486,7 +496,7 @@ var LiveTV = (function () {
     return api;
   }
 
-  return {open: open, logoUrl: logoUrl, rules: {pickList: pickList, onAir: onAir, inGroup: inGroup, sources: sources, step: step,
+  return {open: open, logoUrl: logoUrl, channels: keptNow, rules: {pickList: pickList, onAir: onAir, inGroup: inGroup, sources: sources, step: step,
     embedUrl: embedUrl, logoUrl: logoUrl, nextOf: nextOf, favsOf: favsOf, toggleFav: toggleFav, favourites: favourites, NEWS: NEWS}};
 })();
 

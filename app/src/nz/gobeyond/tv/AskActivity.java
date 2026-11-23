@@ -4,7 +4,9 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.app.SearchManager;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
 import android.view.KeyEvent;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
@@ -19,6 +21,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -27,9 +30,19 @@ import java.util.Locale;
  * are the web app's own files (web/ask.js, notes.js), which build.sh puts in the APK's assets with web/ask.html, so
  * there is one of each to change. This WebView shows them and does what the page can't: asks Beyond Family as this
  * TV, looks up a card's picture on TMDB (the key stays in Java), and opens the app a pick is on.
+ *
+ * Find (web/find.js, ADR 0062) runs here too: the TV's own voice search hears what was said (the remote's microphone),
+ * and this says what's on the TV to match it against (the games, the channels, the apps) and opens what's picked. A
+ * show goes to the TV's own search, or to Ask Beyond when Beyond Family is linked; a kid's only to Ask Beyond.
  */
 public class AskActivity extends Activity {
-    static final String ASK = "ask", NOTES = "notes";
+    static final String ASK = "ask", NOTES = "notes", FIND = "find";
+    private static final int LISTEN = 7;
+
+    /** Find; listen: start listening straight away (the remote's microphone or search button). */
+    static void find(Context c, boolean listen) {
+        open(c, FIND, listen ? "listen" : "", "");
+    }
 
     /** mode: ASK (the orb; `text` asks straight away) or NOTES (the notes wall). `from`: who asked from a phone. */
     static void open(Context c, String mode, String text, String from) {
@@ -77,9 +90,31 @@ public class AskActivity extends Activity {
         if (web != null) web.evaluateJavascript("window.AskHost && AskHost.start()", null);
     }
 
+    /** The TV's voice search answering Find: what it heard (a few guesses, best first), or nothing. */
+    @Override protected void onActivityResult(int request, int result, Intent data) {
+        super.onActivityResult(request, result, data);
+        if (request != LISTEN || web == null) return;
+        ArrayList<String> heard = result == RESULT_OK && data != null ? data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS) : null;
+        JSONArray out = new JSONArray();
+        if (heard != null) for (String h : heard) if (h != null && !h.trim().isEmpty() && out.length() < 5) out.put(h);
+        web.evaluateJavascript("window.AskHost && AskHost.heard(" + out + ")", null);
+    }
+
+    /** Runs a step of Find on the UI thread and leaves Find behind (what it opened is on top). */
+    private void openAndGo(Runnable r) {
+        runOnUiThread(() -> {
+            try {
+                r.run();
+            } catch (RuntimeException e) {
+                AppLog.w("find: " + e);
+            }
+            finish();
+        });
+    }
+
     private void read(Intent i) {
         String m = i.getStringExtra("mode");
-        mode = NOTES.equals(m) ? NOTES : ASK;
+        mode = NOTES.equals(m) ? NOTES : FIND.equals(m) ? FIND : ASK;
         text = i.getStringExtra("text") == null ? "" : i.getStringExtra("text");
         from = i.getStringExtra("from") == null ? "" : i.getStringExtra("from");
     }
@@ -185,6 +220,85 @@ public class AskActivity extends Activity {
                 }
                 done(id, 200, JSONObject.quote(path));
             }, "beyond-ask-tmdb").start();
+        }
+
+        /** The TV's own voice search can be asked (the remote's microphone). */
+        @JavascriptInterface public boolean canListen() {
+            return !getPackageManager().queryIntentActivities(new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0).isEmpty();
+        }
+
+        /** Find: listens through the TV's voice search; the answer comes to AskHost.heard. */
+        @JavascriptInterface public void listen() {
+            runOnUiThread(() -> {
+                Intent i = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+                        .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                        .putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5)
+                        .putExtra(RecognizerIntent.EXTRA_PROMPT, Ui.tr("Diga um jogo, um canal ou uma série", "Say a game, a channel or a show", "Di un juego, un canal o una serie"));
+                try {
+                    startActivityForResult(i, LISTEN);
+                } catch (RuntimeException e) {
+                    if (web != null) web.evaluateJavascript("window.AskHost && AskHost.heard([])", null);
+                }
+            });
+        }
+
+        /** Find: the Games screen's list, {id, name}, the same as GamesActivity. */
+        @JavascriptInterface public String games() {
+            JSONArray out = new JSONArray();
+            try {
+                for (Object[][] group : GamesActivity.groups(AskActivity.this)) {
+                    for (int i = 1; i < group.length; i++) out.put(new JSONObject().put("id", group[i][0]).put("name", group[i][1]));
+                }
+            } catch (JSONException ignored) {
+            }
+            return out.toString();
+        }
+
+        @JavascriptInterface public void openGame(String id) {
+            openAndGo(() -> GamesActivity.start(AskActivity.this, id));
+        }
+
+        /** Find: Tonight's sky or Live TV. */
+        @JavascriptInterface public void openThing(String id) {
+            openAndGo(() -> {
+                if ("sky".equals(id)) SkyActivity.open(AskActivity.this);
+                else if ("live".equals(id)) LiveTvActivity.open(AskActivity.this);
+            });
+        }
+
+        /** Find: the channels that play here, {id, name} (a kid's are the kids' ones). */
+        @JavascriptInterface public String channels() {
+            JSONArray out = new JSONArray();
+            try {
+                for (String[] c : LiveTvActivity.playable(AskActivity.this)) {
+                    out.put(new JSONObject().put("id", c[LiveTvActivity.ID]).put("name", c[LiveTvActivity.NAME]));
+                }
+            } catch (JSONException ignored) {
+            }
+            return out.toString();
+        }
+
+        @JavascriptInterface public void openChannel(String id) {
+            openAndGo(() -> LiveTvActivity.play(AskActivity.this, id));
+        }
+
+        /**
+         * Find: a show, by name. The TV's own search (it looks across every app on Google TV), else YouTube's search.
+         * False when neither is here.
+         */
+        @JavascriptInterface public boolean shows(String query) {
+            String q = query == null ? "" : query.trim();
+            if (q.isEmpty()) return false;
+            List<Intent> tries = new ArrayList<>();
+            tries.add(new Intent(SearchManager.INTENT_ACTION_GLOBAL_SEARCH).putExtra(SearchManager.QUERY, q));
+            tries.add(new Intent(Intent.ACTION_SEARCH).setPackage("com.google.android.youtube.tv").putExtra(SearchManager.QUERY, q));
+            for (Intent i : tries) {
+                if (getPackageManager().resolveActivity(i, 0) == null) continue;
+                final Intent go = i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                openAndGo(() -> startActivity(go));
+                return true;
+            }
+            return false;
         }
 
         @JavascriptInterface public void chime() { Chime.play(); }

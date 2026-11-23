@@ -1,7 +1,7 @@
 /*
  * Games, from the remote (ADR 0021, the pictures and groups ADR 0047): every game and family activity starts here on the TV, no phone needed. Karaoke,
  * board and card games against the robots (table.js), silly party games (laughs.js), Milo's Remote Control Land (rcland.js, ADR 0046), London's Candy Land (candy.js, ADR 0053), school lunches (lunch.js), a party, the light show (lights.js), quiz night, the dinner
- * question, the tidy-up race, Daily chores and the family scoreboard (chores.js, scores.js, ADR 0057), bedtime breathing, and How to play, a guide to every one (guides.js). Quiz night and the dinner question need Beyond Family, because
+ * question, the tidy-up race, Daily chores and the family scoreboard (chores.js, scores.js, ADR 0057), bedtime (calm sounds, then the TV turns off), and How to play, a guide to every one (guides.js). Quiz night and the dinner question need Beyond Family, because
  * everyone answers on their phones. The last game played leads Keep watching on the home screen, and Continue opens it
  * again (ADR 0058). Same as GamesActivity.java. Plain ES5.
  */
@@ -42,7 +42,7 @@ var Games = (function () {
         ['tidy', tr('Corrida da arrumação', 'Tidy-up race', 'Carrera de ordenar'), function () { Tidy.start(10); }],
         ['chores', tr('Tarefas do dia', 'Daily chores', 'Tareas del día'), function () { Chores.open(); }],
         ['scores', tr('Placar da família', 'Family scoreboard', 'Marcador familiar'), function () { Scores.open(); }],
-        ['bedtime', tr('Respirar para dormir', 'Bedtime breathing', 'Respirar para dormir'), function () { Bedtime.start(15); }]]}
+        ['bedtime', tr('Hora de dormir', 'Bedtime', 'Hora de dormir'), function () { Bedtime.choose(); }]]}
     ];
   }
 
@@ -130,5 +130,16 @@ var Games = (function () {
     Family.game(kind, 'start', function (err) { if (!err) a.close(); });
   }
 
-  return {open: open, start: start, nameOf: nameOf};
+  /** Every game in one list, {id, name, run}, for Find (find.js). */
+  function list() {
+    var out = [], all = groups();
+    for (var g = 0; g < all.length; g++) {
+      for (var i = 0; i < all[g].games.length; i++) (function (game) {
+        out.push({id: game[0], name: game[1], run: typeof game[2] === 'string' ? function () { family(game[2], {close: function () {}}); } : game[2]});
+      })(all[g].games[i]);
+    }
+    return out;
+  }
+
+  return {open: open, start: start, nameOf: nameOf, list: list};
 })();

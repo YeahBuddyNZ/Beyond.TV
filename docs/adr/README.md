@@ -69,3 +69,5 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0059](0059-karaoke-take-turns.md) | Karaoke: take turns, so everyone gets a go |
 | [0060](0060-screen-time-limits.md) | Screen time limits per kid, shown kindly |
 | [0061](0061-family-photos-screensaver.md) | Family photos on the screensaver, with the kids' art |
+| [0062](0062-find-voice-search.md) | Find: say a game, a channel, an app or a show |
+| [0063](0063-bedtime-mode.md) | Bedtime mode: calm sounds, then the TV turns itself off |

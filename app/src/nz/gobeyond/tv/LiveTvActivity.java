@@ -66,6 +66,14 @@ public class LiveTvActivity extends Activity {
     /** Favourites each person can pin; holding OK again takes one off. */
     static final int MAX_FAVS = 12;
 
+    /** The channels that play here, in row order, from the copy kept on the TV: a kid's are the kids' ones. */
+    static List<String[]> playable(Context c) {
+        String[][] channels = onAir(kept(c), keptNow(c), System.currentTimeMillis());
+        List<String[]> play = new ArrayList<>();
+        for (String g : People.kid(c) ? new String[] {"kids"} : new String[] {"featured", "news", "more"}) play.addAll(inGroup(channels, g));
+        return play;
+    }
+
     private static final String SITE = "https://yeahbuddynz.github.io/Beyond.TV/live/";
     private static final String LIST_URL = SITE + "channels.json", NOW_URL = SITE + "now.json";
     private static final String YOUTUBE = "com.google.android.youtube.tv";
