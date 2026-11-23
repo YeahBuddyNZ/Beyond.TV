@@ -372,3 +372,66 @@
 .bt-table.ch-card .ch-text { width: 1300px; margin: 40px auto 0; text-align: left; }
 .bt-table.ch-card .ch-text div { position: relative; padding-left: 52px; margin-bottom: 26px; font-size: 34px; line-height: 1.4; }
 .bt-table.ch-card .ch-text div:before { content: ''; position: absolute; left: 6px; top: 17px; width: 18px; height: 18px; border-radius: 9px; background: #9E7BFF; }
+
+/* Who's playing? before a game for one, and the family scoreboard (scores.js, ADR 0057). Only transform and opacity animate. */
+.sc-who .sc-foot { position: absolute; left: 0; right: 0; top: 820px; text-align: center; }
+.bt-scores .sc-top { position: absolute; left: 120px; right: 120px; top: 70px; }
+.bt-scores .sc-tabs { position: absolute; right: 120px; top: 84px; }
+.bt-scores .sc-tabs .bt-button { margin-left: 16px; }
+.bt-scores .sc-tabs .bt-button.on { background: #6E3DDB; }
+.bt-scores .sc-tabs .bt-button.on.focus { background: #F7F6F2; }
+.sc-list { position: absolute; left: 160px; right: 160px; top: 250px; }
+.sc-row { position: relative; height: 92px; margin-bottom: 14px; padding: 4px 0 4px 110px; border-radius: 30px; }
+.sc-row .avatar { position: absolute; left: 0; top: 4px; }
+.sc-row .mid { margin-right: 230px; }
+.sc-row .line { height: 40px; white-space: nowrap; overflow: hidden; }
+.sc-row .name { font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 32px; font-weight: 700; }
+.sc-row .crown { margin-left: 18px; padding: 4px 16px; border-radius: 20px; background: #E8A33D; color: #22221F; font-size: 22px; font-weight: 700; vertical-align: 4px; }
+.sc-row .bar { margin-top: 6px; height: 16px; border-radius: 8px; background: rgba(247, 246, 242, 0.1); overflow: hidden; }
+.sc-row .bar .fill { height: 16px; border-radius: 8px; background: #9E7BFF; }
+.sc-row.champ .bar .fill { background: #E8A33D; }
+.sc-row .award { margin-top: 6px; font-size: 22px; color: rgba(247, 246, 242, 0.7); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sc-row .pts { position: absolute; right: 0; top: 22px; width: 210px; text-align: right; font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 34px; font-weight: 700; }
+.sc-empty { margin-top: 120px; text-align: center; }
+.sc-empty .big { font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 44px; font-weight: 700; }
+.sc-empty .how { margin-top: 18px; font-size: 30px; color: rgba(247, 246, 242, 0.7); }
+.bt-scores .sc-note { position: absolute; left: 0; right: 0; top: 876px; text-align: center; font-size: 28px; font-weight: 600; color: #E8A33D; }
+.bt-scores .sc-foot { position: absolute; left: 0; right: 0; top: 930px; text-align: center; }
+.bt-scores .sc-foot .bt-button { margin: 0 12px; }
+.sc-how { margin-bottom: 18px; font-size: 22px; color: rgba(247, 246, 242, 0.55); }
+
+/* Daily chores (chores.js, ADR 0057): a column for each kid, a tile for each chore. */
+.bt-chores .ch-top { position: absolute; left: 120px; right: 120px; top: 60px; }
+.ch-note { position: absolute; right: 120px; top: 74px; padding: 14px 28px; border-radius: 30px; background: #E8A33D; color: #22221F; font-size: 28px; font-weight: 700; opacity: 0;
+  -webkit-transform: translateY(-12px); transform: translateY(-12px); -webkit-transition: opacity 0.3s, -webkit-transform 0.3s; transition: opacity 0.3s, transform 0.3s; }
+.ch-note.on { opacity: 1; -webkit-transform: none; transform: none; }
+.ch-cols { position: absolute; left: 0; right: 0; top: 240px; text-align: center; white-space: nowrap; }
+.ch-col { display: inline-block; vertical-align: top; margin: 0 14px; padding: 20px; box-sizing: border-box; border-radius: 34px; background: rgba(247, 246, 242, 0.07); text-align: left; white-space: normal; }
+.ch-col.all { background: rgba(232, 163, 61, 0.16); box-shadow: inset 0 0 0 3px #E8A33D; }
+.ch-head { position: relative; height: 92px; padding-left: 100px; }
+.ch-head .avatar { position: absolute; left: 0; top: 0; }
+.ch-head .n { padding-top: 6px; font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 32px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ch-head .stars { margin-top: 4px; font-size: 24px; font-weight: 700; color: #E8A33D; white-space: nowrap; }
+.ch-tile { position: relative; height: 78px; margin-top: 12px; padding-left: 92px; padding-right: 64px; border-radius: 24px; background: rgba(247, 246, 242, 0.08);
+  -webkit-transition: -webkit-transform 0.15s; transition: transform 0.15s; }
+.ch-tile .pic { position: absolute; left: 10px; top: 7px; width: 64px; height: 64px; border-radius: 18px; background-size: cover; background-position: center; }
+.ch-tile .name { font-size: 25px; font-weight: 600; line-height: 78px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ch-tile .tick { position: absolute; right: 14px; top: 17px; width: 44px; height: 44px; border-radius: 22px; box-shadow: inset 0 0 0 3px rgba(247, 246, 242, 0.35);
+  text-align: center; font-size: 28px; font-weight: 800; line-height: 44px; color: transparent; }
+.ch-tile.on { background: rgba(110, 61, 219, 0.45); }
+.ch-tile.on .tick { background: #E8A33D; box-shadow: none; color: #22221F; }
+.ch-tile.on .name { opacity: 0.8; }
+.ch-tile.focus { background: #F7F6F2; color: #22221F; -webkit-transform: scale(1.05); transform: scale(1.05); box-shadow: 0 0 0 4px #9E7BFF; }
+.ch-tile.focus .tick { box-shadow: inset 0 0 0 3px rgba(34, 34, 31, 0.35); }
+.ch-tile.on.focus .tick { box-shadow: none; }
+.ch-col.many .ch-tile { height: 58px; margin-top: 8px; padding-left: 70px; }
+.ch-col.many .ch-tile .pic { left: 8px; top: 5px; width: 48px; height: 48px; border-radius: 14px; }
+.ch-col.many .ch-tile .name { font-size: 23px; line-height: 58px; }
+.ch-col.many .ch-tile .tick { top: 9px; width: 40px; height: 40px; line-height: 40px; font-size: 24px; }
+.ch-left { margin-top: 14px; font-size: 22px; font-weight: 600; color: rgba(247, 246, 242, 0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ch-col.all .ch-left { color: #E8A33D; }
+.ch-col .ch-spend { display: block; margin-top: 14px; padding-left: 10px; padding-right: 10px; text-align: center; font-size: 24px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bt-chores .ch-foot { position: absolute; left: 0; right: 0; top: 960px; text-align: center; }
+.bt-chores .ch-foot .bt-button { margin: 0 12px; }
+.ch-change .ch-grid { position: absolute; left: 260px; right: 260px; top: 300px; }
+.ch-change .ch-grid .ch-tile { display: inline-block; vertical-align: top; width: 640px; margin: 0 20px 20px 0; box-sizing: border-box; text-align: left; }

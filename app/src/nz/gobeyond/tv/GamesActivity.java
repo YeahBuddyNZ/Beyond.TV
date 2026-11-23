@@ -89,6 +89,9 @@ public class GamesActivity extends Activity {
                 {{Ui.tr("Em casa", "Round the house", "En casa")},
                         {"lunch", Ui.tr("Lanches da escola", "School lunches", "Almuerzos del cole"), (Runnable) () -> TableActivity.open(this, "lunch")},
                         {"tidy", Ui.tr("Corrida da arrumação", "Tidy-up race", "Carrera de ordenar"), (Runnable) () -> TidyActivity.open(this, 10)},
+                        // Daily chores and the family scoreboard (web/chores.js, web/scores.js, ADR 0057), in TableActivity's WebView.
+                        {"chores", Ui.tr("Tarefas do dia", "Daily chores", "Tareas del día"), (Runnable) () -> TableActivity.open(this, "chores")},
+                        {"scores", Ui.tr("Placar da família", "Family scoreboard", "Marcador familiar"), (Runnable) () -> TableActivity.open(this, "scores")},
                         {"bedtime", Ui.tr("Respirar para dormir", "Bedtime breathing", "Respirar para dormir"), (Runnable) () -> BedtimeActivity.open(this, 15)}},
         };
         View first = null;

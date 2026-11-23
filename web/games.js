@@ -1,13 +1,16 @@
 /*
  * Games, from the remote (ADR 0021, the pictures and groups ADR 0047): every game and family activity starts here on the TV, no phone needed. Karaoke,
  * board and card games against the robots (table.js), silly party games (laughs.js), Milo's Remote Control Land (rcland.js, ADR 0046), London's Candy Land (candy.js, ADR 0053), school lunches (lunch.js), a party, the light show (lights.js), quiz night, the dinner
- * question, the tidy-up race and bedtime breathing, and How to play, a guide to every one (guides.js). Quiz night and the dinner question need Beyond Family, because
+ * question, the tidy-up race, Daily chores and the family scoreboard (chores.js, scores.js, ADR 0057), bedtime breathing, and How to play, a guide to every one (guides.js). Quiz night and the dinner question need Beyond Family, because
  * everyone answers on their phones. Same as GamesActivity.java. Plain ES5.
  */
 var Games = (function () {
   'use strict';
 
   function linked() { return !!(window.Family && Family.linked()); }
+
+  /** A game for one: on the Family profile, Who's playing? first, so the points go to the right name (ADR 0057). */
+  function solo(run) { return function () { if (window.Scores) Scores.pick(run); else run(); }; }
 
   /**
    * The Games screen: a picture for each game, in groups (four since Build it, so the lower ones scroll up into view). Same groups and order as GamesActivity.java; the pictures
@@ -16,17 +19,17 @@ var Games = (function () {
   function groups() {
     return [
       {name: tr('Vamos jogar', 'Let\'s play', '¡A jugar!'), games: [
-        ['rcland', tr('Terra do Controle Remoto do Milo', 'Milo\'s Remote Control Land', 'La Tierra Teledirigida de Milo'), function () { RCLand.open(); }],
-        ['candy', tr('A Terra dos Doces da London', 'London\'s Candy Land', 'La Tierra de los Dulces de London'), function () { Candy.open(); }],
-        ['arcade', tr('Fliperama', 'Arcade', 'Arcade'), function () { Arcade.open(); }],
+        ['rcland', tr('Terra do Controle Remoto do Milo', 'Milo\'s Remote Control Land', 'La Tierra Teledirigida de Milo'), solo(function () { RCLand.open(); })],
+        ['candy', tr('A Terra dos Doces da London', 'London\'s Candy Land', 'La Tierra de los Dulces de London'), solo(function () { Candy.open(); })],
+        ['arcade', tr('Fliperama', 'Arcade', 'Arcade'), solo(function () { Arcade.open(); })],
         ['table', tr('Jogos de tabuleiro e cartas', 'Board and card games', 'Juegos de mesa y cartas'), function () { Table.open(); }],
         ['silly', tr('Jogos bobos', 'Silly games', 'Juegos locos'), function () { Laughs.open(); }],
         ['guides', tr('Como jogar', 'How to play', 'Cómo jugar'), function () { Guides.list(); }]]},
       // Build it (builder.js, ADR 0052): real building jobs, with the machines.
       {name: tr('Construir', 'Build it', 'A construir'), games: [
-        ['road', tr('Construir uma estrada', 'Build a road', 'Construir una carretera'), function () { Builder.open('road'); }],
-        ['bridge', tr('Construir uma ponte', 'Build a bridge', 'Construir un puente'), function () { Builder.open('bridge'); }],
-        ['town', tr('Planejar uma cidade', 'Plan a town', 'Planear un pueblo'), function () { Builder.open('town'); }]]},
+        ['road', tr('Construir uma estrada', 'Build a road', 'Construir una carretera'), solo(function () { Builder.open('road'); })],
+        ['bridge', tr('Construir uma ponte', 'Build a bridge', 'Construir un puente'), solo(function () { Builder.open('bridge'); })],
+        ['town', tr('Planejar uma cidade', 'Plan a town', 'Planear un pueblo'), solo(function () { Builder.open('town'); })]]},
       {name: tr('Hora da festa', 'Party time', 'Hora de fiesta'), games: [
         ['karaoke', tr('Karaokê', 'Karaoke', 'Karaoke'), function () { Karaoke.choose(); }],
         ['party', tr('Festa', 'Party', 'Fiesta'), function () { Party.choose(); }],
@@ -36,6 +39,8 @@ var Games = (function () {
       {name: tr('Em casa', 'Round the house', 'En casa'), games: [
         ['lunch', tr('Lanches da escola', 'School lunches', 'Almuerzos del cole'), function () { Lunch.open(); }],
         ['tidy', tr('Corrida da arrumação', 'Tidy-up race', 'Carrera de ordenar'), function () { Tidy.start(10); }],
+        ['chores', tr('Tarefas do dia', 'Daily chores', 'Tareas del día'), function () { Chores.open(); }],
+        ['scores', tr('Placar da família', 'Family scoreboard', 'Marcador familiar'), function () { Scores.open(); }],
         ['bedtime', tr('Respirar para dormir', 'Bedtime breathing', 'Respirar para dormir'), function () { Bedtime.start(15); }]]}
     ];
   }

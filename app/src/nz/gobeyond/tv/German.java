@@ -268,6 +268,8 @@ final class German {
             case "Sing it": return "Singen";
             case "The family's songs": return "Die Lieder der Familie";
             case "Tidy-up race": return "Aufräum-Wettrennen";
+            case "Daily chores": return "Tägliche Aufgaben";
+            case "Family scoreboard": return "Familien-Punktetafel";
             case "What are we singing?": return "Was singen wir?";
             case "What shall we do?": return "Was machen wir?";
             case "Who's singing?": return "Wer singt?";

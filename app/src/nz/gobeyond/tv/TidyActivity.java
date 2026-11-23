@@ -246,6 +246,8 @@ public class TidyActivity extends Activity {
         r.place.setText((n == 1 ? "🏆 " + Ui.tr("1º", "1st", "1º") : n == 2 ? Ui.tr("2º", "2nd", "2º") : n == 3 ? Ui.tr("3º", "3rd", "3º")
                 : "✓") + "  " + at);
         r.face.setAlpha(0.85f);
+        // The family scoreboard and Daily chores (web/scores.js, web/chores.js, ADR 0057): 3, 2, then 1 for everyone else.
+        ScoreLog.add(this, r.person, "tidy", n == 1 ? 3 : n == 2 ? 2 : 1);
         r.face.animate().scaleX(1.12f).scaleY(1.12f).setDuration(160).withEndAction(() ->
                 r.face.animate().scaleX(1).scaleY(1).setDuration(220).start()).start();
         beep(ToneGenerator.TONE_PROP_ACK, 250);

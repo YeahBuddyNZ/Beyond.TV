@@ -59,7 +59,7 @@ R.PARTS.forEach(function (p) {
 });
 R.FRIENDS.forEach(function (f) { check(f.id + ' is a kind of friend in five languages', five(f.kind)); });
 check('a How to play guide', Guides.has('candy') && Guides.order.indexOf('candy') >= 0);
-check('six places', R.PLACES.length === 6);
+check('seven places', R.PLACES.length === 7);
 
 // Friends: one at the start, then more as the sparkles grow, never fewer.
 check('one friend to start', R.friendsFor(0) === 1);

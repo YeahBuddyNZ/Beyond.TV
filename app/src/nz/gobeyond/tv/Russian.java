@@ -267,6 +267,8 @@ final class Russian {
             case "Sing it": return "Петь";
             case "The family's songs": return "Песни семьи";
             case "Tidy-up race": return "Гонка уборки";
+            case "Daily chores": return "Дела на день";
+            case "Family scoreboard": return "Семейная таблица очков";
             case "What are we singing?": return "Что поём?";
             case "What shall we do?": return "Чем займёмся?";
             case "Who's singing?": return "Кто поёт?";

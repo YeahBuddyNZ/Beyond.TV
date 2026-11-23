@@ -3,6 +3,8 @@
  * places: the Cloud Bakery (decorate a cake), the Rainbow Ride (fly a unicorn through the rainbow), the Lolly Shower
  * (catch sweets falling from the clouds), the Candy Garden (plant, water and pick), the Sweet Shop (give each friend
  * the treat they wish for) and the Dress-up Castle (hair, outfit, crown, wings and a friend to walk with).
+ * The Star Stall (ADR 0057) is the seventh: stars earned with Daily chores (chores.js) buy a sparkle shower, magic rain
+ * for the garden, a star crown and star wings. Each finished round is a point on the family scoreboard (scores.js).
  * Everything is kind: there is no losing, no game over, no timer that punishes. A miss is a snack for the bunny, a
  * different treat is a lovely surprise, and every step earns sparkles and a few warm words. Sparkles fill a jar, and
  * each full jar brings a new friend to Candy Land. Played with the arrows and OK; Back goes up one level (a place to
@@ -87,9 +89,13 @@ var Candy = (function () {
       about: ['Voe num unicórnio pelo arco-íris', 'Fly a unicorn through the rainbow', 'Vuela en unicornio por el arcoíris', 'Flieg mit dem Einhorn durch den Regenbogen', 'Летите на единороге сквозь радугу']},
     {id: 'dress', x: 860, y: 300,
       name: ['Castelo das Fantasias', 'Dress-up Castle', 'Castillo de Disfraces', 'Verkleide-Schloss', 'Замок нарядов'],
-      about: ['Escolha cabelo, roupa, coroa e asas', 'Pick your hair, outfit, crown and wings', 'Elige pelo, ropa, corona y alas', 'Wähl Frisur, Outfit, Krone und Flügel', 'Выберите причёску, наряд, корону и крылья']}
+      about: ['Escolha cabelo, roupa, coroa e asas', 'Pick your hair, outfit, crown and wings', 'Elige pelo, ropa, corona y alas', 'Wähl Frisur, Outfit, Krone und Flügel', 'Выберите причёску, наряд, корону и крылья']},
+    // The Star Stall (ADR 0057): where the stars from Daily chores are spent.
+    {id: 'stall', x: 100, y: 430,
+      name: ['Barraca das Estrelas', 'Star Stall', 'Puesto de Estrellas', 'Sternenstand', 'Звёздная лавка'],
+      about: ['Gaste as estrelas das suas tarefas', 'Spend the stars from your chores', 'Gasta las estrellas de tus tareas', 'Gib die Sterne von deinen Aufgaben aus', 'Потратьте звёзды за свои дела']}
   ];
-  var PATH = [[40, 520], [190, 560], [310, 640], [440, 610], [570, 560], [690, 575], [820, 645], [950, 625], [1070, 570],
+  var PATH = [[100, 450], [40, 520], [190, 560], [310, 640], [440, 610], [570, 560], [690, 575], [820, 645], [950, 625], [1070, 570],
     [1120, 450], [1060, 360], [960, 322], [860, 300]];
   var RIVER = [[1300, 170], [1180, 250], [1060, 320], [930, 372], [800, 384], [660, 392], [520, 386], [420, 384]];
 
@@ -205,16 +211,43 @@ var Candy = (function () {
     {id: 'outCol', name: ['Cor da roupa', 'Outfit colour', 'Color de la ropa', 'Outfit-Farbe', 'Цвет наряда'], colours: ['#FF8FC8', '#C9A7FF', '#8FE3CF', '#FFE58A', '#8FC8FF', '#FFB38A', '#FF6F91']},
     {id: 'head', name: ['Na cabeça', 'On your head', 'En la cabeza', 'Auf dem Kopf', 'На голове'], options: [NOTHING, ['Tiara', 'Tiara', 'Tiara', 'Diadem', 'Диадема'],
       ['Coroa', 'Crown', 'Corona', 'Krone', 'Корона'], ['Coroa de flores', 'Flower crown', 'Corona de flores', 'Blumenkranz', 'Венок'],
-      ['Laço', 'Bow', 'Lazo', 'Schleife', 'Бант'], ['Chifre de unicórnio', 'Unicorn horn', 'Cuerno de unicornio', 'Einhorn-Horn', 'Рог единорога']]},
+      ['Laço', 'Bow', 'Lazo', 'Schleife', 'Бант'], ['Chifre de unicórnio', 'Unicorn horn', 'Cuerno de unicornio', 'Einhorn-Horn', 'Рог единорога'],
+      // Last, and only once bought at the Star Stall.
+      ['Coroa de estrelas', 'Star crown', 'Corona de estrellas', 'Sternenkrone', 'Звёздная корона']]},
     {id: 'wings', name: ['Asas', 'Wings', 'Alas', 'Flügel', 'Крылья'], options: [NOTHING, ['Fada', 'Fairy', 'Hada', 'Fee', 'Фея'],
-      ['Borboleta', 'Butterfly', 'Mariposa', 'Schmetterling', 'Бабочка'], ['Arco-íris', 'Rainbow', 'Arcoíris', 'Regenbogen', 'Радуга']]},
+      ['Borboleta', 'Butterfly', 'Mariposa', 'Schmetterling', 'Бабочка'], ['Arco-íris', 'Rainbow', 'Arcoíris', 'Regenbogen', 'Радуга'],
+      ['Asas de estrelas', 'Star wings', 'Alas de estrellas', 'Sternenflügel', 'Звёздные крылья']]},
     {id: 'pet', name: ['Amigo', 'Friend', 'Amigo', 'Freund', 'Друг']}];
+
+  // MARK: - The Star Stall's words and wares
+
+  var STALL_HELP = ['◀ ▶ escolher  ·  OK comprar  ·  Voltar mapa', '◀ ▶ pick  ·  OK to buy  ·  Back to the map', '◀ ▶ elegir  ·  OK comprar  ·  Atrás mapa', '◀ ▶ wählen  ·  OK kaufen  ·  Zurück zur Karte', '◀ ▶ выбрать  ·  OK купить  ·  «Назад» на карту'];
+  var STALL_HELP_WHO = ['▲ ▼ de quem são as estrelas  ·  ◀ ▶ escolher  ·  OK comprar', '▲ ▼ whose stars  ·  ◀ ▶ pick  ·  OK to buy', '▲ ▼ de quién son  ·  ◀ ▶ elegir  ·  OK comprar', '▲ ▼ wessen Sterne  ·  ◀ ▶ wählen  ·  OK kaufen', '▲ ▼ чьи звёзды  ·  ◀ ▶ выбрать  ·  OK купить'];
+  var WHOSE = ['Estrelas de quem?', 'Whose stars?', '¿De quién son?', 'Wessen Sterne?', 'Чьи звёзды?'];
+  var STARS_N = ['{n} estrelas', '{n} stars', '{n} estrellas', '{n} Sterne', 'Звёзд: {n}'];
+  var YOURS = ['É seu!', 'Yours!', '¡Es tuyo!', 'Gehört dir!', 'Твоё!'];
+  var NO_STARS = ['As estrelas vêm das Tarefas do dia, em Jogos.', 'Stars come from Daily chores, in Games.', 'Las estrellas salen de Tareas del día, en Juegos.', 'Sterne gibt es für die täglichen Aufgaben, unter Spiele.', 'Звёзды дают за «Дела на день» в разделе «Игры».'];
+  var NEED_MORE = ['Mais {n} e é seu! Marque uma tarefa para ganhar estrelas.', '{n} more and it\'s yours! Tick off a chore for more stars.', '¡{n} más y es tuyo! Marca una tarea para ganar estrellas.', 'Noch {n}, dann gehört es dir! Hak eine Aufgabe ab für mehr Sterne.', 'Ещё {n}, и это твоё! Отметь дело, чтобы получить звёзды.'];
+  var PLANT_FIRST = ['Plante algo no jardim primeiro, depois a chuva mágica faz crescer!', 'Plant something in the garden first, then the magic rain grows it!', '¡Planta algo en el jardín primero y la lluvia mágica lo hará crecer!', 'Pflanz erst etwas im Garten, dann lässt der Zauberregen es wachsen!', 'Сначала посади что-нибудь в саду, и волшебный дождь его вырастит!'];
+  var WARES = [
+    {id: 'shower', price: 1, name: ['Chuva de brilhos', 'Sparkle shower', 'Lluvia de destellos', 'Glitzerregen', 'Дождь из блёсток'],
+      about: ['10 brilhos para o pote', '10 sparkles for your jar', '10 destellos para el bote', '10 Glitzer für dein Glas', '10 блёсток в баночку'],
+      got: ['Uma chuva de brilhos! Mais 10 no pote!', 'A sparkle shower! 10 more in your jar!', '¡Una lluvia de destellos! ¡10 más en el bote!', 'Ein Glitzerregen! 10 mehr in deinem Glas!', 'Дождь из блёсток! Ещё 10 в баночку!']},
+    {id: 'rain', price: 2, name: ['Chuva mágica', 'Magic rain', 'Lluvia mágica', 'Zauberregen', 'Волшебный дождь'],
+      about: ['O jardim todo pronto para colher', 'Your whole garden ready to pick', 'Todo el jardín listo para recoger', 'Dein ganzer Garten erntereif', 'Весь сад готов к сбору'],
+      got: ['Chuva mágica! O jardim está pronto para colher!', 'Magic rain! Your garden is ready to pick!', '¡Lluvia mágica! ¡El jardín está listo!', 'Zauberregen! Dein Garten ist erntereif!', 'Волшебный дождь! Сад готов к сбору!']},
+    {id: 'crown', price: 4, name: ['Coroa de estrelas', 'Star crown', 'Corona de estrellas', 'Sternenkrone', 'Звёздная корона'],
+      about: ['Para usar no Castelo das Fantasias', 'To wear at the Dress-up Castle', 'Para ponértela en el Castillo', 'Zum Tragen im Verkleide-Schloss', 'Носить в Замке нарядов'],
+      got: ['Uma coroa de estrelas, só para você!', 'A star crown, just for you!', '¡Una corona de estrellas, solo para ti!', 'Eine Sternenkrone, nur für dich!', 'Звёздная корона, только для тебя!']},
+    {id: 'wings', price: 4, name: ['Asas de estrelas', 'Star wings', 'Alas de estrellas', 'Sternenflügel', 'Звёздные крылья'],
+      about: ['Para usar no Castelo das Fantasias', 'To wear at the Dress-up Castle', 'Para ponértelas en el Castillo', 'Zum Tragen im Verkleide-Schloss', 'Носить в Замке нарядов'],
+      got: ['Asas de estrelas! Agora você brilha voando!', 'Star wings! Now you sparkle as you fly!', '¡Alas de estrellas! ¡Ahora brillas al volar!', 'Sternenflügel! Jetzt glitzerst du beim Fliegen!', 'Звёздные крылья! Теперь ты сверкаешь в полёте!']}];
 
   // MARK: - Saved on this TV
 
   function fresh() {
     return {sparkles: 0, friends: 1, seen: 1, look: {skin: 1, hair: 0, hairCol: 0, outfit: 0, outCol: 0, head: 1, wings: 1, pet: 0},
-      garden: [], nextPlant: 0, cakes: 0, rides: 0, caught: 0, served: 0, picked: 0};
+      garden: [], nextPlant: 0, cakes: 0, rides: 0, caught: 0, served: 0, picked: 0, starCrown: 0, starWings: 0};
   }
   var save = fresh();
   function load() {
@@ -291,14 +324,14 @@ var Candy = (function () {
   // MARK: - The game's state
 
   var scene = 'map', clock = 0, here = 0, walk = null, msg = null, parts = [], floats = [], pending = 0;
-  var bake = null, ride = null, shower = null, garden = null, shop = null, dress = null, newFriend = -1;
+  var bake = null, ride = null, shower = null, garden = null, shop = null, dress = null, stall = null, newFriend = -1;
   var seed = 7;
   function rnd() { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
   function pickOf(list) { return list[Math.floor(rnd() * list.length)]; }
 
   function playerName() {
     try {
-      var p = window.Profiles && Profiles.current();
+      var p = (window.Scores && Scores.who()) || (window.Profiles && Profiles.current());
       if (p && p.name && !p.together) return p.name;
     } catch (e) {}
     return L(SUPERSTAR);
@@ -325,6 +358,9 @@ var Candy = (function () {
     if (f > save.friends) { pending = f; save.friends = f; }
     store();
   }
+
+  /** A finished round is a point on the family scoreboard, for whoever is playing (scores.js). */
+  function point() { if (window.Scores) Scores.solo('candy', 1); }
 
   function part(x, y, vx, vy, life, col, size, kind, grav) {
     if (parts.length > 260) parts.shift();
@@ -377,6 +413,7 @@ var Candy = (function () {
     else if (id === 'garden') { garden = openGarden(); scene = 'garden'; }
     else if (id === 'shop') { shop = newShop(); scene = 'shop'; }
     else if (id === 'dress') { dress = {row: 0, twirl: 0, changed: false}; scene = 'dress'; }
+    else if (id === 'stall') { stall = openStall(); scene = 'stall'; }
   }
 
   // MARK: - The Cloud Bakery: a cake, its icing, then toppings
@@ -423,6 +460,7 @@ var Candy = (function () {
   function finishCake() {
     bake.done = true; bake.t = 0;
     save.cakes++;
+    point();
     give(5, W / 2 + 80, 300);
     sound('yay'); confetti();
     say(L(CAKE_DONE));
@@ -475,7 +513,7 @@ var Candy = (function () {
     }
     if (r.t > RIDE_TIME - 6 && r.t - dt <= RIDE_TIME - 6) say(L(CASTLE_NEAR));
     if (r.t >= RIDE_TIME) {
-      r.done = true; r.endT = 0; save.rides++;
+      r.done = true; r.endT = 0; save.rides++; point();
       give(5, 640, 300); sound('yay'); confetti();
       say(L(RIDE_DONE));
     }
@@ -535,7 +573,7 @@ var Candy = (function () {
       }
     }
     if (s.t >= SHOWER_TIME && !s.items.length) {
-      s.done = true; s.endT = 0;
+      s.done = true; s.endT = 0; point();
       give(5, 640, 300); sound('yay'); confetti();
       say(fill(CATCH_DONE, s.got));
     }
@@ -625,7 +663,7 @@ var Candy = (function () {
     } else {
       s.gone += dt;
       if (s.served >= DAY) {
-        s.done = true; s.endT = 0;
+        s.done = true; s.endT = 0; point();
         give(5, 640, 300); sound('yay'); confetti();
         say(fill(SHOP_DONE, s.served));
       } else if (s.gone > 0.5) nextCustomer(s);
@@ -645,11 +683,69 @@ var Candy = (function () {
     }
   }
 
+  // MARK: - The Star Stall: stars from Daily chores (chores.js) buy things here
+
+  /** Whose stars: whoever is playing (scores.js), else each kid in turn with ▲ ▼. */
+  function openStall() {
+    var me = window.Scores && Scores.who(), list = window.Chores ? Chores.wallets() : [], at = -1, i;
+    for (i = 0; i < list.length; i++) if (me && list[i].person.id === me.id) at = i;
+    if (me && at < 0) { list.push({person: me, stars: 0}); at = list.length - 1; }
+    var st = {sel: 0, row: 1, who: list, at: Math.max(0, at), pick: at < 0 && list.length > 1, buy: 0};
+    if (!list.length) say(L(NO_STARS));
+    else say(L(PLACES[6].about) + ', ' + list[st.at].person.name + '!');
+    return st;
+  }
+  function stallOwner() { var s = stall; return s.who.length ? s.who[s.at].person : null; }
+  function starsNow() { var p = stallOwner(); return p && window.Chores ? Chores.stars(p.id) : 0; }
+  function owned(w) { return w.id === 'crown' ? !!save.starCrown : w.id === 'wings' ? !!save.starWings : false; }
+  function stallKey(k) {
+    var s = stall;
+    if ((k === UP || k === DOWN) && s.pick) { s.row = s.row ? 0 : 1; sound('step'); return; }
+    if (k === LEFT || k === RIGHT) {
+      var d = k === LEFT ? -1 : 1;
+      if (s.row === 0 && s.pick) { s.at = (s.at + d + s.who.length) % s.who.length; sound('pick'); say(stallOwner().name + ': ' + fill(STARS_N, starsNow()), false); }
+      else { s.sel = (s.sel + d + WARES.length) % WARES.length; sound('step'); }
+      return;
+    }
+    if (k !== OK) return;
+    if (s.row === 0) { s.row = 1; sound('step'); return; }
+    var w = WARES[s.sel], p = stallOwner(), cx = 230 + s.sel * 270;
+    // Bought already: OK puts it on.
+    if (owned(w)) { wear(w); return; }
+    if (!p) { say(L(NO_STARS)); sound('pick'); return; }
+    if (w.id === 'rain' && !planted()) { say(L(PLANT_FIRST)); sound('pick'); return; }
+    var have = starsNow();
+    if (have < w.price) { say(fill(NEED_MORE, w.price - have)); sound('pick'); return; }
+    if (!Chores.spend(p.id, w.price)) return;
+    s.buy = 1;
+    sound('yay'); burst(cx, 500, 40, 340, 1);
+    if (w.id === 'shower') { give(10, cx, 420); confetti(); }
+    else if (w.id === 'rain') { grow(); confetti(); }
+    else if (w.id === 'crown') { save.starCrown = 1; save.look.head = PARTS[5].options.length - 1; store(); confetti(); }
+    else if (w.id === 'wings') { save.starWings = 1; save.look.wings = PARTS[6].options.length - 1; store(); confetti(); }
+    say(L(w.got));
+  }
+  function wear(w) {
+    if (w.id === 'crown') save.look.head = PARTS[5].options.length - 1;
+    else save.look.wings = PARTS[6].options.length - 1;
+    store(); sound('twinkle'); burst(640, 300, 24, 260, 1);
+    say(L(pickOf(LOOKS_GOOD)));
+  }
+  function planted() { for (var i = 0; i < PLOTS.length; i++) if (plot(i)) return true; return false; }
+  /** Magic rain: every plant in the garden ready to pick now. */
+  function grow() {
+    for (var i = 0; i < PLOTS.length; i++) { var p = plot(i); if (p) { p.w = now() - GROW - 1; p.seen = 1; } }
+    store();
+  }
+
   // MARK: - The Dress-up Castle
 
   function optionCount(part) {
     if (part.colours) return part.colours.length;
     if (part.id === 'pet') return save.friends + 1;
+    // The star crown and star wings are the last of their rows, there once bought at the Star Stall.
+    if (part.id === 'head' && !save.starCrown) return part.options.length - 1;
+    if (part.id === 'wings' && !save.starWings) return part.options.length - 1;
     return part.options.length;
   }
   function dressKey(k) {
@@ -695,6 +791,7 @@ var Candy = (function () {
     else if (scene === 'bakery') { bake.t += dt; for (var j = 0; j < bake.tops.length; j++) bake.tops[j].t += dt; }
     else if (scene === 'garden') { if (garden.can > 0) garden.can -= dt; if (garden.pick) { garden.pick.t += dt; if (garden.pick.t > 1) garden.pick = null; } }
     else if (scene === 'dress') { if (dress.twirl > 0) dress.twirl = Math.max(0, dress.twirl - dt * 1.4); }
+    else if (scene === 'stall') { if (stall.buy > 0) stall.buy = Math.max(0, stall.buy - dt * 1.5); }
     // Gentle sparkles drift up everywhere, all the time.
     if (rnd() < dt * 6) part(rnd() * W, H + 10, (rnd() - 0.5) * 20, -40 - rnd() * 50, 4 + rnd() * 3, BURST[Math.floor(rnd() * 8)], 3 + rnd() * 4, rnd() < 0.5 ? 1 : 0, 0);
   }
@@ -709,6 +806,7 @@ var Candy = (function () {
     else if (scene === 'garden') gardenKey(k);
     else if (scene === 'shop') shopKey(k);
     else if (scene === 'dress') dressKey(k);
+    else if (scene === 'stall') stallKey(k);
     return true;
   }
   /** Back: up one level. A place goes to the map; the map says false, so the screen closes back to Games. */
@@ -924,6 +1022,11 @@ var Candy = (function () {
       c.save(); c.translate(0, -120 + bob);
       for (i = -1; i <= 1; i += 2) { c.save(); c.scale(i, 1); c.rotate(flap - 0.2); for (var k = 0; k < 6; k++) oval(30 + k * 7, -10, 50 - k * 6, 12, rb[k]); c.restore(); }
       c.restore();
+    } else if (lk.wings === 4) {
+      // Star wings, from the Star Stall: three gold stars a side, twinkling.
+      c.save(); c.translate(0, -120 + bob);
+      for (i = -1; i <= 1; i += 2) { c.save(); c.scale(i, 1); c.rotate(flap); star(56, -34, 30, GOLD); star(78, 6, 20, LEMON); star(40, 20, 16, GOLD); sparkle(92, -40, 6 + Math.sin(t * 6) * 2, WHITE); c.restore(); }
+      c.restore();
     }
     // Long hair falls behind the shoulders.
     if (lk.hair === 0) { oval(0, -150 + bob, 46, 62, hair); box(-46, -170 + bob, 92, 74, 30, hair); }
@@ -978,6 +1081,7 @@ var Candy = (function () {
     else if (hd === 3) { var fc = [PINK, LEMON, LILAC, MINT, WHITE, SKY, PEACH]; for (i = 0; i < 7; i++) { var fa = Math.PI * (1.1 + i * 0.13); disc(Math.cos(fa) * 38, -170 + Math.sin(fa) * 38 + bob, 9, fc[i]); disc(Math.cos(fa) * 38, -170 + Math.sin(fa) * 38 + bob, 3.5, GOLD); } }
     else if (hd === 4) { poly([0, -206 + bob, -30, -222 + bob, -30, -192 + bob], HOT); poly([0, -206 + bob, 30, -222 + bob, 30, -192 + bob], HOT); disc(0, -206 + bob, 7, PINK); }
     else if (hd === 5) { poly([-10, -204 + bob, 10, -204 + bob, 0, -252 + bob], GOLD); line(-7, -214 + bob, 7, -219 + bob, 2.5, LEMON); line(-5, -228 + bob, 5, -232 + bob, 2.5, LEMON); }
+    else if (hd === 6) { box(-30, -212 + bob, 60, 12, 6, GOLD); star(-20, -222 + bob, 10, LEMON); star(0, -232 + bob, 15, GOLD); star(20, -222 + bob, 10, LEMON); sparkle(0, -232 + bob, 4, WHITE); }
     c.restore();
   }
 
@@ -1130,7 +1234,7 @@ var Candy = (function () {
     // The rainbow bridge over the river.
     c.save(); c.translate(1008, 352); c.rotate(-0.42); rainbow(0, 30, 54, 7, 1); c.restore();
     // Trees and canes.
-    var trees = [[70, 420, PINK], [300, 470, LILAC], [560, 480, MINT], [770, 470, LEMON], [1230, 640, PINK], [600, 700, PEACH]];
+    var trees = [[250, 700, PINK], [300, 470, LILAC], [560, 480, MINT], [770, 470, LEMON], [1230, 640, PINK], [600, 700, PEACH]];
     for (i = 0; i < trees.length; i++) lollyTree(trees[i][0], trees[i][1], 0.7, trees[i][2]);
     // The friends who have come.
     for (i = 1; i < save.friends; i++) critter(i, FRIEND_SPOTS[i][0], FRIEND_SPOTS[i][1], 0.55, t + i, (Math.floor(t / 3) + i) % 4 === 0);
@@ -1194,6 +1298,8 @@ var Candy = (function () {
       star(0, -100 + Math.sin(t * 3) * 6, 14, GOLD);
     } else if (p.id === 'dress') {
       castle(0, 6, 0.6);
+    } else if (p.id === 'stall') {
+      stallHut(0, 0, 0.62, t);
     }
     c.restore();
   }
@@ -1507,6 +1613,60 @@ var Candy = (function () {
     if (!s.done) help(L(SHOP_HELP));
   }
 
+  /** The Star Stall's hut: a striped awning, a counter and a big star on top. */
+  function stallHut(x, y, s, t) {
+    c.save(); c.translate(x, y); c.scale(s, s);
+    box(-90, -110, 180, 120, 12, CREAM);
+    for (var i = 0; i < 6; i++) poly([-100 + i * 34, -160, -66 + i * 34, -160, -66 + i * 34, -110, -100 + i * 34, -110], i % 2 ? WHITE : VIOLET);
+    for (i = 0; i < 6; i++) disc(-83 + i * 34, -110, 17, i % 2 ? WHITE : VIOLET);
+    box(-100, -40, 200, 26, 10, '#C98D5E');
+    star(0, -186 + Math.sin(t * 3) * 5, 26, GOLD);
+    sparkle(-40, -70, 8, GOLD); sparkle(40, -76, 8, LEMON);
+    c.restore();
+  }
+
+  /** A ware's picture on its card. */
+  function ware(id, x, y, t) {
+    if (id === 'shower') { flossCloud(x, y - 30, 0.55); for (var i = 0; i < 5; i++) sparkle(x - 40 + i * 20, y + 10 + ((t * 50 + i * 13) % 40), 7, i % 2 ? HOT : GOLD); }
+    else if (id === 'rain') { cloud(x, y - 30, 0.55, SKY); for (i = 0; i < 4; i++) oval(x - 30 + i * 20, y + 14 + ((t * 70 + i * 17) % 30), 4, 8, '#6EC6FF'); lollyTree(x + 46, y + 50, 0.35, PINK); }
+    else if (id === 'crown') { box(x - 46, y, 92, 18, 9, GOLD); star(x - 30, y - 12, 15, LEMON); star(x, y - 28, 24, GOLD); star(x + 30, y - 12, 15, LEMON); sparkle(x, y - 28, 6, WHITE); }
+    else { for (var j = -1; j <= 1; j += 2) { star(x + j * 34, y - 16, 26, GOLD); star(x + j * 56, y + 18, 16, LEMON); } disc(x, y, 10, PINK); }
+  }
+
+  function drawStall() {
+    var s = stall, t = clock, i;
+    sky('#E4DAFF', '#FFE3EF');
+    cloud(160, 110, 0.8); cloud(1100, 90, 0.7);
+    hill(200, 360, 180, '#FFC7E3'); hill(1080, 360, 200, '#D9C8FF');
+    grass(330, '#BDF2D5');
+    stallHut(640, 330, 1.25, t);
+    text(L(PLACES[6].name), 640, 236, 30, WHITE, 'center', '800', VIOLET);
+    // Whose stars, and how many.
+    var p = stallOwner(), have = starsNow(), on0 = s.row === 0 && s.pick;
+    box(20, 18, 420, 112, 26, on0 ? '#FFE1F0' : 'rgba(255,255,255,0.9)');
+    if (on0) { c.strokeStyle = HOT; c.lineWidth = 4; rr(20, 18, 420, 112, 26); c.stroke(); }
+    star(78, 74, 36, GOLD);
+    text(String(have), 78, 76, 26, INK, 'center', '800');
+    text(p ? p.name : L(WHOSE), 134, 56, 26, INK, 'left', '800');
+    text(p ? fill(STARS_N, have) : L(NO_STARS), 134, 94, 18, '#8A6A9C', 'left', '700');
+    if (on0) { text('◀', 400, 56, 20, HOT, 'center', '800'); text('▶', 424, 56, 20, HOT, 'center', '800'); }
+    // The wares.
+    for (i = 0; i < WARES.length; i++) {
+      var w = WARES[i], x = 230 + i * 270, on = s.row === 1 && i === s.sel, mine = owned(w), lift = on ? -10 - s.buy * 16 : 0;
+      box(x - 120, 400 + lift, 240, 250, 30, on ? WHITE : 'rgba(255,255,255,0.82)');
+      if (on) { c.strokeStyle = HOT; c.lineWidth = 5; rr(x - 120, 400 + lift, 240, 250, 30); c.stroke(); }
+      ware(w.id, x, 480 + lift, t + i);
+      text(L(w.name), x, 568 + lift, 22, INK, 'center', '800');
+      text(L(w.about), x, 598 + lift, 14, '#8A6A9C', 'center', '600');
+      if (mine) text(L(YOURS), x, 628 + lift, 20, HOT, 'center', '800');
+      else { star(x - 22, 628 + lift, 12, GOLD); text(String(w.price), x + 4, 629 + lift, 22, have >= w.price ? INK : '#B9A6C6', 'left', '800'); }
+    }
+    jar(1220, 78);
+    particles();
+    banner(740, 600);
+    help(L(s.pick ? STALL_HELP_WHO : STALL_HELP));
+  }
+
   function drawDress() {
     var d = dress, t = clock, i;
     sky('#E8D9FF', '#FFE3EF');
@@ -1567,6 +1727,7 @@ var Candy = (function () {
     else if (scene === 'garden') drawGarden();
     else if (scene === 'shop') drawShop();
     else if (scene === 'dress') drawDress();
+    else if (scene === 'stall') drawStall();
   }
 
   // MARK: - The screen
@@ -1586,17 +1747,20 @@ var Candy = (function () {
   }
 
   /** Fresh state for a visit: the map, and a hello. */
-  function begin() {
+  function begin(start) {
     save = load();
     seed = (Date.now() % 100000) + 7;
     scene = 'map'; here = 0; walk = null; parts = []; floats = []; pending = 0; newFriend = -1; clock = 0;
     // Friends earned on another visit (or a newer list) are counted again, quietly.
     save.friends = Math.max(save.friends, friendsFor(save.sparkles));
     say(fill(HELLO[Math.floor(rnd() * HELLO.length)], playerName()));
+    // From Daily chores' Spend in Candy Land: straight to the Star Stall.
+    if (start === 'stall') { here = 6; enter('stall'); }
   }
 
-  function open() {
-    begin();
+  /** start: 'stall' opens at the Star Stall. after() runs once the game has closed. */
+  function open(start, after) {
+    begin(start);
     last = 0;
     UI.open({
       cls: 'bt-candy',
@@ -1615,6 +1779,7 @@ var Candy = (function () {
       closed: function () {
         store(); hush();
         live = false; c = null; canvas = null;
+        if (typeof after === 'function') after();
       }
     });
     live = true;
@@ -1622,16 +1787,16 @@ var Candy = (function () {
     raf(frame);
   }
 
-  return {open: open, rules: {PLACES: PLACES, FRIENDS: FRIENDS, TREATS: TREATS, TOPPINGS: TOPPINGS, ICINGS: ICINGS, SHAPES: SHAPES,
+  return {open: open, rules: {WARES: WARES, PLACES: PLACES, FRIENDS: FRIENDS, TREATS: TREATS, TOPPINGS: TOPPINGS, ICINGS: ICINGS, SHAPES: SHAPES,
     PARTS: PARTS, PLANTS: PLANTS, CHEERS: CHEERS, KIND: KIND, HELLO: HELLO, EXACTLY: EXACTLY, LOOKS_GOOD: LOOKS_GOOD,
     words: function () {
       return [TITLE, SPARKLES, JAR, JAR_FULL, MAP_HELP, SUPERSTAR, BACK_MAP, NEW_FRIEND, CARRY_ON, FRIEND_TIP, ALL_DONE, CAKE_DONE, CAKE_AGAIN,
-        CAKE_FULL, RIDE_HELP, RIDE_DONE, RAINBOW, CASTLE_NEAR, GOT, AGAIN, CATCH_HELP, CATCH_DONE, GOLD_STAR, GARDEN_HELP, PLANT_HERE,
+        CAKE_FULL, STALL_HELP, STALL_HELP_WHO, WHOSE, STARS_N, YOURS, NO_STARS, NEED_MORE, PLANT_FIRST, RIDE_HELP, RIDE_DONE, RAINBOW, CASTLE_NEAR, GOT, AGAIN, CATCH_HELP, CATCH_DONE, GOLD_STAR, GARDEN_HELP, PLANT_HERE,
         WATER_ME, GROWING, READY, PLANTED, WATERED, PATIENT, GREW, SHOP_HELP, WISH, SHOP_DONE, SHOP_AGAIN, DRESS_HELP, NOTHING]
         .concat(CAKE_STEPS, CAKE_HELP);
     },
     friendsFor: friendsFor,
     // For the tests and a preview in a browser: play without a screen, draw on a stand-in canvas.
     begin: begin, press: press, back: back, step: step, render: render, useContext: function (ctx) { c = ctx; },
-    state: function () { return {scene: scene, here: here, save: save, bake: bake, ride: ride, shower: shower, garden: garden, shop: shop, dress: dress, walking: !!walk}; }}};
+    state: function () { return {scene: scene, here: here, save: save, bake: bake, ride: ride, shower: shower, garden: garden, shop: shop, dress: dress, stall: stall, walking: !!walk}; }}};
 })();

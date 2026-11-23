@@ -64,6 +64,8 @@ var Tidy = (function () {
       place.textContent = (n === 1 ? '🏆 ' + tr('1º', '1st', '1º') : n === 2 ? tr('2º', '2nd', '2º') : n === 3 ? tr('3º', '3rd', '3º')
         : '✓') + '  ' + time(Date.now() - started);
       UI.setClass(node, 'done', true);
+      // The family scoreboard and Daily chores (scores.js, chores.js, ADR 0057): 3, 2, then 1 for everyone else.
+      if (window.Scores) Scores.add(p, 'tidy', n === 1 ? 3 : n === 2 ? 2 : 1);
       if (order.length === people.length) end();
     }
 
