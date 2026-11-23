@@ -14,7 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 /**
- * Screen time is used up for today (ADR 0058): kind words in the kid's own colour, full screen over the app, never a
+ * Screen time is used up for today (ADR 0060): kind words in the kid's own colour, full screen over the app, never a
  * telling-off. OK goes back to the home screen; a grown-up's PIN adds 15 minutes; or someone else can watch.
  * Same as timeUp in web/screentime.js.
  */

@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Family photos (ADR 0059) without a TV: the phone's page, the code, a photo arriving, the size limit, the door
+ * Family photos (ADR 0061) without a TV: the phone's page, the code, a photo arriving, the size limit, the door
  * closing after too many wrong codes, the screensaver's mix of photos and art, and the QR code for the address.
  */
 public class PhotoDropTest {

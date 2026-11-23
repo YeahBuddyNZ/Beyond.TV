@@ -2,7 +2,7 @@ package nz.gobeyond.tv;
 
 import java.util.Calendar;
 
-/** Screen time (ADR 0058): the same cases as tests/screentime.test.js, so the TV and the web app agree. */
+/** Screen time (ADR 0060): the same cases as tests/screentime.test.js, so the TV and the web app agree. */
 public class ScreenTimeTest {
     private static int failed, passed;
 

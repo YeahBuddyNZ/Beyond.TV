@@ -96,6 +96,7 @@ public class HomeActivity extends Activity implements Family.Screen {
             handler.removeCallbacks(quiet);
             handler.postDelayed(quiet, 15_000);
             if (on) Chime.play();   // hello: the TV just came on
+            if (on) home.startOnContinue();   // and opens on Continue: the last thing this person was watching (ADR 0058)
             if (People.count(this) > 1 && (on || System.currentTimeMillis() - People.chosenAt(this) > ASK_AGAIN_AFTER)) {
                 People.asked(this);
                 WhoActivity.open(this, null);
@@ -104,7 +105,7 @@ public class HomeActivity extends Activity implements Family.Screen {
     }
 
     @Override protected void onPause() {
-        // Off to an app (or a game): a kid with a screen time limit is counted from here (ADR 0058).
+        // Off to an app (or a game): a kid with a screen time limit is counted from here (ADR 0060).
         ScreenTimeService.homeInFront = false;
         ScreenTimeService.start(this);
         handler.removeCallbacks(quiet);

@@ -267,6 +267,8 @@ final class Russian {
             case "Sing it": return "Петь";
             case "The family's songs": return "Песни семьи";
             case "Tidy-up race": return "Гонка уборки";
+            case "Daily chores": return "Дела на день";
+            case "Family scoreboard": return "Семейная таблица очков";
             case "What are we singing?": return "Что поём?";
             case "What shall we do?": return "Чем займёмся?";
             case "Who's singing?": return "Кто поёт?";
@@ -559,6 +561,13 @@ final class Russian {
             case "Got it": return "Понятно";
             case "How to play": return "Как играть";
             case "▲ ▼ to change channel": return "▲ ▼ переключают канал";
+            case "Your favourites": return "Избранное";
+            case "Hold OK on a channel to pin it to the top.": return "Удерживайте OK на канале, чтобы закрепить его наверху.";
+            case "Pinned to your favourites": return "Добавлено в избранное";
+            case "Taken out of your favourites": return "Убрано из избранного";
+            case "Live": return "В эфире";
+            case "Up next": return "Далее";
+            case "Continue": return "Продолжить";
             case "The list is full": return "Список заполнен";
             case "Grown-up: 15 more minutes": return "Взрослым: ещё 15 минут";
             case "More tomorrow.": return "Завтра будет ещё.";

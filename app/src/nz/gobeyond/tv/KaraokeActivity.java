@@ -43,7 +43,7 @@ import java.util.Map;
  * Panda first); only when there is none does it fall back to the YouTube app. The words come from the video: Beyond
  * never keeps lyrics. Same as web/karaoke.js.
  *
- * Take turns (ADR 0057): the TV's own list of requests, anyone's song added from the remote, sung in a fair order so
+ * Take turns (ADR 0059): the TV's own list of requests, anyone's song added from the remote, sung in a fair order so
  * nobody sings twice until everyone who asked has had a go (KaraokeTurns). No phone needed.
  */
 public class KaraokeActivity extends Activity {

@@ -100,7 +100,7 @@ final class DreamView extends View implements Choreographer.FrameCallback, HomeD
     private final Recs recs;
     private final Art art;
     private boolean artMode;        // paintings (Art) instead of the picks' film photos
-    private boolean familyMode;     // the family's own photos and the kids' art (FamilyPhotos, ADR 0059)
+    private boolean familyMode;     // the family's own photos and the kids' art (FamilyPhotos, ADR 0061)
     private final Handler handler = new Handler(Looper.getMainLooper());
     private ExecutorService worker = Executors.newSingleThreadExecutor();
     private final Recording content = Recording.create("clock");     // without photos: the clock over the aurora

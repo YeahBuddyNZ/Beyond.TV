@@ -29,7 +29,7 @@ import java.util.List;
  * then which song, and KaraokeActivity counts down and plays it. The songs are the family's own from Beyond Family,
  * then a few everybody knows, and "Find another song" for anything else (it goes on the family's list too). Only
  * titles and artists: the words come from the video, Beyond never keeps lyrics. Same as Karaoke.choose in
- * web/karaoke.js. Take turns (ADR 0057) is here too: anyone's song goes on the TV's own list, sung in a fair order.
+ * web/karaoke.js. Take turns (ADR 0059) is here too: anyone's song goes on the TV's own list, sung in a fair order.
  */
 public class KaraokePickActivity extends Activity {
     /** Songs most families can sing, for a TV with no list of its own yet. Titles and artists only. */

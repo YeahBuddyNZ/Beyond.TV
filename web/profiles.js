@@ -315,7 +315,7 @@ var Profiles = (function () {
             tr('As escolhas na tela inicial vêm daqui.', 'Their picks on the home screen come from this.', 'Sus sugerencias salen de aquí.'),
             p.likes || [], function (picked) { p.likes = picked; });
         });
-        // Screen time a day (screentime.js, ADR 0058): kept on this TV, saved with the rest.
+        // Screen time a day (screentime.js, ADR 0060): kept on this TV, saved with the rest.
         var limit = window.ScreenTime ? ScreenTime.limit(p.id) : 0;
         var timeBtn = UI.button(actions, '', null, 'toggle-row');
         function timeLabel() { timeBtn.lastChild.textContent = tr('Tempo de tela por dia: ', 'Screen time a day: ', 'Pantalla al día: ') + ScreenTime.label(limit); }

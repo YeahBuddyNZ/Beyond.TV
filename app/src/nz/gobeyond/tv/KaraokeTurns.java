@@ -7,7 +7,7 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Karaoke's Take turns (ADR 0057), the rules only: requests in the order they were asked for, and how many turns each
+ * Karaoke's Take turns (ADR 0059), the rules only: requests in the order they were asked for, and how many turns each
  * singer has had tonight. The next turn goes to whoever has sung least; between them, whoever asked first. Everyone
  * together is a singer of its own. Plain Java, no Android, so tests/KaraokeTurnsTest.java runs it. Same rules as
  * Turns in web/karaoke.js. Kept on the TV by KaraokeActivity.Turns.

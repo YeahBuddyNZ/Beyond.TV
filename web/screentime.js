@@ -1,5 +1,5 @@
 /*
- * Screen time (ADR 0058). A grown-up gives each kid a daily limit in their profile (Manage people, behind the PIN):
+ * Screen time (ADR 0060). A grown-up gives each kid a daily limit in their profile (Manage people, behind the PIN):
  * no limit, 30 minutes, or 1 to 3 hours. The TV counts the kid's time in other apps and in Plex, shows what's left
  * beside the greeting, says so kindly with 5 minutes to go, and once it's used up shows a gentle "that's screen time
  * for today" in place of the app. A grown-up's PIN adds 15 minutes. A new day starts fresh at midnight.

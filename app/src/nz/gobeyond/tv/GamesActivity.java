@@ -24,11 +24,20 @@ import java.io.InputStream;
  * question, the tidy-up race, bedtime breathing and How to play. Quiz night and the dinner question need Beyond Family, because everyone answers on their
  * phones. Same as Games.open in web/games.js: a picture for each, in groups (ADR 0047; four since Build it, ADR 0052, so they scroll). A game opens on top of
  * this screen and it stays open, so Back from a game comes back here, one step, not out to the home screen.
+ * The last game played leads Keep watching on the home screen, and Continue there opens it again on top of this screen
+ * (extra GAME, ADR 0058).
  */
 public class GamesActivity extends Activity {
     static void open(Context c) {
         c.startActivity(new Intent(c, GamesActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
+
+    /** Continue on the home screen: this screen, with that game started on top of it. */
+    static void play(Context c, String id) {
+        c.startActivity(new Intent(c, GamesActivity.class).putExtra(GAME, id).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+    }
+
+    static final String GAME = "game";
 
     private boolean busy;
 
@@ -89,9 +98,14 @@ public class GamesActivity extends Activity {
                 {{Ui.tr("Em casa", "Round the house", "En casa")},
                         {"lunch", Ui.tr("Lanches da escola", "School lunches", "Almuerzos del cole"), (Runnable) () -> TableActivity.open(this, "lunch")},
                         {"tidy", Ui.tr("Corrida da arrumação", "Tidy-up race", "Carrera de ordenar"), (Runnable) () -> TidyActivity.open(this, 10)},
+                        // Daily chores and the family scoreboard (web/chores.js, web/scores.js, ADR 0057), in TableActivity's WebView.
+                        {"chores", Ui.tr("Tarefas do dia", "Daily chores", "Tareas del día"), (Runnable) () -> TableActivity.open(this, "chores")},
+                        {"scores", Ui.tr("Placar da família", "Family scoreboard", "Marcador familiar"), (Runnable) () -> TableActivity.open(this, "scores")},
                         {"bedtime", Ui.tr("Respirar para dormir", "Bedtime breathing", "Respirar para dormir"), (Runnable) () -> BedtimeActivity.open(this, 15)}},
         };
         View first = null;
+        Runnable resume = null;
+        String want = getIntent().getStringExtra(GAME);
         int tw = Math.round(316 * k), th = Math.round(178 * k);
         for (Object[][] group : groups) {
             TextView name = FeedbackActivity.text(this, (String) group[0][0], Ui.displaySemibold, 30 * k, 0xBFFFFFFF);
@@ -105,9 +119,18 @@ public class GamesActivity extends Activity {
             rp.bottomMargin = Math.round(40 * k);
             column.addView(row, rp);
             for (int i = 1; i < group.length; i++) {
-                View tile = tile((String) group[i][0], (String) group[i][1], k);
-                final Runnable run = (Runnable) group[i][2];
+                final String id = (String) group[i][0], label = (String) group[i][1];
+                View tile = tile(id, label, k);
+                final Runnable game = (Runnable) group[i][2];
+                // A game played goes to the front of Keep watching (kept on the TV only). How to play and the
+                // phone games aren't something to continue.
+                final boolean keep = !"guides".equals(id) && !"quiz".equals(id) && !"dinner".equals(id);
+                final Runnable run = () -> {
+                    if (keep) Watched.add(this, "beyond:game:" + id, label, "", "", "");
+                    game.run();
+                };
                 tile.setOnClickListener(v -> run.run());
+                if (keep && id.equals(want)) resume = run;
                 LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(tw, th);
                 bp.rightMargin = Math.round(22 * k);
                 row.addView(tile, bp);
@@ -128,6 +151,28 @@ public class GamesActivity extends Activity {
 
         setContentView(root);
         first.requestFocus();
+        if (resume != null) resume.run();
+    }
+
+    /** A game's name in the TV's language, for its screen in Keep watching. Empty when there's no such game. */
+    static String nameOf(String id) {
+        switch (id) {
+            case "rcland": return Ui.tr("Terra do Controle Remoto do Milo", "Milo's Remote Control Land", "La Tierra Teledirigida de Milo");
+            case "candy": return Ui.tr("A Terra dos Doces da London", "London's Candy Land", "La Tierra de los Dulces de London");
+            case "arcade": return Ui.tr("Fliperama", "Arcade", "Arcade");
+            case "table": return Ui.tr("Jogos de tabuleiro e cartas", "Board and card games", "Juegos de mesa y cartas");
+            case "silly": return Ui.tr("Jogos bobos", "Silly games", "Juegos locos");
+            case "road": return Ui.tr("Construir uma estrada", "Build a road", "Construir una carretera");
+            case "bridge": return Ui.tr("Construir uma ponte", "Build a bridge", "Construir un puente");
+            case "town": return Ui.tr("Planejar uma cidade", "Plan a town", "Planear un pueblo");
+            case "karaoke": return Ui.tr("Karaokê", "Karaoke", "Karaoke");
+            case "party": return Ui.tr("Festa", "Party", "Fiesta");
+            case "lights": return Ui.tr("Show de luzes", "Light show", "Show de luces");
+            case "lunch": return Ui.tr("Lanches da escola", "School lunches", "Almuerzos del cole");
+            case "tidy": return Ui.tr("Corrida da arrumação", "Tidy-up race", "Carrera de ordenar");
+            case "bedtime": return Ui.tr("Respirar para dormir", "Bedtime breathing", "Respirar para dormir");
+            default: return "";
+        }
     }
 
     /** One game: its picture, its name over the bottom, a little bigger with a lilac ring when it has the focus. */

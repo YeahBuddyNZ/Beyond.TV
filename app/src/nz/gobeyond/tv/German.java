@@ -268,6 +268,8 @@ final class German {
             case "Sing it": return "Singen";
             case "The family's songs": return "Die Lieder der Familie";
             case "Tidy-up race": return "Aufräum-Wettrennen";
+            case "Daily chores": return "Tägliche Aufgaben";
+            case "Family scoreboard": return "Familien-Punktetafel";
             case "What are we singing?": return "Was singen wir?";
             case "What shall we do?": return "Was machen wir?";
             case "Who's singing?": return "Wer singt?";
@@ -516,6 +518,13 @@ final class German {
             case "Got it": return "Verstanden";
             case "How to play": return "Wie man spielt";
             case "▲ ▼ to change channel": return "▲ ▼ wechselt den Sender";
+            case "Your favourites": return "Deine Favoriten";
+            case "Hold OK on a channel to pin it to the top.": return "Halte OK auf einem Sender gedrückt, um ihn oben anzuheften.";
+            case "Pinned to your favourites": return "An deine Favoriten angeheftet";
+            case "Taken out of your favourites": return "Aus deinen Favoriten genommen";
+            case "Live": return "Live";
+            case "Up next": return "Danach";
+            case "Continue": return "Weiter";
             case "The list is full": return "Die Liste ist voll";
             case "Grown-up: 15 more minutes": return "Erwachsene: 15 Minuten mehr";
             case "More tomorrow.": return "Morgen gibt es mehr.";

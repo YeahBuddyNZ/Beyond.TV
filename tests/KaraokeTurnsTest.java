@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Karaoke's Take turns (ADR 0057): the same cases as tests/karaoke.test.js, so the TV and the web app agree. */
+/** Karaoke's Take turns (ADR 0059): the same cases as tests/karaoke.test.js, so the TV and the web app agree. */
 public class KaraokeTurnsTest {
     private static int failed, passed;
 

@@ -32,7 +32,7 @@ public class WhoActivity extends Activity {
     static final String THEN = "then";
     /** After the PIN: open Beyond TV's settings, or the TV's own. */
     static final String THEN_SETTINGS = "settings", THEN_TV_SETTINGS = "tv-settings";
-    /** After the PIN: 15 more minutes of screen time for the kid watching (TimeUpActivity, ADR 0058). */
+    /** After the PIN: 15 more minutes of screen time for the kid watching (TimeUpActivity, ADR 0060). */
     static final String THEN_MORE_TIME = "more-time";
 
     private FrameLayout root;
@@ -260,7 +260,7 @@ public class WhoActivity extends Activity {
             p.emoji = person.emoji;
             p.visitor = person.visitor;
         }
-        // Screen time a day (ADR 0058): kept on this TV by ScreenTimeService, saved with the rest.
+        // Screen time a day (ADR 0060): kept on this TV by ScreenTimeService, saved with the rest.
         final int[] limit = {isNew ? 0 : ScreenTimeService.limit(this, p.id)};
         LinearLayout c = page(isNew ? Ui.tr("Adicionar alguém", "Add someone") : p.name, null);
 

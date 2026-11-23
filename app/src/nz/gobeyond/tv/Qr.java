@@ -3,7 +3,7 @@ package nz.gobeyond.tv;
 import java.nio.charset.StandardCharsets;
 
 /**
- * A QR code for a short address, so a phone can open a page the TV serves (PhotosActivity, ADR 0059). Byte mode,
+ * A QR code for a short address, so a phone can open a page the TV serves (PhotosActivity, ADR 0061). Byte mode,
  * medium error correction, versions 1 to 10 (up to 213 bytes). Follows ISO/IEC 18004 the way Project Nayuki's
  * public domain generator lays it out. Plain Java, no Android: tests/PhotoDropTest.java checks it.
  */

@@ -7,7 +7,7 @@
  * best one (Sing King and Lost Panda first); only when there is none does it fall back to the YouTube app.
  * The words come from the video: Beyond never keeps lyrics. Same as KaraokeActivity.java. Plain ES5.
  *
- * Take turns (ADR 0057): anyone adds a song for anyone from the remote, and the TV works out a fair order, so nobody
+ * Take turns (ADR 0059): anyone adds a song for anyone from the remote, and the TV works out a fair order, so nobody
  * sings twice until everyone who asked has had a go. Kept on this TV for the night (localStorage), no phone needed.
  * The rules are in `Karaoke.turns` (tests/karaoke.test.js); KaraokeTurns.java is the same on Google TV.
  */

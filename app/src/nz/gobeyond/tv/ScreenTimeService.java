@@ -20,7 +20,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * Screen time on Google TV (ADR 0058). A grown-up sets each kid's daily limit in Manage people (behind the PIN). While
+ * Screen time on Google TV (ADR 0060). A grown-up sets each kid's daily limit in Manage people (behind the PIN). While
  * a kid with a limit is watching and the TV is on, this foreground service in :home counts every half minute that
  * isn't on the home screen (apps, and Beyond TV's own games and players), says kindly when 5 minutes are left, and when
  * the time is used up opens TimeUpActivity over the app. The home screen shows what's left by the greeting, and

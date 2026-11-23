@@ -332,6 +332,30 @@ var Guides = (function () {
       page(TIPS, [['Ninguém fica sem tempo: quando todos terminam, a TV diz quem foi o mais rápido.', 'Nobody runs out of time: when everyone\'s done, the TV says who was fastest.', 'A nadie se le acaba el tiempo: cuando todos terminan, la tele dice quién fue el más rápido.', 'Niemandem läuft die Zeit davon: Wenn alle fertig sind, sagt der Fernseher, wer am schnellsten war.', 'Время ни у кого не кончается: когда все закончат, телевизор скажет, кто был быстрее.']])
     ]},
 
+    // Daily chores and the family scoreboard (chores.js, scores.js, ADR 0057).
+    chores: {icon: '✅', name: ['Tarefas do dia', 'Daily chores', 'Tareas del día', 'Tägliche Aufgaben', 'Дела на день'], pages: [
+      page(AIM, [['Fazer as tarefas do dia e ganhar estrelas para gastar na Terra dos Doces.', 'Do your jobs for the day and earn stars to spend in Candy Land.', 'Hacer las tareas del día y ganar estrellas para gastar en la Tierra de los Dulces.', 'Erledige deine Aufgaben für heute und sammle Sterne fürs Zuckerland.', 'Сделать дела на день и получить звёзды для Сладкой страны.']]),
+      page(REMOTE, [
+        ['Cada criança tem uma coluna. Aperte OK numa tarefa quando ela estiver feita.', 'Each kid has a column. Press OK on a chore when it\'s done.', 'Cada niño tiene una columna. Pulsa OK en una tarea cuando esté hecha.', 'Jedes Kind hat eine Spalte. Drück OK auf eine Aufgabe, wenn sie erledigt ist.', 'У каждого ребёнка своя колонка. Нажмите OK на деле, когда оно сделано.'],
+        ['Marcou sem querer? OK de novo desmarca.', 'Ticked one by mistake? OK again unticks it.', '¿Marcaste sin querer? OK otra vez lo desmarca.', 'Aus Versehen abgehakt? Nochmal OK nimmt es zurück.', 'Отметили случайно? Ещё раз OK снимет отметку.'],
+        ['Gastar na Terra dos Doces leva você direto para a Barraca das Estrelas.', 'Spend in Candy Land takes you straight to the Star Stall.', 'Gastar en la Tierra de los Dulces te lleva directo al Puesto de Estrellas.', 'Im Zuckerland ausgeben bringt dich direkt zum Sternenstand.', '«Потратить в Сладкой стране» ведёт прямо в Звёздную лавку.']]),
+      page(RULES, [
+        ['Cada tarefa vale 1 estrela. Todas as de hoje valem mais 2: é o desafio do dia.', 'Each chore is 1 star. All of today\'s is 2 more: that\'s the daily challenge.', 'Cada tarea es 1 estrella. Todas las de hoy son 2 más: es el reto del día.', 'Jede Aufgabe ist 1 Stern. Alle von heute geben 2 extra: Das ist die Tagesaufgabe.', 'Каждое дело даёт 1 звезду. Все дела дня дают ещё 2: это задание дня.'],
+        ['Fez a corrida da arrumação? Arrumar o quarto se marca sozinho.', 'Did the tidy-up race? Tidy my room ticks itself.', '¿Hiciste la carrera de ordenar? Ordenar mi cuarto se marca solo.', 'Beim Aufräum-Rennen mitgemacht? Zimmer aufräumen hakt sich selbst ab.', 'Участвовали в гонке уборки? «Убрать в комнате» отметится само.'],
+        ['As marcas recomeçam todo dia; as estrelas ficam.', 'The ticks start again each day; the stars stay.', 'Las marcas empiezan de nuevo cada día; las estrellas se quedan.', 'Die Haken fangen jeden Tag neu an, die Sterne bleiben.', 'Отметки начинаются заново каждый день, звёзды остаются.']]),
+      page(TIPS, [['Um adulto escolhe as tarefas em Mudar as tarefas.', 'A grown-up picks the chores with Change the chores.', 'Un adulto elige las tareas en Cambiar las tareas.', 'Ein Erwachsener wählt die Aufgaben unter Aufgaben ändern.', 'Взрослый выбирает дела в «Изменить дела».']])
+    ]},
+
+    scores: {icon: '🏆', name: ['Placar da família', 'Family scoreboard', 'Marcador familiar', 'Familien-Punktetafel', 'Семейная таблица очков'], pages: [
+      page(AIM, [['Ver quem marcou mais pontos esta semana, em todos os jogos e tarefas.', 'See who scored the most this week, across every game and chore.', 'Ver quién sumó más puntos esta semana, en todos los juegos y tareas.', 'Sieh, wer diese Woche die meisten Punkte hat, in allen Spielen und Aufgaben.', 'Узнать, кто набрал больше всех очков за неделю во всех играх и делах.']]),
+      page(RULES, [
+        ['Ganhar um jogo: 3 pontos. Terminar um: 1 ou 2. Cada tarefa: 1.', 'Win a game: 3 points. Finish one: 1 or 2. Each chore: 1.', 'Ganar un juego: 3 puntos. Terminarlo: 1 o 2. Cada tarea: 1.', 'Ein Spiel gewinnen: 3 Punkte. Eins beenden: 1 oder 2. Jede Aufgabe: 1.', 'Победа: 3 очка. Доиграть: 1 или 2. Каждое дело: 1.'],
+        ['A semana vai de segunda a domingo. Depois, cada um ganha um prêmio pelo que fez de melhor.', 'Weeks run Monday to Sunday. Then everyone gets an award for what they did best.', 'La semana va de lunes a domingo. Luego cada uno gana un premio por lo que mejor hizo.', 'Eine Woche geht von Montag bis Sonntag. Dann bekommt jeder einen Preis für das, was er am besten konnte.', 'Неделя с понедельника по воскресенье. Потом каждый получает награду за то, что у него получилось лучше всего.'],
+        ['Quem tiver mais pontos é o campeão da semana.', 'Whoever has the most points is the champion of the week.', 'Quien tenga más puntos es el campeón de la semana.', 'Wer die meisten Punkte hat, ist Champion der Woche.', 'У кого больше всех очков, тот чемпион недели.']]),
+      page(REMOTE, [['◀ ▶ troca entre esta semana e a semana passada.', '◀ ▶ switches between this week and last week.', '◀ ▶ cambia entre esta semana y la pasada.', '◀ ▶ wechselt zwischen dieser und letzter Woche.', '◀ ▶ переключает эту и прошлую неделю.']]),
+      page(TIPS, [['No perfil Família, diga quem está jogando antes de começar, para os pontos irem para o seu nome.', 'On the Family profile, say who\'s playing before a game, so the points go on your name.', 'En el perfil Familia, di quién juega antes de empezar, para que los puntos vayan a tu nombre.', 'Im Profil Familie sag vor dem Spiel, wer spielt, damit die Punkte auf deinen Namen gehen.', 'В профиле «Семья» перед игрой выберите, кто играет, чтобы очки пошли на ваше имя.']])
+    ]},
+
     bedtime: {icon: '🌙', name: ['Respirar para dormir', 'Bedtime breathing', 'Respirar para dormir', 'Atmen vor dem Schlafen', 'Дыхание перед сном'], pages: [
       page(AIM, [['Acalmar o corpo antes de dormir.', 'Calm your body down before sleep.', 'Calmar el cuerpo antes de dormir.', 'Den Körper vor dem Schlafen beruhigen.', 'Успокоить тело перед сном.']]),
       page(REMOTE, [
@@ -342,7 +366,7 @@ var Guides = (function () {
 
   /** The order on the How to play screen: the same as the Games screen. */
   var ORDER = ['karaoke', 'ludo', 'chess', 'chant', 'snap', 'likely', 'rather', 'dare', 'rcland', 'road', 'bridge', 'town', 'candy', 'eel', 'paddle', 'guard', 'dots',
-    'crew', 'lunch', 'party', 'lights', 'quiz', 'question', 'tidy', 'bedtime'];
+    'crew', 'lunch', 'party', 'lights', 'quiz', 'question', 'tidy', 'chores', 'scores', 'bedtime'];
 
   function nameOf(id) { return GUIDES[id] ? L(GUIDES[id].name) : ''; }
 

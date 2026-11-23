@@ -23,7 +23,7 @@ import java.security.SecureRandom;
 import java.util.Locale;
 
 /**
- * Family photos (ADR 0059): a QR code for a phone on the same Wi-Fi. The phone opens a little page from the TV, picks
+ * Family photos (ADR 0061): a QR code for a phone on the same Wi-Fi. The phone opens a little page from the TV, picks
  * photos or the kids' art (and who drew it), and sends them; they go on the screensaver. The TV only listens while this
  * screen is open, for 20 minutes at most, and only to the code on it.
  */

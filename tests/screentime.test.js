@@ -1,4 +1,4 @@
-// Screen time (web/screentime.js, ADR 0058) without a screen: the day's record, what a stretch away counts and
+// Screen time (web/screentime.js, ADR 0060) without a screen: the day's record, what a stretch away counts and
 // the minutes left. ScreenTime.java follows the same rules (tests/ScreenTimeTest.java).
 // node tests/screentime.test.js
 'use strict';

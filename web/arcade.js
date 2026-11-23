@@ -884,6 +884,8 @@ var Arcade = (function () {
       if (g.over) {
         state = 'over';
         if (g.id !== 'paddle') g.newBest = saveBest(g.id, g.score);
+        // The family scoreboard (scores.js, ADR 0057): 1 for a game, 3 for a new best or a win.
+        if (window.Scores) Scores.solo('arcade', g.newBest || g.won ? 3 : 1);
         sfx(g.won ? 'win' : 'lose');
       }
     }

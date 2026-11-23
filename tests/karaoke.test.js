@@ -1,4 +1,4 @@
-// Karaoke's Take turns (web/karaoke.js, ADR 0057) without a screen: the fair order, adding, taking a turn,
+// Karaoke's Take turns (web/karaoke.js, ADR 0059) without a screen: the fair order, adding, taking a turn,
 // taking one out and the list going stale. KaraokeTurns.java follows the same rules (tests/KaraokeTurnsTest.java).
 // node tests/karaoke.test.js
 'use strict';

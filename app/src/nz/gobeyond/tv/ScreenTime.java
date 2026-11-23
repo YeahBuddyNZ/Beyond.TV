@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Screen time (ADR 0058), the sums only: each kid's daily limit, what they've used today and a grown-up's extra
+ * Screen time (ADR 0060), the sums only: each kid's daily limit, what they've used today and a grown-up's extra
  * minutes. A new day starts fresh at midnight on the TV's clock; the limits stay. Plain Java, no Android, so
  * tests/ScreenTimeTest.java runs it. Same rules as ScreenTime.rules in web/screentime.js: change one, change both.
  * Kept on the TV by ScreenTimeService.

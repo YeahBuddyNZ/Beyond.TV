@@ -1,4 +1,4 @@
-# 0057. Karaoke: take turns
+# 0059. Karaoke: take turns
 
 Date: 23/11/2026. Status: accepted.
 
