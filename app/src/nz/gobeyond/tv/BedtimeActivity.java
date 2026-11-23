@@ -26,7 +26,7 @@ import android.widget.TextView;
 import java.util.Random;
 
 /**
- * Bedtime (bedtime mode, ADR 0058): a night light that breathes with the kids as they wind down, a calm sound, then
+ * Bedtime (bedtime mode, ADR 0059): a night light that breathes with the kids as they wind down, a calm sound, then
  * the TV turns itself off. Same as web/bedtime.js on LG and Samsung.
  *
  * First a short pick on the remote: a sound (rain, waves, a fan, or quiet, heard as it's picked) and how long (15, 30

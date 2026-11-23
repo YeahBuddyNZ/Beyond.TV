@@ -53,7 +53,7 @@ public class LiveTvActivity extends Activity {
         c.startActivity(new Intent(c, LiveTvActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
 
-    /** One channel full screen, by its id (Find, ADR 0057); Back from it is the channel list. */
+    /** One channel full screen, by its id (Find, ADR 0058); Back from it is the channel list. */
     static void play(Context c, String id) {
         c.startActivity(new Intent(c, LiveTvActivity.class).putExtra("channel", id).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }

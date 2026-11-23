@@ -573,7 +573,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         boolean kid = watcher.kid;   // kids get fewer: no feedback, no HDMI inputs
         // NZ election results, live (ElectionActivity, ADR 0039): on New Zealand TVs until 27/11/2026, then gone.
         if (ElectionActivity.showing()) lightButtons.add(HomeApps.action(HomeApps.ELECTION, "election", Ui.tr("Resultados da eleição", "Election results", "Resultados electorales"), "check"));
-        // Bedtime (ADR 0058), at night: a night light that breathes, a calm sound, then the TV turns itself off.
+        // Bedtime (ADR 0059), at night: a night light that breathes, a calm sound, then the TV turns itself off.
         if (nightTarget) lightButtons.add(HomeApps.action(HomeApps.BEDTIME, "bedtime", Ui.tr("Hora de dormir", "Bedtime", "Hora de dormir"), "bedtime"));
         // Notes left from a phone in Beyond Family (ADR 0025): the button is there while any are up, and opens them big.
         notesShown = hasNotes();
@@ -582,7 +582,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         // Beyond: feedback, spoken or typed (FeedbackActivity), not for kids.
         if (Family.linked(getContext())) lightButtons.add(HomeApps.action(HomeApps.ASK, "ask", Ui.tr("Pergunte à Beyond", "Ask Beyond", "Pregúntale a Beyond"), "dots"));
         else if (!kid) lightButtons.add(HomeApps.action(HomeApps.FEEDBACK, "feedback", Ui.tr("Fale com a Beyond", "Talk to Beyond"), "dots"));
-        // Find (ADR 0057): say a game, a channel, an app or a show, and open it with OK. For everyone, kids included.
+        // Find (ADR 0058): say a game, a channel, an app or a show, and open it with OK. For everyone, kids included.
         lightButtons.add(HomeApps.action(HomeApps.FIND, "find", Ui.tr("Encontrar", "Find", "Buscar"), "mic"));
         // Live TV (LiveTvActivity, ADR 0042): the aerial, the free-to-air apps and free world news on one screen.
         lightButtons.add(HomeApps.action(HomeApps.LIVE, "live", Ui.tr("TV aberta", "Live TV"), "live_tv"));

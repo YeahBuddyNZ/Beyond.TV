@@ -13,7 +13,7 @@ final class Russian {
 
     static String text(String english) {
         switch (english) {
-            // Find and Bedtime (ADR 0057, ADR 0058)
+            // Find and Bedtime (ADR 0058, ADR 0059)
             case "Find": return "Найти";
             case "Say a game, a channel or a show": return "Назовите игру, канал или передачу";
             case "Waves": return "Волны";
@@ -277,6 +277,8 @@ final class Russian {
             case "Sing it": return "Петь";
             case "The family's songs": return "Песни семьи";
             case "Tidy-up race": return "Гонка уборки";
+            case "Daily chores": return "Дела на день";
+            case "Family scoreboard": return "Семейная таблица очков";
             case "What are we singing?": return "Что поём?";
             case "What shall we do?": return "Чем займёмся?";
             case "Who's singing?": return "Кто поёт?";

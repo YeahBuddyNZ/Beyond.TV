@@ -6,7 +6,7 @@ final class German {
 
     static String text(String english) {
         switch (english) {
-            // Find and Bedtime (ADR 0057, ADR 0058)
+            // Find and Bedtime (ADR 0058, ADR 0059)
             case "Find": return "Finden";
             case "Say a game, a channel or a show": return "Sag ein Spiel, einen Sender oder eine Sendung";
             case "Rain": return "Regen";
@@ -279,6 +279,8 @@ final class German {
             case "Sing it": return "Singen";
             case "The family's songs": return "Die Lieder der Familie";
             case "Tidy-up race": return "Aufräum-Wettrennen";
+            case "Daily chores": return "Tägliche Aufgaben";
+            case "Family scoreboard": return "Familien-Punktetafel";
             case "What are we singing?": return "Was singen wir?";
             case "What shall we do?": return "Was machen wir?";
             case "Who's singing?": return "Wer singt?";

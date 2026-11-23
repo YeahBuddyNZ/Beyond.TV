@@ -270,14 +270,14 @@
         if (!ok) toast(tr('Abra gobeyond.nz/election no navegador da TV.', 'Open gobeyond.nz/election in the TV\'s browser.', 'Abre gobeyond.nz/election en el navegador de la TV.'));
       });
     }});
-    // Find (find.js, ADR 0057): say a game, a channel, an app or a show, and open it with OK. For everyone, kids included.
+    // Find (find.js, ADR 0058): say a game, a channel, an app or a show, and open it with OK. For everyone, kids included.
     list.push({icon: 'mic', label: tr('Encontrar', 'Find', 'Buscar'), run: function () { openFind(false); }});
     // Live TV (livetv.js, ADR 0042): the aerial, the free-to-air apps and free world news on one screen.
     list.push({icon: 'live_tv', label: tr('TV aberta', 'Live TV', 'TV en vivo'), run: openLive});
     if (!kid) list.push({icon: 'hdmi', label: tr('Entradas HDMI', 'HDMI Inputs', 'Entradas HDMI'), run: function () {
       st.zone = Z.SHELF; openDrawer(); st.drawer = 1 < drawerInputs ? 1 : 0; updateFocus();
     }});
-    // Bedtime (ADR 0058), in the evening: a night light that breathes, a calm sound, then the TV turns itself off.
+    // Bedtime (ADR 0059), in the evening: a night light that breathes, a calm sound, then the TV turns itself off.
     if (Data.isNight(Date.now())) list.push({icon: 'bedtime', label: tr('Hora de dormir', 'Bedtime', 'Hora de dormir'), run: function () { Bedtime.choose(); }});
     // Games, for anyone with the remote: karaoke, a party, quiz night and the rest, no phone needed (games.js).
     list.push({icon: 'gamepad', label: tr('Jogos', 'Games', 'Juegos'), run: function () { Games.open(); }});
@@ -1141,7 +1141,7 @@
 
   /** The Live TV screen, with this TV's aerial and apps. Plex opens Plex itself here, for its free channels. */
   /**
-   * Find (find.js, ADR 0057): what's on this TV for it to match. The Games screen, Tonight's sky and Live TV, the
+   * Find (find.js, ADR 0058): what's on this TV for it to match. The Games screen, Tonight's sky and Live TV, the
    * channels that play here, and the apps Ask Beyond may point at (a kid's own shelf). A show goes to Ask Beyond when
    * Beyond Family is linked, else to YouTube for grown-ups.
    */

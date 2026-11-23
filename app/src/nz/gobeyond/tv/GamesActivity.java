@@ -21,7 +21,7 @@ import java.io.InputStream;
 /**
  * Games, from the remote (ADR 0021): every game and family activity starts here on the TV, no phone needed. Karaoke,
  * board and card games against the robots, silly party games, Milo's Remote Control Land, London's Candy Land, Build it and the light show (all TableActivity), a party, quiz night, the dinner
- * question, the tidy-up race, Bedtime (ADR 0058) and How to play. Quiz night and the dinner question need Beyond Family, because everyone answers on their
+ * question, the tidy-up race, Bedtime (ADR 0059) and How to play. Quiz night and the dinner question need Beyond Family, because everyone answers on their
  * phones. Same as Games.open in web/games.js: a picture for each, in groups (ADR 0047; four since Build it, ADR 0052, so they scroll). A game opens on top of
  * this screen and it stays open, so Back from a game comes back here, one step, not out to the home screen.
  */
@@ -103,7 +103,7 @@ public class GamesActivity extends Activity {
 
     /**
      * The groups, in the same order as Games.open in web/games.js (ADR 0047). Each: picture (web/games/<id>.jpg), name,
-     * what it opens from `a`. Find (AskActivity, ADR 0057) opens a game from the same list.
+     * what it opens from `a`. Find (AskActivity, ADR 0058) opens a game from the same list.
      */
     static Object[][][] groups(Activity a) {
         return new Object[][][] {
@@ -131,6 +131,9 @@ public class GamesActivity extends Activity {
                 {{Ui.tr("Em casa", "Round the house", "En casa")},
                         {"lunch", Ui.tr("Lanches da escola", "School lunches", "Almuerzos del cole"), (Runnable) () -> TableActivity.open(a, "lunch")},
                         {"tidy", Ui.tr("Corrida da arrumação", "Tidy-up race", "Carrera de ordenar"), (Runnable) () -> TidyActivity.open(a, 10)},
+                        // Daily chores and the family scoreboard (web/chores.js, web/scores.js, ADR 0057), in TableActivity's WebView.
+                        {"chores", Ui.tr("Tarefas do dia", "Daily chores", "Tareas del día"), (Runnable) () -> TableActivity.open(a, "chores")},
+                        {"scores", Ui.tr("Placar da família", "Family scoreboard", "Marcador familiar"), (Runnable) () -> TableActivity.open(a, "scores")},
                         {"bedtime", Ui.tr("Hora de dormir", "Bedtime", "Hora de dormir"), (Runnable) () -> BedtimeActivity.open(a, 0)}},
         };
     }

@@ -479,6 +479,8 @@ var Laughs = (function () {
     game.phase = 'awards';
     var players = game.players.slice().sort(function (a, b) { return game.score[b.id] - game.score[a.id]; });
     var best = players.length ? game.score[players[0].id] : 0;
+    // The family scoreboard (scores.js, ADR 0057): 3 for the most votes, 1 for playing. Once a game.
+    if (window.Scores && !game.scored) { game.scored = true; for (var s = 0; s < players.length; s++) Scores.add(players[s], 'silly', best && game.score[players[s].id] === best ? 3 : 1); }
     Sfx.play('home');
     UI.open({
       cls: 'bt-table bt-table-debrief lf-awards',

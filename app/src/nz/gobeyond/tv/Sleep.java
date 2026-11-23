@@ -100,7 +100,7 @@ final class Sleep {
 
     /**
      * Turns the TV off now through its own ADB: the sleep key, then the power key on TVs that ignore it. On a thread;
-     * then() runs after (or null). The sleep timer and Bedtime (ADR 0058) both end here.
+     * then() runs after (or null). The sleep timer and Bedtime (ADR 0059) both end here.
      */
     static void offNow(final Context app, final String why, final Runnable then) {
         new Thread(() -> {
