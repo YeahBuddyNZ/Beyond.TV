@@ -44,9 +44,32 @@ var SCENES = {
     art: [['🚚', 300, 120, 70, 0], ['⛵', 120, 250, 56, 0], ['👷', 480, 150, 80, 0]]},
   town: {sky: ['#6EC6FF', '#BDE6FF'], ground: '#7CC46A', grid: '#FFFFFF',
     art: [['🏫', 150, 170, 100, 0], ['🏘️', 330, 160, 120, 0], ['🏭', 480, 120, 70, 0], ['😊', 470, 240, 56, 0], ['🍦', 70, 250, 46, -10]]},
+  // Daily chores and the family scoreboard (chores.js, scores.js, ADR 0057).
+  chores: {bg: ['#6E3DDB', '#9E7BFF'], burst: '#B9A1FF',
+    art: [['✅', 160, 170, 130, -8], ['🛏️', 360, 200, 110, 0], ['⭐', 460, 80, 56, 12], ['⭐', 80, 80, 40, -10], ['🧸', 480, 250, 56, 8]]},
+  scores: {bg: ['#E8A33D', '#F2C94C'], burst: '#FFE7A3', podium: true,
+    art: [['🏆', 280, 120, 130, 0], ['🥇', 120, 220, 70, -10], ['🥈', 440, 230, 64, 10], ['⭐', 470, 70, 40, 0], ['⭐', 90, 70, 34, 0]]},
   guides: {bg: ['#F7F6F2', '#E7E3F7'], burst: '#FFFFFF',
     art: [['📖', 260, 175, 160, -6], ['💡', 450, 90, 80, 12], ['⭐', 90, 90, 40, 0]]}
 };
+
+// Daily chores' little pictures (web/games/chore-<id>.jpg, 128 x 128): one emoji on a colour, for kids who can't read yet.
+var CHORES = {bed: ['🛏️', '#2F7D6D'], dressed: ['👕', '#378ADD'], teeth: ['🪥', '#5CC4AE'], room: ['🧸', '#D85A30'],
+  clothes: ['🧺', '#E8A33D'], table: ['🍽️', '#6E3DDB'], pets: ['🐾', '#B5562E'], bag: ['🎒', '#9E7BFF']};
+
+/* Runs in the page: one chore's picture in the top left corner. */
+function chore(e) {
+  var c = document.getElementById('c').getContext('2d');
+  c.setTransform(1, 0, 0, 1, 0, 0);
+  c.clearRect(0, 0, 560, 316);
+  var g = c.createLinearGradient(0, 0, 128, 128); g.addColorStop(0, e[1]); g.addColorStop(1, 'rgba(255,255,255,0.35)');
+  c.fillStyle = e[1]; c.fillRect(0, 0, 128, 128);
+  c.fillStyle = g; c.fillRect(0, 0, 128, 128);
+  c.textAlign = 'center'; c.textBaseline = 'middle';
+  c.font = '78px "Noto Color Emoji"';
+  c.shadowColor = 'rgba(13,12,24,0.3)'; c.shadowBlur = 8; c.shadowOffsetY = 4;
+  c.fillText(e[0], 64, 68);
+}
 
 function page() {
   return '<!DOCTYPE html><html><body style="margin:0"><canvas id="c" width="' + W + '" height="' + H + '"></canvas></body></html>';
@@ -118,6 +141,9 @@ function draw(s) {
     var cc = ['#F7F6F2', '#378ADD', '#2F7D6D', '#9E7BFF', '#F2C94C'];
     for (i = 0; i < 70; i++) { c.save(); c.translate(rnd() * W, rnd() * H); c.rotate(rnd() * 6); c.fillStyle = cc[i % cc.length]; c.fillRect(-6, -3, 12, 6); c.restore(); }
   }
+  if (s.podium) {
+    c.fillStyle = 'rgba(255,255,255,0.4)'; c.fillRect(W / 2 - 70, 210, 140, 106); c.fillRect(W / 2 - 210, 250, 140, 66); c.fillRect(W / 2 + 70, 266, 140, 50);
+  }
   if (s.table) {
     c.fillStyle = 'rgba(247,246,242,0.18)'; c.beginPath(); c.ellipse(W / 2, H - 40, 300, 90, 0, 0, 7); c.fill();
   }
@@ -156,8 +182,16 @@ function draw(s) {
   await p.setContent(page());
   await p.evaluate(function () { return document.fonts.load('40px "Noto Color Emoji"', '🎤'); });
   // node tools/game_art.js road: only the pictures named, so the others stay as they are.
-  var names = process.argv.length > 2 ? process.argv.slice(2) : Object.keys(SCENES);
+  // node tools/game_art.js chores-icons: only Daily chores' little pictures.
+  var names = process.argv.length > 2 ? process.argv.slice(2) : Object.keys(SCENES).concat(['chores-icons']);
   for (var i = 0; i < names.length; i++) {
+    if (names[i] === 'chores-icons') {
+      for (var id in CHORES) {
+        await p.evaluate(chore, CHORES[id]);
+        fs.writeFileSync(path.join(OUT, 'chore-' + id + '.jpg'), await p.screenshot({type: 'jpeg', quality: 85, clip: {x: 0, y: 0, width: 128, height: 128}}));
+      }
+      continue;
+    }
     await p.evaluate(draw, SCENES[names[i]]);
     var shot = await p.locator('#c').screenshot({type: 'jpeg', quality: 82});
     fs.writeFileSync(path.join(OUT, names[i] + '.jpg'), shot);

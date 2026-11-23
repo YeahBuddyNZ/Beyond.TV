@@ -205,6 +205,8 @@ var Builder = (function () {
   function nextStep(g) {
     if (g.step >= ROAD_STEPS.length - 1) {
       g.phase = 'finish'; g.done = true;
+      // The family scoreboard (scores.js, ADR 0057): a road built.
+      if (window.Scores) Scores.solo('road', 2);
       g.total = 0;
       for (var i = 0; i < g.stars.length; i++) g.total += g.stars[i] || 0;
       var sv = load();
@@ -950,6 +952,7 @@ var Builder = (function () {
         var s = Math.max(1, 4 - g.tries);
         g.stars[g.level] = Math.max(g.stars[g.level] || 0, s);
         var sv = load(); sv.bridgeStars = g.stars; save(sv);
+        if (window.Scores) Scores.solo('bridge', 2);
         sfx('win'); fx(g, 640, DECK_Y - 40, EMBER, 24, 400); fx(g, 640, DECK_Y - 40, LILAC, 24, 400);
       } else sfx('lose');
     }
@@ -1383,7 +1386,7 @@ var Builder = (function () {
     if (id === 'house' && !cl.linked) say(g, L(NEEDS_ROAD), EMBER);
     else if (id === 'icecream' && !g.iced) { g.iced = true; say(g, L(ICE_LESSON), EMBER); }
     else if (def.need && !cl.linked) say(g, L(WORKS_ROAD), EMBER);
-    if (g.won) { g.phase = 'won'; g.tt = 0; townWin(g); }
+    if (g.won) { g.phase = 'won'; g.tt = 0; townWin(g); if (window.Scores) Scores.solo('town', 2); }
   }
 
   function townStars(g) { var left = g.money / TOWNS[g.level].budget; return left >= 0.25 ? 3 : left >= 0.1 ? 2 : 1; }
