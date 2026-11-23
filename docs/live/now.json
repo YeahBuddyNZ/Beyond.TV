@@ -1,18 +1,14 @@
 {
- "about": "Written by tools/live_now.py when the website builds: the live video each channel is streaming now, its title, and the next scheduled stream when there is one (ADR 0058).",
- "at": "2026-11-23T02:02:30Z",
+ "about": "Written by tools/live_now.py when the website builds: the live video each channel is streaming now, its title, and the next scheduled stream when there is one (ADR 0058); for each mix channel, the latest videos of the channels in it: v the video, t its title, s its length in seconds (ADR 0065).",
+ "at": "2026-11-23T07:49:48Z",
  "channels": {
   "UCoMdktPbSTixAyNGwb-UYkQ": {
    "video": "53SxFKpbKDE",
-   "title": "Watch Sky News live",
-   "next": {
-    "title": "Mornings with Ridge and Frost | Monday 23 November 2026",
-    "at": "2026-11-23T06:00:00Z"
-   }
+   "title": "Watch Sky News live"
   },
   "UCBi2mrWuNuyYy4gbM6fU18Q": {
-   "video": "QbWsfPZrRpA",
-   "title": "ABC News Live - Sunday, November 22"
+   "video": "KQhNZQ_Uag8",
+   "title": "ABC News Live - 24/7 news, context and analysis"
   },
   "UCeY0bbntWzzVIaj2z3QigXg": {
    "video": "pJZBppLlwJo",
@@ -84,7 +80,642 @@
   },
   "UCrNnk0wFBnCS1awGjq_ijGQ": {
    "video": "z2EWnolxa90",
-   "title": "NEW SHOW | Explore, Learn, and Have Fun with Phoebe & Jay! \u2728 Full Episodes! | PBS"
+   "title": "NEW SHOW | Explore, Learn, and Have Fun with Phoebe & Jay! \u2728 Full Episodes! | PBS KIDS"
   }
+ },
+ "mixes": {
+  "nz-news": [
+   {
+    "v": "UTjNybt1e2U",
+    "t": "Brave teen details crucial evidence that helped crack Kyle Whorrall case | TVNZ+",
+    "s": 573
+   },
+   {
+    "v": "uVu80AQqBTI",
+    "t": "He really mattered a lot to a lot of people\u2019: Josh Thomson remembers Dai Henwood | RNZ",
+    "s": 303
+   },
+   {
+    "v": "PRIsh_6KZXQ",
+    "t": "What the hell happened at Woofington's? | Streaming Now on TVNZ+",
+    "s": 135
+   },
+   {
+    "v": "xkKhB-1Zxss",
+    "t": "Full Episode: Paraire 20 N\u014dema 2026 | Te Karere TVNZ",
+    "s": 1352
+   },
+   {
+    "v": "Jir4L24Y6kU",
+    "t": "Racism tops online abuse during election | Te Ao M\u0101ori News",
+    "s": 193
+   },
+   {
+    "v": "zbuK3wNFsrk",
+    "t": "Election 2026: People\u2019s Debate November 5 2026",
+    "s": 4351
+   },
+   {
+    "v": "fkELVqmgxxo",
+    "t": "Photo ops ahead of democracy - the new fears over Trump's behaviour l The Detail",
+    "s": 1448
+   },
+   {
+    "v": "smcoET9Jk2o",
+    "t": "People are lying to get Wegovy. I test the loophole",
+    "s": 1022
+   },
+   {
+    "v": "dRtTmKNzY4s",
+    "t": "Association of Boys' Schools of New Zealand conference takes place in Rotorua",
+    "s": 332
+   },
+   {
+    "v": "GvmYi0wOH2A",
+    "t": "New Opportunity Party MP Kayla Kingdon-Bebb has defended He Puapua | Te Ao M\u0101ori News",
+    "s": 259
+   },
+   {
+    "v": "iBHe94a1GO0",
+    "t": "Election 2026: 1News Kaupapa M\u0101ori Debate October 29 2026",
+    "s": 2776
+   },
+   {
+    "v": "3DL8m_-ogjM",
+    "t": "A troubled child, a mysterious woman and Auckland\u2019s darkest secret... | Pacific Dark",
+    "s": 1215
+   },
+   {
+    "v": "5Z3ryEYMAcU",
+    "t": "People are lying to get Wegovy. I test the loophole",
+    "s": 1022
+   },
+   {
+    "v": "wgxsNEZG1RQ",
+    "t": "M\u0101ori lawyers warn of strong opposition against Waitangi Tribunal scrapping | Tuia News",
+    "s": 234
+   },
+   {
+    "v": "5JUlZTw8Ego",
+    "t": "Zimbabwean wh\u0101nau embrace te ao M\u0101ori through haka | Te Ao M\u0101ori News",
+    "s": 189
+   },
+   {
+    "v": "fKxXvaibkIs",
+    "t": "Election 2026: TVNZ 1News Multi-Party Leaders Debate October 13 2026",
+    "s": 5484
+   },
+   {
+    "v": "YrUHFUK-MU0",
+    "t": "Jacqueline Fahey: From Where I'm Looking | Film | RNZ",
+    "s": 1055
+   },
+   {
+    "v": "gfRTx-EVQFY",
+    "t": "S\u0101moan language is declining. This school is changing that",
+    "s": 445
+   },
+   {
+    "v": "rMJ3xN-7_20",
+    "t": "Zimbabwean \u0101konga goes viral for performance at Tai Tokerau haka regionals | Te Ao M\u0101ori N",
+    "s": 217
+   },
+   {
+    "v": "HlYt6eersbI",
+    "t": "Hinemihi whare carvings set to return to Aotearoa after 135 years | Te Ao M\u0101ori News",
+    "s": 185
+   },
+   {
+    "v": "2gNEyySgIXQ",
+    "t": "Election 2026: TVNZ 1News Leaders Debate October 6 2026",
+    "s": 5462
+   },
+   {
+    "v": "nDSCBgLPhxw",
+    "t": "Many flags, one umbrella': How rugby league is bringing communities together | RNZ",
+    "s": 224
+   },
+   {
+    "v": "NVzDZTJf3GY",
+    "t": "I have Tourette\u2019s, ask me anything",
+    "s": 192
+   },
+   {
+    "v": "zxoeYVio8bM",
+    "t": "Full Episode: Wenerei 18 Noema 2026 | Te Karere TVNZ",
+    "s": 1350
+   },
+   {
+    "v": "AMLbUxkSIB4",
+    "t": "Mana whenua voting changes spark council concerns over government overreach | Te Ao M\u0101ori",
+    "s": 138
+   }
+  ],
+  "nz-music": [
+   {
+    "v": "fJar9TovXzI",
+    "t": "Lorde - Take Me to the River (Visualizer)",
+    "s": 265
+   },
+   {
+    "v": "m-ufBrAbjX4",
+    "t": "SIX60 - Once In A Lifetime | VLOG",
+    "s": 554
+   },
+   {
+    "v": "Jo7oKiiNV94",
+    "t": "BENEE - Chainmail (Official Lyric Video)",
+    "s": 166
+   },
+   {
+    "v": "hkwTqCpQYCA",
+    "t": "Fat Freddy's Drop Vinyl Hounds Ep 03",
+    "s": 179
+   },
+   {
+    "v": "wP0TooRlZd8",
+    "t": "Drax Project - Summer Rain ft. Signature Choir",
+    "s": 245
+   },
+   {
+    "v": "0jkUqJAE7AE",
+    "t": "Stan Walker & Te Wehi - Hoki Mai R\u0101 Koe (Live at Parachute)",
+    "s": 187
+   },
+   {
+    "v": "hsv8pbYjJUk",
+    "t": "The Beths - \"Til My Heart Stops (Nik Brinkman Remix)\"",
+    "s": 229
+   },
+   {
+    "v": "3Xvlt1I8tG8",
+    "t": "Corrella - Not I (Official Music Video)",
+    "s": 188
+   },
+   {
+    "v": "MpbqjUt84Qk",
+    "t": "I\u2019m sorry babe \ud83e\udd23 #youalreadyknow #sonsofzion",
+    "s": 87
+   },
+   {
+    "v": "tGDCjYCwdyM",
+    "t": "L.A.B Live in Brunswick - May 2, 2026",
+    "s": 120
+   },
+   {
+    "v": "IWUZppDnhBw",
+    "t": "Tiki Taane - Always On My Mind (Live at Soundsplash Festival 2026)",
+    "s": 528
+   },
+   {
+    "v": "Xvt2Vo6kOrI",
+    "t": "TEEKS - Drive (Live at the Auckland Town Hall with the APO, 2019)",
+    "s": 220
+   },
+   {
+    "v": "fwVqGC0jHk8",
+    "t": "Aldous Harding - Riding That Symbol (Official Audio)",
+    "s": 182
+   },
+   {
+    "v": "0yQXMeEFY_I",
+    "t": "Mitch James - Mumma And Me (Dunedin Symphony Orchestra Version)",
+    "s": 255
+   },
+   {
+    "v": "5wl7I3dXLtA",
+    "t": "Katchafire & Mike Love - Sensimillia (Live Acoustic Jam)",
+    "s": 215
+   },
+   {
+    "v": "G7TNmokwsxo",
+    "t": "Kings - How Our Life Goes (Audio)",
+    "s": 197
+   },
+   {
+    "v": "_hs7xHifUmo",
+    "t": "Marlon Williams - Whakameatia Mai (from 'Marlon Williams: Ng\u0101 Ao E Rua - Two Worlds')",
+    "s": 124
+   },
+   {
+    "v": "ATrW3joS_zU",
+    "t": "Tami Neilson and Lynda Topp Honour Jools Topp Live at AMAs 2026",
+    "s": 849
+   },
+   {
+    "v": "LICKBafLu-E",
+    "t": "Shapeshifter \"On Your Side\" - Official Music Video",
+    "s": 202
+   },
+   {
+    "v": "zfYvcAXCsKo",
+    "t": "Ladi6 - Fuarosa",
+    "s": 221
+   },
+   {
+    "v": "o8sBFA59n5c",
+    "t": "Hollie Smith - 4LC (Official Music Video)",
+    "s": 199
+   },
+   {
+    "v": "XeS6m309DTw",
+    "t": "Lorde - Helen of Troy (Official Audio)",
+    "s": 172
+   },
+   {
+    "v": "-wTTrBh_-Wk",
+    "t": "SIX60 - Enjoy The View (Live From Stebbings)",
+    "s": 185
+   },
+   {
+    "v": "m4hIH2Hq95M",
+    "t": "BENEE - Off The Rails (Official Lyric Video)",
+    "s": 108
+   },
+   {
+    "v": "HAjEeZJ5O5U",
+    "t": "Fat Freddy's Drop Vinyl Hounds, Ep 02",
+    "s": 298
+   },
+   {
+    "v": "WbYb3gcILlY",
+    "t": "Drax Project - D A D A (Lyric Video)",
+    "s": 178
+   },
+   {
+    "v": "kYc30zcG6RY",
+    "t": "A Little Behind the Scenes Sneak Peek of TONIGHT's Show #christchurch #stanwalker",
+    "s": 70
+   },
+   {
+    "v": "2UIUWkH05X0",
+    "t": "The Beths - \"Metal (Nik Brinkman Remix)\"",
+    "s": 265
+   },
+   {
+    "v": "JjwwKGjlzhk",
+    "t": "Corrella - NOT I (Audio)",
+    "s": 188
+   },
+   {
+    "v": "3VzjCX-Ohmc",
+    "t": "Sons of Zion - You Already Know (Official Music Video)",
+    "s": 181
+   },
+   {
+    "v": "d1NSoS-4MmQ",
+    "t": "L.A.B Live in Taup\u014d - Jan 18, 2025",
+    "s": 101
+   },
+   {
+    "v": "QdPF75nhZTQ",
+    "t": "TEEKS - Te Ahi Kai P\u014d (Live at the Auckland Town Hall with the APO & Ng\u0101 T\u016bmanako, 2019)",
+    "s": 423
+   },
+   {
+    "v": "A6HfcYE1J94",
+    "t": "Aldous Harding - Train On The Island (Official Audio)",
+    "s": 336
+   },
+   {
+    "v": "LDFC8mrJjjo",
+    "t": "Mitch James - Bird In A Hurricane (Acoustic Version)",
+    "s": 180
+   },
+   {
+    "v": "TslLH1H3n0E",
+    "t": "Katchafire with Kaiit - Collie Herb Man (Lyric Video)",
+    "s": 191
+   },
+   {
+    "v": "_xO3O8gvqJ0",
+    "t": "Kings - $ave Me (Audio)",
+    "s": 216
+   },
+   {
+    "v": "TcDVY0FjXhs",
+    "t": "Marlon Williams - Korero M\u0101ori (from 'Marlon Williams: Ng\u0101 Ao E Rua - Two Worlds')",
+    "s": 150
+   },
+   {
+    "v": "L5FD0wEL7EA",
+    "t": "Tami Neilson \"KEEP ON\" feat. The Secret Sisters- Official Music Video",
+    "s": 202
+   },
+   {
+    "v": "awFnK8xyw-8",
+    "t": "Shapeshifter - Amokura - Official Music Video",
+    "s": 209
+   },
+   {
+    "v": "YvuF-OsE11Y",
+    "t": "Ladi6 - Haters Down",
+    "s": 147
+   },
+   {
+    "v": "1evxYIN-xPA",
+    "t": "Hollie Smith - 'Strength In You' (Official Visualiser)",
+    "s": 388
+   },
+   {
+    "v": "LMV-WYfR9ao",
+    "t": "Lorde - Hold No Grudge (Official Audio)",
+    "s": 269
+   },
+   {
+    "v": "dPVtKjOrVoA",
+    "t": "SIX60 - South Island Road Trip | VLOG",
+    "s": 80
+   },
+   {
+    "v": "-X3g4fXrlrQ",
+    "t": "BENEE - Cinnamon (Official Lyric Video)",
+    "s": 163
+   },
+   {
+    "v": "yNYQUgxB_ZA",
+    "t": "Fat Freddy's Drop C-Way's Tour Vlog, Lyon - Amsterdam 2026",
+    "s": 158
+   },
+   {
+    "v": "bjXRF4b8G5w",
+    "t": "Drax Project - 24/7 (Official Lyric Video)",
+    "s": 199
+   },
+   {
+    "v": "0TjYegGva5Q",
+    "t": "Stan Walker - Tiaho (Live at Parachute, 2026)",
+    "s": 223
+   },
+   {
+    "v": "qrQ65x1D8mE",
+    "t": "The Beths - \"Til My Heart Stops\" (Official)",
+    "s": 258
+   },
+   {
+    "v": "zluXkQV5JS0",
+    "t": "Corrella - Under The Covers (Audio)",
+    "s": 184
+   },
+   {
+    "v": "q4oAzkcWrw0",
+    "t": "Sons of Zion - I Do (Official Music Video) ft. Trexx",
+    "s": 206
+   },
+   {
+    "v": "gun7agl-iPQ",
+    "t": "L.A.B, Corrella & Brannigan Kaa - Maumahara Noa Ahau (Audio)",
+    "s": 171
+   },
+   {
+    "v": "e3GCj32Chtk",
+    "t": "TEEKS - Something To Feel (Behind The Album)",
+    "s": 404
+   },
+   {
+    "v": "Mw0jYucBhT4",
+    "t": "Aldous Harding - What Am I Gonna Do (Official Audio)",
+    "s": 225
+   },
+   {
+    "v": "QRbc0_iw-zM",
+    "t": "Mitch James - Old News",
+    "s": 227
+   },
+   {
+    "v": "JOu-NaZLroc",
+    "t": "Katchafire with Laughton Kora - Bounce (Lyric Video)",
+    "s": 217
+   },
+   {
+    "v": "soNAwsIgoms",
+    "t": "kings - crashwell \u2026",
+    "s": 128
+   },
+   {
+    "v": "Hp8H086FlB8",
+    "t": "Marlon Williams - Rere Mai Ng\u0101 Rau (OFFICIAL VIDEO)",
+    "s": 180
+   },
+   {
+    "v": "nCxSMi3N9Qw",
+    "t": "Stopped to pay our respects to Hank Williams when passing thru Alabama on tour w/Willie. H",
+    "s": 110
+   },
+   {
+    "v": "UxGP3h3rvjU",
+    "t": "Shapeshifter \"Runaway\" Official Music Video",
+    "s": 226
+   },
+   {
+    "v": "KYHpZ-Cvp6U",
+    "t": "Ladi6 - BBZ",
+    "s": 226
+   }
+  ],
+  "nz-shows": [
+   {
+    "v": "jarTz0ofCoE",
+    "t": "What happens behind closed doors to negotiate a government?",
+    "s": 2373
+   },
+   {
+    "v": "8a6lWH501-g",
+    "t": "GOLF | 2026 NZSS Golf",
+    "s": 961
+   },
+   {
+    "v": "lbLguZ8HaRc",
+    "t": "Aro perform their Silver Scroll-winning waiata Puna Ora live in the studio.",
+    "s": 199
+   },
+   {
+    "v": "YphLBa44a3o",
+    "t": "The day Africa quit the Olympics, because NZ was there",
+    "s": 2292
+   },
+   {
+    "v": "BLiySGoYgPM",
+    "t": "ORIENTEERING | NZSSOC 2026 | Sprint Highlights",
+    "s": 875
+   },
+   {
+    "v": "SjMs9DyNQHI",
+    "t": "Betty-Anne has new music out! Moana catches up with the musical star.",
+    "s": 749
+   },
+   {
+    "v": "rkGdJuc8jzU",
+    "t": "Guyon Espiner on RNZ crisis and TVNZ\u2019s \u2018flabbergasting\u2019 plan",
+    "s": 1576
+   },
+   {
+    "v": "WkAFPctL_OM",
+    "t": "Day One Shorts | He K\u014drihi",
+    "s": 87
+   },
+   {
+    "v": "ULEz5740uhI",
+    "t": "Panel: David Shearer, Carmen Parahi and Roihana Nuri",
+    "s": 811
+   },
+   {
+    "v": "myNMMpR8XRk",
+    "t": "Hamish McKenzie: sh*t talked by Elon Musk, Substack and saving the media",
+    "s": 1897
+   },
+   {
+    "v": "SUCGk16Qffw",
+    "t": "\u0100e Nah! | Episode 7 - KURA KID: PARE & RAMA",
+    "s": 300
+   },
+   {
+    "v": "hAMehburhL4",
+    "t": "Meet new Te Tai Tonga MP Mananui Ramsden",
+    "s": 371
+   },
+   {
+    "v": "aPkIeV9R3SM",
+    "t": "Big questions that linger after election day",
+    "s": 2241
+   },
+   {
+    "v": "7iWVB44etlk",
+    "t": "\u0100e Nah! | Episode 3 - KURA KID: TE WEHI PRESTON",
+    "s": 300
+   },
+   {
+    "v": "Yo85RcB2jIc",
+    "t": "Panel: Have Te Tiriti discussions become too academic?",
+    "s": 498
+   }
+  ],
+  "nz-sport": [
+   {
+    "v": "sk3Mm1VsUm8",
+    "t": "150 Tests. One Incredible Journey | Beauden Barrett",
+    "s": 686
+   },
+   {
+    "v": "xIp866GP--k",
+    "t": "You Can't Train for That Catch\" Dhruv Jurel Reacts | New Zealand v India 1st Test Day 4",
+    "s": 342
+   },
+   {
+    "v": "WKPrFHuZV28",
+    "t": "This is how England beat the All Blacks | The After Match",
+    "s": 1987
+   },
+   {
+    "v": "OL9w9LhrdDU",
+    "t": "FULL GAME | Black Ferns vs England, The Rivalry Final | 2017 Women\u2019s Rugby World Cup Final",
+    "s": 5980
+   },
+   {
+    "v": "V6cHFlnyrGo",
+    "t": "Silver Ferns v Australia - 2026 Constellation Cup | Game 4 Highlights",
+    "s": 504
+   },
+   {
+    "v": "QnECs4EhT9k",
+    "t": "A Closer Look at the All Blacks Defeat to England | The Breakdown",
+    "s": 3149
+   },
+   {
+    "v": "M4yFXCZhpHw",
+    "t": "Everyone Wants to See Theater\" Rachin Ravindra Reacts | New Zealand v India 1st Test Day 4",
+    "s": 601
+   },
+   {
+    "v": "3bpAuBgF-Yg",
+    "t": "Analyzing the dangerous England attack | The After Match",
+    "s": 632
+   },
+   {
+    "v": "E7TDMrOpMug",
+    "t": "Blues vs Matat\u016b | Super Rugby Aupiki Final 2026 Full Game | Three-Peat on the Line in Chri",
+    "s": 5886
+   },
+   {
+    "v": "hbHk4Zf8iUA",
+    "t": "Silver Ferns v Australia - 2026 Constellation Cup | Game 3 Highlights",
+    "s": 312
+   },
+   {
+    "v": "dbLA2_qeGw4",
+    "t": "All Blacks Reflect on England Test | Press Conference (Twickenham)",
+    "s": 644
+   },
+   {
+    "v": "gRMLKYqb2ik",
+    "t": "Trust My Defense, Trust My Technique\" KL Rahul Reacts | New Zealand v India 1st Test Day 3",
+    "s": 1224
+   },
+   {
+    "v": "GQdoPVhdK3o",
+    "t": "Beauden Barrett Gets Emotional Ahead of his 150th All Blacks Test | Full Interview",
+    "s": 888
+   },
+   {
+    "v": "N7n95-QATkE",
+    "t": "Is this the best Black Ferns performance ever? | Black Ferns v France All Tries",
+    "s": 552
+   },
+   {
+    "v": "HXNz1RjBPN8",
+    "t": "Silver Ferns v Australia - 2026 Constellation Cup | Game 2 Press Conference",
+    "s": 702
+   },
+   {
+    "v": "P1NkEDu0swc",
+    "t": "MINI MATCH | All Blacks v England | London, 2026 (Nations Championship)",
+    "s": 905
+   },
+   {
+    "v": "AIGk4E_dyZY",
+    "t": "India Are Allowed to Bat Okay Too\" Jacob Oram Reacts | New Zealand v India 1st Test Day 3",
+    "s": 898
+   },
+   {
+    "v": "mvIHf_91nsA",
+    "t": "All Blacks Team Announced to play England | Nations Championship",
+    "s": 177
+   },
+   {
+    "v": "CsCsoF8C458",
+    "t": "Elinor-Plum King 2026 Highlights | Black Ferns Breakthrough Player of the Year \ud83c\udfc6",
+    "s": 482
+   },
+   {
+    "v": "6HOppsHLVVA",
+    "t": "Silver Ferns v Australia - 2026 Constellation Cup | Game 2 Highlights",
+    "s": 302
+   },
+   {
+    "v": "emyGsfOiWeE",
+    "t": "Beauden Barrett\u2019s Greatest Ever Test? | All Blacks vs Wallabies Eden Park 2018 Highlights",
+    "s": 789
+   },
+   {
+    "v": "O1-HVTNEeNM",
+    "t": "NZC Youth Fast Bowling Challenge - Boys' Final",
+    "s": 1327
+   },
+   {
+    "v": "CBOESemqRyQ",
+    "t": "This is how Wales beat the All Blacks | The After Match",
+    "s": 1593
+   },
+   {
+    "v": "m8b92k-7Law",
+    "t": "Kaipo Olsen-Baker 2026 Highlights | Why She\u2019s Player of the Year \ud83c\udfc9",
+    "s": 598
+   },
+   {
+    "v": "9sKAj0MoSak",
+    "t": "Silver Ferns v Australia - 2026 Constellation Cup | Game 1 Press Conference",
+    "s": 965
+   }
+  ]
  }
 }

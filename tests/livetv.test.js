@@ -103,13 +103,72 @@ check('kids row has channels', L.inGroup(L.NEWS, 'kids').length >= 1);
 check('no group is news', L.inGroup([{name: 'x', youtube: 'UCabcdefghijklmnopqrstuv'}], 'news').length === 1);
 check('every channel has a logo on the site', L.NEWS.every(function (c) { return fs.existsSync(path.join(__dirname, '..', 'docs', 'live', 'logos', c.id + '.jpg')); }));
 
-// The website's list is the same as the app's own copy
+// The website's list is the same as the app's own copy (its live channels: mixes need now.json, so only come from there)
 var site = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'docs', 'live', 'channels.json'), 'utf8'));
-check('website list matches the app', JSON.stringify(site.channels) === JSON.stringify(L.NEWS));
+var siteLive = site.channels.filter(function (c) { return c.youtube; });
+check('website list matches the app', JSON.stringify(siteLive) === JSON.stringify(L.NEWS));
+check('every channel on the website is good, and has a logo', site.channels.every(function (c) {
+  return L.validChannel(c) && fs.existsSync(path.join(__dirname, '..', 'docs', 'live', 'logos', c.id + '.jpg'));
+}));
+check('the NZ mixes are on the website', ['nz-news', 'nz-music', 'nz-shows', 'nz-sport'].every(function (id) {
+  return site.channels.some(function (c) { return c.id === id && c.group === 'nz' && c.mix.length >= 3; });
+}));
+
+// Mix channels (ADR 0065): their videos come from now.json; none, and the mix is off air
+var mixC = {id: 'nz-music', name: 'NZ Music', from: 'Aotearoa', mix: ['UCabcdefghijklmnopqrstuv'], group: 'nz'};
+check('a mix is a good channel', L.validChannel(mixC) && !L.validChannel({id: 'x', name: 'X', mix: ['nope']}) && !L.validChannel({id: '../x', name: 'X', mix: ['UCabcdefghijklmnopqrstuv']}));
+check('a mix keeps its place in a list', L.pickList({channels: [mixC]}, null)[0].id === 'nz-music');
+var mixNow = {at: '2026-11-21T09:00:00Z', channels: {}, mixes: {'nz-music': [
+  {v: 'aaaaaaaaaaa', t: 'Song one', s: 200}, {v: 'bad', t: 'x', s: 100}, {v: 'bbbbbbbbbbb', t: 'Song two', s: 100},
+  {v: 'ccccccccccc', t: 'Too short', s: 5}, {v: 'ddddddddddd', t: 7, s: 100}]}};
+var mixAir = L.onAir([mixC], mixNow, t);
+check('a mix gets its good videos', mixAir.length === 1 && mixAir[0].videos.map(function (v) { return v.v; }).join() === 'aaaaaaaaaaa,bbbbbbbbbbb');
+check('a mix without videos is off air', L.onAir([mixC], {at: mixNow.at, channels: {}}, t).length === 0 && L.onAir([mixC], null, t).length === 0);
+var vids = mixAir[0].videos;
+check('the clock picks the video', L.mixAt(vids, 0).i === 0 && L.mixAt(vids, 199000).i === 0 && L.mixAt(vids, 200000).i === 1 && L.mixAt(vids, 300000).i === 0);
+check('and how far into it', L.mixAt(vids, 250000).start === 50 && L.mixAt(vids, 250000).title === 'Song two');
+check('now on a mix is the video playing', L.nowOf(mixAir[0], 250000) === 'Song two' && L.nowOf({now: 'Live'}, 0) === 'Live' && L.nowOf(null, 0) === '');
+var mixUrl = L.embedUrl(mixAir[0], 250000);
+check('a mix plays from where it is, then on round', mixUrl.indexOf('https://www.youtube.com/embed/bbbbbbbbbbb?start=50&playlist=aaaaaaaaaaa&loop=1&') === 0 && /autoplay=1/.test(mixUrl));
+check('a broken list of videos is empty', L.videosOf(null).length === 0 && L.videosOf('x').length === 0);
+
+// The line-up: numbered, the aerial and NZ apps first, then channels, then the other apps; a kid's is smaller
+var lineRows = L.sources(apps), onAirNow = L.onAir([mixC].concat(L.NEWS), {at: mixNow.at, channels: {}, mixes: mixNow.mixes}, t);
+onAirNow = L.onAir([mixC].concat(L.NEWS), null, t).filter(function (c) { return c.youtube; });
+onAirNow.unshift(mixAir[0]);
+var line = L.lineup(onAirNow, lineRows, {id: 'tv', title: 'Live TV'}, false);
+check('numbers from 1', line[0].num === 1 && line[line.length - 1].num === line.length);
+check('aerial, then the NZ apps', line.slice(0, 4).map(function (e) { return e.key; }).join() === 'aerial,freeview,tvnz,threenow');
+check('then the NZ mixes', line[4].key === 'nz-music' && line[4].kind === 'channel');
+check('the other apps last', line.slice(-3).map(function (e) { return e.key; }).join() === 'plex,skysportnow,neon');
+check('kids channels are on it', line.some(function (e) { return e.key === 'pbs-kids'; }));
+var kidLine = L.lineup(onAirNow, lineRows, null, true);
+check('a kid gets the NZ apps and the kids channels', kidLine.map(function (e) { return e.key; }).join() === 'freeview,tvnz,threenow,pbs-kids');
+
+// Choose channels: off per person, numbers kept, never all off
+var off1 = L.toggleOff({}, 'p1', 'tvnz');
+check('turned off', L.offOf(off1, 'p1').join() === 'tvnz');
+check('and on again', L.offOf(L.toggleOff(off1, 'p1', 'tvnz'), 'p1').length === 0 && L.offOf(off1, 'p1').join() === 'tvnz');
+check('each person their own', L.offOf(L.toggleOff(off1, 'p2', 'dw'), 'p1').join() === 'tvnz');
+var shownLine = L.shown(line, ['tvnz']);
+check('off ones are skipped', shownLine.length === line.length - 1 && !shownLine.some(function (e) { return e.key === 'tvnz'; }));
+check('a channel keeps its number', shownLine[2].key === 'threenow' && shownLine[2].num === 4);
+check('all off still shows something', L.shown(line, line.map(function (e) { return e.key; })).length === line.length);
+check('a number finds its channel', L.byNumber(shownLine, 4) === 2 && L.byNumber(shownLine, 3) === -1 && L.byNumber(shownLine, 999) === -1);
+
+// Where surfing starts: the one asked for, else the last, else the first channel, never an app
+check('starts on the one asked for', line[L.startAt(line, 'dw', 'nz-music')].key === 'dw');
+check('else the last watched', line[L.startAt(line, null, 'nz-music')].key === 'nz-music');
+check('last can be an app', line[L.startAt(line, null, 'tvnz')].key === 'tvnz');
+check('else the first channel', line[L.startAt(line, 'gone', 'gone')].kind === 'channel' && L.startAt([], null, null) === -1);
+
+// The remote's number and channel keys
+check('number keys', L.digit(48) === 0 && L.digit(57) === 9 && L.digit(101) === 5 && L.digit(13) === -1);
+check('channel keys', L.channelKey(33) === 1 && L.channelKey(427) === 1 && L.channelKey(34) === -1 && L.channelKey(428) === -1 && L.channelKey(38) === 0);
 var java = fs.readFileSync(path.join(__dirname, '..', 'app', 'src', 'nz', 'gobeyond', 'tv', 'LiveTvActivity.java'), 'utf8');
 var javaList = java.slice(java.indexOf('static final String[][] NEWS'), java.indexOf('};', java.indexOf('static final String[][] NEWS')));
 var javaRows = javaList.match(/\{"[^}]*\}/g).map(function (r) { return JSON.parse('[' + r.slice(1, -1) + ']'); });
-check('Google TV list matches the website', JSON.stringify(javaRows) === JSON.stringify(site.channels.map(function (c) { return [c.id, c.name, c.from, c.youtube, c.group, c.colour]; })));
+check('Google TV list matches the website', JSON.stringify(javaRows) === JSON.stringify(siteLive.map(function (c) { return [c.id, c.name, c.from, c.youtube, c.group, c.colour]; })));
 
 console.log(passed + ' passed, ' + failed + ' failed');
 process.exit(failed ? 1 : 0);

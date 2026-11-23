@@ -1,6 +1,79 @@
 {
-  "about": "Free 24/7 channels Beyond TV plays from each channel's own official YouTube live stream. group: featured, news, more or kids (kids profiles see kids only). Read by web/livetv.js and LiveTvActivity.java; edit here to add or drop one without an app update. tools/live_now.py writes now.json (the live video and logo of each) when the website builds.",
+  "about": "Free channels Beyond TV plays. A channel with \"youtube\" is that channel's own official 24/7 YouTube live stream; a channel with \"mix\" is ours, made of the latest uploads of those official YouTube channels (ADR 0065). group: nz, featured, news, more or kids (kids profiles see kids only). Read by web/livetv.js and LiveTvActivity.java; edit here to add or drop one without an app update. tools/live_now.py writes now.json (the live video and logo of each, and each mix's videos) when the website builds.",
   "channels": [
+    {
+      "id": "nz-news",
+      "name": "NZ News",
+      "from": "1News, RNZ and more",
+      "mix": [
+        "UCxPAYgO8OpFev3PUTKbsxNw",
+        "UCp4OXwfZE1SaCQ4jRAuaoXQ",
+        "UC2BQ3U9IxoYIJyulv0bN5PQ",
+        "UCtgvSkmjzkGoFMflc_ztVwQ",
+        "UCm2YVvo3blxPgvu5wAHcm2Q"
+      ],
+      "group": "nz",
+      "colour": "#1E5AEC"
+    },
+    {
+      "id": "nz-music",
+      "name": "NZ Music",
+      "from": "Aotearoa's own artists",
+      "mix": [
+        "UCOxhwqKKlVq_NaD0LVffGuw",
+        "UC6yoFGoq2K9B_0MEbGM4JoQ",
+        "UCqkzefLq9-QoYwFwolcImQw",
+        "UCsLGIbOjsV8TFTco9cL6HHA",
+        "UCk8jFRtyLmF9Cmd3T7FKc7g",
+        "UCmOkWRl8fRPJ3ZHhS_iyLhg",
+        "UCwLwi6zxlfFljTvNQQLVEfQ",
+        "UCIcCIyONDlhG49BJc3u38Vg",
+        "UCoobMAB47QLLWOs2_uw33Rw",
+        "UCKWjsUy00CrQj-AQ5uOHFPw",
+        "UCPaX1exyF4z2IJC2LwYtLjg",
+        "UCzgcYN62Zd-b1lV19bYh0lw",
+        "UCbna7cKg1fgvraE9WiHMceA",
+        "UCHAgqYKEUUxT4MzF0yRLNQw",
+        "UCP-mlQpr1V3ZVRgLOA2u8tQ",
+        "UCvYnfuCRhq6PRYK2MltekXA",
+        "UCEoAsX261pEOb0PGEKi4gVw",
+        "UCs2s2ByyjhgyEaF7yG_Ekxg",
+        "UCvJuoVZYYPFwVZVaQTZjv4g",
+        "UCfzyuqY_hvYkGXF-SsUHQzg",
+        "UC-S0KWVF60ntSL4SigZUL2Q",
+        "UCN8t6D_du7XyDuPWFY08yRQ",
+        "UCRNyynfX9rlC0rCqIIfABJw",
+        "UCPgXrJM4a5sx_-3iIlyk_lw"
+      ],
+      "group": "nz",
+      "colour": "#6E3DDB"
+    },
+    {
+      "id": "nz-shows",
+      "name": "NZ Shows",
+      "from": "Free from Aotearoa",
+      "mix": [
+        "UCprQWxc91NtC1Jx1iuEbC-Q",
+        "UCtKqREZk41D4sZ5oJwkaaHA",
+        "UCypmk20rwRZIyy5H6fpAyFg"
+      ],
+      "group": "nz",
+      "colour": "#A3216B"
+    },
+    {
+      "id": "nz-sport",
+      "name": "NZ Sport",
+      "from": "All Blacks, Black Caps and more",
+      "mix": [
+        "UCsAPiUMyBjtKamxYGbSUnLA",
+        "UCuKowzPg2-A0FcmyPa3yWug",
+        "UC8f1U3h2TAcKOktgonnL0Yw",
+        "UCk8kVitTTdDn2-6SfFqHWSA",
+        "UCBfq7h4L1kKY6yHp8-e1ZRA"
+      ],
+      "group": "nz",
+      "colour": "#22221F"
+    },
     {
       "id": "sky-news",
       "name": "Sky News",

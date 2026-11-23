@@ -548,6 +548,17 @@ final class Russian {
             case "Couldn't tell Beyond Family just now.": return "Сейчас не получилось сообщить Beyond Family.";
             case "Thanks, ": return "Спасибо, ";
             case "! It's ticked off in Beyond Family.": return "! Отмечено в Beyond Family.";
+            // Channels (LiveTvActivity, ADR 0065)
+            case "Press OK to open ": return "Нажмите OK, чтобы открыть ";
+            case "The channels from your aerial": return "Каналы с вашей антенны";
+            case "An app on your TV": return "Приложение на вашем телевизоре";
+            case "There's no channel ": return "Нет канала ";
+            case "▲ ▼ change channel   ·   OK for the guide": return "▲ ▼ переключить канал   ·   OK открывает список";
+            case "Made in Aotearoa": return "Сделано в Аотеароа";
+            case "Choose channels": return "Выбрать каналы";
+            case "Turn off the ones you don't watch. Changing channel skips them.": return "Выключите те, что вы не смотрите. При переключении они пропускаются.";
+            case "Keep at least one channel on": return "Оставьте хотя бы один канал";
+            case "Open channels in the YouTube app (smoother on older TVs)": return "Открывать каналы в приложении YouTube (плавнее на старых телевизорах)";
             // Live TV (LiveTvActivity)
             case "Pick a channel": return "Выберите канал";
             case "Free channels, no subscription": return "Бесплатные каналы, без подписки";
