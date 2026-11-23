@@ -324,6 +324,8 @@ final class Russian {
             case "Tidy-up race!": return "Гонка уборки!";
             case "Go!": return "Вперёд!";
             case "Untick anyone who's out, then press Go!": return "Уберите тех, кто не участвует, и нажмите «Вперёд!»";
+            case "Nobody home? The TV turns itself off at ": return "Никого нет дома? Телевизор выключится сам в ";
+            case " unless someone presses a button.": return ", если никто не нажмёт кнопку.";
             case "Who's tidying?": return "Кто убирает?";
             case "Ready, set, go! When you're done, press OK on your face.": return "На старт, внимание, марш! Кто закончил, нажмите OK на своём лице.";
             case "1st": return "1-й";
