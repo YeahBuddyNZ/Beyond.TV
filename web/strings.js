@@ -45,7 +45,7 @@ var I18N = (function () {
     "For sport without a Sky box: Sky Sport Now.": "Für Sport ohne Sky-Box: Sky Sport Now.",
     "Got it": "Verstanden",
     "▲ ▼ to change channel": "▲ ▼ wechselt den Sender",
-    // Now and next, favourites, Continue (ADR 0057)
+    // Now and next, favourites, Continue (ADR 0058)
     "Your favourites": "Deine Favoriten",
     "Hold OK on a channel to pin it to the top.": "Halte OK auf einem Sender gedrückt, um ihn oben anzuheften.",
     "Pinned to your favourites": "An deine Favoriten angeheftet",
@@ -127,6 +127,8 @@ var I18N = (function () {
     "Karaoke": "Karaoke",
     "Party": "Party",
     "Tidy-up race": "Aufräum-Wettrennen",
+    "Daily chores": "Tägliche Aufgaben",
+    "Family scoreboard": "Familien-Punktetafel",
     "Karaoke night": "Karaoke-Abend",
     "Who's singing?": "Wer singt?",
     "One song now, or a playlist?": "Ein Lied jetzt oder eine Playlist?",
@@ -875,7 +877,7 @@ var I18N = (function () {
     "For sport without a Sky box: Sky Sport Now.": "Спорт без приставки Sky: Sky Sport Now.",
     "Got it": "Понятно",
     "▲ ▼ to change channel": "▲ ▼ переключают канал",
-    // Now and next, favourites, Continue (ADR 0057)
+    // Now and next, favourites, Continue (ADR 0058)
     "Your favourites": "Избранное",
     "Hold OK on a channel to pin it to the top.": "Удерживайте OK на канале, чтобы закрепить его наверху.",
     "Pinned to your favourites": "Добавлено в избранное",
@@ -957,6 +959,8 @@ var I18N = (function () {
     "Karaoke": "Караоке",
     "Party": "Вечеринка",
     "Tidy-up race": "Гонка уборки",
+    "Daily chores": "Дела на день",
+    "Family scoreboard": "Семейная таблица очков",
     "Karaoke night": "Вечер караоке",
     "Who's singing?": "Кто поёт?",
     "One song now, or a playlist?": "Одну песню сейчас или плейлист?",

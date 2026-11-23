@@ -68,7 +68,7 @@ check('old now.json: every channel, by channel id', L.onAir(L.NEWS, {at: '2026-1
 check('no now.json: every channel', L.onAir(L.NEWS, null, t).length === L.NEWS.length && !L.onAir(L.NEWS, null, t)[0].video);
 check('a now.json from the future is not trusted', L.onAir(L.NEWS, {at: '2026-11-25T00:00:00Z', channels: now.channels}, t).length === L.NEWS.length);
 
-// Now and next (ADR 0057): the live video's title, and what's on next while it hasn't started
+// Now and next (ADR 0058): the live video's title, and what's on next while it hasn't started
 var nn = {at: '2026-11-21T09:30:00Z', channels: {}};
 nn.channels[L.NEWS[0].youtube] = {video: 'abcdefghijk', title: 'Watch Sky News live', next: {title: 'Mornings', at: '2026-11-21T11:00:00Z'}};
 nn.channels[L.NEWS[1].youtube] = {video: 'bcdefghijkl', title: 42, next: {title: 'Bad time', at: 'soon'}};
@@ -80,7 +80,7 @@ check('next before it starts', L.nextOf(air2[0], t).title === 'Mornings');
 check('next once it has started is gone', L.nextOf(air2[0], Date.parse('2026-11-21T11:01:00Z')) === null);
 check('no next', L.nextOf(air2[1], t) === null && L.nextOf(null, t) === null);
 
-// Favourites (ADR 0057): per person, newest first, holding OK again takes one off, the store given untouched
+// Favourites (ADR 0058): per person, newest first, holding OK again takes one off, the store given untouched
 var store = {p1: ['sky-news']};
 var r1 = L.toggleFav(store, 'p1', 'dw');
 check('pinning puts it first', r1.pinned && r1.store.p1.join() === 'dw,sky-news');

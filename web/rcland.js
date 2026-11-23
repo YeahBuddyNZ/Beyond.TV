@@ -2379,6 +2379,8 @@ var RCLand = (function () {
   function finishRace() {
     var rc = g.race, s2 = load(), key = g.water ? 'raceWater' : 'race', best = !s2[key] || rc.total < s2[key];
     results.push({player: rc.player, name: g.m.name, time: rc.time, stunts: g.stunts, total: rc.total, water: g.water, best: best});
+    // The family scoreboard (scores.js, ADR 0057): 2 for a race, 3 for a best time.
+    if (window.Scores) Scores.solo('rcland', best ? 3 : 2);
     save(g);
     if (best) { s2 = load(); s2[key] = rc.total; try { window.localStorage.setItem(KEY, JSON.stringify(s2)); } catch (e) {} }
     hush();

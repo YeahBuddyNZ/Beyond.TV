@@ -607,7 +607,7 @@
 
   /**
    * Keep watching as cards: the show and its app when it came from a pick, otherwise just the app; a Live TV channel or
-   * a game played here (ADR 0057). The first is Continue: the home screen opens on it.
+   * a game played here (ADR 0058). The first is Continue: the home screen opens on it.
    */
   function watchingCards() {
     return Watched.list(3).map(function (x, i) {

@@ -1,5 +1,5 @@
 {
- "about": "Written by tools/live_now.py when the website builds: the live video each channel is streaming now, its title, and the next scheduled stream when there is one (ADR 0057).",
+ "about": "Written by tools/live_now.py when the website builds: the live video each channel is streaming now, its title, and the next scheduled stream when there is one (ADR 0058).",
  "at": "2026-11-23T02:02:30Z",
  "channels": {
   "UCoMdktPbSTixAyNGwb-UYkQ": {

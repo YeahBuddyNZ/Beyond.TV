@@ -358,6 +358,8 @@ var Table = (function () {
       if (p.robot) continue;
       var score = result.draw ? 0.5 : n > 1 ? (n - 1 - i) / (n - 1) : 1;
       var learnt = learn(p, result.game, score, result.extra && result.extra[p.id]);
+      // The family scoreboard (scores.js, ADR 0057): 3 for a win, 1 for playing.
+      if (window.Scores) Scores.add(p, 'table', i === 0 && !result.draw ? 3 : 1);
       rows.push({person: p, place: i, learnt: learnt});
     }
     var winner = result.order[0];

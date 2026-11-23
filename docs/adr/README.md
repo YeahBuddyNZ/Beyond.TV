@@ -64,4 +64,5 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0054](0054-build-a-bridge.md) | Build it: build a bridge |
 | [0055](0055-plan-a-town.md) | Build it: plan a town |
 | [0056](0056-londons-candy-land.md) | Lolly Land (London's Candy Land): a kind candy world for the remote |
-| [0057](0057-live-tv-now-next-favourites-and-continue.md) | Live TV now and next, favourite channels, and the home screen opening on Continue |
+| [0057](0057-family-scoreboard-and-daily-chores.md) | The family scoreboard and Daily chores, with stars for Candy Land |
+| [0058](0058-live-tv-now-next-favourites-and-continue.md) | Live TV now and next, favourite channels, and the home screen opening on Continue |

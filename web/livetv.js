@@ -12,7 +12,7 @@
  * is streaming right now, so we play that video (YouTube's "live_stream?channel=" link says "Video not found" when a
  * channel runs two streams) and leave out a channel that isn't live. Never a channel somebody had no right to share:
  * only a channel's own official stream, with its own logo on its tile.
- * Now and next, favourites (ADR 0057): each tile says what is on now (the live video's title, from now.json), and the
+ * Now and next, favourites (ADR 0058): each tile says what is on now (the live video's title, from now.json), and the
  * focused one what is on next when the channel has scheduled it. Holding OK on a channel pins it to "Your favourites",
  * the first row, for whoever is watching; kept on the TV only. What was last watched leads Keep watching on the home
  * screen, so it opens again with one press.

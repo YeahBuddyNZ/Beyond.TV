@@ -25,7 +25,7 @@ import java.io.InputStream;
  * phones. Same as Games.open in web/games.js: a picture for each, in groups (ADR 0047; four since Build it, ADR 0052, so they scroll). A game opens on top of
  * this screen and it stays open, so Back from a game comes back here, one step, not out to the home screen.
  * The last game played leads Keep watching on the home screen, and Continue there opens it again on top of this screen
- * (extra GAME, ADR 0057).
+ * (extra GAME, ADR 0058).
  */
 public class GamesActivity extends Activity {
     static void open(Context c) {
@@ -98,6 +98,9 @@ public class GamesActivity extends Activity {
                 {{Ui.tr("Em casa", "Round the house", "En casa")},
                         {"lunch", Ui.tr("Lanches da escola", "School lunches", "Almuerzos del cole"), (Runnable) () -> TableActivity.open(this, "lunch")},
                         {"tidy", Ui.tr("Corrida da arrumação", "Tidy-up race", "Carrera de ordenar"), (Runnable) () -> TidyActivity.open(this, 10)},
+                        // Daily chores and the family scoreboard (web/chores.js, web/scores.js, ADR 0057), in TableActivity's WebView.
+                        {"chores", Ui.tr("Tarefas do dia", "Daily chores", "Tareas del día"), (Runnable) () -> TableActivity.open(this, "chores")},
+                        {"scores", Ui.tr("Placar da família", "Family scoreboard", "Marcador familiar"), (Runnable) () -> TableActivity.open(this, "scores")},
                         {"bedtime", Ui.tr("Respirar para dormir", "Bedtime breathing", "Respirar para dormir"), (Runnable) () -> BedtimeActivity.open(this, 15)}},
         };
         View first = null;

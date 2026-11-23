@@ -160,7 +160,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
     /** Each screen's words, worked out off the frame loop: its name, its line under it, and how long ago. */
     private final String[] cardName = new String[3], cardMeta = new String[3], cardWhen = new String[3];
     private final float[] cardWhenW = new float[3];
-    /** Continue (ADR 0057): the first of Keep watching, its chip purple; the home screen opens on it. */
+    /** Continue (ADR 0058): the first of Keep watching, its chip purple; the home screen opens on it. */
     private final boolean[] cardGo = new boolean[3];
     /** A Live TV channel's logo or a game's picture, for something of ours in Keep watching. Made once, in cardWords. */
     private final Bitmap[] cardPic = new Bitmap[3];

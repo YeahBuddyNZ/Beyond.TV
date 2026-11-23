@@ -46,7 +46,7 @@ import java.util.regex.Pattern;
  * TV's own video decoder), else full screen here in YouTube's web player (up and down change channel).
  * The list comes from our website (docs/live/channels.json), kept for next time, with this copy until then; now.json
  * beside it says which video each channel streams right now (tools/live_now.py, hourly), and the logos sit in
- * live/logos/. Now and next, favourites (ADR 0057): each tile says what is on now (the live video's title, from
+ * live/logos/. Now and next, favourites (ADR 0058): each tile says what is on now (the live video's title, from
  * now.json) and the corner says what is on next for the focused one, when the channel has scheduled it. Holding OK on a
  * channel pins it to "Your favourites", the first row, for whoever is watching; kept on the TV only. What was last
  * watched leads Keep watching on the home screen, and Continue there opens it again (extra PLAY).
@@ -838,7 +838,7 @@ public class LiveTvActivity extends Activity {
                 String v = n == null ? "" : n.optString("video", "");
                 if (!VIDEO_ID.matcher(v).matches()) continue;
                 copy[VIDEO] = v;
-                // Now and next (ADR 0057): text only, cut to a length a tile can carry.
+                // Now and next (ADR 0058): text only, cut to a length a tile can carry.
                 Object title = n.opt("title");
                 if (title instanceof String && !((String) title).isEmpty()) copy[NOW] = cut((String) title);
                 JSONObject next = n.optJSONObject("next");
@@ -858,7 +858,7 @@ public class LiveTvActivity extends Activity {
         return s.length() > 120 ? s.substring(0, 120) : s;
     }
 
-    // MARK: - Favourites (ADR 0057), per person, kept on the TV only
+    // MARK: - Favourites (ADR 0058), per person, kept on the TV only
 
     /** One person's pinned channel ids, newest first. */
     static List<String> favs(Context c, String who) {

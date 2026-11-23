@@ -8,7 +8,7 @@ The TVs play that video; a channel missing from now.json falls back to live_stre
 
 It also keeps each channel's own picture in docs/live/logos/<id>.jpg for the Live TV tiles.
 
-Now and next (ADR 0057): it also keeps the live video's title (what is on now) and, when the channel has
+Now and next (ADR 0058): it also keeps the live video's title (what is on now) and, when the channel has
 scheduled one, the next stream's title and start time, read from that video's own page.
 
 Usage: python3 tools/live_now.py docs/live
@@ -177,7 +177,7 @@ def main(folder):
         print('Only %d of %d channels read: keeping the old now.json' % (read, len(channels)), file=sys.stderr)
         return
     out = {'about': 'Written by tools/live_now.py when the website builds: the live video each channel is streaming now, '
-                    'its title, and the next scheduled stream when there is one (ADR 0057).',
+                    'its title, and the next scheduled stream when there is one (ADR 0058).',
            'at': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), 'channels': now}
     with open(os.path.join(folder, 'now.json'), 'w') as f:
         json.dump(out, f, indent=1)

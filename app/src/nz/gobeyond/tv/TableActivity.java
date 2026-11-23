@@ -37,7 +37,7 @@ import java.nio.charset.StandardCharsets;
 public class TableActivity extends Activity {
     static void open(Context c) { open(c, null); }
 
-    /** start: "silly" opens the silly games (web/laughs.js), "lunch" school lunches (web/lunch.js), "arcade" the arcade (web/arcade.js), "rcland" Milo's Remote Control Land (web/rcland.js), "candy" London's Candy Land (web/candy.js), "road" Build a road, "bridge" Build a bridge and "town" Plan a town (web/builder.js), "sky" Look around (web/skylook.js), "lights" the light show (web/lights.js) and "guides" How to play (web/guides.js), rather than the board and card games. */
+    /** start: "silly" opens the silly games (web/laughs.js), "lunch" school lunches (web/lunch.js), "arcade" the arcade (web/arcade.js), "rcland" Milo's Remote Control Land (web/rcland.js), "candy" London's Candy Land (web/candy.js), "road" Build a road, "bridge" Build a bridge and "town" Plan a town (web/builder.js), "chores" Daily chores (web/chores.js), "scores" the family scoreboard (web/scores.js), "sky" Look around (web/skylook.js), "lights" the light show (web/lights.js) and "guides" How to play (web/guides.js), rather than the board and card games. */
     static void open(Context c, String start) {
         c.startActivity(new Intent(c, TableActivity.class).putExtra("start", start).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
@@ -134,6 +134,9 @@ public class TableActivity extends Activity {
         }
 
         @JavascriptInterface public String language() { return Ui.language; }
+
+        /** The tidy-up race's places for the family scoreboard (ScoreLog, ADR 0057). */
+        @JavascriptInterface public String scores() { return ScoreLog.all(TableActivity.this); }
 
         /** Where the TV is, for the sky: latitude and longitude as set in Home Settings, the city and the country. */
         @JavascriptInterface public String place() {
