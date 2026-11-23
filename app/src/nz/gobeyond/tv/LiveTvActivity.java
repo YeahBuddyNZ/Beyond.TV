@@ -46,12 +46,25 @@ import java.util.regex.Pattern;
  * TV's own video decoder), else full screen here in YouTube's web player (up and down change channel).
  * The list comes from our website (docs/live/channels.json), kept for next time, with this copy until then; now.json
  * beside it says which video each channel streams right now (tools/live_now.py, hourly), and the logos sit in
- * live/logos/. Same as web/livetv.js: change one, change both.
+ * live/logos/. Now and next, favourites (ADR 0057): each tile says what is on now (the live video's title, from
+ * now.json) and the corner says what is on next for the focused one, when the channel has scheduled it. Holding OK on a
+ * channel pins it to "Your favourites", the first row, for whoever is watching; kept on the TV only. What was last
+ * watched leads Keep watching on the home screen, and Continue there opens it again (extra PLAY).
+ * Same as web/livetv.js: change one, change both.
  */
 public class LiveTvActivity extends Activity {
     static void open(Context c) {
         c.startActivity(new Intent(c, LiveTvActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
+
+    /** Continue on the home screen: Live TV, straight into this channel when it's still on air. */
+    static void play(Context c, String id) {
+        c.startActivity(new Intent(c, LiveTvActivity.class).putExtra(PLAY, id).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+    }
+
+    static final String PLAY = "play";
+    /** Favourites each person can pin; holding OK again takes one off. */
+    static final int MAX_FAVS = 12;
 
     private static final String SITE = "https://yeahbuddynz.github.io/Beyond.TV/live/";
     private static final String LIST_URL = SITE + "channels.json", NOW_URL = SITE + "now.json";
@@ -62,7 +75,7 @@ public class LiveTvActivity extends Activity {
     private static final Pattern SLUG = Pattern.compile("^[a-z0-9-]{1,40}$");
     static final String[] GROUPS = {"featured", "news", "more", "kids"};
     // Fields of a channel
-    static final int ID = 0, NAME = 1, FROM = 2, YT = 3, GROUP = 4, COLOUR = 5, VIDEO = 6;
+    static final int ID = 0, NAME = 1, FROM = 2, YT = 3, GROUP = 4, COLOUR = 5, VIDEO = 6, NOW = 7, NEXT = 8, NEXT_AT = 9;
     /** YouTube's embeds want a real address behind them, as in KaraokeActivity. */
     private static final String BASE = "https://yeahbuddynz.github.io/Beyond.TV/";
     private static final Pattern CHANNEL_ID = Pattern.compile("^UC[A-Za-z0-9_-]{22}$");
@@ -107,6 +120,12 @@ public class LiveTvActivity extends Activity {
     private View backdrop, list, help;
     private WebView web;
     private TextView channelName, hint;
+    /** What's on now and next for the focused channel, in the top right corner. */
+    private LinearLayout nowBar;
+    private TextView nowWho, nowLine, nextLine;
+    /** After pinning: the channel whose tile gets the focus back, in its own row. */
+    private String keepOn;
+    private View keepTile;
     /** The channels on air, in row order (what up and down go through while watching). */
     private String[][] playable = new String[0][];
     private int at = -1;
@@ -125,7 +144,21 @@ public class LiveTvActivity extends Activity {
         String[][] shown = onAir(kept(this), keptNow(this), System.currentTimeMillis());
         list = buildList(shown);
         root.addView(list, new FrameLayout.LayoutParams(-1, -1));
+        root.addView(buildNowBar(), nowBarParams());
+        // The corner follows the focus: a channel's now and next, nothing for an app or a button.
+        root.getViewTreeObserver().addOnGlobalFocusChangeListener((was, now) ->
+                showNow(now == null ? null : (String[]) now.getTag(R_CHANNEL)));
         setContentView(root);
+        String play = getIntent().getStringExtra(PLAY);
+        if (play != null) {
+            for (int i = 0; i < playable.length; i++) {
+                if (play.equals(playable[i][ID])) {
+                    final int at0 = i;
+                    handler.post(() -> { if (!gone) watch(at0); });
+                    break;
+                }
+            }
+        }
         refresh(getApplicationContext(), () -> {
             // The website had something newer: show it, unless somebody has moved on from the first tile already.
             String[][] fresh = onAir(kept(this), keptNow(this), System.currentTimeMillis());
@@ -136,6 +169,74 @@ public class LiveTvActivity extends Activity {
             list = buildList(fresh);
             root.addView(list, 1, new FrameLayout.LayoutParams(-1, -1));
         });
+    }
+
+    /** The corner card: the channel's name and where from, Now and its title, then Up next with its time. */
+    private View buildNowBar() {
+        nowBar = new LinearLayout(this);
+        nowBar.setOrientation(LinearLayout.VERTICAL);
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor(0xDB0D0C18);
+        bg.setCornerRadius(24 * k);
+        nowBar.setBackground(bg);
+        nowBar.setElevation(10 * k);
+        nowBar.setPadding(Math.round(28 * k), Math.round(20 * k), Math.round(28 * k), Math.round(22 * k));
+        nowWho = FeedbackActivity.text(this, "", Ui.displaySemibold, 28 * k, 0xFFFFFFFF);
+        nowLine = FeedbackActivity.text(this, "", Ui.regular, 22 * k, 0xD9FFFFFF);
+        nextLine = FeedbackActivity.text(this, "", Ui.regular, 22 * k, 0x99FFFFFF);
+        for (TextView t : new TextView[] {nowWho, nowLine, nextLine}) {
+            t.setGravity(Gravity.START);
+            t.setMaxLines(2);
+            t.setEllipsize(android.text.TextUtils.TruncateAt.END);
+            nowBar.addView(t, new LinearLayout.LayoutParams(-1, -2));
+        }
+        nowWho.setSingleLine(true);
+        nowLine.setPadding(0, Math.round(8 * k), 0, 0);
+        nextLine.setPadding(0, Math.round(6 * k), 0, 0);
+        nowBar.setVisibility(View.INVISIBLE);
+        return nowBar;
+    }
+
+    private FrameLayout.LayoutParams nowBarParams() {
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(Math.round(696 * k), -2, Gravity.END | Gravity.TOP);
+        lp.rightMargin = Math.round(140 * k);
+        lp.topMargin = Math.round(64 * k);
+        return lp;
+    }
+
+    private void showNow(String[] c) {
+        if (nowBar == null) return;
+        if (c == null || at >= 0 || help != null) {
+            nowBar.setVisibility(View.INVISIBLE);
+            return;
+        }
+        nowWho.setText(c[NAME] + (c[FROM].isEmpty() ? "" : "  ·  " + c[FROM]));
+        android.text.SpannableString now = new android.text.SpannableString(Ui.tr("Agora", "Now", "Ahora") + "  "
+                + (c[NOW] != null ? c[NOW] : Ui.tr("Ao vivo", "Live", "En vivo")));
+        int end = Ui.tr("Agora", "Now", "Ahora").length();
+        now.setSpan(new android.text.style.ForegroundColorSpan(Glow.LILAC), 0, end, 0);
+        now.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 0, end, 0);
+        nowLine.setText(now);
+        String next = nextText(c, System.currentTimeMillis());
+        nextLine.setText(next);
+        nextLine.setVisibility(next.isEmpty() ? View.GONE : View.VISIBLE);
+        nowBar.setVisibility(View.VISIBLE);
+    }
+
+    /** "Up next 7:00 PM: Mornings with Ridge and Frost" while it hasn't started, else empty. */
+    static String nextText(String[] c, long time) {
+        long nextAt = nextAt(c);
+        if (nextAt <= time) return "";
+        return Ui.tr("A seguir", "Up next", "A continuación") + " " + Ui.time(nextAt) + ": " + c[NEXT];
+    }
+
+    static long nextAt(String[] c) {
+        if (c.length <= NEXT_AT || c[NEXT] == null || c[NEXT_AT] == null) return 0;
+        try {
+            return Long.parseLong(c[NEXT_AT]);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
     static boolean nz() {
@@ -171,6 +272,11 @@ public class LiveTvActivity extends Activity {
                 Ui.regular, 30 * k, 0xA6FFFFFF);
         sub.setGravity(Gravity.START);
         column.addView(sub);
+        TextView pinTip = FeedbackActivity.text(this, Ui.tr("Segure OK num canal para fixá-lo no topo.", "Hold OK on a channel to pin it to the top.",
+                "Mantén OK en un canal para fijarlo arriba."), Ui.regular, 24 * k, 0x8CFFFFFF);
+        pinTip.setGravity(Gravity.START);
+        pinTip.setPadding(0, Math.round(4 * k), 0, 0);
+        column.addView(pinTip, new LinearLayout.LayoutParams(Math.round(900 * k), -2));
 
         List<String[]> nzApps = new ArrayList<>(), free = new ArrayList<>(), paid = new ArrayList<>();
         sources(this, nzApps, free, paid);
@@ -180,6 +286,10 @@ public class LiveTvActivity extends Activity {
         List<String[]> play = new ArrayList<>();
         for (String g : kid ? new String[] {"kids"} : new String[] {"featured", "news", "more"}) play.addAll(inGroup(channels, g));
         playable = play.toArray(new String[0][]);
+        List<String[]> pinned = favourites(playable, favs(this, People.current(this).id));
+        keepTile = null;
+        // Your favourites first: the channels this person pinned by holding OK.
+        channelRow(column, Ui.tr("Seus favoritos", "Your favourites", "Tus favoritos"), pinned, true, true, pinned);
 
         if (aerial || !nzApps.isEmpty()) {
             LinearLayout row = section(column, nz() ? Ui.tr("Nova Zelândia", "Here in Aotearoa", "Nueva Zelanda")
@@ -188,11 +298,11 @@ public class LiveTvActivity extends Activity {
             for (String[] a : nzApps) add(row, appTile(a), () -> openApp(a[0], a[1]));
         }
         if (kid) {
-            channelRow(column, Ui.tr("Para crianças", "For kids", "Para niños"), inGroup(channels, "kids"), true);
+            channelRow(column, Ui.tr("Para crianças", "For kids", "Para niños"), inGroup(channels, "kids"), true, false, pinned);
         } else {
-            channelRow(column, Ui.tr("Em destaque", "Featured", "Destacados"), inGroup(channels, "featured"), true);
-            channelRow(column, Ui.tr("Notícias do mundo, grátis", "World news, free", "Noticias del mundo, gratis"), inGroup(channels, "news"), false);
-            channelRow(column, Ui.tr("Clima, espaço e música", "Weather, space and music", "Clima, espacio y música"), inGroup(channels, "more"), false);
+            channelRow(column, Ui.tr("Em destaque", "Featured", "Destacados"), inGroup(channels, "featured"), true, false, pinned);
+            channelRow(column, Ui.tr("Notícias do mundo, grátis", "World news, free", "Noticias del mundo, gratis"), inGroup(channels, "news"), false, false, pinned);
+            channelRow(column, Ui.tr("Clima, espaço e música", "Weather, space and music", "Clima, espacio y música"), inGroup(channels, "more"), false, false, pinned);
             if (!free.isEmpty()) {
                 LinearLayout more = section(column, Ui.tr("Mais canais grátis", "More free channels", "Más canales gratis"));
                 for (String[] a : free) add(more, appTile(a), () -> {
@@ -229,14 +339,14 @@ public class LiveTvActivity extends Activity {
             tip.setPadding(0, Math.round(30 * k), 0, 0);
             if (nz() || kid) column.addView(tip);
         }
-        if (firstTile != null) {
-            final View f = firstTile;
-            handler.post(f::requestFocus);
-        }
+        // Pinned or unpinned: the focus stays on that channel in its own row.
+        final View f = keepTile != null ? keepTile : firstTile;
+        keepOn = null;
+        if (f != null) handler.post(f::requestFocus);
         return scroll;
     }
 
-    private void channelRow(LinearLayout column, String label, List<String[]> channels, boolean big) {
+    private void channelRow(LinearLayout column, String label, List<String[]> channels, boolean big, boolean favRow, List<String[]> pinned) {
         if (channels.isEmpty()) return;
         LinearLayout row = section(column, label);
         for (String[] c : channels) {
@@ -245,10 +355,47 @@ public class LiveTvActivity extends Activity {
                 colour = Color.parseColor(c[COLOUR]);
             } catch (RuntimeException ignored) {
             }
-            View t = tile(c[NAME], c[FROM], logoFile(this, c[ID]), c[NAME], colour, big, false);
+            View t = tile(c[NAME], c[NOW] != null ? c[NOW] : c[FROM], logoFile(this, c[ID]), c[NAME], colour, big, false);
+            if (favRow || pinned.contains(c)) star(t);
             loadLogo(t, c[ID]);
             add(row, t, () -> watch(indexOf(playable, c)));
+            // Holding OK pins the channel for whoever is watching (or takes it off).
+            t.setOnLongClickListener(v -> {
+                pin(c);
+                return true;
+            });
+            t.setTag(R_CHANNEL, c);
+            if (!favRow && c[ID].equals(keepOn)) keepTile = t;
         }
+    }
+
+    /** A key for the channel id on its tile (any id unique to this app does). */
+    private static final int R_CHANNEL = 0x7f0b0001;
+
+    /** The star on a pinned channel's picture. */
+    private void star(View tile) {
+        FrameLayout face = (FrameLayout) ((LinearLayout) tile).getChildAt(0);
+        TextView s = FeedbackActivity.text(this, "\u2605", Ui.semibold, 24 * k, 0xFFFFFFFF);
+        s.setGravity(Gravity.CENTER);
+        GradientDrawable dot = new GradientDrawable();
+        dot.setColor(0xFF6E3DDB);
+        dot.setShape(GradientDrawable.OVAL);
+        s.setBackground(dot);
+        int d = Math.round(40 * k);
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(d, d, Gravity.END | Gravity.TOP);
+        lp.rightMargin = lp.topMargin = Math.round(10 * k);
+        face.addView(s, face.getChildCount() - 1, lp);
+    }
+
+    /** Pins or unpins a channel for whoever is watching, says so, and draws the rows again. */
+    private void pin(String[] c) {
+        boolean pinned = toggleFav(this, People.current(this).id, c[ID]);
+        Toast.makeText(this, pinned ? Ui.tr("Fixado nos seus favoritos", "Pinned to your favourites", "Fijado en tus favoritos")
+                : Ui.tr("Tirado dos seus favoritos", "Taken out of your favourites", "Quitado de tus favoritos"), Toast.LENGTH_SHORT).show();
+        keepOn = c[ID];
+        root.removeView(list);
+        list = buildList(onAir(kept(this), keptNow(this), System.currentTimeMillis()));
+        root.addView(list, 1, new FrameLayout.LayoutParams(-1, -1));
     }
 
     private static int indexOf(String[][] l, String[] c) {
@@ -501,8 +648,16 @@ public class LiveTvActivity extends Activity {
     private void watch(int i) {
         if (playable.length == 0) return;
         String[] c = playable[i];
-        if (c[VIDEO] != null && inYouTube(c[VIDEO])) return;
+        if (c[VIDEO] != null && inYouTube(c[VIDEO])) {
+            remember(c);
+            return;
+        }
         watchHere(i);
+    }
+
+    /** Keep watching on the home screen: this channel, ready to open again with one press. Kept on the TV only. */
+    private void remember(String[] c) {
+        Watched.add(this, "beyond:live:" + c[ID], c[NAME], "", "", "");
     }
 
     private boolean inYouTube(String video) {
@@ -556,13 +711,16 @@ public class LiveTvActivity extends Activity {
         at = i;
         String[] c = playable[i];
         list.setVisibility(View.INVISIBLE);
+        if (nowBar != null) nowBar.setVisibility(View.INVISIBLE);
+        remember(c);
         // The moving backdrop would keep drawing under the video for nothing.
         backdrop.setVisibility(View.GONE);
         web.setVisibility(View.VISIBLE);
         channelName.setVisibility(View.VISIBLE);
         hint.setVisibility(View.VISIBLE);
         web.loadDataWithBaseURL(BASE, page(c), "text/html", "utf-8", null);
-        channelName.setText(c[NAME] + (c[FROM].isEmpty() ? "" : "  ·  " + c[FROM]));
+        String line = c[NOW] != null ? c[NOW] : c[FROM];
+        channelName.setText(c[NAME] + (line.isEmpty() ? "" : "  ·  " + line));
         channelName.setAlpha(1);
         hint.setAlpha(1);
         handler.removeCallbacksAndMessages(null);
@@ -597,6 +755,8 @@ public class LiveTvActivity extends Activity {
         backdrop.setVisibility(View.VISIBLE);
         list.setVisibility(View.VISIBLE);
         restoreFocus();
+        View f = getCurrentFocus();
+        showNow(f == null ? null : (String[]) f.getTag(R_CHANNEL));
     }
 
     static int step(int i, int by, int n) {
@@ -671,19 +831,93 @@ public class LiveTvActivity extends Activity {
         }
         List<String[]> out = new ArrayList<>();
         for (String[] c : channels) {
-            String video = null;
+            String[] copy = new String[NEXT_AT + 1];
+            System.arraycopy(c, 0, copy, 0, Math.min(c.length, VIDEO));
             if (live != null) {
                 JSONObject n = live.optJSONObject(c[YT]);
                 String v = n == null ? "" : n.optString("video", "");
                 if (!VIDEO_ID.matcher(v).matches()) continue;
-                video = v;
+                copy[VIDEO] = v;
+                // Now and next (ADR 0057): text only, cut to a length a tile can carry.
+                Object title = n.opt("title");
+                if (title instanceof String && !((String) title).isEmpty()) copy[NOW] = cut((String) title);
+                JSONObject next = n.optJSONObject("next");
+                Object nt = next == null ? null : next.opt("title");
+                long at = next == null ? 0 : parseTime(next.optString("at", ""));
+                if (nt instanceof String && !((String) nt).isEmpty() && at > 0) {
+                    copy[NEXT] = cut((String) nt);
+                    copy[NEXT_AT] = Long.toString(at);
+                }
             }
-            String[] copy = new String[VIDEO + 1];
-            System.arraycopy(c, 0, copy, 0, Math.min(c.length, VIDEO));
-            copy[VIDEO] = video;
             out.add(copy);
         }
         return out.toArray(new String[0][]);
+    }
+
+    private static String cut(String s) {
+        return s.length() > 120 ? s.substring(0, 120) : s;
+    }
+
+    // MARK: - Favourites (ADR 0057), per person, kept on the TV only
+
+    /** One person's pinned channel ids, newest first. */
+    static List<String> favs(Context c, String who) {
+        return favsOf(prefs(c).getString("fav", "{}"), who);
+    }
+
+    static List<String> favsOf(String json, String who) {
+        List<String> out = new ArrayList<>();
+        try {
+            JSONArray l = new JSONObject(json).optJSONArray(who);
+            for (int i = 0; l != null && i < l.length() && out.size() < MAX_FAVS; i++) {
+                Object id = l.opt(i);
+                if (id instanceof String && SLUG.matcher((String) id).matches() && !out.contains(id)) out.add((String) id);
+            }
+        } catch (Exception ignored) {
+            // A broken store is empty.
+        }
+        return out;
+    }
+
+    /** Pins a channel for one person, or unpins it if it was pinned. True when it is pinned now. */
+    static boolean toggleFav(Context c, String who, String id) {
+        String[] out = new String[1];
+        boolean pinned = toggled(prefs(c).getString("fav", "{}"), who, id, out);
+        prefs(c).edit().putString("fav", out[0]).apply();
+        return pinned;
+    }
+
+    static boolean toggled(String json, String who, String id, String[] out) {
+        JSONObject store;
+        try {
+            store = new JSONObject(json);
+        } catch (Exception e) {
+            store = new JSONObject();
+        }
+        List<String> l = favsOf(store.toString(), who);
+        boolean pinned = !l.remove(id);
+        if (pinned) l.add(0, id);
+        while (l.size() > MAX_FAVS) l.remove(l.size() - 1);
+        try {
+            store.put(who, new JSONArray(l));
+        } catch (Exception ignored) {
+        }
+        out[0] = store.toString();
+        return pinned;
+    }
+
+    /** The pinned channels that are on air, in the order they were pinned. */
+    static List<String[]> favourites(String[][] channels, List<String> ids) {
+        List<String[]> out = new ArrayList<>();
+        for (String id : ids) {
+            for (String[] c : channels) {
+                if (id.equals(c[ID])) {
+                    out.add(c);
+                    break;
+                }
+            }
+        }
+        return out;
     }
 
     private static long parseTime(String iso) {

@@ -516,6 +516,13 @@ final class German {
             case "Got it": return "Verstanden";
             case "How to play": return "Wie man spielt";
             case "▲ ▼ to change channel": return "▲ ▼ wechselt den Sender";
+            case "Your favourites": return "Deine Favoriten";
+            case "Hold OK on a channel to pin it to the top.": return "Halte OK auf einem Sender gedrückt, um ihn oben anzuheften.";
+            case "Pinned to your favourites": return "An deine Favoriten angeheftet";
+            case "Taken out of your favourites": return "Aus deinen Favoriten genommen";
+            case "Live": return "Live";
+            case "Up next": return "Danach";
+            case "Continue": return "Weiter";
             default:
                 if (english.startsWith("Beyond™ TV is on: new home screen and screensaver, ")) {
                     return "Beyond™ TV ist an: neuer Startbildschirm und Bildschirmschoner, "

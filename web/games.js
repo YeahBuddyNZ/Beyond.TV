@@ -2,7 +2,8 @@
  * Games, from the remote (ADR 0021, the pictures and groups ADR 0047): every game and family activity starts here on the TV, no phone needed. Karaoke,
  * board and card games against the robots (table.js), silly party games (laughs.js), Milo's Remote Control Land (rcland.js, ADR 0046), London's Candy Land (candy.js, ADR 0053), school lunches (lunch.js), a party, the light show (lights.js), quiz night, the dinner
  * question, the tidy-up race and bedtime breathing, and How to play, a guide to every one (guides.js). Quiz night and the dinner question need Beyond Family, because
- * everyone answers on their phones. Same as GamesActivity.java. Plain ES5.
+ * everyone answers on their phones. The last game played leads Keep watching on the home screen, and Continue opens it
+ * again (ADR 0057). Same as GamesActivity.java. Plain ES5.
  */
 var Games = (function () {
   'use strict';
@@ -62,7 +63,7 @@ var Games = (function () {
               var pic = UI.el('div', 'gh-pic', tile);
               pic.style.backgroundImage = 'url(games/' + game[0] + '.jpg)';
               UI.el('div', 'gh-label', tile, game[1]);
-              var run = typeof game[2] === 'string' ? function () { family(game[2], a); } : game[2];
+              var run = typeof game[2] === 'string' ? function () { family(game[2], a); } : played(game);
               a.add(tile, run, {first: first});
               first = false;
             })(all[g].games[i]);
@@ -87,6 +88,34 @@ var Games = (function () {
     });
   }
 
+  /** A game's start, which also puts it at the front of Keep watching (kept on the TV only). How to play isn't a game. */
+  function played(game) {
+    return function () {
+      if (game[0] !== 'guides' && window.Watched) Watched.add({app: 'beyond:game:' + game[0], name: game[1]});
+      game[2]();
+    };
+  }
+
+  /** Continue on the home screen: the Games screen, with that game open on top of it. False if there's no such game. */
+  function start(id) {
+    var all = groups();
+    for (var g = 0; g < all.length; g++) for (var i = 0; i < all[g].games.length; i++) {
+      var game = all[g].games[i];
+      if (game[0] !== id || typeof game[2] === 'string') continue;
+      open();
+      played(game)();
+      return true;
+    }
+    return false;
+  }
+
+  /** The name of a game, in the TV's language, for its Keep watching screen. */
+  function nameOf(id) {
+    var all = groups();
+    for (var g = 0; g < all.length; g++) for (var i = 0; i < all[g].games.length; i++) if (all[g].games[i][0] === id) return all[g].games[i][1];
+    return '';
+  }
+
   /** Quiz night or the dinner question: Beyond Family starts it, and its command opens the game on every TV. */
   function family(kind, a) {
     if (!linked()) {
@@ -96,5 +125,5 @@ var Games = (function () {
     Family.game(kind, 'start', function (err) { if (!err) a.close(); });
   }
 
-  return {open: open};
+  return {open: open, start: start, nameOf: nameOf};
 })();

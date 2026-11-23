@@ -68,6 +68,32 @@ check('old now.json: every channel, by channel id', L.onAir(L.NEWS, {at: '2026-1
 check('no now.json: every channel', L.onAir(L.NEWS, null, t).length === L.NEWS.length && !L.onAir(L.NEWS, null, t)[0].video);
 check('a now.json from the future is not trusted', L.onAir(L.NEWS, {at: '2026-11-25T00:00:00Z', channels: now.channels}, t).length === L.NEWS.length);
 
+// Now and next (ADR 0057): the live video's title, and what's on next while it hasn't started
+var nn = {at: '2026-11-21T09:30:00Z', channels: {}};
+nn.channels[L.NEWS[0].youtube] = {video: 'abcdefghijk', title: 'Watch Sky News live', next: {title: 'Mornings', at: '2026-11-21T11:00:00Z'}};
+nn.channels[L.NEWS[1].youtube] = {video: 'bcdefghijkl', title: 42, next: {title: 'Bad time', at: 'soon'}};
+var air2 = L.onAir(L.NEWS, nn, t);
+check('now is the live title', air2[0].now === 'Watch Sky News live');
+check('next keeps its title and time', air2[0].next.title === 'Mornings' && air2[0].next.at === Date.parse('2026-11-21T11:00:00Z'));
+check('a title that is not text is dropped', air2[1].now === undefined && air2[1].next === undefined);
+check('next before it starts', L.nextOf(air2[0], t).title === 'Mornings');
+check('next once it has started is gone', L.nextOf(air2[0], Date.parse('2026-11-21T11:01:00Z')) === null);
+check('no next', L.nextOf(air2[1], t) === null && L.nextOf(null, t) === null);
+
+// Favourites (ADR 0057): per person, newest first, holding OK again takes one off, the store given untouched
+var store = {p1: ['sky-news']};
+var r1 = L.toggleFav(store, 'p1', 'dw');
+check('pinning puts it first', r1.pinned && r1.store.p1.join() === 'dw,sky-news');
+check('the old store is untouched', store.p1.join() === 'sky-news');
+var r2 = L.toggleFav(r1.store, 'p1', 'sky-news');
+check('pinning again unpins', !r2.pinned && r2.store.p1.join() === 'dw');
+check('each person their own', L.toggleFav(r2.store, 'p2', 'nasa').store.p1.join() === 'dw' && L.favsOf(L.toggleFav(r2.store, 'p2', 'nasa').store, 'p2').join() === 'nasa');
+check('a broken store is empty', L.favsOf({p1: 'x'}, 'p1').length === 0 && L.favsOf(null, 'p1').length === 0 && L.favsOf({p1: ['../x', 3, 'ok']}, 'p1').join() === 'ok');
+var many = {p1: []};
+for (var m = 0; m < 20; m++) many = L.toggleFav(many, 'p1', 'c' + m).store;
+check('at most twelve', L.favsOf(many, 'p1').length === 12 && L.favsOf(many, 'p1')[0] === 'c19');
+check('favourites in pinned order, only what is on air', L.favourites(L.NEWS, ['dw', 'gone', 'sky-news']).map(function (c) { return c.id; }).join() === 'dw,sky-news');
+
 // Rows: every channel lands in one, and a channel with no group is news
 var total = 0;
 ['featured', 'news', 'more', 'kids'].forEach(function (g) { total += L.inGroup(L.NEWS, g).length; });
