@@ -45,6 +45,17 @@ jobs:
           javac -d out/music-test app/src/nz/gobeyond/tv/Mdns.java app/src/nz/gobeyond/tv/MusicRelay.java \
             app/src/nz/gobeyond/tv/LocalHttp.java tests/MusicTest.java
           java -cp out/music-test nz.gobeyond.tv.MusicTest
+      - name: Family features
+        # Take turns at karaoke (ADR 0057), screen time (ADR 0058) and the photo drop with its QR code (ADR 0059).
+        run: |
+          mkdir -p out/family-test
+          javac -d out/family-test app/src/nz/gobeyond/tv/KaraokeTurns.java tests/KaraokeTurnsTest.java \
+            app/src/nz/gobeyond/tv/ScreenTime.java tests/ScreenTimeTest.java \
+            app/src/nz/gobeyond/tv/PhotoDrop.java app/src/nz/gobeyond/tv/Qr.java app/src/nz/gobeyond/tv/LocalHttp.java \
+            tests/PhotoDropTest.java
+          java -cp out/family-test nz.gobeyond.tv.KaraokeTurnsTest
+          java -cp out/family-test nz.gobeyond.tv.ScreenTimeTest
+          java -cp out/family-test nz.gobeyond.tv.PhotoDropTest
       - name: Signing key
         env:
           KEYSTORE: ${{ secrets.ANDROID_KEYSTORE }}

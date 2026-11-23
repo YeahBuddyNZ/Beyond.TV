@@ -744,6 +744,9 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .bt-karaoke .count { font-size: 36px; margin-top: 40px; color: rgba(255,255,255,0.65); }
 .bt-karaoke .bt-buttons { margin-top: 50px; }
 .bt-karaoke .after { font-size: 32px; margin-top: 40px; color: rgba(255,255,255,0.55); }
+/* Screen time's kind card (screentime.js): the karaoke card's layout, gentler words. */
+.bt-timeup .who { font-size: 76px; }
+.bt-timeup .bt-sub.song { font-size: 40px; }
 .bt-karaoke-player { background: #000; }
 .bt-karaoke-player .video { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; border: 0; }
 .bt-karaoke-player .video div, .bt-karaoke-player .video iframe { width: 1920px; height: 1080px; border: 0; }

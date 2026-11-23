@@ -1439,6 +1439,9 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             if (!city.isEmpty()) rest.append(city).append(' ');
             rest.append(HomeData.degrees(wx.temp)).append(", ").append(condition(wx));
         }
+        // A kid with a screen time limit sees what's left, as part of the day (ADR 0058). Once a minute, never per frame.
+        String left = ScreenTimeService.line(getContext());
+        if (!left.isEmpty()) rest.append("  ·  ").append(left);
         infoRest = rest.toString();
         infoTimeW = lInfoTime.measureText(infoTime);
     }
@@ -2571,6 +2574,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         }
         // Earn your screen: a kid with jobs left sees them instead.
         if ((it.kind == HomeApps.APP || it.kind == HomeApps.LIVE_TV) && JobsActivity.first(activity)) return;
+        // Screen time used up for today: the kind card instead (ADR 0058).
+        if ((it.kind == HomeApps.APP || it.kind == HomeApps.LIVE_TV) && ScreenTimeService.blocked(activity)) return;
         boolean opened = HomeApps.open(activity, it, this, Math.round(r.left), Math.round(r.top),
                 Math.round(r.width()), Math.round(r.height()));
         if (!opened) {

@@ -803,7 +803,31 @@ var I18N = (function () {
     "You were {n} seconds on average. Rest your thumb on OK so it's ready to go.": "Im Schnitt warst du bei {n} Sekunden. Lass den Daumen auf OK liegen, dann bist du schneller.",
     "Your fastest slap ever!": "Dein schnellster Treffer überhaupt!",
     "Oops, no match: you take the pile.": "Hoppla, kein Treffer: Du nimmst den Stapel.",
-    "Ask a grown-up to do this.": "Frag dafür einen Erwachsenen."
+    "Ask a grown-up to do this.": "Frag dafür einen Erwachsenen.",
+    "The list is full": "Die Liste ist voll",
+    "Grown-up: 15 more minutes": "Erwachsene: 15 Minuten mehr",
+    "More tomorrow.": "Morgen gibt es mehr.",
+    "Press again to clear": "Zum Leeren noch einmal drücken",
+    "Everyone picks a song. The TV sorts out whose turn it is.": "Jeder sucht sich ein Lied aus. Der Fernseher sagt, wer dran ist.",
+    "OK": "OK",
+    "Start singing": "Los singen",
+    "Clear the list": "Liste leeren",
+    "15 more minutes": "15 Minuten mehr",
+    "Another round?": "Noch eine Runde?",
+    "Nobody sings twice until everyone's had a go.": "Keiner singt zweimal, bevor alle dran waren.",
+    "Great watching! How about a game, a book, or a run around outside?": "Schön geschaut! Wie wär's mit einem Spiel, einem Buch oder Toben draußen?",
+    "Take turns": "Abwechseln",
+    "Screen time a day: ": "Bildschirmzeit pro Tag: ",
+    "Everyone's had a go!": "Alle waren dran!",
+    "Switch who's watching": "Wer schaut? Wechseln",
+    "One song now, or take turns?": "Ein Lied jetzt oder abwechseln?",
+    "One song now, take turns, or a playlist?": "Ein Lied jetzt, abwechseln oder eine Playlist?",
+    "1 more waiting": "1 weiteres wartet",
+    "nobody else waiting yet": "noch wartet sonst keiner",
+    "no limit": "keine Grenze",
+    "screen time done for today": "Bildschirmzeit für heute vorbei",
+    "min": "Min.",
+    "h": "Std."
   };
 
   /** German by the English; text built at runtime by its English pattern. */
@@ -823,6 +847,20 @@ var I18N = (function () {
     if (m) return 'Was singt ' + m[1] + '?';
     m = /^(.+)'s up!$/.exec(en);
     if (m) return m[1] + ' ist dran!';
+    m = /^That's screen time for today, (.+)$/.exec(en);
+    if (m) return 'Das war die Bildschirmzeit für heute, ' + m[1];
+    m = /^⏳ (.+) of screen time left$/.exec(en);
+    if (m) return '⏳ noch ' + m[1] + ' Bildschirmzeit';
+    m = /^(\d+) minutes of screen time left, (.+)\. Time to find a good place to stop\.$/.exec(en);
+    if (m) return m[2] + ', noch ' + m[1] + ' Minuten Bildschirmzeit. Zeit, eine gute Stelle zum Aufhören zu finden.';
+    m = /^(\d+) more minutes\.$/.exec(en);
+    if (m) return m[1] + ' Minuten mehr.';
+    m = /^(.+) is up next$/.exec(en);
+    if (m) return m[1] + ' ist als Nächstes dran';
+    m = /^(.+) is (\d+)(st|nd|rd|th) in line$/.exec(en);
+    if (m) return m[1] + ' ist ' + m[2] + '. in der Reihe';
+    m = /^(\d+) more waiting$/.exec(en);
+    if (m) return m[1] + ' weitere warten';
     m = /^Starting in (\d+)$/.exec(en);
     if (m) return 'Startet in ' + m[1];
     return en;
@@ -1634,7 +1672,31 @@ var I18N = (function () {
     "You were {n} seconds on average. Rest your thumb on OK so it's ready to go.": "В среднем {n} с. Держите большой палец на OK, чтобы быть наготове.",
     "Your fastest slap ever!": "Ваш самый быстрый хлопок!",
     "Oops, no match: you take the pile.": "Ой, не совпало: стопка ваша.",
-    "Ask a grown-up to do this.": "Попросите взрослого."
+    "Ask a grown-up to do this.": "Попросите взрослого.",
+    "The list is full": "Список заполнен",
+    "Grown-up: 15 more minutes": "Взрослым: ещё 15 минут",
+    "More tomorrow.": "Завтра будет ещё.",
+    "Press again to clear": "Нажмите ещё раз, чтобы очистить",
+    "Everyone picks a song. The TV sorts out whose turn it is.": "Каждый выбирает песню. Телевизор следит за очередью.",
+    "OK": "OK",
+    "Start singing": "Начать петь",
+    "Clear the list": "Очистить список",
+    "15 more minutes": "Ещё 15 минут",
+    "Another round?": "Ещё раунд?",
+    "Nobody sings twice until everyone's had a go.": "Никто не поёт дважды, пока не спели все.",
+    "Great watching! How about a game, a book, or a run around outside?": "Хорошо посмотрели! Как насчёт игры, книжки или прогулки на улице?",
+    "Take turns": "По очереди",
+    "Screen time a day: ": "Экранное время в день: ",
+    "Everyone's had a go!": "Все уже спели!",
+    "Switch who's watching": "Сменить зрителя",
+    "One song now, or take turns?": "Одна песня сейчас или по очереди?",
+    "One song now, take turns, or a playlist?": "Одна песня сейчас, по очереди или плейлист?",
+    "1 more waiting": "Ждёт ещё 1",
+    "nobody else waiting yet": "больше никто не ждёт",
+    "no limit": "без ограничений",
+    "screen time done for today": "экранное время на сегодня закончилось",
+    "min": "мин",
+    "h": "ч"
   };
 
   function russianText(en) {
@@ -1649,6 +1711,20 @@ var I18N = (function () {
     if (m) return 'Что поёт ' + m[1] + '?';
     m = /^(.+)'s up!$/.exec(en);
     if (m) return 'Очередь: ' + m[1] + '!';
+    m = /^That's screen time for today, (.+)$/.exec(en);
+    if (m) return 'На сегодня экранное время всё, ' + m[1];
+    m = /^⏳ (.+) of screen time left$/.exec(en);
+    if (m) return '⏳ осталось экранного времени: ' + m[1];
+    m = /^(\d+) minutes of screen time left, (.+)\. Time to find a good place to stop\.$/.exec(en);
+    if (m) return m[2] + ', осталось ' + m[1] + ' мин экранного времени. Пора найти, где остановиться.';
+    m = /^(\d+) more minutes\.$/.exec(en);
+    if (m) return 'Ещё ' + m[1] + ' мин.';
+    m = /^(.+) is up next$/.exec(en);
+    if (m) return m[1] + ' поёт следующим';
+    m = /^(.+) is (\d+)(st|nd|rd|th) in line$/.exec(en);
+    if (m) return m[1] + ': ' + m[2] + '-й в очереди';
+    m = /^(\d+) more waiting$/.exec(en);
+    if (m) return 'Ждут ещё ' + m[1];
     m = /^Starting in (\d+)$/.exec(en);
     if (m) return 'Начало через ' + m[1];
     return en;

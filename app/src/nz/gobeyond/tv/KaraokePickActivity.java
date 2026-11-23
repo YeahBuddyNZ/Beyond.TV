@@ -29,7 +29,7 @@ import java.util.List;
  * then which song, and KaraokeActivity counts down and plays it. The songs are the family's own from Beyond Family,
  * then a few everybody knows, and "Find another song" for anything else (it goes on the family's list too). Only
  * titles and artists: the words come from the video, Beyond never keeps lyrics. Same as Karaoke.choose in
- * web/karaoke.js.
+ * web/karaoke.js. Take turns (ADR 0057) is here too: anyone's song goes on the TV's own list, sung in a fair order.
  */
 public class KaraokePickActivity extends Activity {
     /** Songs most families can sing, for a TV with no list of its own yet. Titles and artists only. */
@@ -51,8 +51,15 @@ public class KaraokePickActivity extends Activity {
             {"Livin' on a Prayer", "Bon Jovi"},
     };
 
+    private static final String ADD = "add";
+
     static void open(Context c) {
         c.startActivity(new Intent(c, KaraokePickActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+    }
+
+    /** Straight to who and which song for the Take turns list, then back to the night. */
+    static Intent adding(Context c) {
+        return new Intent(c, KaraokePickActivity.class).putExtra(ADD, true);
     }
 
     private float k;
@@ -69,7 +76,9 @@ public class KaraokePickActivity extends Activity {
     private JSONObject playlist;
     /** True while who and song add to the playlist instead of singing. */
     private boolean building;
-    private boolean deleting;
+    /** True while who and song add to the Take turns list; adding: that's all this screen is for. */
+    private boolean queueing, adding;
+    private boolean deleting, clearing;
     /** Where Back goes from the screen showing now; null closes. */
     private Runnable back;
     private static final int PLAYLIST_MOST = 40;
@@ -105,8 +114,11 @@ public class KaraokePickActivity extends Activity {
         column.addView(scroll, new LinearLayout.LayoutParams(-1, 0, 1));
 
         setContentView(root);
-        if (Family.linked(this)) start();
-        else whoSings();
+        adding = getIntent().getBooleanExtra(ADD, false);
+        if (adding) {
+            queueing = true;
+            whoSings();
+        } else start();
     }
 
     private LinearLayout row;
@@ -150,16 +162,21 @@ public class KaraokePickActivity extends Activity {
         return b;
     }
 
-    /** First, linked to Beyond Family: one song now, or a playlist. */
+    /** First: one song now, take turns, or (linked to Beyond Family) a playlist. */
     private void start() {
+        boolean linked = Family.linked(this);
         title.setText("🎤 " + Ui.tr("Noite de karaokê", "Karaoke night", "Noche de karaoke"));
         playlist = null;
         building = false;
+        queueing = false;
         deleting = false;
         back = null;
-        clear(Ui.tr("Uma música agora, ou uma playlist?", "One song now, or a playlist?", "¿Una canción ahora, o una lista?"));
+        clear(linked ? Ui.tr("Uma música agora, revezar, ou uma playlist?", "One song now, take turns, or a playlist?", "¿Una canción ahora, por turnos, o una lista?")
+                : Ui.tr("Uma música agora, ou revezar?", "One song now, or take turns?", "¿Una canción ahora, o por turnos?"));
         Button first = add("🎤  " + Ui.tr("Cantar uma música", "Sing a song", "Cantar una canción"), true, v -> whoSings());
-        JSONArray lists = Family.playlists();
+        int waiting = KaraokeActivity.Turns.load(this).requests.size();
+        add("🔁  " + Ui.tr("Revezar", "Take turns", "Por turnos") + (waiting > 0 ? "  ·  " + waiting : ""), false, v -> showTurns());
+        JSONArray lists = linked ? Family.playlists() : null;
         for (int i = 0; lists != null && i < lists.length(); i++) {
             final JSONObject p = lists.optJSONObject(i);
             if (p == null) continue;
@@ -173,8 +190,80 @@ public class KaraokePickActivity extends Activity {
                 showList();
             });
         }
-        add("＋  " + Ui.tr("Nova playlist", "New playlist", "Nueva lista"), false, v -> nameList());
+        if (linked) add("＋  " + Ui.tr("Nova playlist", "New playlist", "Nueva lista"), false, v -> nameList());
         first.requestFocus();
+    }
+
+    /** Take turns: start, add a song, clear the list, or pick one waiting to take it out. */
+    private void showTurns() {
+        back = this::start;
+        queueing = false;
+        List<KaraokeTurns.Request> line = KaraokeActivity.Turns.load(this).waiting();
+        title.setText("🔁 " + Ui.tr("Revezar", "Take turns", "Por turnos"));
+        clear(line.isEmpty() ? Ui.tr("Cada um escolhe uma música. A TV faz a fila.", "Everyone picks a song. The TV sorts out whose turn it is.",
+                "Cada uno elige una canción. La TV arma los turnos.")
+                : Ui.tr("Ninguém canta duas vezes antes de todos cantarem.", "Nobody sings twice until everyone's had a go.",
+                "Nadie canta dos veces hasta que todos hayan cantado."));
+        Button first = null;
+        if (!line.isEmpty()) first = add("▶  " + Ui.tr("Começar", "Start singing", "Empezar"), true, v -> {
+            startActivity(KaraokeActivity.turns(this));
+            finish();
+        });
+        Button more = add("＋  " + Ui.tr("Adicionar música", "Add a song", "Añadir canción"), first == null, v -> {
+            queueing = true;
+            whoSings();
+        });
+        if (first == null) first = more;
+        if (!line.isEmpty()) add(clearing ? Ui.tr("Apertar de novo para limpar", "Press again to clear", "Pulsa otra vez para vaciar")
+                : Ui.tr("Limpar a fila", "Clear the list", "Vaciar la fila"), false, v -> {
+            if (!clearing) {
+                clearing = true;
+                showTurns();
+                return;
+            }
+            clearing = false;
+            KaraokeActivity.Turns t = KaraokeActivity.Turns.load(this);
+            t.requests.clear();
+            t.sung.clear();
+            t.save(this);
+            showTurns();
+        });
+        for (int i = 0; i < line.size(); i++) {
+            final int n = i;
+            line(turnLabel(line.get(i), i), false, v -> showTurn(n));
+        }
+        first.requestFocus();
+    }
+
+    private String turnLabel(KaraokeTurns.Request r, int n) {
+        return (n + 1) + ".  " + (r.name.isEmpty() ? Ui.tr("Todos", "Everyone", "Todos") : r.name) + "  ·  " + r.title;
+    }
+
+    /** One song waiting: take it out, or leave it. */
+    private void showTurn(int n) {
+        back = this::showTurns;
+        List<KaraokeTurns.Request> line = KaraokeActivity.Turns.load(this).waiting();
+        if (n >= line.size()) {
+            showTurns();
+            return;
+        }
+        clear(turnLabel(line.get(n), n));
+        Button out = add("✕  " + Ui.tr("Tirar", "Take it out", "Quitar"), true, v -> {
+            KaraokeActivity.Turns t = KaraokeActivity.Turns.load(this);
+            KaraokeTurns.drop(t.requests, t.sung, n);
+            t.save(this);
+            showTurns();
+        });
+        add(Ui.tr("Pronto", "Done", "Listo"), false, v -> showTurns());
+        out.requestFocus();
+    }
+
+    /** "Aroha is 2nd in line". */
+    private static String place(String name, int n) {
+        String who = name.isEmpty() ? Ui.tr("Todo mundo", "Everyone", "Todos") : name;
+        if (n == 1) return Ui.tr(who + " é o próximo", who + " is up next", who + " va ahora");
+        String th = n % 10 == 1 && n % 100 != 11 ? "st" : n % 10 == 2 && n % 100 != 12 ? "nd" : n % 10 == 3 && n % 100 != 13 ? "rd" : "th";
+        return Ui.tr(who + " é o " + n + "º da fila", who + " is " + n + th + " in line", who + " es el " + n + "º de la fila");
     }
 
     /** A new playlist's name, typed or said. */
@@ -347,7 +436,7 @@ public class KaraokePickActivity extends Activity {
      *  household's own people (it keeps them by their Beyond Family id). */
     private void whoSings() {
         singer = null;
-        back = building ? this::showList : Family.linked(this) ? this::start : null;
+        back = adding ? null : building ? this::showList : queueing ? this::showTurns : this::start;
         clear(building ? Ui.tr("Quem canta essa?", "Who sings this one?", "¿Quién canta esta?") : Ui.tr("Quem vai cantar?", "Who's singing?", "¿Quién canta?"));
         Button first = null;
         for (People.Person p : People.list(this)) {
@@ -437,7 +526,7 @@ public class KaraokePickActivity extends Activity {
         back = this::songs;
         clear(Ui.tr("Diga ou digite a música e quem canta", "Say or type the song and who sings it", "Di o escribe la canción y quién la canta"));
         EditText field = field(Ui.tr("ex. Royals Lorde", "e.g. Royals Lorde", "p. ej. Royals Lorde"));
-        Button go = FeedbackActivity.button(this, building ? Ui.tr("Adicionar", "Add it", "Añadir") : "🎤  " + Ui.tr("Cantar", "Sing it", "Cantar"), k, true);
+        Button go = FeedbackActivity.button(this, building || queueing ? Ui.tr("Adicionar", "Add it", "Añadir") : "🎤  " + Ui.tr("Cantar", "Sing it", "Cantar"), k, true);
         Runnable send = () -> {
             String words = field.getText().toString().trim();
             if (!words.isEmpty()) picked(words, "", null, null, true);
@@ -461,6 +550,25 @@ public class KaraokePickActivity extends Activity {
 
     /** A song was picked: into the playlist being built, or sung now. typed: it goes on the family's list too. */
     private void picked(String name, String artist, String video, String songId, boolean typed) {
+        if (queueing) {
+            if (typed && Family.linked(this)) Family.addSong(this, name, null);
+            KaraokeTurns.Request r = new KaraokeTurns.Request(singer, name);
+            r.colour = KaraokeActivity.hex(colour);
+            r.artist = artist;
+            r.videoId = video == null ? "" : video;
+            r.query = name + (artist.isEmpty() ? "" : " " + artist) + " karaoke";
+            KaraokeActivity.Turns t = KaraokeActivity.Turns.load(this);
+            int at = t.add(r);
+            if (at == 0) {
+                android.widget.Toast.makeText(this, Ui.tr("A fila está cheia", "The list is full", "La fila está llena"), android.widget.Toast.LENGTH_LONG).show();
+                return;
+            }
+            t.save(this);
+            android.widget.Toast.makeText(this, place(singer, at), android.widget.Toast.LENGTH_LONG).show();
+            if (adding) finish();
+            else showTurns();
+            return;
+        }
         if (building) {
             java.util.function.Consumer<String> put = id -> {
                 if (isFinishing()) return;

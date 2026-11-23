@@ -66,6 +66,7 @@ public class HomeActivity extends Activity implements Family.Screen {
             recreate();   // a new language or city: draw everything again
             return;
         }
+        ScreenTimeService.homeInFront = true;
         if (home != null) {
             home.resume();
             Updater.homeShowing(this, true);
@@ -103,6 +104,9 @@ public class HomeActivity extends Activity implements Family.Screen {
     }
 
     @Override protected void onPause() {
+        // Off to an app (or a game): a kid with a screen time limit is counted from here (ADR 0058).
+        ScreenTimeService.homeInFront = false;
+        ScreenTimeService.start(this);
         handler.removeCallbacks(quiet);
         if (Family.screen == this) Family.screen = null;
         Family.onChange = null;

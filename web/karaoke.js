@@ -6,6 +6,10 @@
  * Family, which the TV asks for the next singer when a song ends. Without a video id it asks Beyond Family for the
  * best one (Sing King and Lost Panda first); only when there is none does it fall back to the YouTube app.
  * The words come from the video: Beyond never keeps lyrics. Same as KaraokeActivity.java. Plain ES5.
+ *
+ * Take turns (ADR 0057): anyone adds a song for anyone from the remote, and the TV works out a fair order, so nobody
+ * sings twice until everyone who asked has had a go. Kept on this TV for the night (localStorage), no phone needed.
+ * The rules are in `Karaoke.turns` (tests/karaoke.test.js); KaraokeTurns.java is the same on Google TV.
  */
 var Karaoke = (function () {
   'use strict';
@@ -14,8 +18,96 @@ var Karaoke = (function () {
   var LG_YOUTUBE = 'youtube.leanback.v4', SAMSUNG_YOUTUBE = '9Ur5IzDKqV.TizenYouTube';
   var VIOLET = '#6E3DDB';
   var showing = null;
-  // The night under way: {turns, i, name, queue}. queue: ask Beyond Family for the next singer once the turns run out.
+  // The night under way: {turns, i, name, queue, fair}. queue: ask Beyond Family for the next singer once the turns
+  // run out. fair: Take turns, each next turn from the TV's own list (Turns).
   var night = null;
+
+  // MARK: - Take turns: the fair order (no screen, so tests can run it)
+
+  /**
+   * The list: requests [{name, colour, title, artist, videoId, query}] in the order they were asked for, and sung
+   * {singer: turns had tonight}. The next turn goes to whoever has sung least; between them, whoever asked first.
+   * Everyone together is a singer of its own. A list left alone for 8 hours starts fresh.
+   */
+  var Turns = (function () {
+    var KEY = 'bt.karaoke.turns', FRESH_FOR = 8 * 3600000, MOST = 60;
+
+    function who(r) { return r && r.name ? String(r.name).toLowerCase() : '*'; }
+
+    /** Which request is next: its index, or -1 when the list is empty. */
+    function nextIndex(requests, sung) {
+      var first = {}, keys = [], i, k;
+      for (i = 0; i < requests.length; i++) {
+        k = who(requests[i]);
+        if (!(k in first)) { first[k] = i; keys.push(k); }
+      }
+      var best = -1, bestCount = 0;
+      for (i = 0; i < keys.length; i++) {
+        var count = sung[keys[i]] || 0;
+        if (best < 0 || count < bestCount || (count === bestCount && first[keys[i]] < best)) { best = first[keys[i]]; bestCount = count; }
+      }
+      return best;
+    }
+
+    /** Everyone still waiting, in the order they'll sing. */
+    function order(requests, sung) {
+      var left = requests.slice(), had = {}, out = [], k;
+      for (k in sung) if (sung.hasOwnProperty(k)) had[k] = sung[k];
+      while (left.length) {
+        var i = nextIndex(left, had);
+        out.push(left[i]);
+        k = who(left[i]);
+        had[k] = (had[k] || 0) + 1;
+        left.splice(i, 1);
+      }
+      return out;
+    }
+
+    function load() {
+      var t = null;
+      try { t = JSON.parse(window.localStorage.getItem(KEY) || 'null'); } catch (e) {}
+      if (!t || !t.requests || Date.now() - (t.at || 0) > FRESH_FOR) t = {requests: [], sung: {}};
+      if (!t.sung) t.sung = {};
+      return t;
+    }
+
+    function save(t) {
+      t.at = Date.now();
+      try { window.localStorage.setItem(KEY, JSON.stringify(t)); } catch (e) {}
+    }
+
+    return {
+      who: who, nextIndex: nextIndex, order: order, MOST: MOST,
+      /** Still waiting, in order. */
+      list: function () { var t = load(); return order(t.requests, t.sung); },
+      /** Adds a request; the place it got in the line (1 is next), or 0 when the list is full. */
+      add: function (r) {
+        var t = load();
+        if (t.requests.length >= MOST) return 0;
+        t.requests.push(r);
+        save(t);
+        var all = order(t.requests, t.sung);
+        for (var i = 0; i < all.length; i++) if (all[i] === r) return i + 1;
+        return all.length;
+      },
+      /** The next turn, taken off the list and counted as that singer's go; null when nobody's waiting. */
+      take: function () {
+        var t = load(), i = nextIndex(t.requests, t.sung);
+        if (i < 0) return null;
+        var r = t.requests.splice(i, 1)[0];
+        t.sung[who(r)] = (t.sung[who(r)] || 0) + 1;
+        save(t);
+        return r;
+      },
+      /** Takes out the n-th one waiting (0 is next). */
+      drop: function (n) {
+        var t = load(), all = order(t.requests, t.sung), gone = all[n];
+        for (var i = 0; i < t.requests.length; i++) if (t.requests[i] === gone) { t.requests.splice(i, 1); break; }
+        save(t);
+      },
+      clear: function () { save({requests: [], sung: {}}); }
+    };
+  })();
 
   function validId(id) { return /^[A-Za-z0-9_-]{11}$/.test(id || ''); }
 
@@ -35,9 +127,45 @@ var Karaoke = (function () {
     card();
   }
 
+  /** Take turns: the TV's own list, one turn after another, until nobody's waiting. */
+  function takeTurns() {
+    night = {turns: [], i: -1, name: tr('Revezar', 'Take turns', 'Por turnos'), fair: true};
+    nextFair();
+  }
+
+  function nextFair() {
+    var r = Turns.take();
+    if (!r) { empty(); return; }
+    night.turns.push(r);
+    night.i = night.turns.length - 1;
+    card();
+  }
+
+  /** Nobody's waiting: add another song, or that's the night. */
+  function empty() {
+    night = null;
+    UI.open({
+      cls: 'bt-outside bt-karaoke',
+      build: function (layer, a) {
+        var box = UI.el('div', 'bt-box', layer);
+        var mic = UI.el('div', 'mic', box, '🎉');
+        mic.style.background = VIOLET;
+        UI.el('div', 'who', box, tr('Todo mundo cantou!', "Everyone's had a go!", '¡Todos han cantado!'));
+        UI.el('div', 'bt-sub song', box, tr('Mais uma rodada?', 'Another round?', '¿Otra ronda?'));
+        var row = UI.el('div', 'bt-buttons', box);
+        a.add(UI.button(row, '＋  ' + tr('Adicionar música', 'Add a song', 'Añadir canción'), null, 'primary'), function () {
+          a.close();
+          choose({adding: true, then: function (added) { if (added) takeTurns(); }});
+        }, {first: true});
+        a.add(UI.button(row, tr('Pronto', 'Done', 'Listo')), function () { a.close(); });
+      }
+    });
+  }
+
   /** The turn after this one: the line-up's next, tonight's queue's next, or the end of the night. */
   function onward() {
     if (!night) return;
+    if (night.fair) { nextFair(); return; }
     night.i++;
     if (night.i < night.turns.length) { card(); return; }
     if (night.queue && window.Family && Family.nextTurn) {
@@ -54,14 +182,17 @@ var Karaoke = (function () {
 
   /** Who's up, then a countdown. Back ends the night. */
   function card() {
-    var c = night.turns[night.i], after = night.turns[night.i + 1] || c.next, mine = night;
+    var c = night.turns[night.i], mine = night;
+    var waiting = night.fair ? Turns.list() : null;
+    var after = night.fair ? waiting[0] : night.turns[night.i + 1] || c.next;
     if (showing) showing.close();
     var left = COUNT_FROM, timer = 0, api;
     api = UI.open({
       cls: 'bt-outside bt-karaoke',
       build: function (layer, a) {
         var box = UI.el('div', 'bt-box', layer);
-        if (night.name) UI.el('div', 'bt-sub list', box, '🎶 ' + night.name + '  ·  ' + (night.i + 1) + ' / ' + night.turns.length);
+        if (night.fair) UI.el('div', 'bt-sub list', box, '🔁 ' + night.name + '  ·  ' + inLine(waiting.length));
+        else if (night.name) UI.el('div', 'bt-sub list', box, '🎶 ' + night.name + '  ·  ' + (night.i + 1) + ' / ' + night.turns.length);
         var mic = UI.el('div', 'mic', box, '🎤');
         mic.style.background = c.colour || VIOLET;
         UI.el('div', 'who', box, c.name ? tr('Vez de ' + c.name + '!', c.name + "'s up!", '¡Le toca a ' + c.name + '!')
@@ -70,6 +201,12 @@ var Karaoke = (function () {
         var count = UI.el('div', 'count', box, counting(left));
         var row = UI.el('div', 'bt-buttons', box);
         a.add(UI.button(row, '🎤  ' + tr('Cantar agora', 'Sing now', 'Cantar ahora'), null, 'primary'), function () { go(); }, {first: true});
+        if (night.fair) a.add(UI.button(row, '＋  ' + tr('Adicionar música', 'Add a song', 'Añadir canción')), function () {
+          // Somebody wants a turn: the countdown waits, and this singer is still up after.
+          stop();
+          api.close();
+          choose({adding: true, then: function () { if (night === mine) card(); }});
+        });
         a.add(UI.button(row, tr('Pular', 'Skip this one', 'Saltar')), function () { stop(); api.close(); onward(); });
         a.add(UI.button(row, tr('Terminar', 'Finish', 'Terminar')), function () { stop(); night = null; api.close(); });
         if (after && after.title) UI.el('div', 'after', box, tr('Depois: ', 'After that: ', 'Después: ') +
@@ -97,6 +234,20 @@ var Karaoke = (function () {
   }
 
   function counting(n) { return tr('Começa em ', 'Starting in ', 'Empieza en ') + n; }
+
+  /** "3 waiting" (or nobody yet). */
+  function inLine(n) {
+    if (!n) return tr('ninguém na fila', 'nobody else waiting yet', 'nadie más en la fila');
+    return n === 1 ? tr('mais 1 na fila', '1 more waiting', '1 más en la fila') : tr('mais ' + n + ' na fila', n + ' more waiting', n + ' más en la fila');
+  }
+
+  /** "2nd in line". */
+  function place(name, n) {
+    var who = name || tr('Todo mundo', 'Everyone', 'Todos');
+    if (n === 1) return tr(who + ' é o próximo', who + ' is up next', who + ' va ahora');
+    var th = n % 10 === 1 && n % 100 !== 11 ? 'st' : n % 10 === 2 && n % 100 !== 12 ? 'nd' : n % 10 === 3 && n % 100 !== 13 ? 'rd' : 'th';
+    return tr(who + ' é o ' + n + 'º da fila', who + ' is ' + n + th + ' in line', who + ' es el ' + n + 'º de la fila');
+  }
 
   /** The song in our own player. Without a video id, Beyond Family finds the best one first. */
   function sing(c) {
@@ -282,9 +433,12 @@ var Karaoke = (function () {
    * then ones everybody knows, or any song typed on the remote, which goes on the family's list too). In a playlist
    * the song is added to it; otherwise the countdown starts. Same as KaraokePickActivity.java.
    */
-  function choose() {
+  function choose(opts) {
+    opts = opts || {};
     var hasLists = linkedFamily();
-    var step = hasLists ? 'start' : 'who', lead = null;
+    // adding: straight to who and which song, for the Take turns list, then back to whoever asked (opts.then).
+    var adding = !!opts.adding;
+    var step = adding ? 'who' : 'start', lead = null, queueing = adding, dropping = false, pickedTurn = -1;
     var singer = null, colour = VIOLET, member = null;
     // The playlist being built or looked at: {id, name, items}. building: who and song add to it instead of singing.
     var list = null, building = false, picked = -1, deleting = false;
@@ -311,11 +465,14 @@ var Karaoke = (function () {
         a.typing = null;
         lead = null;
         if (step === 'start') {
-          UI.heading(box, title, tr('Uma música agora, ou uma playlist?', 'One song now, or a playlist?', '¿Una canción ahora, o una lista?'));
+          UI.heading(box, title, hasLists ? tr('Uma música agora, revezar, ou uma playlist?', 'One song now, take turns, or a playlist?', '¿Una canción ahora, por turnos, o una lista?')
+            : tr('Uma música agora, ou revezar?', 'One song now, or take turns?', '¿Una canción ahora, o por turnos?'));
           var row0 = UI.el('div', 'bt-buttons cakes', box);
           lead = UI.button(row0, '🎤  ' + tr('Cantar uma música', 'Sing a song', 'Cantar una canción'), null, 'primary');
-          a.add(lead, function () { building = false; to('who', a); }, {first: true});
-          var lists = Family.playlists();
+          a.add(lead, function () { building = false; queueing = false; to('who', a); }, {first: true});
+          var waitingNow = Turns.list().length;
+          a.add(UI.button(row0, '🔁  ' + tr('Revezar', 'Take turns', 'Por turnos') + (waitingNow ? '  ·  ' + waitingNow : '')), function () { to('turns', a); });
+          var lists = hasLists ? Family.playlists() : [];
           for (i = 0; i < lists.length; i++) (function (p) {
             a.add(UI.button(row0, '🎶  ' + p.name + '  ·  ' + p.items.length), function () {
               list = {id: p.id, name: p.name, items: p.items.slice()};
@@ -324,7 +481,42 @@ var Karaoke = (function () {
               to('list', a);
             });
           })(lists[i]);
-          a.add(UI.button(row0, '＋  ' + tr('Nova playlist', 'New playlist', 'Nueva lista')), function () { to('name', a); });
+          if (hasLists) a.add(UI.button(row0, '＋  ' + tr('Nova playlist', 'New playlist', 'Nueva lista')), function () { to('name', a); });
+        } else if (step === 'turns') {
+          var line = Turns.list();
+          UI.heading(box, '🔁 ' + tr('Revezar', 'Take turns', 'Por turnos'), line.length
+            ? tr('Ninguém canta duas vezes antes de todos cantarem.', "Nobody sings twice until everyone's had a go.", 'Nadie canta dos veces hasta que todos hayan cantado.')
+            : tr('Cada um escolhe uma música. A TV faz a fila.', 'Everyone picks a song. The TV sorts out whose turn it is.', 'Cada uno elige una canción. La TV arma los turnos.'));
+          var acts = UI.el('div', 'bt-buttons', box);
+          if (line.length) {
+            lead = UI.button(acts, '▶  ' + tr('Começar', 'Start singing', 'Empezar'), null, 'primary');
+            a.add(lead, function () { a.close(); takeTurns(); }, {first: true});
+          }
+          var addT = UI.button(acts, '＋  ' + tr('Adicionar música', 'Add a song', 'Añadir canción'), null, line.length ? '' : 'primary');
+          a.add(addT, function () { queueing = true; building = false; to('who', a); }, {first: !line.length});
+          if (!lead) lead = addT;
+          if (line.length) a.add(UI.button(acts, dropping ? tr('Apertar de novo para limpar', 'Press again to clear', 'Pulsa otra vez para vaciar')
+              : tr('Limpar a fila', 'Clear the list', 'Vaciar la fila')), function () {
+            if (!dropping) { dropping = true; a.rebuild(); return; }
+            dropping = false;
+            Turns.clear();
+            to('turns', a);
+          });
+          var waits = UI.el('div', 'bt-buttons cakes songs list', box);
+          for (i = 0; i < line.length; i++) (function (r, n) {
+            a.add(UI.button(waits, (n + 1) + '.  ' + (r.name || tr('Todos', 'Everyone', 'Todos')) + '  ·  ' + r.title), function () { pickedTurn = n; to('turn', a); });
+          })(line[i], i);
+        } else if (step === 'turn') {
+          var one = Turns.list()[pickedTurn];
+          UI.heading(box, '🔁 ' + tr('Revezar', 'Take turns', 'Por turnos'), one ? (pickedTurn + 1) + '.  ' + (one.name || tr('Todos', 'Everyone', 'Todos')) + '  ·  ' + one.title : '');
+          var rowT = UI.el('div', 'bt-buttons cakes', box);
+          if (one) {
+            lead = UI.button(rowT, '✕  ' + tr('Tirar', 'Take it out', 'Quitar'), null, 'primary');
+            a.add(lead, function () { Turns.drop(pickedTurn); pickedTurn = -1; to('turns', a); }, {first: true});
+          }
+          var doneT = UI.button(rowT, tr('Pronto', 'Done', 'Listo'), null, one ? '' : 'primary');
+          a.add(doneT, function () { pickedTurn = -1; to('turns', a); }, {first: !one});
+          if (!lead) lead = doneT;
         } else if (step === 'name') {
           UI.heading(box, title, tr('Como se chama a playlist?', "What's the playlist called?", '¿Cómo se llama la lista?'));
           UI.keyboard(box, a, {max: 40, placeholder: tr('ex. Sexta à noite', 'e.g. Friday night', 'p. ej. Viernes'),
@@ -423,6 +615,16 @@ var Karaoke = (function () {
 
         /** A song was picked: into the playlist being built, or sung now. typed: it goes on the family's list too. */
         function picked2(t, artist, videoId, songId, typed) {
+          if (queueing) {
+            if (typed && window.Family && Family.addSong && Family.linked && Family.linked()) Family.addSong(t, artist);
+            var at = Turns.add({name: singer, colour: colour, title: t, artist: artist, videoId: videoId, query: t + (artist ? ' ' + artist : '') + ' karaoke'});
+            if (!at) { UI.toast(tr('A fila está cheia', 'The list is full', 'La fila está llena')); return; }
+            UI.toast(place(singer, at));
+            if (adding) { a.close(); if (opts.then) opts.then(true); return; }
+            queueing = false;
+            to('turns', a);
+            return;
+          }
           if (building) {
             if (list.items.length >= PLAYLIST_MOST) { UI.toast(tr('A playlist está cheia', 'The playlist is full', 'La lista está llena')); return; }
             var put = function (id) {
@@ -435,7 +637,7 @@ var Karaoke = (function () {
             else Family.addSong(t, artist, function (song) { put(song && song.id); });
             return;
           }
-          if (typed && window.Family && Family.addSong) Family.addSong(t, artist);
+          if (typed && window.Family && Family.addSong && Family.linked && Family.linked()) Family.addSong(t, artist);
           a.close();
           play([{name: singer, colour: colour, title: t, artist: artist, videoId: videoId, query: t + (artist ? ' ' + artist : '') + ' karaoke'}], {queue: true});
         }
@@ -453,8 +655,12 @@ var Karaoke = (function () {
         if (!a) return false;
         if (step === 'find') { to('song', a); return true; }
         if (step === 'song') { to('who', a); return true; }
+        if (step === 'who' && adding) { a.close(); if (opts.then) opts.then(false); return true; }
+        if (step === 'who' && queueing) { queueing = false; to('turns', a); return true; }
         if (step === 'who' && building) { building = false; to('list', a); return true; }
-        if (step === 'who' && hasLists) { to('start', a); return true; }
+        if (step === 'who') { to('start', a); return true; }
+        if (step === 'turn') { pickedTurn = -1; to('turns', a); return true; }
+        if (step === 'turns') { dropping = false; to('start', a); return true; }
         if (step === 'item') { picked = -1; to('list', a); return true; }
         if (step === 'list' || step === 'name') { list = null; deleting = false; to('start', a); return true; }
         return false;
@@ -462,5 +668,5 @@ var Karaoke = (function () {
     });
   }
 
-  return {start: start, play: play, choose: choose};
+  return {start: start, play: play, choose: choose, turns: Turns};
 })();

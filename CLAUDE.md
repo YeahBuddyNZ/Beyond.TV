@@ -161,6 +161,9 @@ Moved to `docs/history/sections.md` (section "Adapting it to another TV"). Read 
   Only art we made or own: free downloads from other studios are usually personal use only (Small Lily Studio's are).
 - How to play (`web/guides.js`, ADR 0043): every game has a guide (the aim, the remote, the rules, tips) in all five
   languages. A new game adds its guide and its id in `ORDER` in the same change; `tests/learn.test.js` checks.
+- Screen time (`ScreenTime.java`, `ScreenTimeService`, `web/screentime.js`, ADR 0058) and karaoke Take turns
+  (`KaraokeTurns.java`, `web/karaoke.js`, ADR 0057) are twins: change one, change both. Family photos (`PhotoDrop`,
+  `FamilyPhotos`, `PhotosActivity`, ADR 0059) are Android only; the TV listens only while that screen is open.
 - Te reo word of the day: `web/kupu.js` and `Kupu.java` hold the same list and pick by the same local day, so every
   TV in a house shows the same kupu. Change one, change both. On Android it leads the quotes row (`HomeView.kupuFor`,
   measured once a day, never in the frame loop); *Te reo word of the day* in Home Settings turns it off.

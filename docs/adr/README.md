@@ -64,3 +64,6 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0054](0054-build-a-bridge.md) | Build it: build a bridge |
 | [0055](0055-plan-a-town.md) | Build it: plan a town |
 | [0056](0056-londons-candy-land.md) | Lolly Land (London's Candy Land): a kind candy world for the remote |
+| [0057](0057-karaoke-take-turns.md) | Karaoke: take turns, so everyone gets a go |
+| [0058](0058-screen-time-limits.md) | Screen time limits per kid, shown kindly |
+| [0059](0059-family-photos-screensaver.md) | Family photos on the screensaver, with the kids' art |

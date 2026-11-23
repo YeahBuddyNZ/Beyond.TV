@@ -422,6 +422,33 @@
             android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|density|fontScale|locale|layoutDirection"
             android:theme="@style/BeyondTV.Home" />
 
+        <!-- Screen time is used up for today (ADR 0058): kind words over the app, OK goes home. -->
+        <activity
+            android:name=".TimeUpActivity"
+            android:process=":home"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTop"
+            android:screenOrientation="landscape"
+            android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|density|fontScale|locale|layoutDirection"
+            android:theme="@style/BeyondTV.Home" />
+
+        <!-- Family photos (ADR 0059): a QR code for a phone to send photos and the kids' art for the screensaver. -->
+        <activity
+            android:name=".PhotosActivity"
+            android:process=":home"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:screenOrientation="landscape"
+            android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|density|fontScale|locale|layoutDirection"
+            android:theme="@style/BeyondTV.Home" />
+
+        <!-- Screen time (ADR 0058): counts a kid's time away from the home screen while they have a limit, then stops. -->
+        <service
+            android:name=".ScreenTimeService"
+            android:process=":home"
+            android:exported="false" />
+
         <!-- Beyond Family: the long wait for the phone remote and messages, only while the TV is linked. In :home,
              with the people it fills in. -->
         <service

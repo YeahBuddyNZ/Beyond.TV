@@ -304,7 +304,7 @@ var Profiles = (function () {
           if (!p.kid) p.kid = true;
           else if (!p.teen) p.teen = true;
           else { p.kid = false; p.teen = false; }
-          kidLabel(); repaint(); likesBtn.style.display = p.kid ? '' : 'none';
+          kidLabel(); repaint(); likesBtn.style.display = timeBtn.style.display = p.kid ? '' : 'none';
         });
         // What a kid is into, set by a grown-up (this is already behind the PIN): it picks the shows on their cards.
         var likesBtn = UI.button(actions, tr('Do que gosta', "What they're into", 'Lo que le gusta'), 'sparkles');
@@ -315,11 +315,24 @@ var Profiles = (function () {
             tr('As escolhas na tela inicial vêm daqui.', 'Their picks on the home screen come from this.', 'Sus sugerencias salen de aquí.'),
             p.likes || [], function (picked) { p.likes = picked; });
         });
+        // Screen time a day (screentime.js, ADR 0058): kept on this TV, saved with the rest.
+        var limit = window.ScreenTime ? ScreenTime.limit(p.id) : 0;
+        var timeBtn = UI.button(actions, '', null, 'toggle-row');
+        function timeLabel() { timeBtn.lastChild.textContent = tr('Tempo de tela por dia: ', 'Screen time a day: ', 'Pantalla al día: ') + ScreenTime.label(limit); }
+        timeBtn.style.display = p.kid && window.ScreenTime ? '' : 'none';
+        if (window.ScreenTime) timeLabel();
+        api.add(timeBtn, function () {
+          if (!p.kid || !window.ScreenTime) return;
+          var all = ScreenTime.CHOICES, at = all.indexOf(limit);
+          limit = all[(at + 1) % all.length];
+          timeLabel();
+        });
         api.add(UI.button(actions, tr('Salvar', 'Save', 'Guardar'), 'check', 'primary'), function () {
           p.name = (kb.text() || '').replace(/^\s+|\s+$/g, '');
           if (!p.name) { UI.toast(tr('Dê um nome ao perfil.', 'Give the profile a name.', 'Ponle un nombre al perfil.')); return; }
           if (isNew) list.push(p);
           else for (var i = 0; i < list.length; i++) if (list[i].id === p.id) list[i] = p;
+          if (window.ScreenTime) ScreenTime.setLimit(p.id, p.kid ? limit : 0);
           if (!isNew && (p.emoji !== person.emoji || p.colour !== person.colour)) { p.look = true; touched(p); }
           changed();
           api.close();
