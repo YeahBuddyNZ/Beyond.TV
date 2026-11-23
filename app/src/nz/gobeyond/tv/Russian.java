@@ -561,6 +561,13 @@ final class Russian {
             case "Got it": return "Понятно";
             case "How to play": return "Как играть";
             case "▲ ▼ to change channel": return "▲ ▼ переключают канал";
+            case "Your favourites": return "Избранное";
+            case "Hold OK on a channel to pin it to the top.": return "Удерживайте OK на канале, чтобы закрепить его наверху.";
+            case "Pinned to your favourites": return "Добавлено в избранное";
+            case "Taken out of your favourites": return "Убрано из избранного";
+            case "Live": return "В эфире";
+            case "Up next": return "Далее";
+            case "Continue": return "Продолжить";
             default:
                 // Notices are saved in the language in use when they were generated.
                 String[] prefixes = {"Couldn't check Beyond™ TV: ", "Couldn't turn on Beyond™ TV: ",

@@ -12,6 +12,10 @@
  * is streaming right now, so we play that video (YouTube's "live_stream?channel=" link says "Video not found" when a
  * channel runs two streams) and leave out a channel that isn't live. Never a channel somebody had no right to share:
  * only a channel's own official stream, with its own logo on its tile.
+ * Now and next, favourites (ADR 0058): each tile says what is on now (the live video's title, from now.json), and the
+ * focused one what is on next when the channel has scheduled it. Holding OK on a channel pins it to "Your favourites",
+ * the first row, for whoever is watching; kept on the TV only. What was last watched leads Keep watching on the home
+ * screen, so it opens again with one press.
  * Same as LiveTvActivity.java: change one, change both. Plain ES5.
  */
 var LiveTV = (function () {
@@ -19,7 +23,11 @@ var LiveTV = (function () {
 
   var SITE = 'https://yeahbuddynz.github.io/Beyond.TV/live/';
   var LIST_URL = SITE + 'channels.json', NOW_URL = SITE + 'now.json';
-  var KEY = 'bt.live', NOW_KEY = 'bt.live.now';
+  var KEY = 'bt.live', NOW_KEY = 'bt.live.now', FAV_KEY = 'bt.live.fav';
+  /** Favourites each person can pin; holding OK again takes one off. */
+  var MAX_FAVS = 12;
+  /** How long holding OK takes to pin a channel. */
+  var HOLD_MS = 650;
   /** How long what now.json says is trusted: a 24/7 stream keeps its video for weeks, an hourly file is never this old. */
   var NOW_FOR = 3 * 24 * 3600 * 1000;
 
@@ -87,10 +95,43 @@ var LiveTV = (function () {
     for (var i = 0; i < channels.length; i++) {
       var c = channels[i], n = fresh ? now.channels[c.youtube] : null, copy = {};
       for (var k in c) if (Object.prototype.hasOwnProperty.call(c, k)) copy[k] = c[k];
-      if (n && /^[A-Za-z0-9_-]{11}$/.test(n.video || '')) copy.video = n.video;
-      else if (fresh) continue;
+      if (n && /^[A-Za-z0-9_-]{11}$/.test(n.video || '')) {
+        copy.video = n.video;
+        if (typeof n.title === 'string' && n.title) copy.now = n.title.slice(0, 120);
+        var nx = n.next, nAt = nx && typeof nx.at === 'string' ? Date.parse(nx.at) : NaN;
+        if (nx && typeof nx.title === 'string' && nx.title && !isNaN(nAt)) copy.next = {title: nx.title.slice(0, 120), at: nAt};
+      } else if (fresh) continue;
       out.push(copy);
     }
+    return out;
+  }
+
+  /** What's on next, once it hasn't started yet: {title, at} or null. */
+  function nextOf(c, at) { return c && c.next && c.next.at > at ? c.next : null; }
+
+  /** One person's pinned channel ids, newest first, from the store kept on the TV ({who: [ids]}). */
+  function favsOf(store, who) {
+    var l = store && Object.prototype.hasOwnProperty.call(store, who) ? store[who] : null, out = [];
+    if (Object.prototype.toString.call(l) !== '[object Array]') return out;
+    for (var i = 0; i < l.length && out.length < MAX_FAVS; i++) if (typeof l[i] === 'string' && /^[a-z0-9-]{1,40}$/.test(l[i]) && out.indexOf(l[i]) < 0) out.push(l[i]);
+    return out;
+  }
+
+  /** Pins a channel for one person, or unpins it if it was pinned: {store, pinned}. The store given is left as it was. */
+  function toggleFav(store, who, id) {
+    var next = {}, k;
+    for (k in store || {}) if (Object.prototype.hasOwnProperty.call(store, k)) next[k] = favsOf(store, k);
+    var l = favsOf(store, who), i = l.indexOf(id);
+    if (i >= 0) l.splice(i, 1);
+    else { l.unshift(id); if (l.length > MAX_FAVS) l.length = MAX_FAVS; }
+    next[who] = l;
+    return {store: next, pinned: i < 0};
+  }
+
+  /** The pinned channels that are on air, in the order they were pinned. */
+  function favourites(channels, ids) {
+    var out = [];
+    for (var i = 0; i < ids.length; i++) for (var j = 0; j < channels.length; j++) if (channels[j].id === ids[i]) { out.push(channels[j]); break; }
     return out;
   }
 
@@ -180,8 +221,8 @@ var LiveTV = (function () {
     load(function (channels) { screen(host, channels); });
   }
 
-  /** A tile: a picture (or the name on a colour when there is none), the name under it. */
-  function tile(row, label, from, pic, colour, cls) {
+  /** A tile: a picture (or the name on a colour when there is none), the name under it, then what's on or where from. */
+  function tile(row, label, from, pic, colour, cls, star) {
     var t = UI.el('div', 'bt-live-tile ' + (cls || ''), row);
     var face = UI.el('div', 'face', t);
     face.style.background = colour || '#2C2458';
@@ -192,23 +233,75 @@ var LiveTV = (function () {
       img.onerror = function () { if (img.parentNode) img.parentNode.removeChild(img); word.style.visibility = ''; };
       img.src = pic;
     }
+    if (star) UI.el('div', 'star', face, '\u2605');
     UI.el('div', 'name', t, label);
     if (from) UI.el('div', 'from', t, from);
     return t;
+  }
+
+  function who() { return window.Profiles && Profiles.current() ? Profiles.current().id || '' : ''; }
+
+  function clock(at) {
+    if (window.Data && Data.time) return Data.time(at);
+    var d = new Date(at), m = d.getMinutes();
+    return d.getHours() + ':' + (m < 10 ? '0' : '') + m;
+  }
+
+  /** "Next at 7:00 PM: Mornings with Ridge and Frost", or empty. */
+  function nextLine(c) {
+    var n = nextOf(c, Date.now());
+    return n ? tr('A seguir', 'Up next', 'A continuación') + ' ' + clock(n.at) + ': ' + n.title : '';
   }
 
   function screen(host, channels) {
     var kid = window.Profiles && Profiles.kid(), rows = sources(host.apps);
     var playable = kid ? inGroup(channels, 'kids') : [];
     if (!kid) for (var g = 0; g < 3; g++) playable = playable.concat(inGroup(channels, GROUPS[g]));
-    var box = null, shift = 0;
-    UI.open({
+    var box = null, bar = null, shift = 0, focusedNode = null, hold = null, keepOn = null, api;
+
+    /** Holding OK pins the focused channel; a short press plays it. A TV that never says the key came up still plays. */
+    function okDown() {
+      var c = focusedNode && focusedNode.btChannel;
+      if (!c) return false;
+      var now = Date.now();
+      if (hold && now - hold.last < 400) { hold.repeats++; hold.last = now; return true; }
+      if (hold) clearTimeout(hold.timer);
+      var h = hold = {repeats: 0, last: now, done: false, node: focusedNode};
+      h.timer = setTimeout(function () {
+        h.done = true;
+        if (h.repeats >= 2) pin(c);
+        else { if (hold === h) hold = null; h.node.btRun(); }
+      }, HOLD_MS);
+      return true;
+    }
+    function okUp(e) {
+      if (!hold || TV.code(e.keyCode) !== TV.keys.ok) return;
+      var h = hold;
+      hold = null;
+      clearTimeout(h.timer);
+      if (!h.done) h.node.btRun();
+    }
+    function pin(c) {
+      var r = toggleFav(read(FAV_KEY) || {}, who(), c.id);
+      try { localStorage.setItem(FAV_KEY, JSON.stringify(r.store)); } catch (e) {}
+      UI.toast(r.pinned ? tr('Fixado nos seus favoritos', 'Pinned to your favourites', 'Fijado en tus favoritos')
+        : tr('Tirado dos seus favoritos', 'Taken out of your favourites', 'Quitado de tus favoritos'));
+      keepOn = c.id;
+      shift = 0;
+      api.rebuild();
+    }
+    document.addEventListener('keyup', okUp);
+
+    api = UI.open({
       cls: 'bt-live',
       build: function (layer, a) {
         box = UI.el('div', 'bt-box', layer);
+        bar = UI.el('div', 'bt-live-now', layer);
+        var keepNode = null, pinned = favourites(kid ? inGroup(channels, 'kids') : playable, favsOf(read(FAV_KEY) || {}, who()));
         UI.heading(box, tr('TV ao vivo', 'Live TV', 'TV en vivo'),
           kid ? tr('Escolha um canal', 'Pick a channel', 'Elige un canal')
             : tr('Canais grátis, sem assinatura', 'Free channels, no subscription', 'Canales gratis, sin suscripción'));
+        UI.el('div', 'bt-sub pin-tip', box, tr('Segure OK num canal para fixá-lo no topo.', 'Hold OK on a channel to pin it to the top.', 'Mantén OK en un canal para fijarlo arriba.'));
         var first = true;
         function add(node, run) {
           a.add(node, run, {first: first});
@@ -222,13 +315,20 @@ var LiveTV = (function () {
         function app(row, s, then) {
           add(tile(row, s.name, '', s.app.icon, '#2A2A2E', 'app'), function () { a.close(); host.launch(s.app); if (then) then(); });
         }
-        function channelRow(title, list, cls) {
+        function channelRow(title, list, cls, favRow) {
           if (!list.length) return;
           var row = section(title, cls);
           for (var n = 0; n < list.length; n++) (function (c) {
-            add(tile(row, c.name, c.from, logoUrl(c), c.colour, cls), function () { watch(playable, playable.indexOf(c)); });
+            var t = tile(row, c.name, c.now || c.from, logoUrl(c), c.colour, cls, favRow || pinned.indexOf(c) >= 0);
+            t.btChannel = c;
+            t.btRun = function () { watch(playable, playable.indexOf(c)); };
+            add(t, t.btRun);
+            if (!favRow && keepOn === c.id) keepNode = t;
           })(list[n]);
         }
+
+        // Your favourites first: the channels this person pinned by holding OK.
+        channelRow(tr('Seus favoritos', 'Your favourites', 'Tus favoritos'), pinned, 'featured', true);
 
         // Here: the aerial and the free-to-air apps
         if (host.aerial || rows.nz.length) {
@@ -267,9 +367,19 @@ var LiveTV = (function () {
           'Sem antena? O app Freeview Streaming TV tem os canais grátis da Nova Zelândia.',
           'No aerial? The Freeview Streaming TV app has every free NZ channel. Find it in the TV\'s app store.',
           '¿Sin antena? La app Freeview Streaming TV tiene los canales gratis de Nueva Zelanda.'));
+        // Pinned or unpinned: the focus stays on that channel in its own row.
+        if (keepNode) { var k = keepNode; keepOn = null; setTimeout(function () { a.focusNode(k); }, 0); }
+      },
+      key: function (k) { return k === TV.keys.ok ? okDown() : false; },
+      closed: function () {
+        document.removeEventListener('keyup', okUp);
+        if (hold) clearTimeout(hold.timer);
+        hold = null;
       },
       // Keeps the focused tile in view: its row slides sideways, the screen slides up. Only transforms, so old TVs keep up.
       focused: function (node) {
+        focusedNode = node;
+        showNow(bar, node.btChannel);
         var track = node.parentNode;
         if (track && track.className === 'track') {
           var room = track.parentNode.offsetWidth, x = 0;
@@ -286,6 +396,22 @@ var LiveTV = (function () {
         slide(box, 'translateY(' + shift + 'px)');
       }
     });
+    // Opened from Continue on the home screen: straight back into that channel, when it's still on air.
+    if (host.play) for (var p = 0; p < playable.length; p++) if (playable[p].id === host.play) { watch(playable, p); break; }
+  }
+
+  /** The focused channel's name, what's on now and what's on next, in the corner. */
+  function showNow(bar, c) {
+    if (!bar) return;
+    bar.innerHTML = '';
+    bar.style.opacity = c ? 1 : 0;
+    if (!c) return;
+    UI.el('div', 'who', bar, c.name + (c.from ? '  ·  ' + c.from : ''));
+    var now = UI.el('div', 'line', bar);
+    UI.el('b', 'live', now, tr('Agora', 'Now', 'Ahora'));
+    now.appendChild(document.createTextNode(' ' + (c.now || tr('Ao vivo', 'Live', 'En vivo'))));
+    var n = nextLine(c);
+    if (n) UI.el('div', 'line next', bar, n);
   }
 
   function slide(node, t) {
@@ -329,12 +455,14 @@ var LiveTV = (function () {
       if (name) {
         name.innerHTML = '';
         UI.el('b', '', name, c.name);
-        if (c.from) UI.el('span', '', name, '  ·  ' + c.from);
+        if (c.now || c.from) UI.el('span', '', name, '  ·  ' + (c.now || c.from));
         name.style.opacity = 1;
         clearTimeout(hideAt);
         hideAt = setTimeout(function () { name.style.opacity = 0; }, 4000);
       }
       if (window.Family && Family.now) Family.now('Live TV', c.name);
+      // Keep watching on the home screen: this channel, ready to open again with one press. Kept on the TV only.
+      if (window.Watched) Watched.add({app: 'beyond:live:' + c.id, name: c.name});
     }
     api = UI.open({
       cls: 'bt-karaoke-player bt-live-player',
@@ -358,8 +486,8 @@ var LiveTV = (function () {
     return api;
   }
 
-  return {open: open, rules: {pickList: pickList, onAir: onAir, inGroup: inGroup, sources: sources, step: step,
-    embedUrl: embedUrl, logoUrl: logoUrl, NEWS: NEWS}};
+  return {open: open, logoUrl: logoUrl, rules: {pickList: pickList, onAir: onAir, inGroup: inGroup, sources: sources, step: step,
+    embedUrl: embedUrl, logoUrl: logoUrl, nextOf: nextOf, favsOf: favsOf, toggleFav: toggleFav, favourites: favourites, NEWS: NEWS}};
 })();
 
 if (typeof module !== 'undefined') module.exports = LiveTV;

@@ -378,11 +378,14 @@
         img.style.background = 'linear-gradient(135deg, ' + p.colour + ', #2C2458)';
         el('div', 'emoji', img, p.emoji);
       } else if (p.watched) {
-        var app = appById(p.watched.app);
+        var app = appById(p.watched.app), own = p.own;
         if (p.watched.image) img.style.backgroundImage = 'url(' + p.watched.image + ')';
+        else if (own && own.kind === 'live' && LiveTV.logoUrl({id: own.id})) { setClass(img, 'logo', true); img.style.backgroundImage = 'url(' + LiveTV.logoUrl({id: own.id}) + ')'; }
+        else if (own && own.kind === 'game') img.style.backgroundImage = 'url(games/' + own.id + '.jpg)';
         else if (app) { setClass(img, 'face', true); face(app, img, 30); }
         else img.style.background = '#2C2458';
-        el('div', 'when', img, Watched.when(p.watched.at));
+        var when = Watched.when(p.watched.at);
+        el('div', 'when' + (p.first ? ' go' : ''), img, p.first ? tr('Continuar', 'Continue', 'Continuar') + ' · ' + when : when);
       } else img.style.backgroundImage = 'url(' + Data.image(p.backdrop, 'w780') + ')';
       el('div', 'play', img);
       el('div', 'name', card, p.title);
@@ -602,12 +605,43 @@
     return null;
   }
 
-  /** Keep watching as cards: the show and its app when it came from a pick, otherwise just the app. */
+  /**
+   * Keep watching as cards: the show and its app when it came from a pick, otherwise just the app; a Live TV channel or
+   * a game played here (ADR 0058). The first is Continue: the home screen opens on it.
+   */
   function watchingCards() {
-    return Watched.list(3).map(function (x) {
-      var app = appById(x.app), name = (app && app.title) || x.name;
-      return {id: 'w:' + x.app + ':' + x.title + ':' + x.at, watched: x, title: x.title || name, meta: x.title ? name : '', app: x.app};
+    return Watched.list(3).map(function (x, i) {
+      var own = ours(x.app), app = own ? null : appById(x.app), name = (app && app.title) || x.name;
+      if (own && own.kind === 'game' && window.Games) name = Games.nameOf(own.id) || name;
+      return {id: 'w:' + x.app + ':' + x.title + ':' + x.at, watched: x, title: x.title || name, app: x.app, own: own, first: i === 0,
+        meta: x.title ? name : own ? (own.kind === 'live' ? tr('TV ao vivo', 'Live TV', 'TV en vivo') : tr('Jogos', 'Games', 'Juegos')) : ''};
     });
+  }
+
+  /** Something of Beyond TV's own in Keep watching: {kind: 'live' or 'game', id}, or null for an app. */
+  function ours(app) {
+    var m = /^beyond:(live|game):([a-z0-9-]{1,40})$/.exec(app || '');
+    return m ? {kind: m[1], id: m[2]} : null;
+  }
+
+  /** Opens a Live TV channel or a game from Keep watching, the way it was left. */
+  function openOurs(own) {
+    if (own.kind === 'live') { if (!jobsFirst()) openLive(own.id); return; }
+    if (!(window.Games && Games.start(own.id))) Games.open();
+  }
+
+  /**
+   * The home screen opens on Continue: the last thing this person opened from here, focused, so OK picks up where they
+   * left off. When the TV comes on, after a profile is picked and when the home screen opens; nothing to continue, the shelf.
+   */
+  function continueFirst() {
+    st.zone = Z.SHELF;
+    st.shelf = 0;
+    if (!Watched.list(1).length) return;
+    kinds = tabKinds();
+    st.tab = Math.max(0, kinds.indexOf('watching'));
+    st.zone = Z.CARDS;
+    st.card = 0;
   }
 
   /** Something opened from here goes to the front of Keep watching. */
@@ -1138,9 +1172,10 @@
   }
 
   /** The Live TV screen, with this TV's aerial and apps. Plex opens Plex itself here, for its free channels. */
-  function openLive() {
+  function openLive(play) {
     var live = liveTV();
     LiveTV.open({
+      play: typeof play === 'string' ? play : null,
       apps: apps,
       aerial: live ? {id: live.id, title: tr('TV aberta', 'Live TV', 'TV en vivo')} : null,
       launch: function (x) {
@@ -1179,6 +1214,7 @@
           } else toast(tr('Esse app não está nesta TV', "That app isn't on this TV", 'Esa app no está en este TV'));
           return;
         }
+        if (p && p.own) { openOurs(p.own); return; }
         if (p && p.watched) {
           var again = appById(p.watched.app);
           if (again) { remember(again, p.watched.title, p.watched.image); launcher(again.id, again.title)(); }
@@ -1596,8 +1632,7 @@
     else if (me.kid) setTimeout(Pets.ask, 600);   // and have the pets been fed today?
     pickShelf();
     cards = [];
-    st.zone = Z.SHELF;
-    st.shelf = 0;
+    continueFirst();
     renderAll();
   }
 
@@ -1680,9 +1715,10 @@
     if (longAway) Chime.play();
     if (longAway && Profiles.count() > 1) setTimeout(function () { Profiles.pick(false, profileChosen); }, 300);
     idleAt = Date.now();
-    // Back from an app: what was just opened leads Keep watching.
+    // Back from an app: what was just opened leads Keep watching. Back after hours away: the home screen opens on Continue.
     st.tab = 0;
     kinds = [];
+    if (longAway) { closeSheets(); continueFirst(); }
     renderTop();
     cards = [];
     renderCards();
@@ -1701,6 +1737,7 @@
   renderTop();
   Chime.play();   // hello
   loadApps(function () {
+    continueFirst();
     renderAll();
     Data.refresh();
     if (Profiles.count() > 1) Profiles.pick(false, profileChosen);
