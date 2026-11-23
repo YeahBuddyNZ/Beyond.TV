@@ -66,5 +66,8 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0056](0056-londons-candy-land.md) | Lolly Land (London's Candy Land): a kind candy world for the remote |
 | [0057](0057-family-scoreboard-and-daily-chores.md) | The family scoreboard and Daily chores, with stars for Candy Land |
 | [0058](0058-live-tv-now-next-favourites-and-continue.md) | Live TV now and next, favourite channels, and the home screen opening on Continue |
-| [0059](0059-find-voice-search.md) | Find: say a game, a channel, an app or a show |
-| [0060](0060-bedtime-mode.md) | Bedtime mode: calm sounds, then the TV turns itself off |
+| [0059](0059-karaoke-take-turns.md) | Karaoke: take turns, so everyone gets a go |
+| [0060](0060-screen-time-limits.md) | Screen time limits per kid, shown kindly |
+| [0061](0061-family-photos-screensaver.md) | Family photos on the screensaver, with the kids' art |
+| [0062](0062-find-voice-search.md) | Find: say a game, a channel, an app or a show |
+| [0063](0063-bedtime-mode.md) | Bedtime mode: calm sounds, then the TV turns itself off |

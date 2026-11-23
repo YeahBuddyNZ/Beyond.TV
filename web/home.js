@@ -270,14 +270,14 @@
         if (!ok) toast(tr('Abra gobeyond.nz/election no navegador da TV.', 'Open gobeyond.nz/election in the TV\'s browser.', 'Abre gobeyond.nz/election en el navegador de la TV.'));
       });
     }});
-    // Find (find.js, ADR 0059): say a game, a channel, an app or a show, and open it with OK. For everyone, kids included.
+    // Find (find.js, ADR 0062): say a game, a channel, an app or a show, and open it with OK. For everyone, kids included.
     list.push({icon: 'mic', label: tr('Encontrar', 'Find', 'Buscar'), run: function () { openFind(false); }});
     // Live TV (livetv.js, ADR 0042): the aerial, the free-to-air apps and free world news on one screen.
     list.push({icon: 'live_tv', label: tr('TV aberta', 'Live TV', 'TV en vivo'), run: openLive});
     if (!kid) list.push({icon: 'hdmi', label: tr('Entradas HDMI', 'HDMI Inputs', 'Entradas HDMI'), run: function () {
       st.zone = Z.SHELF; openDrawer(); st.drawer = 1 < drawerInputs ? 1 : 0; updateFocus();
     }});
-    // Bedtime (ADR 0060), in the evening: a night light that breathes, a calm sound, then the TV turns itself off.
+    // Bedtime (ADR 0063), in the evening: a night light that breathes, a calm sound, then the TV turns itself off.
     if (Data.isNight(Date.now())) list.push({icon: 'bedtime', label: tr('Hora de dormir', 'Bedtime', 'Hora de dormir'), run: function () { Bedtime.choose(); }});
     // Games, for anyone with the remote: karaoke, a party, quiz night and the rest, no phone needed (games.js).
     list.push({icon: 'gamepad', label: tr('Jogos', 'Games', 'Juegos'), run: function () { Games.open(); }});
@@ -692,6 +692,9 @@
     if (!hasClass(body, 'no-picks')) { el('b', 'time', info, Data.time(d.getTime())); el('span', '', info, '  ·  '); }
     el('span', '', info, date);
     if (w && Prefs.weather()) el('span', '', info, '  ·  ' + (Data.city ? Data.city + ' ' : '') + Data.degrees(w.temp) + ', ' + Data.condition(w.code, w.isDay).toLowerCase());
+    // A kid with a screen time limit sees what's left, as part of the day (ADR 0060).
+    var left = ScreenTime.line();
+    if (left) el('span', 'left', info, '  ·  ' + left);
   }
 
   // MARK: - Tonight at home
@@ -1157,6 +1160,7 @@
   function launcher(id, name) {
     return function () {
       if (jobsFirst()) return;
+      if (!ScreenTime.allowed()) return;
       // Plex opens Beyond TV's own Plex screen: Continue Watching, the libraries and the player, right here.
       if (/plex/i.test(name || '') || /plex|cdp-30/i.test(id || '')) { Plex.open(); Family.now('Plex'); return; }
       if (id === Music.app.id) { Music.open(); return; }
@@ -1175,7 +1179,7 @@
 
   /** The Live TV screen, with this TV's aerial and apps. Plex opens Plex itself here, for its free channels. */
   /**
-   * Find (find.js, ADR 0059): what's on this TV for it to match. The Games screen, Tonight's sky and Live TV, the
+   * Find (find.js, ADR 0062): what's on this TV for it to match. The Games screen, Tonight's sky and Live TV, the
    * channels that play here, and the apps Ask Beyond may point at (a kid's own shelf). A show goes to Ask Beyond when
    * Beyond Family is linked, else to YouTube for grown-ups.
    */
@@ -1742,7 +1746,8 @@
   window.addEventListener('appcontrol', reopened);        // Samsung: the same
   var hiddenAt = 0;
   document.addEventListener('visibilitychange', function () {
-    if (document.hidden) { hideSaver(); hiddenAt = Date.now(); return; }
+    if (document.hidden) { hideSaver(); hiddenAt = Date.now(); ScreenTime.away(); return; }
+    ScreenTime.back();
     // Away for hours (the TV was off, most likely): ask who's watching again, as at switch-on.
     var longAway = hiddenAt && Date.now() - hiddenAt > 2 * 3600000;
     hiddenAt = 0;

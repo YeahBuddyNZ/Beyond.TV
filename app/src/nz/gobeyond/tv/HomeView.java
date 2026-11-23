@@ -580,7 +580,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         boolean kid = watcher.kid;   // kids get fewer: no feedback, no HDMI inputs
         // NZ election results, live (ElectionActivity, ADR 0039): on New Zealand TVs until 27/11/2026, then gone.
         if (ElectionActivity.showing()) lightButtons.add(HomeApps.action(HomeApps.ELECTION, "election", Ui.tr("Resultados da eleição", "Election results", "Resultados electorales"), "check"));
-        // Bedtime (ADR 0060), at night: a night light that breathes, a calm sound, then the TV turns itself off.
+        // Bedtime (ADR 0063), at night: a night light that breathes, a calm sound, then the TV turns itself off.
         if (nightTarget) lightButtons.add(HomeApps.action(HomeApps.BEDTIME, "bedtime", Ui.tr("Hora de dormir", "Bedtime", "Hora de dormir"), "bedtime"));
         // Notes left from a phone in Beyond Family (ADR 0025): the button is there while any are up, and opens them big.
         notesShown = hasNotes();
@@ -589,7 +589,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         // Beyond: feedback, spoken or typed (FeedbackActivity), not for kids.
         if (Family.linked(getContext())) lightButtons.add(HomeApps.action(HomeApps.ASK, "ask", Ui.tr("Pergunte à Beyond", "Ask Beyond", "Pregúntale a Beyond"), "dots"));
         else if (!kid) lightButtons.add(HomeApps.action(HomeApps.FEEDBACK, "feedback", Ui.tr("Fale com a Beyond", "Talk to Beyond"), "dots"));
-        // Find (ADR 0059): say a game, a channel, an app or a show, and open it with OK. For everyone, kids included.
+        // Find (ADR 0062): say a game, a channel, an app or a show, and open it with OK. For everyone, kids included.
         lightButtons.add(HomeApps.action(HomeApps.FIND, "find", Ui.tr("Encontrar", "Find", "Buscar"), "mic"));
         // Live TV (LiveTvActivity, ADR 0042): the aerial, the free-to-air apps and free world news on one screen.
         lightButtons.add(HomeApps.action(HomeApps.LIVE, "live", Ui.tr("TV aberta", "Live TV"), "live_tv"));
@@ -1448,6 +1448,9 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             if (!city.isEmpty()) rest.append(city).append(' ');
             rest.append(HomeData.degrees(wx.temp)).append(", ").append(condition(wx));
         }
+        // A kid with a screen time limit sees what's left, as part of the day (ADR 0060). Once a minute, never per frame.
+        String left = ScreenTimeService.line(getContext());
+        if (!left.isEmpty()) rest.append("  ·  ").append(left);
         infoRest = rest.toString();
         infoTimeW = lInfoTime.measureText(infoTime);
     }
@@ -2590,6 +2593,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         }
         // Earn your screen: a kid with jobs left sees them instead.
         if ((it.kind == HomeApps.APP || it.kind == HomeApps.LIVE_TV) && JobsActivity.first(activity)) return;
+        // Screen time used up for today: the kind card instead (ADR 0060).
+        if ((it.kind == HomeApps.APP || it.kind == HomeApps.LIVE_TV) && ScreenTimeService.blocked(activity)) return;
         boolean opened = HomeApps.open(activity, it, this, Math.round(r.left), Math.round(r.top),
                 Math.round(r.width()), Math.round(r.height()));
         if (!opened) {

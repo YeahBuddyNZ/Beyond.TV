@@ -681,12 +681,12 @@ public class SettingsActivity extends Activity {
 
         // Te reo Māori is a choice of language: "mi" is English with the word of the day and "Kia ora" (Prefs.kupu).
         private static final String[] LANGUAGES = {"auto", "mi", "en", "de", "es", "pt", "ru"}, UNITS = {"auto", "C", "F"}, THEMES = {"auto", "light", "dark"},
-                SAVERS = {"auto", "art", "photos"};
+                SAVERS = {"auto", "art", "photos", "family"};
         private static final int[] SAVER_MINUTES = {1, 3, 5, 10, 15, 30};
-        /** Home Settings: language, temperature, theme, sounds (the remote's clicks and the start chime), weather, city, screensaver after, screensaver, kind of art, help fix problems, then
-         *  (only in a build with show_crypto=true) the quotes widget and one row per coin. */
-        private static final int CITY_ROW = 5, SAVER_AFTER_ROW = 6, SAVER_ROW = 7, ART_ROW = 8, HELP_ROW = 9, QUOTES_ROW = 10,
-                COIN_ROWS = 11;
+        /** Home Settings: language, temperature, theme, sounds (the remote's clicks and the start chime), weather, city, screensaver after, screensaver, kind of art,
+         *  family photos (opens PhotosActivity), help fix problems, then (only in a build with show_crypto=true) the quotes widget and one row per coin. */
+        private static final int CITY_ROW = 5, SAVER_AFTER_ROW = 6, SAVER_ROW = 7, ART_ROW = 8, PHOTOS_ROW = 9, HELP_ROW = 10,
+                QUOTES_ROW = 11, COIN_ROWS = 12;
 
         private static String languageChoice() {
             String lang = Prefs.language();
@@ -708,6 +708,7 @@ public class SettingsActivity extends Activity {
             l.add(Ui.tr("Protetor de tela após", "Screensaver after"));
             l.add(Ui.tr("Protetor de tela", "Screensaver"));
             l.add(Ui.tr("Tipo de arte", "Kind of art"));
+            l.add(Ui.tr("Fotos da família", "Family photos"));
             l.add(Ui.tr("Ajudar a corrigir problemas", "Help fix problems"));
             if (Config.SHOW_CRYPTO) l.add(Ui.tr("Widget de cotações", "Quotes widget"));
             // The coins only while the quotes widget is on: off, they would be a list of switches that do nothing.
@@ -736,8 +737,12 @@ public class SettingsActivity extends Activity {
             v[SAVER_AFTER_ROW] = Prefs.saverAfter() + " min";
             String saver = Prefs.screensaver();
             v[SAVER_ROW] = saver.equals("art") ? Ui.tr("Arte", "Art") : saver.equals("photos") ? Ui.tr("Fotos de filmes", "Film photos")
+                    : saver.equals("family") ? Ui.tr("Fotos da família", "Family photos")
                     : Prefs.art() ? Ui.tr("Automático (arte)", "Automatic (art)") : Ui.tr("Automático (fotos)", "Automatic (photos)");
             v[ART_ROW] = artKindName(Prefs.artKind());
+            int photos = FamilyPhotos.count(getContext());
+            v[PHOTOS_ROW] = photos == 0 ? Ui.tr("Enviar do celular", "Send from a phone")
+                    : photos == 1 ? Ui.tr("1 foto", "1 photo") : photos + Ui.tr(" fotos", " photos");
             v[HELP_ROW] = onOff(Checkin.on(getContext()));
             if (Config.SHOW_CRYPTO) v[QUOTES_ROW] = onOff(Prefs.quotes());
             // No quotes widget, nowhere to show prices: the coins read as off (and stay locked) until it is back on.
@@ -828,7 +833,8 @@ public class SettingsActivity extends Activity {
                 }
                 case 3: Prefs.setSounds(!Prefs.sounds()); break;
                 case 4: Prefs.setWeather(!Prefs.weather()); break;
-                case CITY_ROW: return;
+                case CITY_ROW:
+                case PHOTOS_ROW: return;
                 case SAVER_AFTER_ROW: {
                     int at = 0;
                     for (int i = 0; i < SAVER_MINUTES.length; i++) if (SAVER_MINUTES[i] == Prefs.saverAfter()) at = i;
@@ -1080,6 +1086,9 @@ public class SettingsActivity extends Activity {
                         "Disney and Globoplay: the TV itself controls those buttons.")
                         : Ui.tr("Botões do controle da TCL: nesta TV funcionam como sempre.",
                         "TCL remote buttons: on this TV they work as always."), LIST_X * k + 30 * k, hy + 38 * k, hint);
+            } else if (focus == PHOTOS_ROW) {
+                c.drawText(Ui.tr("OK mostra um código para enviar fotos e desenhos das crianças pelo celular.",
+                        "OK shows a code to send photos and the kids' art from a phone."), LIST_X * k + 30 * k, hy + 38 * k, hint);
             } else if (focus == HELP_ROW) {
                 c.drawText(Ui.tr("Uma vez por dia: cidade, modelo da TV e erros. Nunca o que você assiste.",
                         "Once a day: your city, the TV's model and its errors. Never what you watch."), LIST_X * k + 30 * k, hy + 38 * k, hint);
@@ -1125,6 +1134,9 @@ public class SettingsActivity extends Activity {
                 return;
             } else if (screen == HOME_SETTINGS && focus == CITY_ROW) {
                 askCity();
+                return;
+            } else if (screen == HOME_SETTINGS && focus == PHOTOS_ROW) {
+                PhotosActivity.open(activity);
                 return;
             } else if (screen == HOME_SETTINGS) {
                 adjust(1);

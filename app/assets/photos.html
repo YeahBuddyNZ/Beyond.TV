@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beyond™ TV: family photos</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 18px/1.45 -apple-system, "Segoe UI", Roboto, sans-serif; color: #F7F6F2;
+    background: linear-gradient(180deg, #2C2458 0%, #0D0C18 100%); min-height: 100vh; }
+  main { max-width: 460px; margin: 0 auto; padding: 28px 20px 40px; }
+  .dots { display: flex; gap: 8px; margin-bottom: 18px; }
+  .dots i { width: 12px; height: 12px; border-radius: 50%; display: block; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  p { margin: 0 0 18px; color: rgba(247, 246, 242, 0.82); }
+  button, label.big { display: block; width: 100%; min-height: 56px; margin: 0 0 12px; border: 0; border-radius: 28px;
+    font-family: inherit; font-weight: 600; font-size: 19px; line-height: 56px; text-align: center; cursor: pointer; color: #fff;
+    background: rgba(255, 255, 255, 0.14); }
+  button.main, label.big { background: #6E3DDB; }
+  button:focus-visible, label.big:focus-within { outline: 3px solid #9E7BFF; outline-offset: 3px; }
+  input[type=file] { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  input[type=text] { width: 100%; min-height: 56px; border-radius: 16px; border: 2px solid #9E7BFF; background: #0D0C18;
+    color: #fff; font-size: 28px; text-align: center; letter-spacing: 8px; margin-bottom: 12px; }
+  .bar { height: 10px; border-radius: 5px; background: rgba(255, 255, 255, 0.14); overflow: hidden; margin: 6px 0 18px; }
+  .bar b { display: block; height: 100%; width: 0; background: #9E7BFF; transition: width .2s; }
+  .hide { display: none; }
+  .small { font-size: 15px; color: rgba(247, 246, 242, 0.6); }
+</style>
+</head>
+<body>
+<main>
+  <div class="dots"><i style="background:#2F7D6D"></i><i style="background:#E8A33D"></i><i style="background:#D85A30"></i><i style="background:#378ADD"></i></div>
+  <h1>Family photos</h1>
+
+  <section id="code" class="hide">
+    <p>Type the four numbers on the TV.</p>
+    <input id="digits" type="text" inputmode="numeric" maxlength="4" autocomplete="off" aria-label="The code on the TV">
+    <button class="main" id="go">Next</button>
+  </section>
+
+  <section id="what" class="hide">
+    <p>These go on the TV's screensaver. They stay on the TV.</p>
+    <button class="main" data-kind="photo">Family photos</button>
+    <button class="main" data-kind="art">The kids' art</button>
+  </section>
+
+  <section id="who" class="hide">
+    <p>Who drew it? Their name goes under the picture.</p>
+    <div id="names"></div>
+    <button data-by="">Leave the name off</button>
+  </section>
+
+  <section id="pick" class="hide">
+    <p id="pickWords">Pick as many as you like.</p>
+    <label class="big">Choose from your phone<input id="files" type="file" accept="image/*" multiple></label>
+    <button id="back">Back</button>
+  </section>
+
+  <section id="sending" class="hide">
+    <p id="sendWords">Sending…</p>
+    <div class="bar"><b id="bar"></b></div>
+  </section>
+
+  <section id="done" class="hide">
+    <p id="doneWords"></p>
+    <button class="main" id="more">Send some more</button>
+  </section>
+
+  <p class="small" id="note"></p>
+</main>
+<script>
+(function () {
+  var params = new URLSearchParams(location.search);
+  var code = params.get('c') || '';
+  var kind = 'photo', by = '';
+  var LONGEST = 2112;
+
+  function show(id) {
+    ['code', 'what', 'who', 'pick', 'sending', 'done'].forEach(function (s) {
+      document.getElementById(s).classList.toggle('hide', s !== id);
+    });
+    document.getElementById('note').textContent = '';
+  }
+  function note(t) { document.getElementById('note').textContent = t; }
+
+  function hello() {
+    fetch('/hello?c=' + encodeURIComponent(code)).then(function (r) {
+      if (r.status === 403) throw new Error('code');
+      return r.json();
+    }).then(function (j) {
+      var box = document.getElementById('names');
+      box.innerHTML = '';
+      (j.names || []).forEach(function (n) {
+        var b = document.createElement('button');
+        b.className = 'main';
+        b.textContent = n;
+        b.setAttribute('data-by', n);
+        box.appendChild(b);
+      });
+      show('what');
+    }).catch(function (e) {
+      show('code');
+      if (e.message === 'code') note("That code didn't match. Check the numbers on the TV.");
+      else note("Couldn't reach the TV. Is your phone on the same Wi-Fi, and is Family photos still open on the TV?");
+    });
+  }
+
+  document.getElementById('go').onclick = function () {
+    code = document.getElementById('digits').value.replace(/\D/g, '');
+    hello();
+  };
+  document.getElementById('what').onclick = function (e) {
+    var k = e.target.getAttribute && e.target.getAttribute('data-kind');
+    if (!k) return;
+    kind = k;
+    by = '';
+    if (kind === 'art' && document.getElementById('names').children.length) show('who');
+    else pick();
+  };
+  document.getElementById('who').onclick = function (e) {
+    if (!e.target.hasAttribute || !e.target.hasAttribute('data-by')) return;
+    by = e.target.getAttribute('data-by');
+    pick();
+  };
+  function pick() {
+    document.getElementById('pickWords').textContent = kind === 'art'
+      ? (by ? 'Pick photos of ' + by + "'s art. One drawing in each photo works best." : 'Pick photos of the art. One drawing in each photo works best.')
+      : 'Pick as many as you like.';
+    show('pick');
+  }
+  document.getElementById('back').onclick = function () { show('what'); };
+  document.getElementById('more').onclick = function () { show('what'); };
+
+  document.getElementById('files').onchange = function () {
+    var files = Array.prototype.slice.call(this.files || []);
+    this.value = '';
+    if (!files.length) return;
+    send(files);
+  };
+
+  // Made smaller on the phone first: quicker over the Wi-Fi, and the TV only needs its own screen's worth.
+  function shrink(file) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image();
+      var url = URL.createObjectURL(file);
+      img.onload = function () {
+        var s = Math.min(1, LONGEST / Math.max(img.naturalWidth, img.naturalHeight));
+        var c = document.createElement('canvas');
+        c.width = Math.round(img.naturalWidth * s);
+        c.height = Math.round(img.naturalHeight * s);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        c.toBlob(function (b) { b ? resolve(b) : reject(new Error('picture')); }, 'image/jpeg', 0.86);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('picture')); };
+      img.src = url;
+    });
+  }
+
+  function send(files) {
+    var sent = 0, skipped = 0, i = 0;
+    show('sending');
+    function step() {
+      document.getElementById('sendWords').textContent = 'Sending ' + Math.min(i + 1, files.length) + ' of ' + files.length + '…';
+      document.getElementById('bar').style.width = Math.round(100 * i / files.length) + '%';
+      if (i >= files.length) return finish();
+      shrink(files[i]).then(function (blob) {
+        return fetch('/photo?c=' + encodeURIComponent(code) + '&kind=' + kind + '&by=' + encodeURIComponent(by), {
+          method: 'POST', headers: { 'Content-Type': 'image/jpeg' }, body: blob
+        });
+      }).then(function (r) {
+        if (r.status === 403) throw new Error('code');
+        if (r.ok) sent++; else skipped++;
+      }).catch(function (e) {
+        if (e.message === 'code') { i = files.length; skipped = -1; return; }
+        skipped++;
+      }).then(function () { i++; step(); });
+    }
+    function finish() {
+      if (skipped < 0) {
+        show('code');
+        note('The TV stopped listening. Open Family photos on the TV again and scan the new code.');
+        return;
+      }
+      var words = sent === 1 ? '1 picture is on the TV.' : sent + ' pictures are on the TV.';
+      if (skipped) words += ' ' + skipped + " couldn't be read.";
+      document.getElementById('doneWords').textContent = words + ' They show next time the screensaver comes on.';
+      show('done');
+    }
+    step();
+  }
+
+  if (code) hello(); else show('code');
+})();
+</script>
+</body>
+</html>

@@ -21,7 +21,7 @@ import java.io.InputStream;
 /**
  * Games, from the remote (ADR 0021): every game and family activity starts here on the TV, no phone needed. Karaoke,
  * board and card games against the robots, silly party games, Milo's Remote Control Land, London's Candy Land, Build it and the light show (all TableActivity), a party, quiz night, the dinner
- * question, the tidy-up race, Bedtime (ADR 0060) and How to play. Quiz night and the dinner question need Beyond Family, because everyone answers on their
+ * question, the tidy-up race, Bedtime (ADR 0063) and How to play. Quiz night and the dinner question need Beyond Family, because everyone answers on their
  * phones. Same as Games.open in web/games.js: a picture for each, in groups (ADR 0047; four since Build it, ADR 0052, so they scroll). A game opens on top of
  * this screen and it stays open, so Back from a game comes back here, one step, not out to the home screen.
  * The last game played leads Keep watching on the home screen, and Continue there opens it again on top of this screen
@@ -145,7 +145,7 @@ public class GamesActivity extends Activity {
 
     /**
      * The groups, in the same order as Games.open in web/games.js (ADR 0047). Each: picture (web/games/<id>.jpg), name,
-     * what it opens from `a`. Find (AskActivity, ADR 0059) opens a game from the same list.
+     * what it opens from `a`. Find (AskActivity, ADR 0062) opens a game from the same list.
      */
     static Object[][][] groups(Activity a) {
         return new Object[][][] {

@@ -6,7 +6,7 @@ final class German {
 
     static String text(String english) {
         switch (english) {
-            // Find and Bedtime (ADR 0059, ADR 0060)
+            // Find and Bedtime (ADR 0062, ADR 0063)
             case "Find": return "Finden";
             case "Say a game, a channel or a show": return "Sag ein Spiel, einen Sender oder eine Sendung";
             case "Rain": return "Regen";
@@ -536,7 +536,59 @@ final class German {
             case "Live": return "Live";
             case "Up next": return "Danach";
             case "Continue": return "Weiter";
+            case "The list is full": return "Die Liste ist voll";
+            case "Grown-up: 15 more minutes": return "Erwachsene: 15 Minuten mehr";
+            case "More tomorrow.": return "Morgen gibt es mehr.";
+            case "Press again to clear": return "Zum Leeren noch einmal drücken";
+            case "Everyone picks a song. The TV sorts out whose turn it is.": return "Jeder sucht sich ein Lied aus. Der Fernseher sagt, wer dran ist.";
+            case "Start singing": return "Los singen";
+            case "Counting screen time": return "Bildschirmzeit wird gezählt";
+            case "Send from a phone": return "Vom Handy senden";
+            case "Family photos": return "Familienfotos";
+            case "Clear the list": return "Liste leeren";
+            case "15 more minutes.": return "15 Minuten mehr.";
+            case "Another round?": return "Noch eine Runde?";
+            case "No photos yet.": return "Noch keine Fotos.";
+            case "Nobody sings twice until everyone's had a go.": return "Keiner singt zweimal, bevor alle dran waren.";
+            case "The screensaver shows your family photos now.": return "Der Bildschirmschoner zeigt jetzt eure Familienfotos.";
+            case "OK shows a code to send photos and the kids' art from a phone.": return "OK zeigt einen Code, um Fotos und Kinderbilder vom Handy zu senden.";
+            case "Or open ": return "Oder öffne ";
+            case " and type ": return " und gib ";
+            case "Press again to remove them all": return "Zum Entfernen aller noch einmal drücken";
+            case "Remove all photos": return "Alle Fotos entfernen";
+            case "Great watching! How about a game, a book, or a run around outside?": return "Schön geschaut! Wie wär's mit einem Spiel, einem Buch oder Toben draußen?";
+            case "Take turns": return "Abwechseln";
+            case "Everyone's had a go!": return "Alle waren dran!";
+            case "Switch who's watching": return "Wer schaut? Wechseln";
+            case "One song now, or take turns?": return "Ein Lied jetzt oder abwechseln?";
+            case "One song now, take turns, or a playlist?": return "Ein Lied jetzt, abwechseln oder eine Playlist?";
+            case "1 more waiting": return "1 weiteres wartet";
+            case "nobody else waiting yet": return "noch wartet sonst keiner";
+            case "no limit": return "keine Grenze";
+            case "screen time done for today": return "Bildschirmzeit für heute vorbei";
+            case "1 photo on the screensaver.": return "1 Foto im Bildschirmschoner.";
+            case " photos on the screensaver.": return " Fotos im Bildschirmschoner.";
+            case "1 photo": return "1 Foto";
+            case " photos": return " Fotos";
+            case "min": return "Min.";
+            case "h": return "Std.";
+            case "The TV isn't on your home network right now. Check the Wi-Fi and try again.": return "Der Fernseher ist gerade nicht im Heimnetz. Prüf das WLAN und versuch es noch einmal.";
+            case "1. Point your phone's camera at the code.\n2. Pick photos, or the kids' art.\n3. They show on the screensaver.": return "1. Richte die Handykamera auf den Code.\n2. Wähle Fotos oder die Bilder der Kinder.\n3. Sie erscheinen im Bildschirmschoner.";
             default:
+                if (english.startsWith("That's screen time for today, ")) return "Das war die Bildschirmzeit für heute, " + english.substring(30);
+                if (english.startsWith("⏳ ") && english.endsWith(" of screen time left")) return "⏳ noch " + english.substring(2, english.length() - 20) + " Bildschirmzeit";
+                if (english.endsWith(" minutes of screen time left, ") || english.contains(" minutes of screen time left, ")) {
+                    int at = english.indexOf(" minutes of screen time left, ");
+                    String name = english.substring(at + 30).replace(". Time to find a good place to stop.", "");
+                    return name + ", noch " + english.substring(0, at) + " Minuten Bildschirmzeit. Zeit, eine gute Stelle zum Aufhören zu finden.";
+                }
+                if (english.endsWith(" is up next")) return english.substring(0, english.length() - 11) + " ist als Nächstes dran";
+                if (english.matches(".+ is \\d+(st|nd|rd|th) in line")) {
+                    int at = english.lastIndexOf(" is ");
+                    return english.substring(0, at) + " ist " + english.substring(at + 4).replaceAll("\\D", "") + ". in der Reihe";
+                }
+                if (english.matches("\\d+ more waiting")) return english.replace(" more waiting", " weitere warten");
+                if (english.startsWith("By ")) return "Von " + english.substring(3);
                 if (english.startsWith("Beyond™ TV is on: new home screen and screensaver, ")) {
                     return "Beyond™ TV ist an: neuer Startbildschirm und Bildschirmschoner, "
                             + english.substring("Beyond™ TV is on: new home screen and screensaver, ".length()).replace(" apps turned off.", " Apps ausgeschaltet.");

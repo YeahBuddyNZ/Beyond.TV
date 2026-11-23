@@ -1,4 +1,4 @@
-# 0060. Bedtime mode: calm sounds, then the TV turns itself off
+# 0063. Bedtime mode: calm sounds, then the TV turns itself off
 
 Date: 23/11/2026. Status: accepted. Builds on bedtime breathing (Google TV #51, LG and Samsung) and the sleep timer.
 

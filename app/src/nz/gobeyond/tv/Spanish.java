@@ -239,6 +239,11 @@ final class Spanish {
             case "Now watching: ": return "Ahora: ";
             case "That app isn't on this TV": return "Esa app no está en este TV";
             case "Listening for the family's remote and messages": return "Atento al control y los mensajes de la familia";
+            case "Family photos": return "Fotos de la familia";
+            case "Send from a phone": return "Enviar desde el móvil";
+            case "1 photo": return "1 foto";
+            case " photos": return " fotos";
+            case "OK shows a code to send photos and the kids' art from a phone.": return "OK muestra un código para enviar fotos y dibujos de los niños desde el móvil.";
             default:
                 if (english.startsWith("Beyond™ TV is on: new home screen and screensaver, ")) {
                     return "Beyond™ TV está activo: nueva pantalla de inicio y protector, "

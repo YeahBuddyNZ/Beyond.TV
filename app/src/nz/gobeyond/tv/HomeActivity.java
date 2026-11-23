@@ -66,6 +66,7 @@ public class HomeActivity extends Activity implements Family.Screen {
             recreate();   // a new language or city: draw everything again
             return;
         }
+        ScreenTimeService.homeInFront = true;
         if (home != null) {
             home.resume();
             Updater.homeShowing(this, true);
@@ -104,6 +105,9 @@ public class HomeActivity extends Activity implements Family.Screen {
     }
 
     @Override protected void onPause() {
+        // Off to an app (or a game): a kid with a screen time limit is counted from here (ADR 0060).
+        ScreenTimeService.homeInFront = false;
+        ScreenTimeService.start(this);
         handler.removeCallbacks(quiet);
         if (Family.screen == this) Family.screen = null;
         Family.onChange = null;
@@ -161,7 +165,7 @@ public class HomeActivity extends Activity implements Family.Screen {
             return true;
         }
         if (RemoteKeys.onKey(this, event)) return true;
-        // The remote's search button, where the TV hands it to the home screen: Find, listening (ADR 0059).
+        // The remote's search button, where the TV hands it to the home screen: Find, listening (ADR 0062).
         if (event.getKeyCode() == KeyEvent.KEYCODE_SEARCH) {
             if (event.getAction() == KeyEvent.ACTION_UP) AskActivity.find(this, true);
             return true;
@@ -170,7 +174,7 @@ public class HomeActivity extends Activity implements Family.Screen {
         return super.dispatchKeyEvent(event);
     }
 
-    /** The remote's microphone on TVs that ask the app in front first: Find, listening (ADR 0059). */
+    /** The remote's microphone on TVs that ask the app in front first: Find, listening (ADR 0062). */
     @Override public boolean onSearchRequested() {
         AskActivity.find(this, true);
         return true;
