@@ -565,7 +565,7 @@ public class LiveTvActivity extends Activity {
         }
     }
     private void openAerial() {
-        if (JobsActivity.first(this)) return;
+        if (JobsActivity.first(this) || ScreenTimeService.blocked(this)) return;
         Intent i = HomeApps.liveTv(this);
         try {
             if (i != null) {
@@ -579,7 +579,7 @@ public class LiveTvActivity extends Activity {
     }
 
     private void openApp(String pkg, String label) {
-        if (JobsActivity.first(this)) return;
+        if (JobsActivity.first(this) || ScreenTimeService.blocked(this)) return;
         Intent i = HomeApps.launchIntent(getPackageManager(), pkg);
         try {
             if (i != null) {

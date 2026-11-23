@@ -100,6 +100,7 @@ final class DreamView extends View implements Choreographer.FrameCallback, HomeD
     private final Recs recs;
     private final Art art;
     private boolean artMode;        // paintings (Art) instead of the picks' film photos
+    private boolean familyMode;     // the family's own photos and the kids' art (FamilyPhotos, ADR 0061)
     private final Handler handler = new Handler(Looper.getMainLooper());
     private ExecutorService worker = Executors.newSingleThreadExecutor();
     private final Recording content = Recording.create("clock");     // without photos: the clock over the aurora
@@ -169,7 +170,10 @@ final class DreamView extends View implements Choreographer.FrameCallback, HomeD
         startedAt = clock();
         lastFrame = 0;
         failed.clear();
-        artMode = Prefs.art();
+        // Family photos with none sent yet shows the paintings until the first ones arrive.
+        boolean family = "family".equals(Prefs.screensaver());
+        familyMode = family && !FamilyPhotos.showcase(getContext()).isEmpty();
+        artMode = Prefs.art() || (family && !familyMode);
         fallback = !artMode && showcase().isEmpty();
         data.addListener(this);
         recs.addListener(this);
@@ -263,10 +267,11 @@ final class DreamView extends View implements Choreographer.FrameCallback, HomeD
 
     /** What the screensaver shows: paintings in Art mode, otherwise the picks with their film photos. */
     private List<Recs.Pick> showcase() {
-        return artMode ? art.showcase() : recs.showcase();
+        return familyMode ? FamilyPhotos.showcase(getContext()) : artMode ? art.showcase() : recs.showcase();
     }
 
     private void refreshSource() {
+        if (familyMode) return;
         if (artMode) {
             art.refresh();
         } else {
@@ -304,7 +309,7 @@ final class DreamView extends View implements Choreographer.FrameCallback, HomeD
             prepared = newSlide(pick, last.image, last.frost, last.lightCaption, last.lightClock);
             return;
         }
-        File file = artMode ? art.readyImage(pick) : recs.readyImage(pick);
+        File file = familyMode ? FamilyPhotos.readyImage(pick) : artMode ? art.readyImage(pick) : recs.readyImage(pick);
         if (file == null) {
             failed.add(Recs.key(pick));   // the image is gone from disk: try the next one
             prepareNext();
@@ -318,8 +323,8 @@ final class DreamView extends View implements Choreographer.FrameCallback, HomeD
             float[] light = new float[2];
             try {
                 images = Backdrop.photo(file, PW, PH, light);
-                // A painting is already hung on its wall (Art.frame); nothing is written over it, so no scrims.
-                images[0] = Backdrop.gpu(artMode ? images[0] : withScrims(images[0], light[0], light[1]));
+                // A painting is already hung on its wall (Art.frame), and family photos carry no words: no scrims.
+                images[0] = Backdrop.gpu(artMode || familyMode ? images[0] : withScrims(images[0], light[0], light[1]));
             } catch (Exception | OutOfMemoryError e) {
                 AppLog.w("screensaver: photo for “" + chosen.title + "”: " + e.getMessage());
             }
@@ -393,8 +398,8 @@ final class DreamView extends View implements Choreographer.FrameCallback, HomeD
 
     /** Photo position and scale now: zoom from 1 to 1.1 (or back) and a pan toward a corner, never showing an edge. */
     private void place(Slide s, long up, float[] out) {
-        if (artMode) {
-            // Paintings hang still: the whole picture (wall included) fitted to the screen.
+        if (artMode || familyMode && "art".equals(s.pick.kind)) {
+            // Paintings and the kids' art hang still: the whole picture (wall included) fitted to the screen.
             out[0] = 0;
             out[1] = 0;
             out[2] = (float) w / s.image.getWidth();
@@ -466,8 +471,9 @@ final class DreamView extends View implements Choreographer.FrameCallback, HomeD
             drawPhoto(canvas, incoming, placeB, e);
         }
 
-        // Art mode is only the painting: no clock, no date, no caption. Family messages still come over it.
-        if (artMode) return;
+        // Art mode is only the painting, family photos only the photo: no clock, no date, no caption. Family
+        // messages still come over it.
+        if (artMode || familyMode) return;
         if (chromeDirty) recordChrome();
         chrome.setAlpha(first);
         chrome.draw(canvas);

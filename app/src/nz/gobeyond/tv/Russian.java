@@ -568,7 +568,59 @@ final class Russian {
             case "Live": return "В эфире";
             case "Up next": return "Далее";
             case "Continue": return "Продолжить";
+            case "The list is full": return "Список заполнен";
+            case "Grown-up: 15 more minutes": return "Взрослым: ещё 15 минут";
+            case "More tomorrow.": return "Завтра будет ещё.";
+            case "Press again to clear": return "Нажмите ещё раз, чтобы очистить";
+            case "Everyone picks a song. The TV sorts out whose turn it is.": return "Каждый выбирает песню. Телевизор следит за очередью.";
+            case "Start singing": return "Начать петь";
+            case "Counting screen time": return "Считаем экранное время";
+            case "Send from a phone": return "Отправить с телефона";
+            case "Family photos": return "Семейные фото";
+            case "Clear the list": return "Очистить список";
+            case "15 more minutes.": return "Ещё 15 минут.";
+            case "Another round?": return "Ещё раунд?";
+            case "No photos yet.": return "Фото пока нет.";
+            case "Nobody sings twice until everyone's had a go.": return "Никто не поёт дважды, пока не спели все.";
+            case "The screensaver shows your family photos now.": return "Теперь заставка показывает ваши семейные фото.";
+            case "OK shows a code to send photos and the kids' art from a phone.": return "OK покажет код, чтобы отправить фото и детские рисунки с телефона.";
+            case "Or open ": return "Или откройте ";
+            case " and type ": return " и введите ";
+            case "Press again to remove them all": return "Нажмите ещё раз, чтобы удалить все";
+            case "Remove all photos": return "Удалить все фото";
+            case "Great watching! How about a game, a book, or a run around outside?": return "Хорошо посмотрели! Как насчёт игры, книжки или прогулки на улице?";
+            case "Take turns": return "По очереди";
+            case "Everyone's had a go!": return "Все уже спели!";
+            case "Switch who's watching": return "Сменить зрителя";
+            case "One song now, or take turns?": return "Одна песня сейчас или по очереди?";
+            case "One song now, take turns, or a playlist?": return "Одна песня сейчас, по очереди или плейлист?";
+            case "1 more waiting": return "Ждёт ещё 1";
+            case "nobody else waiting yet": return "больше никто не ждёт";
+            case "no limit": return "без ограничений";
+            case "screen time done for today": return "экранное время на сегодня закончилось";
+            case "1 photo on the screensaver.": return "1 фото на заставке.";
+            case " photos on the screensaver.": return " фото на заставке.";
+            case "1 photo": return "1 фото";
+            case " photos": return " фото";
+            case "min": return "мин";
+            case "h": return "ч";
+            case "The TV isn't on your home network right now. Check the Wi-Fi and try again.": return "Телевизор сейчас не в домашней сети. Проверьте Wi-Fi и попробуйте ещё раз.";
+            case "1. Point your phone's camera at the code.\n2. Pick photos, or the kids' art.\n3. They show on the screensaver.": return "1. Наведите камеру телефона на код.\n2. Выберите фото или детские рисунки.\n3. Они появятся на заставке.";
             default:
+                if (english.startsWith("That's screen time for today, ")) return "На сегодня экранное время всё, " + english.substring(30);
+                if (english.startsWith("⏳ ") && english.endsWith(" of screen time left")) return "⏳ осталось экранного времени: " + english.substring(2, english.length() - 20);
+                if (english.contains(" minutes of screen time left, ")) {
+                    int at = english.indexOf(" minutes of screen time left, ");
+                    String name = english.substring(at + 30).replace(". Time to find a good place to stop.", "");
+                    return name + ", осталось " + english.substring(0, at) + " мин экранного времени. Пора найти, где остановиться.";
+                }
+                if (english.endsWith(" is up next")) return english.substring(0, english.length() - 11) + " поёт следующим";
+                if (english.matches(".+ is \\d+(st|nd|rd|th) in line")) {
+                    int at = english.lastIndexOf(" is ");
+                    return english.substring(0, at) + ": " + english.substring(at + 4).replaceAll("\\D", "") + "-й в очереди";
+                }
+                if (english.matches("\\d+ more waiting")) return "Ждут ещё " + english.replace(" more waiting", "");
+                if (english.startsWith("By ")) return "Автор: " + english.substring(3);
                 // Notices are saved in the language in use when they were generated.
                 String[] prefixes = {"Couldn't check Beyond™ TV: ", "Couldn't turn on Beyond™ TV: ",
                         "Couldn't go back to the original: ", "Original mode, but I couldn't turn back on: "};

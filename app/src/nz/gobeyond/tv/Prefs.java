@@ -117,10 +117,11 @@ final class Prefs {
     /** Te reo Māori: the word of the day (Kupu) and "Kia ora". On unless they turn it off. */
     static boolean kupu() { return sp().getBoolean("kupu", true); }
 
-    /** The screensaver: "art" (paintings, like a Samsung Frame), "photos" (the picks' film photos) or "auto". */
+    /** The screensaver: "art" (paintings, like a Samsung Frame), "photos" (the picks' film photos), "family" (the
+     *  family's own photos and the kids' art, FamilyPhotos) or "auto". */
     static String screensaver() {
         String v = sp().getString("screensaver", "auto");
-        return v.equals("art") || v.equals("photos") ? v : "auto";
+        return v.equals("art") || v.equals("photos") || v.equals("family") ? v : "auto";
     }
 
     static void setScreensaver(String v) { put("screensaver", v); }

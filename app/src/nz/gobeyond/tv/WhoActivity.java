@@ -32,6 +32,8 @@ public class WhoActivity extends Activity {
     static final String THEN = "then";
     /** After the PIN: open Beyond TV's settings, or the TV's own. */
     static final String THEN_SETTINGS = "settings", THEN_TV_SETTINGS = "tv-settings";
+    /** After the PIN: 15 more minutes of screen time for the kid watching (TimeUpActivity, ADR 0060). */
+    static final String THEN_MORE_TIME = "more-time";
 
     private FrameLayout root;
     private LinearLayout column;
@@ -55,6 +57,12 @@ public class WhoActivity extends Activity {
 
     private void openThen() {
         String then = getIntent().getStringExtra(THEN);
+        if (THEN_MORE_TIME.equals(then)) {
+            ScreenTimeService.more(this, People.current(this).id, ScreenTime.MORE);
+            android.widget.Toast.makeText(this, Ui.tr("Mais 15 minutos.", "15 more minutes.", "15 minutos más."), android.widget.Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
         SettingsActivity.unlock();
         Intent i = THEN_TV_SETTINGS.equals(then) ? new Intent(Settings.ACTION_SETTINGS)
                 : new Intent().setComponent(new ComponentName(this, SettingsActivity.class));
@@ -252,6 +260,8 @@ public class WhoActivity extends Activity {
             p.emoji = person.emoji;
             p.visitor = person.visitor;
         }
+        // Screen time a day (ADR 0060): kept on this TV by ScreenTimeService, saved with the rest.
+        final int[] limit = {isNew ? 0 : ScreenTimeService.limit(this, p.id)};
         LinearLayout c = page(isNew ? Ui.tr("Adicionar alguém", "Add someone") : p.name, null);
 
         EditText name = new EditText(this);
@@ -291,6 +301,18 @@ public class WhoActivity extends Activity {
         Runnable kidLabel = () -> kid.setText((p.kid ? "★ " : "") + Ui.tr("Perfil infantil: ", "Kids' profile: ")
                 + (!p.kid ? Ui.tr("não", "off") : p.teen ? Ui.tr("adolescente, com YouTube", "teen, with YouTube") : Ui.tr("sim", "on")));
         kidLabel.run();
+        final Button time = add(kidRow, "", false, null);
+        Runnable timeLabel = () -> {
+            time.setText(Ui.tr("Tempo de tela por dia: ", "Screen time a day: ", "Pantalla al día: ") + ScreenTimeService.label(limit[0]));
+            time.setVisibility(p.kid ? View.VISIBLE : View.GONE);
+        };
+        timeLabel.run();
+        time.setOnClickListener(v -> {
+            int at = 0;
+            for (int i = 0; i < ScreenTime.CHOICES.length; i++) if (ScreenTime.CHOICES[i] == limit[0]) at = i;
+            limit[0] = ScreenTime.CHOICES[(at + 1) % ScreenTime.CHOICES.length];
+            timeLabel.run();
+        });
         kid.setOnClickListener(v -> {
             if (!p.kid && !isNew && !person.kid && grownUps(people) <= 1) {
                 note(Ui.tr("Precisa de pelo menos um adulto.", "There needs to be at least one grown-up."));
@@ -301,6 +323,7 @@ public class WhoActivity extends Activity {
             else if (!p.teen) p.teen = true;
             else p.kid = p.teen = false;
             kidLabel.run();
+            timeLabel.run();
         });
 
         LinearLayout actions = row(c, 30);
@@ -320,6 +343,7 @@ public class WhoActivity extends Activity {
             }
             if (!found) people.add(p);
             People.save(this, people);
+            ScreenTimeService.setLimit(this, p.id, p.kid ? limit[0] : 0);
             // A colour chosen here is theirs on every TV.
             if (!isNew && p.member() != null && p.colour != person.colour) Family.pushColour(this, p.member(), p.colour);
             manage();

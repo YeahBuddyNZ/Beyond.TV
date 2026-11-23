@@ -690,6 +690,9 @@
     if (!hasClass(body, 'no-picks')) { el('b', 'time', info, Data.time(d.getTime())); el('span', '', info, '  ·  '); }
     el('span', '', info, date);
     if (w && Prefs.weather()) el('span', '', info, '  ·  ' + (Data.city ? Data.city + ' ' : '') + Data.degrees(w.temp) + ', ' + Data.condition(w.code, w.isDay).toLowerCase());
+    // A kid with a screen time limit sees what's left, as part of the day (ADR 0060).
+    var left = ScreenTime.line();
+    if (left) el('span', 'left', info, '  ·  ' + left);
   }
 
   // MARK: - Tonight at home
@@ -1155,6 +1158,7 @@
   function launcher(id, name) {
     return function () {
       if (jobsFirst()) return;
+      if (!ScreenTime.allowed()) return;
       // Plex opens Beyond TV's own Plex screen: Continue Watching, the libraries and the player, right here.
       if (/plex/i.test(name || '') || /plex|cdp-30/i.test(id || '')) { Plex.open(); Family.now('Plex'); return; }
       if (id === Music.app.id) { Music.open(); return; }
@@ -1708,7 +1712,8 @@
   window.addEventListener('appcontrol', reopened);        // Samsung: the same
   var hiddenAt = 0;
   document.addEventListener('visibilitychange', function () {
-    if (document.hidden) { hideSaver(); hiddenAt = Date.now(); return; }
+    if (document.hidden) { hideSaver(); hiddenAt = Date.now(); ScreenTime.away(); return; }
+    ScreenTime.back();
     // Away for hours (the TV was off, most likely): ask who's watching again, as at switch-on.
     var longAway = hiddenAt && Date.now() - hiddenAt > 2 * 3600000;
     hiddenAt = 0;
