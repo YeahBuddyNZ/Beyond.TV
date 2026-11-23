@@ -160,6 +160,13 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
     /** Each screen's words, worked out off the frame loop: its name, its line under it, and how long ago. */
     private final String[] cardName = new String[3], cardMeta = new String[3], cardWhen = new String[3];
     private final float[] cardWhenW = new float[3];
+    /** Continue (ADR 0058): the first of Keep watching, its chip purple; the home screen opens on it. */
+    private final boolean[] cardGo = new boolean[3];
+    /** A Live TV channel's logo or a game's picture, for something of ours in Keep watching. Made once, in cardWords. */
+    private final Bitmap[] cardPic = new Bitmap[3];
+    private final java.util.HashMap<String, Bitmap> ourPics = new java.util.HashMap<>();
+    /** Open on Continue at the next look at the cards: a new home screen (a new profile too), or the TV just came on. */
+    private boolean continuePending = true;
     private final HomeApps.Item[] cardApp = new HomeApps.Item[3];
     // The jobs tile, worked out in cardWords: each kid's first name (cut to fit), colour, jobs done and jobs in all.
     private final String[][] jobKid = new String[3][3];
@@ -573,7 +580,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         boolean kid = watcher.kid;   // kids get fewer: no feedback, no HDMI inputs
         // NZ election results, live (ElectionActivity, ADR 0039): on New Zealand TVs until 27/11/2026, then gone.
         if (ElectionActivity.showing()) lightButtons.add(HomeApps.action(HomeApps.ELECTION, "election", Ui.tr("Resultados da eleição", "Election results", "Resultados electorales"), "check"));
-        // Bedtime (ADR 0059), at night: a night light that breathes, a calm sound, then the TV turns itself off.
+        // Bedtime (ADR 0060), at night: a night light that breathes, a calm sound, then the TV turns itself off.
         if (nightTarget) lightButtons.add(HomeApps.action(HomeApps.BEDTIME, "bedtime", Ui.tr("Hora de dormir", "Bedtime", "Hora de dormir"), "bedtime"));
         // Notes left from a phone in Beyond Family (ADR 0025): the button is there while any are up, and opens them big.
         notesShown = hasNotes();
@@ -582,7 +589,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         // Beyond: feedback, spoken or typed (FeedbackActivity), not for kids.
         if (Family.linked(getContext())) lightButtons.add(HomeApps.action(HomeApps.ASK, "ask", Ui.tr("Pergunte à Beyond", "Ask Beyond", "Pregúntale a Beyond"), "dots"));
         else if (!kid) lightButtons.add(HomeApps.action(HomeApps.FEEDBACK, "feedback", Ui.tr("Fale com a Beyond", "Talk to Beyond"), "dots"));
-        // Find (ADR 0058): say a game, a channel, an app or a show, and open it with OK. For everyone, kids included.
+        // Find (ADR 0059): say a game, a channel, an app or a show, and open it with OK. For everyone, kids included.
         lightButtons.add(HomeApps.action(HomeApps.FIND, "find", Ui.tr("Encontrar", "Find", "Buscar"), "mic"));
         // Live TV (LiveTvActivity, ADR 0042): the aerial, the free-to-air apps and free world news on one screen.
         lightButtons.add(HomeApps.action(HomeApps.LIVE, "live", Ui.tr("TV aberta", "Live TV"), "live_tv"));
@@ -2479,6 +2486,12 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
                 showToast(jobsSummary(p.kids));
                 return;
             }
+            String[] own = p != null && p.watchedAt != 0 ? ours(p.pkg) : null;
+            if (own != null) {
+                click.open();
+                openOurs(own);
+                return;
+            }
             if (p != null && p.tile != null && p.pkg == null) {
                 showToast(Ui.tr("Esse app não está nesta TV", "That app isn't on this TV", "Esa app no está en este TV"));
                 return;
@@ -3032,6 +3045,16 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             layoutLight();
             retarget(true);
         }
+        boolean toContinue = false;
+        if (continuePending) {
+            continuePending = false;
+            int w = kinds.indexOf("watching");
+            if (w >= 0) {
+                tab = w;
+                toContinue = true;
+                HomeHub.pace(false);
+            }
+        }
         String kind = tab < kinds.size() ? kinds.get(tab) : null;
         List<Recs.Pick> list = kind == null ? new ArrayList<>()
                 : "pinned".equals(kind) ? pinnedCards() : "home".equals(kind) ? homeCards() : "watching".equals(kind) ? watchingCards() : picksFor("all".equals(kind) ? null : kind);
@@ -3042,6 +3065,12 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
                 zone = Z_SHELF;
                 retarget(false);
             }
+        }
+        if (toContinue && !cards.isEmpty() && !sheetOpen && !drawerOpen) {
+            // The home screen opens on Continue: OK picks up where this person left off.
+            zone = Z_CARDS;
+            cardIndex = 0;
+            retarget(true);
         }
         cardWords();    // "2 hours ago" moves on
         for (Recs.Pick p : recs.wanted()) recs.backdrop(p);   // every tab preloaded: switching tabs is instant
@@ -3233,11 +3262,14 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         for (Watched.Item x : Watched.list(getContext(), 3)) {
             HomeApps.Item app = appFor(x.pkg);
             String name = app != null ? app.label : x.name;
+            String[] own = ours(x.pkg);
+            if (own != null && "game".equals(own[0]) && !GamesActivity.nameOf(own[1]).isEmpty()) name = GamesActivity.nameOf(own[1]);
             Recs.Pick p = new Recs.Pick();
             p.kind = "watched";
             p.id = (x.pkg + "|" + x.title + "|" + x.at).hashCode();
             p.title = x.title.isEmpty() ? name : x.title;
-            p.meta = x.title.isEmpty() ? "" : name;
+            p.meta = !x.title.isEmpty() ? name : own == null ? ""
+                    : "live".equals(own[0]) ? Ui.tr("TV ao vivo", "Live TV", "TV en vivo") : Ui.tr("Jogos", "Games", "Juegos");
             p.app = name;
             p.pkg = x.pkg;
             p.backdrop = x.backdrop.isEmpty() ? null : x.backdrop;
@@ -3245,6 +3277,65 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             p.watchedAt = x.at;
             out.add(p);
         }
+        return out;
+    }
+
+    /** Something of Beyond TV's own in Keep watching: {"live" or "game", id}, or null for an app. */
+    static String[] ours(String pkg) {
+        java.util.regex.Matcher m = OURS.matcher(pkg == null ? "" : pkg);
+        return m.matches() ? new String[] {m.group(1), m.group(2)} : null;
+    }
+
+    private static final java.util.regex.Pattern OURS = java.util.regex.Pattern.compile("^beyond:(live|game):([a-z0-9-]{1,40})$");
+
+    /** Opens a Live TV channel or a game from Keep watching, the way it was left. */
+    private void openOurs(String[] own) {
+        if ("live".equals(own[0])) {
+            if (!JobsActivity.first(activity)) LiveTvActivity.play(activity, own[1]);
+        } else {
+            GamesActivity.play(activity, own[1]);
+        }
+    }
+
+    /** The TV just came on: the home screen opens on Continue again, everything else as Home leaves it. */
+    void startOnContinue() {
+        reset(false);
+        continuePending = true;
+        if (labelPaint != null) updateCards();
+    }
+
+    /**
+     * A channel's logo, whole, on a dark 16:9 screen; a game's own picture. Made once each and kept (a few small images),
+     * never in the frame loop.
+     */
+    private Bitmap ourPic(String[] own) {
+        String key = own[0] + ":" + own[1];
+        if (ourPics.containsKey(key)) return ourPics.get(key);
+        Bitmap out = null;
+        try {
+            if ("game".equals(own[0])) {
+                try (java.io.InputStream in = getContext().getAssets().open("games/" + own[1] + ".jpg")) {
+                    out = android.graphics.BitmapFactory.decodeStream(in);
+                }
+            } else {
+                java.io.File f = LiveTvActivity.logoFile(getContext(), own[1]);
+                Bitmap logo = f != null && f.isFile() ? android.graphics.BitmapFactory.decodeFile(f.getPath()) : null;
+                if (logo != null) {
+                    out = Bitmap.createBitmap(480, 270, Bitmap.Config.ARGB_8888);
+                    Canvas c = new Canvas(out);
+                    c.drawColor(BEZEL);
+                    int side = 178;
+                    RectF to = new RectF((480 - side) / 2f, (270 - side) / 2f, (480 + side) / 2f, (270 + side) / 2f);
+                    Paint p = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
+                    c.drawBitmap(logo, null, to, p);
+                    logo.recycle();
+                }
+            }
+        } catch (Exception | OutOfMemoryError e) {
+            out = null;
+        }
+        // A logo not downloaded yet is asked for again next time; a game's picture is there or never will be.
+        if (out != null || "game".equals(own[0])) ourPics.put(key, out);
         return out;
     }
 
@@ -3264,6 +3355,9 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             Recs.Pick p = i < cards.size() ? cards.get(i) : null;
             cardApp[i] = p != null && (p.watchedAt != 0 || p.tile != null) && p.pkg != null ? appFor(p.pkg) : null;
             cardName[i] = cardMeta[i] = cardWhen[i] = null;
+            cardGo[i] = false;
+            String[] own = p != null && p.watchedAt != 0 ? ours(p.pkg) : null;
+            cardPic[i] = own != null ? ourPic(own) : null;
             if (p == null) continue;
             fitPaint.set(lCardTitle);
             cardName[i] = TextUtils.ellipsize(p.title == null ? "" : p.title, fitPaint, bw, TextUtils.TruncateAt.END).toString();
@@ -3284,7 +3378,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
                 for (int n = 0; n < jobAll[i][j]; n++) if (jobs.optJSONObject(n) != null && jobs.optJSONObject(n).optBoolean("done")) jobDone[i][j]++;
             }
             if (p.watchedAt != 0) {
-                cardWhen[i] = Watched.when(p.watchedAt);
+                cardGo[i] = i == 0;
+                cardWhen[i] = cardGo[i] ? Ui.tr("Continuar", "Continue", "Continuar") + " · " + Watched.when(p.watchedAt) : Watched.when(p.watchedAt);
                 cardWhenW[i] = lWhen.measureText(cardWhen[i]);
             }
         }
@@ -3441,6 +3536,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             drawHouse(c, p, cell, r0);
         } else if (b != null && b.screen != null) {
             roundImage(c, b.screen, cell, r0);
+        } else if (cardPic[i] != null) {
+            roundImage(c, cardPic[i], cell, r0);
         } else if (app != null && (app.logo != null || app.tile != null)) {
             int[] style = TILE_STYLE.get(app.key);
             fill.setColor(style != null ? style[1] : 0xFF161618);
@@ -3461,7 +3558,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         if (cardWhen[i] != null) {
             float ch = 36 * k;
             tmp.set(cell.left + 14 * k, cell.top + 14 * k, cell.left + 14 * k + cardWhenW[i] + 28 * k, cell.top + 14 * k + ch);
-            fill.setColor(0xB80D0C18);
+            fill.setColor(cardGo[i] ? PURPLE : 0xB80D0C18);
             c.drawRoundRect(tmp, ch / 2, ch / 2, fill);
             c.drawText(cardWhen[i], tmp.left + 14 * k, tmp.centerY() + Ui.halfCap(lWhen), lWhen);
         }

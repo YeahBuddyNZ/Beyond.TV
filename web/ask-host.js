@@ -1,5 +1,5 @@
 /*
- * Ask Beyond, the notes and Find (ADR 0058) on Google TV (AskActivity, ADR 0025): ask.html runs the same ask.js and notes.js as LG and
+ * Ask Beyond, the notes and Find (ADR 0059) on Google TV (AskActivity, ADR 0025): ask.html runs the same ask.js and notes.js as LG and
  * Samsung in a WebView, and this stands in for the home screen around them. Beyond Family is asked through the TV
  * (BeyondAsk.call, with the TV's own id), card pictures come from TMDB through it too (the key stays in Java), and the
  * remote's keys arrive through AskHost.key. Find matches against what the TV says it has (BeyondAsk.games, channels,

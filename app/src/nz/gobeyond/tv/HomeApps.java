@@ -63,7 +63,7 @@ final class HomeApps {
     static final int PEOPLE = 9;
     /** The sleep timer (Sleep): each press moves to the next choice. */
     static final int SLEEP = 10;
-    /** Bedtime: the moon at night (BedtimeActivity, ADR 0059). */
+    /** Bedtime: the moon at night (BedtimeActivity, ADR 0060). */
     static final int BEDTIME = 11;
     /** Party mode: asks disco or whose birthday (PartyPickActivity), then the party. */
     static final int PARTY = 12;
@@ -79,7 +79,7 @@ final class HomeApps {
     static final int ELECTION = 18;
     /** Live TV: the aerial, the free-to-air apps and free world news on one screen (LiveTvActivity, ADR 0042). */
     static final int LIVE = 19;
-    /** Find: say a game, a channel, an app or a show (AskActivity's Find, ADR 0058). */
+    /** Find: say a game, a channel, an app or a show (AskActivity's Find, ADR 0059). */
     static final int FIND = 20;
     /** Image size of each card (16:9; on screen it shows up to ~330 px wide). */
     static final int TILE_W = 384, TILE_H = 216;

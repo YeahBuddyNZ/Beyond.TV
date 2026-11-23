@@ -694,7 +694,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 }
 .bt-bed .hold { position: absolute; left: 0; top: 0; width: 1px; height: 1px; }
 
-/* Bedtime's pick (ADR 0059): a sound, how long, then Goodnight. The one picked wears a lilac ring and a tick. */
+/* Bedtime's pick (ADR 0060): a sound, how long, then Goodnight. The one picked wears a lilac ring and a tick. */
 .bt-bed-pick .bt-box { position: absolute; left: 0; right: 0; top: 110px; text-align: center; }
 .bt-bed-pick .moon { font-size: 96px; line-height: 1; margin-bottom: 24px; }
 .bt-bed-pick .bt-heading { display: inline-block; }
@@ -704,7 +704,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .bt-button.chosen { box-shadow: inset 0 0 0 3px #9E7BFF; }
 .bt-button.chosen.focus { box-shadow: 0 0 0 4px #9E7BFF, 0 16px 34px rgba(0, 0, 0, 0.5); }
 
-/* MARK: - Find (ADR 0058): a microphone that glows while it listens, what was heard, and the matches as big tiles. */
+/* MARK: - Find (ADR 0059): a microphone that glows while it listens, what was heard, and the matches as big tiles. */
 .bt-find .bt-box { position: absolute; left: 120px; right: 120px; top: 90px; text-align: center; }
 .bt-find .bt-heading { display: inline-block; }
 .bt-find .mic {
@@ -942,6 +942,10 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   position: absolute; left: 14px; top: 14px; padding: 0 14px; height: 36px; border-radius: 18px;
   font-size: 19px; font-weight: 600; line-height: 36px; color: #FFF; background: rgba(13, 12, 24, 0.72);
 }
+/* Continue: the first of Keep watching, where the home screen opens (ADR 0058). */
+.card .img .when.go { background: #6E3DDB; }
+/* A Live TV channel in Keep watching: its logo, whole, on the dark screen. */
+.card .img.logo { background-color: #15131F; background-size: auto 66%; background-repeat: no-repeat; }
 /* A play button, shown on the focused screen. */
 .card .img .play {
   position: absolute; right: 16px; bottom: 16px; width: 58px; height: 58px; border-radius: 29px; background: #FFF;
@@ -1160,6 +1164,15 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .bt-live-tile.aerial .word { font-size: 84px; }
 .bt-live-tile.focus .face { -webkit-transform: scale(1.12); transform: scale(1.12); box-shadow: 0 0 0 5px #0D0C18, 0 0 0 10px #9E7BFF, 0 18px 40px rgba(0, 0, 0, 0.6); }
 .bt-live-tile.focus .name { color: #FFF; }
+.bt-live-tile .star { position: absolute; right: 10px; top: 10px; width: 40px; height: 40px; border-radius: 20px; background: #6E3DDB; color: #FFF; font-size: 24px; line-height: 40px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4); }
+/* Now and next for the focused channel, in the top right corner (ADR 0058); the line under the heading stays clear of it. */
+.bt-live .bt-heading + .bt-sub, .bt-live .pin-tip { max-width: 900px; }
+.bt-live .pin-tip { margin-top: 4px; font-size: 24px; }
+.bt-live .bt-live-now { position: absolute; right: 140px; top: 64px; width: 640px; padding: 22px 28px; border-radius: 24px; background: rgba(13, 12, 24, 0.86); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); color: #F7F6F2; z-index: 2; -webkit-transition: opacity 0.2s; transition: opacity 0.2s; }
+.bt-live-now .who { font-family: 'Sora', 'Inter', sans-serif; font-weight: 600; font-size: 28px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bt-live-now .line { margin-top: 8px; font-size: 22px; line-height: 1.3; color: rgba(247, 246, 242, 0.85); overflow: hidden; max-height: 58px; }
+.bt-live-now .line.next { color: rgba(247, 246, 242, 0.6); }
+.bt-live-now .live { display: inline-block; padding: 1px 10px; margin-right: 4px; border-radius: 8px; background: #6E3DDB; color: #FFF; font-size: 18px; font-weight: 600; }
 .bt-live .help { margin-top: 20px; text-align: left; }
 .bt-live .help .bt-button { margin: 0; }
 .bt-live .bt-button.quiet { background: transparent; box-shadow: inset 0 0 0 2px rgba(247, 246, 242, 0.25); }

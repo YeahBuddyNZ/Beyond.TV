@@ -1,66 +1,90 @@
 {
- "about": "Written by tools/live_now.py when the website builds: the live video each channel is streaming now.",
- "at": "2026-11-21T09:18:59Z",
+ "about": "Written by tools/live_now.py when the website builds: the live video each channel is streaming now, its title, and the next scheduled stream when there is one (ADR 0058).",
+ "at": "2026-11-23T02:02:30Z",
  "channels": {
   "UCoMdktPbSTixAyNGwb-UYkQ": {
-   "video": "53SxFKpbKDE"
+   "video": "53SxFKpbKDE",
+   "title": "Watch Sky News live",
+   "next": {
+    "title": "Mornings with Ridge and Frost | Monday 23 November 2026",
+    "at": "2026-11-23T06:00:00Z"
+   }
   },
   "UCBi2mrWuNuyYy4gbM6fU18Q": {
-   "video": "KQhNZQ_Uag8"
+   "video": "QbWsfPZrRpA",
+   "title": "ABC News Live - Sunday, November 22"
   },
   "UCeY0bbntWzzVIaj2z3QigXg": {
-   "video": "pJZBppLlwJo"
+   "video": "pJZBppLlwJo",
+   "title": "NBC News NOW"
   },
   "UCNye-wNBqNL5ZzHSJj3l8Bg": {
-   "video": "gCNeDWCI0vo"
+   "video": "gCNeDWCI0vo",
+   "title": "Al Jazeera English | Live"
   },
   "UCJg9wBPyKMNA5sRDnvzmkdg": {
-   "video": "C96oohpWBGw"
+   "video": "C96oohpWBGw",
+   "title": "LiveNOW FOX 24/7 LIVE STREAM"
   },
   "UCVgO39Bk5sMo66-6o6Spn6Q": {
-   "video": "vOTiJkg1voo"
+   "video": "vOTiJkg1voo",
+   "title": "Watch ABC NEWS Australia live | ABC NEWS"
   },
   "UCupvZG-5ko_eiXAupbDfxWw": {
-   "video": "GotlA1KKWoo"
+   "video": "GotlA1KKWoo",
+   "title": "CNN Headlines: 24/7 Live News"
   },
   "UCknLrEdhRCp1aegoMqRaCZg": {
-   "video": "LuKwFajn37U"
+   "video": "LuKwFajn37U",
+   "title": "DW News livestream | Headline news from around the world"
   },
   "UCQfwfsi5VrQ8yKZ-UWmAEFg": {
-   "video": "HvZt-nh9sGg"
+   "video": "HvZt-nh9sGg",
+   "title": "FRANCE 24 English, LIVE, International Breaking News & Top stories - 24/7 stream"
   },
   "UCSPEjw8F2nQDtmUKPFNF7_A": {
-   "video": "IimtbuqYIE8"
+   "video": "IimtbuqYIE8",
+   "title": "NHK WORLD-JAPAN News"
   },
   "UC83jt4dlz1Gjl58fzQrrKZg": {
-   "video": "-PWMxjBgr0k"
+   "video": "-PWMxjBgr0k",
+   "title": "CNA 24/7 LIVE: Breaking news on Asia and award-winning documentaries and shows"
   },
   "UCSrZ3UV4jOidv8ppoVuvW9Q": {
-   "video": "pykpO5kQJ98"
+   "video": "pykpO5kQJ98",
+   "title": "Euronews English Live"
   },
   "UCIALMKvObZNtJ6AmdCLP7Lg": {
-   "video": "QB5BNdBFujE"
+   "video": "QB5BNdBFujE",
+   "title": "Bloomberg Business News Live"
   },
   "UC7fWeaHhqgM4Ry-RMpM2YYw": {
-   "video": "JV5w1MhzcfQ"
+   "video": "JV5w1MhzcfQ",
+   "title": "Watch TRT World"
   },
   "UC_gUM8rL-Lrg6O3adPW9K1g": {
-   "video": "vfszY1JYbMc"
+   "video": "vfszY1JYbMc",
+   "title": "WION LIVE News | World Latest English News | International News | Top English News | Live"
   },
   "UC0vn8ISa4LKMunLbzaXLnOQ": {
-   "video": "EDbWwVR7i9Q"
+   "video": "EDbWwVR7i9Q",
+   "title": "GB News Live: Watch GB News 24/7"
   },
   "UC1FbPiXx59_ltnFVx7IxWow": {
-   "video": "wt6SIE7BXS8"
+   "video": "wt6SIE7BXS8",
+   "title": "Watch FOX Weather Channel Live Stream: Tracking Breaking Weather News, Local and National"
   },
   "UCLA_DiR1FfKNvjuUpBHmylQ": {
-   "video": "ROboUHfPUrU"
+   "video": "ROboUHfPUrU",
+   "title": "Live High-Definition Views from the International Space Station (Official NASA Stream)"
   },
   "UCSJ4gkVC6NrvII8umztf0Ow": {
-   "video": "rFZHOHl-L8A"
+   "video": "rFZHOHl-L8A",
+   "title": "lofi hip hop radio \ud83d\udcda beats to relax/study to"
   },
   "UCrNnk0wFBnCS1awGjq_ijGQ": {
-   "video": "z2EWnolxa90"
+   "video": "z2EWnolxa90",
+   "title": "NEW SHOW | Explore, Learn, and Have Fun with Phoebe & Jay! \u2728 Full Episodes! | PBS"
   }
  }
 }

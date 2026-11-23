@@ -21,14 +21,23 @@ import java.io.InputStream;
 /**
  * Games, from the remote (ADR 0021): every game and family activity starts here on the TV, no phone needed. Karaoke,
  * board and card games against the robots, silly party games, Milo's Remote Control Land, London's Candy Land, Build it and the light show (all TableActivity), a party, quiz night, the dinner
- * question, the tidy-up race, Bedtime (ADR 0059) and How to play. Quiz night and the dinner question need Beyond Family, because everyone answers on their
+ * question, the tidy-up race, Bedtime (ADR 0060) and How to play. Quiz night and the dinner question need Beyond Family, because everyone answers on their
  * phones. Same as Games.open in web/games.js: a picture for each, in groups (ADR 0047; four since Build it, ADR 0052, so they scroll). A game opens on top of
  * this screen and it stays open, so Back from a game comes back here, one step, not out to the home screen.
+ * The last game played leads Keep watching on the home screen, and Continue there opens it again on top of this screen
+ * (extra GAME, ADR 0058).
  */
 public class GamesActivity extends Activity {
     static void open(Context c) {
         c.startActivity(new Intent(c, GamesActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
+
+    /** Continue on the home screen: this screen, with that game started on top of it. */
+    static void play(Context c, String id) {
+        c.startActivity(new Intent(c, GamesActivity.class).putExtra(GAME, id).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+    }
+
+    static final String GAME = "game";
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,6 +72,8 @@ public class GamesActivity extends Activity {
         boolean linked = Family.linked(this);
         Object[][][] groups = groups(this);
         View first = null;
+        Runnable resume = null;
+        String want = getIntent().getStringExtra(GAME);
         int tw = Math.round(316 * k), th = Math.round(178 * k);
         for (Object[][] group : groups) {
             TextView name = FeedbackActivity.text(this, (String) group[0][0], Ui.displaySemibold, 30 * k, 0xBFFFFFFF);
@@ -76,9 +87,18 @@ public class GamesActivity extends Activity {
             rp.bottomMargin = Math.round(40 * k);
             column.addView(row, rp);
             for (int i = 1; i < group.length; i++) {
-                View tile = tile((String) group[i][0], (String) group[i][1], k);
-                final Runnable run = (Runnable) group[i][2];
+                final String id = (String) group[i][0], label = (String) group[i][1];
+                View tile = tile(id, label, k);
+                final Runnable game = (Runnable) group[i][2];
+                // A game played goes to the front of Keep watching (kept on the TV only). How to play and the
+                // phone games aren't something to continue.
+                final boolean keep = !"guides".equals(id) && !"quiz".equals(id) && !"dinner".equals(id);
+                final Runnable run = () -> {
+                    if (keep) Watched.add(this, "beyond:game:" + id, label, "", "", "");
+                    game.run();
+                };
                 tile.setOnClickListener(v -> run.run());
+                if (keep && id.equals(want)) resume = run;
                 LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(tw, th);
                 bp.rightMargin = Math.round(22 * k);
                 row.addView(tile, bp);
@@ -99,11 +119,33 @@ public class GamesActivity extends Activity {
 
         setContentView(root);
         first.requestFocus();
+        if (resume != null) resume.run();
+    }
+
+    /** A game's name in the TV's language, for its screen in Keep watching. Empty when there's no such game. */
+    static String nameOf(String id) {
+        switch (id) {
+            case "rcland": return Ui.tr("Terra do Controle Remoto do Milo", "Milo's Remote Control Land", "La Tierra Teledirigida de Milo");
+            case "candy": return Ui.tr("A Terra dos Doces da London", "London's Candy Land", "La Tierra de los Dulces de London");
+            case "arcade": return Ui.tr("Fliperama", "Arcade", "Arcade");
+            case "table": return Ui.tr("Jogos de tabuleiro e cartas", "Board and card games", "Juegos de mesa y cartas");
+            case "silly": return Ui.tr("Jogos bobos", "Silly games", "Juegos locos");
+            case "road": return Ui.tr("Construir uma estrada", "Build a road", "Construir una carretera");
+            case "bridge": return Ui.tr("Construir uma ponte", "Build a bridge", "Construir un puente");
+            case "town": return Ui.tr("Planejar uma cidade", "Plan a town", "Planear un pueblo");
+            case "karaoke": return Ui.tr("Karaokê", "Karaoke", "Karaoke");
+            case "party": return Ui.tr("Festa", "Party", "Fiesta");
+            case "lights": return Ui.tr("Show de luzes", "Light show", "Show de luces");
+            case "lunch": return Ui.tr("Lanches da escola", "School lunches", "Almuerzos del cole");
+            case "tidy": return Ui.tr("Corrida da arrumação", "Tidy-up race", "Carrera de ordenar");
+            case "bedtime": return Ui.tr("Respirar para dormir", "Bedtime breathing", "Respirar para dormir");
+            default: return "";
+        }
     }
 
     /**
      * The groups, in the same order as Games.open in web/games.js (ADR 0047). Each: picture (web/games/<id>.jpg), name,
-     * what it opens from `a`. Find (AskActivity, ADR 0058) opens a game from the same list.
+     * what it opens from `a`. Find (AskActivity, ADR 0059) opens a game from the same list.
      */
     static Object[][][] groups(Activity a) {
         return new Object[][][] {

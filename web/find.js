@@ -1,5 +1,5 @@
 /*
- * Find (ADR 0058): say what you want and the TV finds it. A game, a channel, an app or a show, from the remote alone:
+ * Find (ADR 0059): say what you want and the TV finds it. A game, a channel, an app or a show, from the remote alone:
  * press the Find button (the microphone at the top of the home screen) or the remote's own microphone or search
  * button where the TV passes it to us, say "Candy Land", "Sky News" or "Bluey", and the best matches come up as big
  * tiles to open with OK. Where the TV can't hear (no voice on it), Type it brings the on-screen keyboard instead.

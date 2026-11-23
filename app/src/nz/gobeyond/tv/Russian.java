@@ -13,7 +13,7 @@ final class Russian {
 
     static String text(String english) {
         switch (english) {
-            // Find and Bedtime (ADR 0058, ADR 0059)
+            // Find and Bedtime (ADR 0059, ADR 0060)
             case "Find": return "Найти";
             case "Say a game, a channel or a show": return "Назовите игру, канал или передачу";
             case "Waves": return "Волны";
@@ -571,6 +571,13 @@ final class Russian {
             case "Got it": return "Понятно";
             case "How to play": return "Как играть";
             case "▲ ▼ to change channel": return "▲ ▼ переключают канал";
+            case "Your favourites": return "Избранное";
+            case "Hold OK on a channel to pin it to the top.": return "Удерживайте OK на канале, чтобы закрепить его наверху.";
+            case "Pinned to your favourites": return "Добавлено в избранное";
+            case "Taken out of your favourites": return "Убрано из избранного";
+            case "Live": return "В эфире";
+            case "Up next": return "Далее";
+            case "Continue": return "Продолжить";
             default:
                 // Notices are saved in the language in use when they were generated.
                 String[] prefixes = {"Couldn't check Beyond™ TV: ", "Couldn't turn on Beyond™ TV: ",

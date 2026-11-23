@@ -270,14 +270,14 @@
         if (!ok) toast(tr('Abra gobeyond.nz/election no navegador da TV.', 'Open gobeyond.nz/election in the TV\'s browser.', 'Abre gobeyond.nz/election en el navegador de la TV.'));
       });
     }});
-    // Find (find.js, ADR 0058): say a game, a channel, an app or a show, and open it with OK. For everyone, kids included.
+    // Find (find.js, ADR 0059): say a game, a channel, an app or a show, and open it with OK. For everyone, kids included.
     list.push({icon: 'mic', label: tr('Encontrar', 'Find', 'Buscar'), run: function () { openFind(false); }});
     // Live TV (livetv.js, ADR 0042): the aerial, the free-to-air apps and free world news on one screen.
     list.push({icon: 'live_tv', label: tr('TV aberta', 'Live TV', 'TV en vivo'), run: openLive});
     if (!kid) list.push({icon: 'hdmi', label: tr('Entradas HDMI', 'HDMI Inputs', 'Entradas HDMI'), run: function () {
       st.zone = Z.SHELF; openDrawer(); st.drawer = 1 < drawerInputs ? 1 : 0; updateFocus();
     }});
-    // Bedtime (ADR 0059), in the evening: a night light that breathes, a calm sound, then the TV turns itself off.
+    // Bedtime (ADR 0060), in the evening: a night light that breathes, a calm sound, then the TV turns itself off.
     if (Data.isNight(Date.now())) list.push({icon: 'bedtime', label: tr('Hora de dormir', 'Bedtime', 'Hora de dormir'), run: function () { Bedtime.choose(); }});
     // Games, for anyone with the remote: karaoke, a party, quiz night and the rest, no phone needed (games.js).
     list.push({icon: 'gamepad', label: tr('Jogos', 'Games', 'Juegos'), run: function () { Games.open(); }});
@@ -380,11 +380,14 @@
         img.style.background = 'linear-gradient(135deg, ' + p.colour + ', #2C2458)';
         el('div', 'emoji', img, p.emoji);
       } else if (p.watched) {
-        var app = appById(p.watched.app);
+        var app = appById(p.watched.app), own = p.own;
         if (p.watched.image) img.style.backgroundImage = 'url(' + p.watched.image + ')';
+        else if (own && own.kind === 'live' && LiveTV.logoUrl({id: own.id})) { setClass(img, 'logo', true); img.style.backgroundImage = 'url(' + LiveTV.logoUrl({id: own.id}) + ')'; }
+        else if (own && own.kind === 'game') img.style.backgroundImage = 'url(games/' + own.id + '.jpg)';
         else if (app) { setClass(img, 'face', true); face(app, img, 30); }
         else img.style.background = '#2C2458';
-        el('div', 'when', img, Watched.when(p.watched.at));
+        var when = Watched.when(p.watched.at);
+        el('div', 'when' + (p.first ? ' go' : ''), img, p.first ? tr('Continuar', 'Continue', 'Continuar') + ' · ' + when : when);
       } else img.style.backgroundImage = 'url(' + Data.image(p.backdrop, 'w780') + ')';
       el('div', 'play', img);
       el('div', 'name', card, p.title);
@@ -604,12 +607,43 @@
     return null;
   }
 
-  /** Keep watching as cards: the show and its app when it came from a pick, otherwise just the app. */
+  /**
+   * Keep watching as cards: the show and its app when it came from a pick, otherwise just the app; a Live TV channel or
+   * a game played here (ADR 0058). The first is Continue: the home screen opens on it.
+   */
   function watchingCards() {
-    return Watched.list(3).map(function (x) {
-      var app = appById(x.app), name = (app && app.title) || x.name;
-      return {id: 'w:' + x.app + ':' + x.title + ':' + x.at, watched: x, title: x.title || name, meta: x.title ? name : '', app: x.app};
+    return Watched.list(3).map(function (x, i) {
+      var own = ours(x.app), app = own ? null : appById(x.app), name = (app && app.title) || x.name;
+      if (own && own.kind === 'game' && window.Games) name = Games.nameOf(own.id) || name;
+      return {id: 'w:' + x.app + ':' + x.title + ':' + x.at, watched: x, title: x.title || name, app: x.app, own: own, first: i === 0,
+        meta: x.title ? name : own ? (own.kind === 'live' ? tr('TV ao vivo', 'Live TV', 'TV en vivo') : tr('Jogos', 'Games', 'Juegos')) : ''};
     });
+  }
+
+  /** Something of Beyond TV's own in Keep watching: {kind: 'live' or 'game', id}, or null for an app. */
+  function ours(app) {
+    var m = /^beyond:(live|game):([a-z0-9-]{1,40})$/.exec(app || '');
+    return m ? {kind: m[1], id: m[2]} : null;
+  }
+
+  /** Opens a Live TV channel or a game from Keep watching, the way it was left. */
+  function openOurs(own) {
+    if (own.kind === 'live') { if (!jobsFirst()) openLive(own.id); return; }
+    if (!(window.Games && Games.start(own.id))) Games.open();
+  }
+
+  /**
+   * The home screen opens on Continue: the last thing this person opened from here, focused, so OK picks up where they
+   * left off. When the TV comes on, after a profile is picked and when the home screen opens; nothing to continue, the shelf.
+   */
+  function continueFirst() {
+    st.zone = Z.SHELF;
+    st.shelf = 0;
+    if (!Watched.list(1).length) return;
+    kinds = tabKinds();
+    st.tab = Math.max(0, kinds.indexOf('watching'));
+    st.zone = Z.CARDS;
+    st.card = 0;
   }
 
   /** Something opened from here goes to the front of Keep watching. */
@@ -1141,7 +1175,7 @@
 
   /** The Live TV screen, with this TV's aerial and apps. Plex opens Plex itself here, for its free channels. */
   /**
-   * Find (find.js, ADR 0058): what's on this TV for it to match. The Games screen, Tonight's sky and Live TV, the
+   * Find (find.js, ADR 0059): what's on this TV for it to match. The Games screen, Tonight's sky and Live TV, the
    * channels that play here, and the apps Ask Beyond may point at (a kid's own shelf). A show goes to Ask Beyond when
    * Beyond Family is linked, else to YouTube for grown-ups.
    */
@@ -1155,7 +1189,7 @@
         list.push({kind: 'thing', id: 'live', name: tr('TV aberta', 'Live TV', 'TV en vivo'), also: Find.ALIASES.live, run: openLive});
         var channels = LiveTV.channels();
         for (i = 0; i < channels.length; i++) (function (c) {
-          list.push({kind: 'channel', id: c.id, name: c.name, run: function () { LiveTV.play(c.id); }});
+          list.push({kind: 'channel', id: c.id, name: c.name, run: function () { openLive(c.id); }});
         })(channels[i]);
         var names = watchApps();
         for (i = 0; i < names.length; i++) (function (name) {
@@ -1172,9 +1206,10 @@
     }, {listen: listen});
   }
 
-  function openLive() {
+    function openLive(play) {
     var live = liveTV();
     LiveTV.open({
+      play: typeof play === 'string' ? play : null,
       apps: apps,
       aerial: live ? {id: live.id, title: tr('TV aberta', 'Live TV', 'TV en vivo')} : null,
       launch: function (x) {
@@ -1213,6 +1248,7 @@
           } else toast(tr('Esse app não está nesta TV', "That app isn't on this TV", 'Esa app no está en este TV'));
           return;
         }
+        if (p && p.own) { openOurs(p.own); return; }
         if (p && p.watched) {
           var again = appById(p.watched.app);
           if (again) { remember(again, p.watched.title, p.watched.image); launcher(again.id, again.title)(); }
@@ -1630,8 +1666,7 @@
     else if (me.kid) setTimeout(Pets.ask, 600);   // and have the pets been fed today?
     pickShelf();
     cards = [];
-    st.zone = Z.SHELF;
-    st.shelf = 0;
+    continueFirst();
     renderAll();
   }
 
@@ -1714,9 +1749,10 @@
     if (longAway) Chime.play();
     if (longAway && Profiles.count() > 1) setTimeout(function () { Profiles.pick(false, profileChosen); }, 300);
     idleAt = Date.now();
-    // Back from an app: what was just opened leads Keep watching.
+    // Back from an app: what was just opened leads Keep watching. Back after hours away: the home screen opens on Continue.
     st.tab = 0;
     kinds = [];
+    if (longAway) { closeSheets(); continueFirst(); }
     renderTop();
     cards = [];
     renderCards();
@@ -1735,6 +1771,7 @@
   renderTop();
   Chime.play();   // hello
   loadApps(function () {
+    continueFirst();
     renderAll();
     Data.refresh();
     if (Profiles.count() > 1) Profiles.pick(false, profileChosen);

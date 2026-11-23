@@ -95,6 +95,7 @@ public class HomeActivity extends Activity implements Family.Screen {
             handler.removeCallbacks(quiet);
             handler.postDelayed(quiet, 15_000);
             if (on) Chime.play();   // hello: the TV just came on
+            if (on) home.startOnContinue();   // and opens on Continue: the last thing this person was watching (ADR 0058)
             if (People.count(this) > 1 && (on || System.currentTimeMillis() - People.chosenAt(this) > ASK_AGAIN_AFTER)) {
                 People.asked(this);
                 WhoActivity.open(this, null);
@@ -160,7 +161,7 @@ public class HomeActivity extends Activity implements Family.Screen {
             return true;
         }
         if (RemoteKeys.onKey(this, event)) return true;
-        // The remote's search button, where the TV hands it to the home screen: Find, listening (ADR 0058).
+        // The remote's search button, where the TV hands it to the home screen: Find, listening (ADR 0059).
         if (event.getKeyCode() == KeyEvent.KEYCODE_SEARCH) {
             if (event.getAction() == KeyEvent.ACTION_UP) AskActivity.find(this, true);
             return true;
@@ -169,7 +170,7 @@ public class HomeActivity extends Activity implements Family.Screen {
         return super.dispatchKeyEvent(event);
     }
 
-    /** The remote's microphone on TVs that ask the app in front first: Find, listening (ADR 0058). */
+    /** The remote's microphone on TVs that ask the app in front first: Find, listening (ADR 0059). */
     @Override public boolean onSearchRequested() {
         AskActivity.find(this, true);
         return true;
