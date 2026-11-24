@@ -75,4 +75,5 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0065](0065-beyond-tv-channels.md) | Beyond TV Channels: one line-up you surf like a real TV, NZ mix channels, turning channels off |
 | [0066](0066-whos-watching-warm-notes-and-own-pins.md) | Who's watching: grown-ups first, warm notes, a grown-up's own PIN with tap to allow |
 | [0067](0067-family-wall-and-to-dos.md) | The family wall and to-dos from Beyond Family, ticked with the remote |
-| [0068](0068-ask-a-grown-up-and-the-morning-board.md) | Ask a grown-up from the TV for more screen time with one tap to answer, and the Morning board |
+| [0068](0068-ask-for-kids.md) | Ask for kids: questions about the world, checked twice, and a log for their grown-ups |
+| [0069](0069-ask-a-grown-up-and-the-morning-board.md) | Ask a grown-up from the TV for more screen time with one tap to answer, and the Morning board |

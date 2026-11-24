@@ -498,7 +498,7 @@
 .wl-compose .wl-preview .wl-card.blank .words { opacity: 0.45; }
 .wl-compose .wl-cancel { margin-top: 34px; }
 .wl-face .kidtag { display: none; }
-/* The Morning board (morning.js, ADR 0068): everyone's to-dos on the left, today's calendar on the right, the weather up top. */
+/* The Morning board (morning.js, ADR 0069): everyone's to-dos on the left, today's calendar on the right, the weather up top. */
 .bt-morning .ch-note { right: 640px; }
 .bt-morning .mb-cols { left: 60px; right: auto; width: 1240px; top: 230px; text-align: left; }
 .bt-morning .mb-cols .ch-col { margin: 0 24px 0 0; }

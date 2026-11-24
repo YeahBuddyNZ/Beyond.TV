@@ -83,7 +83,7 @@ final class HomeApps {
     static final int FIND = 20;
     /** The family wall and everyone's to-dos, ticked with the remote (web/wall.js in TableActivity, ADR 0067). */
     static final int WALL = 21;
-    /** The Morning board: today's to-dos, calendar and weather for the house (web/morning.js in TableActivity, ADR 0068). */
+    /** The Morning board: today's to-dos, calendar and weather for the house (web/morning.js in TableActivity, ADR 0069). */
     static final int MORNING = 22;
     /** Image size of each card (16:9; on screen it shows up to ~330 px wide). */
     static final int TILE_W = 384, TILE_H = 216;

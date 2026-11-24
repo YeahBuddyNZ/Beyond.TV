@@ -2,7 +2,10 @@
  * Ask Beyond (ADR 0025): the TV's assistant. An orb of light that listens, thinks and answers. Pick a starter or type
  * with the remote, or ask from a phone in Beyond Family and the question turns up here; Beyond Family asks Claude with
  * this TV's apps and the answer comes back as a line and up to four cards, which open the app with OK. A kid watching
- * gets a kid's answer. Nothing asked is kept, here or there. Needs Beyond Family linked, because that's who answers.
+ * gets Ask for kids (ADR 0068): questions about the world, answered for their age, every question and answer checked
+ * by Beyond Family before it shows, and logged there for the household's grown-ups, who are told when one is stopped.
+ * The kid is told all that the first time, and the line at the bottom says it every time. A grown-up's question is
+ * never kept, here or there. Needs Beyond Family linked, because that's who answers.
  * Google TV runs this same file in AskActivity's WebView (ask-host.js). Plain ES5.
  */
 var Ask = (function () {
@@ -11,11 +14,28 @@ var Ask = (function () {
   // The same starters as Beyond Family's ASK_STARTERS (shared/tvNotes.ts): keep the two in step.
   var STARTERS = ['Rom-coms for date night', 'Something funny, under 90 minutes', "A family movie we'll all like",
     'A show to binge this week', 'Something Kiwi', 'Surprise me'];
-  var KID_STARTERS = ['Something funny', 'Animals!', 'Dinosaurs', 'Space and rockets', 'Something with music', 'Surprise me'];
+  // A kid's Ask is mostly about the world (ADR 0068), with one way back to something to watch.
+  var KID_STARTERS = ['Why is the sky blue?', 'How big is a blue whale?', 'What do kiwi eat?', 'How far away is the Moon?',
+    'How do volcanoes work?', 'Something funny to watch'];
+  var LESSON_KEY = 'bt.askKidLesson';
 
-  var api = null, mode = 'idle', question = '', from = '', answer = null, problem = '', asking = 0, orb = null;
+  var api = null, mode = 'idle', question = '', from = '', answer = null, problem = '', asking = 0, orb = null, as = null;
 
-  function kid() { return !!(window.Profiles && Profiles.current && Profiles.current().kid); }
+  function me() { return window.Profiles && Profiles.current ? Profiles.current() || {} : {}; }
+  /** A kid watching, or a kid asking from their phone (as.kid). */
+  function kid() { return !!(as && as.kid) || !!me().kid; }
+
+  /** Whether this kid has seen the "your grown-ups can see" lesson on this TV. */
+  function learnt() {
+    try { return (JSON.parse(localStorage.getItem(LESSON_KEY)) || []).indexOf(String(me().id || 'kid')) >= 0; } catch (e) { return false; }
+  }
+  function learn() {
+    try {
+      var seen = JSON.parse(localStorage.getItem(LESSON_KEY)) || [];
+      seen.push(String(me().id || 'kid'));
+      localStorage.setItem(LESSON_KEY, JSON.stringify(seen.slice(-20)));
+    } catch (e) {}
+  }
 
   function starterText(s) {
     // The starters go to Beyond in English, the words on the button follow the TV's language.
@@ -26,11 +46,12 @@ var Ask = (function () {
       'A show to binge this week': tr('Uma série para maratonar', 'A show to binge this week', 'Una serie para maratonear'),
       'Something Kiwi': tr('Algo da Nova Zelândia', 'Something Kiwi', 'Algo de Nueva Zelanda'),
       'Surprise me': tr('Me surpreenda', 'Surprise me', 'Sorpréndeme'),
-      'Something funny': tr('Algo engraçado', 'Something funny', 'Algo gracioso'),
-      'Animals!': tr('Bichos!', 'Animals!', '¡Animales!'),
-      'Dinosaurs': tr('Dinossauros', 'Dinosaurs', 'Dinosaurios'),
-      'Space and rockets': tr('Espaço e foguetes', 'Space and rockets', 'Espacio y cohetes'),
-      'Something with music': tr('Algo com música', 'Something with music', 'Algo con música')
+      'Why is the sky blue?': tr('Por que o céu é azul?', 'Why is the sky blue?', '¿Por qué el cielo es azul?'),
+      'How big is a blue whale?': tr('Qual o tamanho de uma baleia-azul?', 'How big is a blue whale?', '¿Qué tan grande es una ballena azul?'),
+      'What do kiwi eat?': tr('O que o kiwi come?', 'What do kiwi eat?', '¿Qué comen los kiwis?'),
+      'How far away is the Moon?': tr('A Lua fica a que distância?', 'How far away is the Moon?', '¿Qué tan lejos está la Luna?'),
+      'How do volcanoes work?': tr('Como funcionam os vulcões?', 'How do volcanoes work?', '¿Cómo funcionan los volcanes?'),
+      'Something funny to watch': tr('Algo engraçado para ver', 'Something funny to watch', 'Algo gracioso para ver')
     };
     return words[s] || s;
   }
@@ -88,6 +109,7 @@ var Ask = (function () {
   function build(layer, a) {
     // With an answer the orb steps back, smaller, to make room for the cards.
     UI.setClass(layer, 'answer', mode === 'answer');
+    UI.setClass(layer, 'lesson', mode === 'lesson');
     var stage = UI.el('div', 'bt-ask-stage', layer);
     var c = UI.el('canvas', 'bt-orb', stage);
     c.width = 440;
@@ -95,13 +117,18 @@ var Ask = (function () {
     if (orb) orb.stop();
     orb = Orb(c);
     if (question) UI.el('div', 'bt-ask-said', stage, (from ? from + ': ' : '') + '“' + question + '”');
-    var line = mode === 'thinking' ? tr('Deixa eu ver o que tem de bom…', "Okay, let me see what's good…", 'Déjame ver qué hay de bueno…')
+    if (mode === 'lesson') { lesson(layer, stage, a); return; }
+    var line = mode === 'thinking' ? (kid() ? tr('Hmm, deixa eu pensar…', 'Hmm, let me think…', 'Mmm, déjame pensar…')
+        : tr('Deixa eu ver o que tem de bom…', "Okay, let me see what's good…", 'Déjame ver qué hay de bueno…'))
       : mode === 'answer' ? answer.reply
       : mode === 'error' ? problem
       : mode === 'typing' ? tr('Escreva com o controle', 'Type it with the remote', 'Escríbelo con el control')
-      : kid() ? tr('O que você quer assistir?', 'What do you feel like watching?', '¿Qué te apetece ver?')
+      : kid() ? tr('O que você quer saber?', 'What do you want to know?', '¿Qué quieres saber?')
       : tr('O que vocês estão a fim de ver?', 'What are you in the mood for?', '¿Qué les apetece ver?');
-    UI.el('div', 'bt-ask-line' + (mode === 'thinking' ? ' thinking' : ''), stage, line);
+    UI.el('div', 'bt-ask-line' + (mode === 'thinking' ? ' thinking' : '') + (mode === 'answer' && kid() && answer.reply.length > 120 ? ' long' : ''), stage, line);
+    if (mode === 'answer' && answer.blocked) UI.el('div', 'bt-ask-told', stage, answer.told
+      ? tr('Seus responsáveis vão ver esta pergunta.', 'Your grown-ups will see this question.', 'Tus adultos verán esta pregunta.')
+      : tr('Tente perguntar de outro jeito.', 'Try asking another way.', 'Prueba a preguntarlo de otra forma.'));
 
     if (mode === 'idle' || mode === 'error') {
       var chips = UI.el('div', 'bt-buttons bt-ask-chips', layer), list = kid() ? KID_STARTERS : STARTERS;
@@ -114,12 +141,17 @@ var Ask = (function () {
       var more = UI.el('div', 'bt-buttons bt-ask-more', layer);
       a.add(UI.button(more, tr('Escrever', 'Type it', 'Escribir'), 'sparkles'), function () { mode = 'typing'; a.rebuild(); });
       if (!kid() && window.BeyondTV && BeyondTV.talk) a.add(UI.button(more, tr('Falar com a equipe Beyond™', 'Tell the Beyond™ team something', 'Decirle algo al equipo de Beyond™')), function () { a.close(); BeyondTV.talk(); });
-      UI.el('div', 'bt-ask-small', layer, tr(
+      // Honest about who sees what: a kid's questions go to their grown-ups (ADR 0068), a grown-up's go nowhere.
+      UI.el('div', 'bt-ask-small', layer, kid() ? tr(
+        'Seus responsáveis podem ver o que você pergunta aqui, no Beyond Family. Se não for coisa de criança, eu paro e conto para eles.',
+        "Your grown-ups can see what you ask here, in Beyond Family. If it isn't for kids, I'll stop and tell them.",
+        'Tus adultos pueden ver lo que preguntas aquí, en Beyond Family. Si no es para niños, paro y les aviso.') : tr(
         'Também dá para perguntar pelo celular, no Beyond Family. A Beyond não guarda o que você pergunta.',
         "You can ask from your phone too, in Beyond Family. Beyond doesn't keep what you ask.",
         'También puedes preguntar desde el teléfono, en Beyond Family. Beyond no guarda lo que preguntas.'));
     } else if (mode === 'typing') {
-      UI.keyboard(layer, a, {max: 120, placeholder: tr('Tipo: algo de terror, mas não muito', 'Like: scary, but not too scary', 'Como: miedo, pero no mucho'),
+      UI.keyboard(layer, a, {max: 120, placeholder: kid() ? tr('Tipo: por que os gatos ronronam?', 'Like: why do cats purr?', 'Como: ¿por qué ronronean los gatos?')
+        : tr('Tipo: algo de terror, mas não muito', 'Like: scary, but not too scary', 'Como: miedo, pero no mucho'),
         spaceLabel: tr('Espaço', 'Space', 'Espacio'), doneLabel: tr('Perguntar', 'Ask', 'Preguntar'),
         done: function (text) { if (text && text.length >= 2) ask(text, ''); }});
     } else if (mode === 'answer') {
@@ -146,6 +178,32 @@ var Ask = (function () {
     }
   }
 
+  /**
+   * The first time a kid opens Ask on this TV: what it's for, and that it's watched over (ADR 0068). Short, friendly,
+   * three lines and one button, read from a couch. Shown again only on a new TV or for a new face.
+   */
+  function lesson(layer, stage, a) {
+    UI.el('div', 'bt-ask-line', stage, tr('Pergunte qualquer coisa sobre o mundo!', 'Ask me anything about the world!', '¡Pregúntame lo que quieras sobre el mundo!'));
+    var box = UI.el('div', 'bt-ask-lesson', layer);
+    var rules = [
+      ['🌏', tr('Bichos, espaço, vulcões, como as coisas funcionam: pode perguntar.', 'Animals, space, volcanoes, how things work: ask away.', 'Animales, espacio, volcanes, cómo funcionan las cosas: pregunta.')],
+      ['🛑', tr('Se não for coisa de criança, eu paro e não respondo.', "If it isn't for kids, I'll stop and won't answer.", 'Si no es para niños, paro y no respondo.')],
+      ['👀', tr('Seus responsáveis podem ver tudo o que você pergunta, e eu conto para eles quando eu paro.', 'Your grown-ups can see everything you ask, and I tell them when I stop.', 'Tus adultos pueden ver todo lo que preguntas, y les aviso cuando paro.')],
+      ['🤐', tr('Nunca diga seu endereço, telefone ou senhas, nem para mim.', 'Never tell anyone your address, phone number or passwords, even me.', 'Nunca digas tu dirección, teléfono o contraseñas, ni a mí.')]
+    ];
+    for (var i = 0; i < rules.length; i++) {
+      var row = UI.el('div', 'bt-ask-rule', box);
+      UI.el('span', 'mark', row, rules[i][0]);
+      UI.el('span', '', row, rules[i][1]);
+    }
+    var go = UI.el('div', 'bt-buttons bt-ask-more', layer);
+    a.add(UI.button(go, tr('Entendi!', 'Got it!', '¡Entendido!'), '', 'primary'), function () {
+      learn();
+      mode = 'idle';
+      if (question) ask(question, from); else a.rebuild();
+    }, {first: true});
+  }
+
   /** OK on a pick: its app, when this TV has it. Otherwise say where to look. */
   function openPick(pick) {
     if (pick.app && window.BeyondTV && BeyondTV.openApp && BeyondTV.openApp(pick.app)) {
@@ -163,8 +221,10 @@ var Ask = (function () {
     answer = null;
     mode = 'thinking';
     if (api) api.rebuild();
-    var mine = ++asking, me = window.Profiles && Profiles.current ? Profiles.current() : {};
-    Family.ask(question, window.BeyondTV && BeyondTV.watchApps ? BeyondTV.watchApps() : [], !!me.together, function (err, res) {
+    var mine = ++asking, who = me();
+    // A kid says so, with their first name for their grown-ups' log; a phone ask says whose phone it was.
+    var kidAsk = kid() ? {kid: true, teen: !!who.teen, name: as && as.kid ? '' : String(who.name || '').slice(0, 30), member: as && as.member} : as && as.member ? {member: as.member} : null;
+    Family.ask(question, window.BeyondTV && BeyondTV.watchApps ? BeyondTV.watchApps() : [], !!who.together && !kid(), function (err, res) {
       if (mine !== asking || !api) return;
       if (err) {
         mode = 'error';
@@ -173,32 +233,44 @@ var Ask = (function () {
           : tr('Não consegui responder agora. Confira a internet e tente de novo.', "I couldn't answer just now. Check the internet and try again.", 'No pude responder ahora. Revisa internet e inténtalo de nuevo.');
       } else {
         answer = res;
+        if (!answer || typeof answer.reply !== 'string') answer = {reply: '', picks: []};
         mode = 'answer';
       }
       api.rebuild();
-    });
+    }, kidAsk);
   }
 
-  /** Opens Ask Beyond; with a question (from a phone), asks it straight away. */
-  function open(text, who) {
+  /**
+   * Opens Ask Beyond; with a question (from a phone), asks it straight away. asker: {member, kid} when a phone sent it,
+   * so a kid asking from their phone gets Ask for kids even on a grown-up's profile.
+   */
+  function open(text, who, asker) {
     if (!window.Family || !Family.linked()) {
       UI.toast(tr('Conecte o Beyond Family em Configurações para perguntar.', 'Link Beyond Family in Settings to ask.', 'Conecta Beyond Family en Ajustes para preguntar.'));
       return;
     }
     if (!api) {
       mode = 'idle'; question = ''; answer = null;
+      as = asker && (asker.member || asker.kid) ? {member: asker.member || undefined, kid: !!asker.kid} : null;
+      if (kid() && !learnt()) mode = 'lesson';
       api = UI.open({
         cls: 'bt-ask',
         build: build,
         back: function () {
           // Back from typing or an answer goes back to the starters; from the starters, it closes.
           if (mode === 'typing' || mode === 'answer' || mode === 'error') { mode = 'idle'; question = ''; answer = null; api.rebuild(); return true; }
+          // Back on the lesson closes it; it shows again next time, until Got it.
           return false;
         },
-        closed: function () { api = null; asking++; if (orb) { orb.stop(); orb = null; } }
+        closed: function () { api = null; as = null; asking++; if (orb) { orb.stop(); orb = null; } }
       });
     }
-    if (text) ask(text, who);
+    else if (asker && (asker.member || asker.kid)) as = {member: asker.member || undefined, kid: !!asker.kid};
+    if (text) {
+      // A phone's question waits for the lesson, when a kid hasn't seen it yet.
+      if (mode === 'lesson') { question = String(text).slice(0, 200); from = who || ''; api.rebuild(); }
+      else ask(text, who);
+    }
   }
 
   return {open: open, starters: STARTERS};

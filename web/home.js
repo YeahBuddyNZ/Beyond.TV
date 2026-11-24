@@ -263,7 +263,7 @@
     else if (!kid) list.push({dots: true, label: tr('Fale com a Beyond', 'Talk to Beyond', 'Habla con Beyond'), run: talkToBeyond});
     // The family wall and everyone's to-dos, ticked with the remote (wall.js, ADR 0067). Kids included: it's their jobs.
     if (Family.linked()) list.push({emoji: '\uD83D\uDCCC', label: tr('Mural da família', 'Family wall', 'Muro de la familia'), run: function () { Wall.open(); }});
-    // The Morning board (morning.js, ADR 0068): today's to-dos, calendar and weather for the house. Linked only.
+    // The Morning board (morning.js, ADR 0069): today's to-dos, calendar and weather for the house. Linked only.
     if (Family.linked()) list.push({icon: 'sunny', label: tr('Hoje', 'Today', 'Hoy'), run: function () { Morning.open(); }});
     // Notes from the family, when there are any up: opens them big (notes.js).
     if (Notes.count()) list.push({emoji: '\uD83D\uDCDD', label: tr('Bilhetes', 'Notes', 'Notas'), run: function () { Notes.open(); }});
@@ -1679,7 +1679,7 @@
     var me = Profiles.current();
     if (me.kid && !me.look && !me.offered) setTimeout(makeItYours, 450);
     else if (me.kid) setTimeout(Pets.ask, 600);   // and have the pets been fed today?
-    // The Morning board, first thing each morning (morning.js, ADR 0068). It waits while another question is up.
+    // The Morning board, first thing each morning (morning.js, ADR 0069). It waits while another question is up.
     setTimeout(Morning.maybe, 900);
     pickShelf();
     cards = [];
@@ -1794,7 +1794,7 @@
     renderAll();
     Data.refresh();
     if (Profiles.count() > 1) Profiles.pick(false, profileChosen);
-    else setTimeout(Morning.maybe, 1500);   // the Morning board, first thing (morning.js, ADR 0068)
+    else setTimeout(Morning.maybe, 1500);   // the Morning board, first thing (morning.js, ADR 0069)
   });
   Checkin.start();
   if (window.HomeHub) HomeHub.start(homeChanged);

@@ -16,7 +16,7 @@ import android.widget.Toast;
 /**
  * Screen time is used up for today (ADR 0060): kind words in the kid's own colour, full screen over the app, never a
  * telling-off. OK goes back to the home screen; a grown-up's PIN adds 15 minutes; Ask a grown-up sends the ask to
- * their phones in Beyond Family (ADR 0068); or someone else can watch.
+ * their phones in Beyond Family (ADR 0069); or someone else can watch.
  * Same as timeUp in web/screentime.js.
  */
 public class TimeUpActivity extends Activity {
@@ -82,7 +82,7 @@ public class TimeUpActivity extends Activity {
             WhoActivity.open(this, null);
             finish();
         });
-        // Ask a grown-up (ADR 0068): their phones buzz and one tap in Beyond Family says yes. A kid from Beyond Family only.
+        // Ask a grown-up (ADR 0069): their phones buzz and one tap in Beyond Family says yes. A kid from Beyond Family only.
         Button ask = null;
         if (Family.linked(this) && me.id != null && me.id.startsWith("bf-")) {
             final String member = me.id.substring(3);

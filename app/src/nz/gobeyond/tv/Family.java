@@ -577,7 +577,7 @@ final class Family {
         }, "beyond-family-pets").start();
     }
 
-    // MARK: - Ask a grown-up and the Morning board (ADR 0068)
+    // MARK: - Ask a grown-up and the Morning board (ADR 0069)
 
     /**
      * A kid asks the grown-ups' phones for more screen time ("time", 15 or 30 minutes) or one more game ("game").
@@ -929,6 +929,20 @@ final class Family {
         return o.isNull(key) ? "" : o.optString(key, "");
     }
 
+    /** A phone's ask: {member, kid} for ask.js (ADR 0068), or "" when the command doesn't say. */
+    private static String askerOf(JSONObject cmd) {
+        String member = text(cmd, "memberId");
+        boolean kid = cmd.optBoolean("kid", false);
+        if (member.isEmpty() && !kid) return "";
+        try {
+            JSONObject o = new JSONObject().put("kid", kid);
+            if (!member.isEmpty()) o.put("member", member);
+            return o.toString();
+        } catch (JSONException e) {
+            return "";
+        }
+    }
+
     static int colour(String hex, int fallback) {
         try {
             return hex == null || hex.isEmpty() ? fallback : Color.parseColor(hex) | 0xFF000000;
@@ -988,7 +1002,7 @@ final class Family {
                 });
                 break;
             case "request-answer":
-                // A grown-up's yes or not now to a kid's ask (ADR 0068).
+                // A grown-up's yes or not now to a kid's ask (ADR 0069).
                 MAIN.post(() -> answered(app, cmd));
                 break;
             case "sky":
@@ -1094,12 +1108,14 @@ final class Family {
             case "ask":
                 // Asked from a phone in Beyond Family: the TV asks it with its own apps, and the answer comes up here.
                 final String question = text(cmd, "text"), asker = text(cmd, "from");
+                // Whose phone it was, and whether they're a kid (ADR 0068): a kid's question is checked and logged.
+                final String who = askerOf(cmd);
                 if (question.isEmpty()) break;
                 adb().post(() -> {
                     allowOverApps(app);
                     MAIN.post(() -> {
                         try {
-                            AskActivity.open(app, AskActivity.ASK, question, asker);
+                            AskActivity.open(app, AskActivity.ASK, question, asker, who);
                         } catch (RuntimeException ignored) {
                         }
                     });

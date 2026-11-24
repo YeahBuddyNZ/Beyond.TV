@@ -1,4 +1,4 @@
-# 0068. Ask a grown-up from the TV, and the Morning board
+# 0069. Ask a grown-up from the TV, and the Morning board
 
 Date: 24/11/2026. Status: accepted. Builds on 0060 (screen time limits), 0064 (Beyond Family sets things on the TV) and
 0067 (the family wall and to-dos).

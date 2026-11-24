@@ -449,7 +449,7 @@ var Family = (function () {
     if (c.kind === 'request-answer') { if (window.ScreenTime) ScreenTime.answered(c); return; }
     if (c.kind === 'note') { if (c.id && window.Notes) Notes.arrived(c.id); return; }
     // A question from a phone: this TV asks it with its own apps, and the answer shows here.
-    if (c.kind === 'ask') { hide(); if (window.Ask) Ask.open(c.text, c.from); return; }
+    if (c.kind === 'ask') { hide(); if (window.Ask) Ask.open(c.text, c.from, {member: c.memberId, kid: !!c.kid}); return; }
     if (c.kind === 'together') { together(c); return; }
     if (c.kind === 'together-end') { togetherEnd(c.session); return; }
     if (c.kind === 'react') { react(c.emoji, c.from, c.colour); return; }
@@ -499,10 +499,13 @@ var Family = (function () {
 
   // MARK: - Ask Beyond and notes (ADR 0025)
 
-  /** Ask Beyond: the question and this TV's app names, and who's watching so a kid gets a kid's answer. Nothing is kept. */
-  function askBeyond(text, apps, together, done) {
+  /** Ask Beyond: the question and this TV's app names, and who's watching so a kid gets Ask for kids. A grown-up's isn't kept. */
+  function askBeyond(text, apps, together, done, who) {
     if (!linked()) { done({status: 403}); return; }
-    call('POST', '/tv/ask', {ask: String(text).slice(0, 200), apps: (apps || []).slice(0, 40), memberId: watcher(), together: together || undefined},
+    // who (ask.js): a kid asking (ADR 0068), checked and logged for their grown-ups; or whose phone sent it.
+    who = who || {};
+    call('POST', '/tv/ask', {ask: String(text).slice(0, 200), apps: (apps || []).slice(0, 40), memberId: who.member || watcher(),
+      together: together || undefined, kid: who.kid || undefined, teen: who.teen || undefined, name: who.name || undefined},
       function (err, json) { done(err, json); }, 40000);
   }
 
@@ -948,7 +951,7 @@ var Family = (function () {
     call('POST', '/tv/now', app ? {app: String(app).slice(0, 40), title: title ? String(title).slice(0, 120) : undefined, who: who ? who.name : undefined} : {}, function () {});
   }
 
-  // MARK: - Ask a grown-up and the Morning board (ADR 0068)
+  // MARK: - Ask a grown-up and the Morning board (ADR 0069)
 
   /**
    * A kid asks the grown-ups' phones for more screen time or one more game (screentime.js). done(err, answer):
