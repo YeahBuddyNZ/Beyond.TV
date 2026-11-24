@@ -14,7 +14,7 @@
 var Profiles = (function () {
   'use strict';
 
-  var KEY = 'btv.profiles', WHO = 'btv.who', PIN = 'btv.pin', TOGETHER = 'btv.together';
+  var KEY = 'btv.profiles', WHO = 'btv.who', PIN = 'btv.pin', TOGETHER = 'btv.together', WARM = 'btv.warm';
 
   /** Beyond's people colours (the same family as Beyond Family's member swatches). */
   var COLOURS = ['#2F7D6D', '#D85A30', '#378ADD', '#E8A33D', '#7A4FD0', '#D6589A', '#2A9DA8', '#55534B'];
@@ -29,6 +29,8 @@ var Profiles = (function () {
     try { var v = JSON.parse(localStorage.getItem(key)); return v === null || v === undefined ? fallback : v; } catch (e) { return fallback; }
   }
   function save(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {} }
+  /** Today on the TV's clock, as YYYY-MM-DD. */
+  function today() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
 
   /** A sample household for the browser preview and the website's demo, so the screens have people in them. */
   var DEMO = [
@@ -214,12 +216,13 @@ var Profiles = (function () {
     var line = UI.el('div', 'bt-warm', layer);
     line.style.top = top + 'px';
     var dot = UI.el('span', 'dot', line), words = UI.el('span', '', line);
-    var step = Math.floor(Date.now() / 1000) % (people.length * 7);
-    var day = Math.floor((Date.now() - new Date().getTimezoneOffset() * 60000) / 86400000);
+    // Shuffled (ADR 0072), and remembered between visits so opening the screen again carries on.
+    var mem = load(WARM, null) || Warm.memory();
     var lang = window.I18N ? I18N.lang : 'en';
     function show() {
-      var note = Warm.next(people, step++, day, lang);
+      var note = Warm.next(people, mem, Math.random, lang);
       if (!note) return;
+      save(WARM, mem);
       dot.style.background = people[note.who].colour || '#9E7BFF';
       words.textContent = note.text;
       UI.setClass(line, 'out', false);
@@ -270,8 +273,11 @@ var Profiles = (function () {
             var f = UI.el('div', 'bt-face', row);
             spot(f, i);
             var av = UI.avatar(p, f, size);
-            if (!manage && !p.together && !p.visitor) { noted.push({name: p.name, kid: !!p.kid, stage: school(p), colour: p.colour}); notedFaces.push(av); }
+            if (!manage && !p.together && !p.visitor) { noted.push({name: p.name, kid: !!p.kid, stage: school(p), parent: p.parent, colour: p.colour, awards: p.kid ? p.awards : undefined}); notedFaces.push(av); }
             UI.el('div', 'name', f, p.name);
+            // Their newest award from Beyond Family, for a fortnight (ADR 0072).
+            var won = !manage && p.kid && window.Warm ? Warm.badge(p, today()) : '';
+            if (won) UI.el('div', 'edit award', f, won);
             if (p.together) UI.el('div', 'edit', f, tr('Todos juntos', 'Everyone together', 'Todos juntos'));
             if (manage) UI.el('div', 'edit', f, tr('Editar', 'Edit', 'Editar'));
             api.add(f, function () {

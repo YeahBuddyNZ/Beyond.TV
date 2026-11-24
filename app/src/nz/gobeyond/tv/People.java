@@ -48,6 +48,9 @@ final class People {
         boolean visitor;
         /** Kindy, school or college (WarmNotes), from their birthday in Beyond Family. A choice on this TV wins. */
         String stage = "";
+        /** Awards a grown-up gave this kid in Beyond Family (ADR 0072), newest first, as Beyond Family sent them: a JSON
+         *  array of {title, emoji, from, note, on}. Empty for none. */
+        String awards = "";
         /** Kept on this TV only, never sent anywhere (ADR 0066): "mum", "dad" or "" for a grown-up, so Mum comes
          *  first on Who's watching, and the kid's stage chosen here. Beyond Family's syncs leave them be. */
         String parent = "";
@@ -90,6 +93,7 @@ final class People {
                 for (int j = 0; loves != null && j < loves.length(); j++) p.loves.add(loves.optString(j));
                 p.visitor = o.optBoolean("visitor");
                 p.stage = o.optString("stage");
+                p.awards = o.optString("awards");
                 out.add(p);
             }
         } catch (Exception ignored) {
@@ -174,6 +178,7 @@ final class People {
                 if (!p.loves.isEmpty()) o.put("loves", new JSONArray(p.loves));
                 if (p.visitor) o.put("visitor", true);
                 if (p.stage != null && !p.stage.isEmpty()) o.put("stage", p.stage);
+                if (p.awards != null && !p.awards.isEmpty()) o.put("awards", p.awards);
                 a.put(o);
             }
             SharedPreferences.Editor e = sp(c).edit().putString("list", a.toString());
@@ -194,7 +199,8 @@ final class People {
             if (!a.id.equals(b.id) || !a.name.equals(b.name) || a.colour != b.colour || a.kid != b.kid || a.teen != b.teen
                     || !String.valueOf(a.emoji).equals(String.valueOf(b.emoji)) || a.visitor != b.visitor
                     || !String.valueOf(a.world).equals(String.valueOf(b.world)) || !a.loves.equals(b.loves)
-                    || !String.valueOf(a.stage).equals(String.valueOf(b.stage))) return false;
+                    || !String.valueOf(a.stage).equals(String.valueOf(b.stage))
+                    || !String.valueOf(a.awards).equals(String.valueOf(b.awards))) return false;
         }
         return true;
     }
