@@ -41,9 +41,11 @@ var AskHost = (function () {
 
   window.Family = {
     linked: function () { return bridge ? bridge.linked() : false; },
-    ask: function (text, apps, together, done) {
-      call('POST', '/tv/ask', {ask: String(text).slice(0, 200), apps: (apps || []).slice(0, 40), memberId: me.member || undefined,
-        together: together || undefined}, done);
+    ask: function (text, apps, together, done, who) {
+      // who (ask.js): a kid asking (ADR 0068), checked and logged for their grown-ups; or whose phone sent it.
+      who = who || {};
+      call('POST', '/tv/ask', {ask: String(text).slice(0, 200), apps: (apps || []).slice(0, 40), memberId: who.member || me.member || undefined,
+        together: together || undefined, kid: who.kid || undefined, teen: who.teen || undefined, name: who.name || undefined}, done);
     },
     noteHeart: function (id, done) { call('POST', '/tv/notes/' + id + '/heart', {memberId: me.member || undefined}, function (err) { done(err); }); },
     noteDown: function (id, done) { call('POST', '/tv/notes/' + id + '/down', {}, function (err) { done(err); }); }
@@ -131,7 +133,7 @@ var AskHost = (function () {
       Notes.open();
     } else {
       var text = bridge ? bridge.text() : '';
-      Ask.open(text || undefined, bridge ? bridge.from() : '');
+      Ask.open(text || undefined, bridge ? bridge.from() : '', bridge && bridge.asker ? json(bridge.asker(), null) : null);
     }
     if (!UI.active() && bridge) setTimeout(function () { if (!UI.active()) bridge.close(); }, 2500);
   }
