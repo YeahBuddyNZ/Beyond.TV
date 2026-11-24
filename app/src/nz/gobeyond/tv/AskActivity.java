@@ -46,12 +46,18 @@ public class AskActivity extends Activity {
 
     /** mode: ASK (the orb; `text` asks straight away) or NOTES (the notes wall). `from`: who asked from a phone. */
     static void open(Context c, String mode, String text, String from) {
+        open(c, mode, text, from, "");
+    }
+
+    /** asker: {member, kid} as JSON when a phone asked (ADR 0066), so a kid's phone question is a kid's question. */
+    static void open(Context c, String mode, String text, String from, String asker) {
         c.startActivity(new Intent(c, AskActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                .putExtra("mode", mode).putExtra("text", text == null ? "" : text).putExtra("from", from == null ? "" : from));
+                .putExtra("mode", mode).putExtra("text", text == null ? "" : text).putExtra("from", from == null ? "" : from)
+                .putExtra("asker", asker == null ? "" : asker));
     }
 
     private WebView web;
-    private String mode = ASK, text = "", from = "";
+    private String mode = ASK, text = "", from = "", asker = "";
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     @Override protected void onCreate(Bundle savedInstanceState) {
@@ -117,6 +123,7 @@ public class AskActivity extends Activity {
         mode = NOTES.equals(m) ? NOTES : FIND.equals(m) ? FIND : ASK;
         text = i.getStringExtra("text") == null ? "" : i.getStringExtra("text");
         from = i.getStringExtra("from") == null ? "" : i.getStringExtra("from");
+        asker = i.getStringExtra("asker") == null ? "" : i.getStringExtra("asker");
     }
 
     private void done(final String id, final int status, final String json) {
@@ -133,6 +140,9 @@ public class AskActivity extends Activity {
 
         @JavascriptInterface public String from() { return from; }
 
+        /** Whose phone asked, and whether they're a kid (ADR 0066): {member, kid}, or "" when the TV asked. */
+        @JavascriptInterface public String asker() { return asker; }
+
         @JavascriptInterface public String language() { return Ui.language; }
 
         @JavascriptInterface public boolean sounds() { return Prefs.sounds(); }
@@ -146,7 +156,8 @@ public class AskActivity extends Activity {
             People.Person p = People.current(AskActivity.this);
             JSONObject out = new JSONObject();
             try {
-                out.put("id", p.id == null ? "" : p.id).put("kid", p.kid).put("together", p.together());
+                out.put("id", p.id == null ? "" : p.id).put("kid", p.kid).put("together", p.together())
+                        .put("teen", p.teen).put("name", p.name == null ? "" : p.name);
                 if (p.member() != null) out.put("member", p.member());
             } catch (JSONException ignored) {
             }
