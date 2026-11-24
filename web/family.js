@@ -81,8 +81,10 @@ var Family = (function () {
     // likes: what a grown-up said a kid is into, which picks their shows (kidpicks.js).
     // teen: a kid of 13 or more, worked out by Beyond Family from their birthday (only the yes or no comes here).
     // profile: their face, colour, world, loves and shelf, kept with them in Beyond Family.
+    // stage: kindy, school or college, worked out from their birthday (only the word comes here), for the warm notes.
+    var stage = p.kid && /^(kindy|school|college)$/.test(p.stage || '') ? p.stage : undefined;
     return {id: 'bf-' + p.id, name: p.name, colour: p.colour || '#2F7D6D', kid: !!p.kid, teen: !!(p.kid && p.teen), family: p.id, jobs: p.jobs,
-      likes: p.likes, profile: p.profile, visitor: visitor || undefined};
+      likes: p.likes, profile: p.profile, visitor: visitor || undefined, stage: stage};
   }
 
   /**
@@ -137,6 +139,36 @@ var Family = (function () {
       if (!err) Profiles.saved(p.id, stamp);
       // Offline or refused: it stays marked, and goes again with the next change from Beyond Family.
     });
+  }
+
+  /**
+   * Tap to allow (ADR 0066): a grown-up with their own PIN lets themselves in from the Beyond Family app. The TV asks,
+   * their phone shows "Is this you on the TV?", and a tap on Allow opens their profile. update(state) hears "asked",
+   * then "allowed", "no", "late" (two minutes) or "failed". Returns a function that stops asking.
+   */
+  function unlock(member, update) {
+    var stopped = false, timer = null, until = Date.now() + 120000;
+    function end(state) { if (!stopped) { stopped = true; clearTimeout(timer); update(state); } }
+    call('POST', '/tv/requests', {kind: 'unlock', memberId: member}, function (err, res) {
+      if (stopped) return;
+      if (err || !res || !res.id) { end('failed'); return; }
+      update('asked');
+      (function look() {
+        timer = setTimeout(function () {
+          if (stopped) return;
+          if (Date.now() > until) { end('late'); return; }
+          call('GET', '/tv/requests/' + res.id, undefined, function (e, r) {
+            if (stopped) return;
+            var status = r && r.status;
+            if (status === 'yes') end('allowed');
+            else if (status === 'no') end('no');
+            else if (status === 'gone') end('late');
+            else look();
+          }, 10000);
+        }, 2000);
+      })();
+    });
+    return function () { stopped = true; clearTimeout(timer); };
   }
 
   /** Signs a visitor out of this TV. */
@@ -879,6 +911,7 @@ var Family = (function () {
 
   return {
     linked: linked,
+    listening: listening,
     homeName: function () { return state.home ? state.home.name : ''; },
     link: link,
     manage: manage,
@@ -902,6 +935,7 @@ var Family = (function () {
     widgets: function () { return linked() ? widgets : []; },
     visit: visit,
     signOut: signOut,
+    unlock: unlock,
     pushProfile: pushProfile,
     now: now,
     ask: askBeyond,

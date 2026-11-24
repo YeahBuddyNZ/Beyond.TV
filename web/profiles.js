@@ -76,6 +76,8 @@ var Profiles = (function () {
       p.loves = old.loves;
       if (!p.likes) p.likes = old.likes;
       p.offered = old.offered;
+      // Kept on this TV only (ADR 0066): Mum or Dad, a kid's stage chosen here, a grown-up's own PIN.
+      p.parent = old.parent; p.stageHere = old.stageHere; p.ownPin = old.ownPin;
       if (old.pending) { p.pending = old.pending; return p; }
       // Made up on this TV before Beyond Family kept looks: send it up once, so it isn't lost.
       if (old.look && !prof) p.pending = 1;
@@ -112,7 +114,7 @@ var Profiles = (function () {
   }
 
   /** The PIN pad: four dots, digits 0 to 9 on screen (or the remote's number keys). check(typed) → true to close. */
-  function askPin(title, check, sub) {
+  function askPin(title, check, sub, extra) {
     var typed = '';
     var dotsRow;
     function paintDots(wrong) {
@@ -152,7 +154,9 @@ var Profiles = (function () {
             }, {first: k === '5'});
           })(keys[i], i);
         }
+        if (extra) extra(UI.el('div', 'bt-pin-extra', box), api);
       },
+      closed: function () { if (stopAsking) { stopAsking(); stopAsking = null; } },
       key: function (k) {
         if (k >= 48 && k <= 57) { press(String(k - 48), UI.top()); return true; }
         return false;
@@ -160,9 +164,77 @@ var Profiles = (function () {
     });
   }
 
+  /** A kid's kindy, school or college: what was chosen on this TV, else what Beyond Family worked out. */
+  function school(p) { return p.stageHere ? (p.stageHere === 'none' ? '' : p.stageHere) : (p.stage || ''); }
+
+  var stopAsking = null;
+
+  /**
+   * A grown-up's own PIN (ADR 0066): typed with the remote's numbers or the pad, or, when they're in Beyond Family,
+   * allowed with one tap on their phone. Either way then() runs.
+   */
+  function askOwn(p, then) {
+    var phone = !!(p.family && window.Family && Family.listening && Family.listening());
+    askPin(p.name, function (t) { if (t === p.ownPin) { setTimeout(then, 0); return true; } return false; },
+      phone ? tr('Digite seu PIN, ou permita pelo celular.', 'Type your PIN, or allow it from your phone.', 'Escribe tu PIN, o permítelo desde tu móvil.')
+        : tr('Digite seu PIN.', 'Type your PIN.', 'Escribe tu PIN.'),
+      phone ? function (foot, api) {
+        var b = UI.button(foot, tr('Permitir pelo meu celular', 'Allow from my phone', 'Permitir desde mi móvil'));
+        var busy = false;
+        function say(t) { b.lastChild.textContent = t; }
+        api.add(b, function () {
+          if (busy) return;
+          busy = true;
+          say(tr('Perguntando ao seu celular…', 'Asking your phone…', 'Preguntando a tu móvil…'));
+          if (stopAsking) stopAsking();
+          stopAsking = Family.unlock(p.family, function (state) {
+            if (state === 'asked') { say(tr('Olhe o celular e toque em Permitir', 'Look at your phone and tap Allow', 'Mira el móvil y toca Permitir')); return; }
+            stopAsking = null;
+            if (state === 'allowed') { api.close(); setTimeout(then, 0); return; }
+            busy = false;
+            say(tr('Perguntar de novo', 'Ask again', 'Preguntar otra vez'));
+            UI.toast(state === 'no' ? tr('Seu celular disse que não era você.', "Your phone said that wasn't you.", 'Tu móvil dijo que no eras tú.')
+              : state === 'late' ? tr('O celular não respondeu. Digite seu PIN.', 'No answer from your phone. Type your PIN instead.', 'El móvil no respondió. Escribe tu PIN.')
+              : tr('Não deu para falar com o celular. Digite seu PIN.', "Couldn't reach your phone. Type your PIN instead.", 'No se pudo llegar a tu móvil. Escribe tu PIN.'));
+          });
+        });
+      } : null);
+  }
+
   // MARK: - Who's watching?
 
   var whoOpen = false;
+  var warmTimers = [];
+  function stopWarm() { while (warmTimers.length) clearTimeout(warmTimers.pop()); }
+
+  /** Warm notes (warm.js, ADR 0066): one kind line at a time under the faces, each person in turn, with a little hop. */
+  function warmNotes(layer, people, faces, top) {
+    stopWarm();
+    if (!window.Warm || !people.length) return;
+    var line = UI.el('div', 'bt-warm', layer);
+    line.style.top = top + 'px';
+    var dot = UI.el('span', 'dot', line), words = UI.el('span', '', line);
+    var step = Math.floor(Date.now() / 1000) % (people.length * 7);
+    var day = Math.floor((Date.now() - new Date().getTimezoneOffset() * 60000) / 86400000);
+    var lang = window.I18N ? I18N.lang : 'en';
+    function show() {
+      var note = Warm.next(people, step++, day, lang);
+      if (!note) return;
+      dot.style.background = people[note.who].colour || '#9E7BFF';
+      words.textContent = note.text;
+      UI.setClass(line, 'out', false);
+      UI.setClass(line, 'in', false);
+      warmTimers.push(setTimeout(function () { UI.setClass(line, 'in', true); }, 30));
+      var av = faces[note.who];
+      if (av) {
+        UI.setClass(av, 'hop', true);
+        warmTimers.push(setTimeout(function () { UI.setClass(av, 'hop', false); }, 800));
+      }
+      warmTimers.push(setTimeout(function () { UI.setClass(line, 'in', false); UI.setClass(line, 'out', true); }, 5600));
+      warmTimers.push(setTimeout(show, 6400));
+    }
+    warmTimers.push(setTimeout(show, 900));
+  }
 
   /** The picker. manage=true opens it to edit (every face opens the editor, and there's an Add). */
   function pick(manage, done) {
@@ -175,10 +247,15 @@ var Profiles = (function () {
         UI.dots(hello);
         UI.el('span', '', hello, manage ? tr('Perfis', 'Profiles', 'Perfiles') : tr('Quem está assistindo?', "Who's watching?", '¿Quién está viendo?'));
         var row = UI.el('div', 'bt-faces', layer);
-        var all = manage || list.length < 2 ? list.slice() : [find(FAMILY.id)].concat(list);
-        // Everyone on one screen: smaller faces for a big family, then two or three rows, never a scroll.
+        // Grown-ups first with Mum leading, then the kids (warm.js, ADR 0066). Family stays first of all.
+        var ordered = window.Warm ? Warm.order(list) : list.slice();
+        var all = manage || list.length < 2 ? ordered : [find(FAMILY.id)].concat(ordered);
+        // Everyone on one screen: smaller faces for a big family, then two or three rows, never a scroll. Smaller
+        // than they were, to leave room for the warm notes underneath.
         var n = all.length + (manage ? 1 : 0), rows = n <= 7 ? 1 : n <= 14 ? 2 : 3, across = Math.ceil(n / rows);
-        var size = rows === 3 ? 105 : rows === 2 ? 140 : n > 5 ? 170 : 200, gap = rows > 1 ? 44 : n > 5 ? 52 : 70;
+        var size = manage ? (rows === 3 ? 105 : rows === 2 ? 140 : n > 5 ? 170 : 200) : rows === 3 ? 92 : rows === 2 ? 120 : n > 5 ? 140 : 164;
+        var gap = rows > 1 ? 44 : n > 5 ? 56 : 70;
+        var noted = [], notedFaces = [];
         var rowH = size + (rows === 3 ? 70 : 90), lastAcross = n - (rows - 1) * across;
         if (rows > 1) { row.style.top = rows === 3 ? '320px' : '350px'; row.className += ' rows'; }
         function spot(f, i) {
@@ -192,7 +269,8 @@ var Profiles = (function () {
           (function (p, i) {
             var f = UI.el('div', 'bt-face', row);
             spot(f, i);
-            UI.avatar(p, f, size);
+            var av = UI.avatar(p, f, size);
+            if (!manage && !p.together && !p.visitor) { noted.push({name: p.name, kid: !!p.kid, stage: school(p), colour: p.colour}); notedFaces.push(av); }
             UI.el('div', 'name', f, p.name);
             if (p.together) UI.el('div', 'edit', f, tr('Todos juntos', 'Everyone together', 'Todos juntos'));
             if (manage) UI.el('div', 'edit', f, tr('Editar', 'Edit', 'Editar'));
@@ -212,8 +290,12 @@ var Profiles = (function () {
           UI.el('div', 'name', add, tr('Adicionar', 'Add someone', 'Añadir'));
           api.add(add, function () { edit(null, function () { api.rebuild(); }); });
         }
+        var rowTop = rows === 3 ? 320 : rows === 2 ? 350 : 380, rowH2 = size + (rows === 3 ? 70 : 90);
+        var warmTop = rowTop + (rows === 1 ? size + 150 : rows * rowH2) + 20;
         var foot = UI.el('div', 'bt-who-foot', layer);
         if (!manage) {
+          warmNotes(layer, noted, notedFaces, warmTop);
+          foot.style.top = Math.max(860, warmTop + 110) + 'px';
           var m = UI.button(foot, tr('Gerenciar perfis', 'Manage profiles', 'Administrar perfiles'), 'settings');
           api.add(m, function () { guard(tr('Gerenciar perfis', 'Manage profiles', 'Administrar perfiles'), function () { pick(true, function () { UI.top() && UI.top().rebuild(); }); }); });
           if (window.Family && Family.visit) {
@@ -227,7 +309,7 @@ var Profiles = (function () {
         if (window.Family && Family.linked()) UI.el('div', 'bt-who-note', foot, tr('Do Beyond Family: ', 'From Beyond Family: ', 'De Beyond Family: ') + Family.homeName());
       },
       back: function () { return !manage && !current(); },
-      closed: function () { whoOpen = false; if (manage && done) done(); }
+      closed: function () { if (!manage) stopWarm(); whoOpen = false; if (manage && done) done(); }
     });
   }
 
@@ -239,6 +321,8 @@ var Profiles = (function () {
       api.close();
       if (done) done(p);
     }
+    // A grown-up with their own PIN (ADR 0066): theirs, typed or allowed from their phone.
+    if (!p.together && !p.kid && p.ownPin && p.id !== who) { askOwn(p, go); return; }
     // A kid moving to a grown-up's profile needs the PIN; anyone moving to a kid's doesn't.
     if (current().kid && !p.kid && pin()) {
       askPin(tr('Perfil de adulto', "A grown-up's profile", 'Perfil de adulto'), function (t) { if (t === pin()) { setTimeout(go, 0); return true; } return false; });
@@ -304,7 +388,61 @@ var Profiles = (function () {
           if (!p.kid) p.kid = true;
           else if (!p.teen) p.teen = true;
           else { p.kid = false; p.teen = false; }
-          kidLabel(); repaint(); likesBtn.style.display = timeBtn.style.display = p.kid ? '' : 'none';
+          kidLabel(); repaint(); moreLabels(); likesBtn.style.display = timeBtn.style.display = p.kid ? '' : 'none';
+        });
+        // Who they are and their own PIN for a grown-up; kindy, school or college for a kid (ADR 0066).
+        var parentBtn = UI.button(actions, '', null, 'toggle-row');
+        var pinBtn = UI.button(actions, '', null, 'toggle-row');
+        var stageBtn = UI.button(actions, '', null, 'toggle-row');
+        function moreLabels() {
+          parentBtn.lastChild.textContent = tr('Quem é: ', 'Who they are: ', 'Quién es: ') + (p.parent === 'mum' ? tr('Mãe', 'Mum', 'Mamá') : p.parent === 'dad' ? tr('Pai', 'Dad', 'Papá') : tr('Adulto', 'Grown-up', 'Adulto'));
+          pinBtn.lastChild.textContent = tr('PIN próprio: ', 'Their own PIN: ', 'PIN propio: ') + (p.ownPin ? tr('sim', 'on', 'sí') : tr('não', 'off', 'no'));
+          var at = school(p);
+          stageBtn.lastChild.textContent = tr('Estuda: ', 'At: ', 'Estudia: ') + (at === 'kindy' ? tr('escolinha', 'kindy', 'kínder') : at === 'school' ? tr('escola', 'school', 'cole')
+            : at === 'college' ? tr('ensino médio', 'college', 'instituto') : tr('não marcado', 'not set', 'sin marcar'));
+          parentBtn.style.display = p.kid ? 'none' : '';
+          pinBtn.style.display = p.kid ? 'none' : '';
+          stageBtn.style.display = p.kid ? '' : 'none';
+        }
+        moreLabels();
+        api.add(parentBtn, function () { if (p.kid) return; p.parent = !p.parent ? 'mum' : p.parent === 'mum' ? 'dad' : ''; moreLabels(); });
+        api.add(stageBtn, function () {
+          if (!p.kid) return;
+          // Kindy, school, college, then not set, then back to whatever Beyond Family says.
+          var at = school(p);
+          p.stageHere = at === 'kindy' ? 'school' : at === 'school' ? 'college' : at === 'college' ? 'none' : p.stage && p.stageHere === 'none' ? '' : 'kindy';
+          moreLabels();
+        });
+        api.add(pinBtn, function () {
+          if (p.kid) return;
+          function choose() {
+            askPin(p.name || tr('Novo PIN', 'New grown-up PIN', 'Nuevo PIN'), function (first) {
+              setTimeout(function () {
+                askPin(tr('Confirme o PIN', 'Type it again', 'Confirma el PIN'), function (again) {
+                  if (again !== first) { UI.toast(tr('Os PINs não batem. Tente de novo.', "Those didn't match. Try again.", 'No coinciden. Prueba otra vez.')); return true; }
+                  p.ownPin = first;
+                  moreLabels();
+                  return true;
+                }, tr('Mais uma vez', 'Once more, to be sure', 'Una vez más'));
+              }, 0);
+              return true;
+            }, tr('Quatro números só seus.', 'Four numbers that are only yours.', 'Cuatro números que son solo tuyos.'));
+          }
+          if (!p.ownPin) { choose(); return; }
+          // One already: type it first, then change it or take it off.
+          askPin(tr('PIN atual', 'Current PIN', 'PIN actual'), function (t) {
+            if (t !== p.ownPin) return false;
+            setTimeout(function () {
+              UI.open({cls: 'bt-pin', build: function (layer2, api2) {
+                var box2 = UI.el('div', 'bt-box', layer2);
+                UI.heading(box2, p.name, tr('O que fazer com o seu PIN?', 'What would you like to do with your PIN?', '¿Qué quieres hacer con tu PIN?'));
+                var row2 = UI.el('div', 'bt-pin-extra', box2);
+                api2.add(UI.button(row2, tr('Mudar o PIN', 'Change my PIN', 'Cambiar el PIN'), null, 'primary'), function () { api2.close(); setTimeout(choose, 0); }, {first: true});
+                api2.add(UI.button(row2, tr('Tirar o PIN', 'Take my PIN off', 'Quitar el PIN'), null, 'danger'), function () { p.ownPin = ''; moreLabels(); api2.close(); });
+              }});
+            }, 0);
+            return true;
+          }, p.name);
         });
         // What a kid is into, set by a grown-up (this is already behind the PIN): it picks the shows on their cards.
         var likesBtn = UI.button(actions, tr('Do que gosta', "What they're into", 'Lo que le gusta'), 'sparkles');
@@ -330,6 +468,7 @@ var Profiles = (function () {
         api.add(UI.button(actions, tr('Salvar', 'Save', 'Guardar'), 'check', 'primary'), function () {
           p.name = (kb.text() || '').replace(/^\s+|\s+$/g, '');
           if (!p.name) { UI.toast(tr('Dê um nome ao perfil.', 'Give the profile a name.', 'Ponle un nombre al perfil.')); return; }
+          if (p.kid) { delete p.parent; delete p.ownPin; } else delete p.stageHere;
           if (isNew) list.push(p);
           else for (var i = 0; i < list.length; i++) if (list[i].id === p.id) list[i] = p;
           if (window.ScreenTime) ScreenTime.setLimit(p.id, p.kid ? limit : 0);

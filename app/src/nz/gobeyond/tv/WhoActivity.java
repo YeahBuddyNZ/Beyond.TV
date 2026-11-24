@@ -75,6 +75,9 @@ public class WhoActivity extends Activity {
 
     /** Clears the screen for the next step and returns the column to fill. */
     private LinearLayout page(String heading, String sub) {
+        stopWarm();
+        stopAsking();
+        typing = null;
         if (column != null) root.removeView(column);
         column = new LinearLayout(this);
         column.setOrientation(LinearLayout.VERTICAL);
@@ -161,15 +164,23 @@ public class WhoActivity extends Activity {
         Face first = null;
         java.util.List<People.Person> choices = People.choices(this);
         // A few faces get the room a few faces deserve; a big family gets smaller faces, then rows, all on one screen.
+        // Smaller than before (ADR 0066), to leave room under them for the warm notes.
         int n = choices.size();
-        float big = fit(n, n <= 2 ? 1.35f : n <= 4 ? 1.15f : 1f);
+        float big = fit(n, n <= 2 ? 1.05f : n <= 4 ? 0.9f : 0.78f) * (n > 7 ? 0.9f : 1f);
         LinearLayout[] rows = faceRows(c, n, big);
+        java.util.List<People.Person> noted = new java.util.ArrayList<>();
+        java.util.List<Face> notedFaces = new java.util.ArrayList<>();
         for (int i = 0; i < n; i++) {
             People.Person p = choices.get(i);
             Face f = face(rows[i / perRow(n)], p, p.together() ? Ui.tr("Todos juntos", "Everyone together") : null, v -> choose(p), big);
             if (p.id.equals(now.id)) first = f;
+            if (!p.together() && !p.visitor) {
+                noted.add(p);
+                notedFaces.add(f);
+            }
         }
-        LinearLayout foot = row(c, 40);
+        warmNotes(c, noted, notedFaces);
+        LinearLayout foot = row(c, 24);
         if (now.kid && !now.together()) {
             // Their buddy, colour, world and loves: theirs to change, no PIN.
             add(foot, Ui.tr("Do seu jeito", "Make it yours", "A tu manera"), true, v -> {
@@ -192,6 +203,71 @@ public class WhoActivity extends Activity {
         if (first != null) first.requestFocus();
     }
 
+    // MARK: - Warm notes (ADR 0066)
+
+    private TextView warm;
+    private int warmStep;
+    private final Runnable warmNext = this::showWarm;
+    private java.util.List<People.Person> warmPeople;
+    private java.util.List<Face> warmFaces;
+
+    /** One kind line at a time under the faces, each person in turn, big enough to read from the couch. */
+    private void warmNotes(LinearLayout c, java.util.List<People.Person> people, java.util.List<Face> faces) {
+        handler.removeCallbacks(warmNext);
+        warmPeople = people;
+        warmFaces = faces;
+        warm = FeedbackActivity.text(this, "", Ui.displaySemibold, 46 * k, 0xFFFFFFFF);
+        warm.setSingleLine(true);
+        warm.setShadowLayer(18 * k, 0, 4 * k, 0x66000000);
+        warm.setAlpha(0f);
+        LinearLayout.LayoutParams wp = new LinearLayout.LayoutParams(-1, Math.round(110 * k));
+        wp.topMargin = Math.round(18 * k);
+        c.addView(warm, wp);
+        if (people.isEmpty()) return;
+        // A different start each time the screen opens, so the same person isn't always first.
+        warmStep = (int) ((System.currentTimeMillis() / 1000) % (people.size() * 7));
+        handler.postDelayed(warmNext, 900);
+    }
+
+    private void showWarm() {
+        if (warm == null || warmPeople == null || warmPeople.isEmpty()) return;
+        int n = warmPeople.size();
+        String[] names = new String[n], stage = new String[n];
+        boolean[] kid = new boolean[n];
+        for (int i = 0; i < n; i++) {
+            People.Person p = warmPeople.get(i);
+            names[i] = p.name;
+            kid[i] = p.kid;
+            stage[i] = p.school();
+        }
+        int day = (int) ((System.currentTimeMillis() + java.util.TimeZone.getDefault().getOffset(System.currentTimeMillis())) / 86_400_000L);
+        String lang = Ui.de ? "de" : Ui.ru ? "ru" : Ui.es ? "es" : Ui.en ? "en" : "pt";
+        WarmNotes.Note note = WarmNotes.next(names, kid, stage, warmStep++, day, lang);
+        if (note == null) return;
+        People.Person who = warmPeople.get(note.who);
+        // A dot in their colour, so it's clear whose note it is, then the words.
+        android.text.SpannableString line = new android.text.SpannableString("\u25CF  " + note.text);
+        line.setSpan(new android.text.style.ForegroundColorSpan(who.colour | 0xFF000000), 0, 1, 0);
+        warm.animate().cancel();
+        warm.setText(line);
+        warm.setTranslationY(26 * k);
+        warm.setAlpha(0f);
+        warm.animate().alpha(1f).translationY(0).setDuration(700).setInterpolator(new android.view.animation.DecelerateInterpolator()).start();
+        // Their face gives a little hop (unless it's the one lifted for focus).
+        Face f = warmFaces.get(note.who);
+        if (!f.isFocused()) {
+            f.animate().translationY(-16 * k).setDuration(260).withEndAction(() -> f.animate().translationY(0).setDuration(420)
+                    .setInterpolator(new android.view.animation.BounceInterpolator()).start()).start();
+        }
+        handler.postDelayed(() -> { if (warm != null) warm.animate().alpha(0f).translationY(-14 * k).setDuration(500).start(); }, 5600);
+        handler.postDelayed(warmNext, 6400);
+    }
+
+    private void stopWarm() {
+        handler.removeCallbacks(warmNext);
+        warm = null;
+    }
+
     private void choose(People.Person p) {
         People.Person now = People.current(this);
         Runnable go = () -> {
@@ -200,8 +276,10 @@ public class WhoActivity extends Activity {
             if (!MyWorldActivity.offer(this, p)) PetsActivity.offer(this, p);
             finish();
         };
+        // A grown-up with their own PIN (ADR 0066): theirs, typed on the remote or allowed from their phone.
+        if (!p.together() && !p.kid && !p.id.equals(now.id) && People.hasOwnPin(this, p)) askOwnPin(p, go);
         // A kid moving to Family or a grown-up needs the PIN; anyone moving to a kid's profile doesn't.
-        if (now.kid && !p.kid && People.hasPin(this)) askPin(Ui.tr("PIN de adulto", "Grown-up PIN"), go);
+        else if (now.kid && !p.kid && People.hasPin(this)) askPin(Ui.tr("PIN de adulto", "Grown-up PIN"), go);
         else go.run();
     }
 
@@ -259,6 +337,9 @@ public class WhoActivity extends Activity {
             p.teen = person.teen;
             p.emoji = person.emoji;
             p.visitor = person.visitor;
+            p.stage = person.stage;
+            p.parent = person.parent;
+            p.stageHere = person.stageHere;
         }
         // Screen time a day (ADR 0060): kept on this TV by ScreenTimeService, saved with the rest.
         final int[] limit = {isNew ? 0 : ScreenTimeService.limit(this, p.id)};
@@ -313,6 +394,36 @@ public class WhoActivity extends Activity {
             limit[0] = ScreenTime.CHOICES[(at + 1) % ScreenTime.CHOICES.length];
             timeLabel.run();
         });
+        // Who they are and their own PIN for a grown-up; kindy, school or college for a kid (ADR 0066).
+        LinearLayout moreRow = row(c, 16);
+        final Button parent = add(moreRow, "", false, null);
+        final Button ownPin = add(moreRow, "", false, null);
+        final Button stage = add(moreRow, "", false, null);
+        Runnable moreLabels = () -> {
+            parent.setText(Ui.tr("Quem é: ", "Who they are: ", "Quién es: ") + ("mum".equals(p.parent) ? Ui.tr("Mãe", "Mum", "Mamá")
+                    : "dad".equals(p.parent) ? Ui.tr("Pai", "Dad", "Papá") : Ui.tr("Adulto", "Grown-up", "Adulto")));
+            ownPin.setText(Ui.tr("PIN próprio: ", "Their own PIN: ", "PIN propio: ") + (People.hasOwnPin(this, p) ? Ui.tr("sim", "on") : Ui.tr("não", "off")));
+            String at = p.school();
+            stage.setText(Ui.tr("Estuda: ", "At: ", "Estudia: ") + (WarmNotes.KINDY.equals(at) ? Ui.tr("escolinha", "kindy", "kínder")
+                    : WarmNotes.SCHOOL.equals(at) ? Ui.tr("escola", "school", "cole") : WarmNotes.COLLEGE.equals(at) ? Ui.tr("ensino médio", "college", "instituto")
+                    : Ui.tr("não marcado", "not set", "sin marcar")));
+            parent.setVisibility(p.kid ? View.GONE : View.VISIBLE);
+            ownPin.setVisibility(p.kid || isNew ? View.GONE : View.VISIBLE);
+            stage.setVisibility(p.kid ? View.VISIBLE : View.GONE);
+        };
+        moreLabels.run();
+        parent.setOnClickListener(v -> {
+            p.parent = "".equals(p.parent) || p.parent == null ? "mum" : "mum".equals(p.parent) ? "dad" : "";
+            moreLabels.run();
+        });
+        stage.setOnClickListener(v -> {
+            // Kindy, school, college, then not set, then back to whatever Beyond Family says.
+            String at = p.school();
+            p.stageHere = WarmNotes.KINDY.equals(at) ? WarmNotes.SCHOOL : WarmNotes.SCHOOL.equals(at) ? WarmNotes.COLLEGE
+                    : WarmNotes.COLLEGE.equals(at) ? "none" : p.stage != null && !p.stage.isEmpty() && "none".equals(p.stageHere) ? "" : WarmNotes.KINDY;
+            moreLabels.run();
+        });
+        ownPin.setOnClickListener(v -> ownPin(person, () -> edit(person)));
         kid.setOnClickListener(v -> {
             if (!p.kid && !isNew && !person.kid && grownUps(people) <= 1) {
                 note(Ui.tr("Precisa de pelo menos um adulto.", "There needs to be at least one grown-up."));
@@ -324,6 +435,7 @@ public class WhoActivity extends Activity {
             else p.kid = p.teen = false;
             kidLabel.run();
             timeLabel.run();
+            moreLabels.run();
         });
 
         LinearLayout actions = row(c, 30);
@@ -343,6 +455,8 @@ public class WhoActivity extends Activity {
             }
             if (!found) people.add(p);
             People.save(this, people);
+            People.setExtra(this, p.id, "parent", p.kid ? "" : p.parent);
+            People.setExtra(this, p.id, "stage", p.kid ? p.stageHere : "");
             ScreenTimeService.setLimit(this, p.id, p.kid ? limit[0] : 0);
             // A colour chosen here is theirs on every TV.
             if (!isNew && p.member() != null && p.colour != person.colour) Family.pushColour(this, p.member(), p.colour);
@@ -386,7 +500,7 @@ public class WhoActivity extends Activity {
         column.addView(noteView);
     }
 
-    // MARK: - The grown-up PIN
+    // MARK: - PINs
 
     /** Four numbers on the remote. then runs when they match the PIN. */
     private void askPin(String heading, Runnable then) {
@@ -396,7 +510,54 @@ public class WhoActivity extends Activity {
                 return true;
             }
             return false;
-        });
+        }, null);
+    }
+
+    /**
+     * A grown-up's own PIN (ADR 0066): typed with the remote's numbers or the pad on screen, or, when they're in
+     * Beyond Family, allowed with one tap on their phone. Either way then runs.
+     */
+    private void askOwnPin(People.Person p, Runnable then) {
+        boolean phone = p.member() != null && Family.listening(this);
+        pinPage(p.name, phone ? Ui.tr("Digite seu PIN, ou permita pelo celular.", "Type your PIN, or allow it from your phone.", "Escribe tu PIN, o permítelo desde tu móvil.")
+                : Ui.tr("Digite seu PIN.", "Type your PIN.", "Escribe tu PIN."), typed -> {
+            if (People.ownPinIs(this, p, typed)) {
+                then.run();
+                return true;
+            }
+            return false;
+        }, phone ? foot -> {
+            Button ask = add(foot, Ui.tr("Permitir pelo meu celular", "Allow from my phone", "Permitir desde mi móvil"), false, null);
+            ask.setOnClickListener(v -> {
+                ask.setEnabled(false);
+                ask.setText(Ui.tr("Perguntando ao seu celular…", "Asking your phone…", "Preguntando a tu móvil…"));
+                stopAsking();
+                asking = Family.unlock(this, p.member(), state -> {
+                    if ("allowed".equals(state)) {
+                        asking = null;
+                        then.run();
+                        return;
+                    }
+                    if ("asked".equals(state)) {
+                        ask.setText(Ui.tr("Olhe o celular e toque em Permitir", "Look at your phone and tap Allow", "Mira el móvil y toca Permitir"));
+                        return;
+                    }
+                    asking = null;
+                    ask.setEnabled(true);
+                    ask.setText(Ui.tr("Perguntar de novo", "Ask again", "Preguntar otra vez"));
+                    note("no".equals(state) ? Ui.tr("Seu celular disse que não era você.", "Your phone said that wasn't you.", "Tu móvil dijo que no eras tú.")
+                            : "late".equals(state) ? Ui.tr("O celular não respondeu. Digite seu PIN.", "No answer from your phone. Type your PIN instead.", "El móvil no respondió. Escribe tu PIN.")
+                            : Ui.tr("Não deu para falar com o celular. Digite seu PIN.", "Couldn't reach your phone. Type your PIN instead.", "No se pudo llegar a tu móvil. Escribe tu PIN."));
+                });
+            });
+        } : null);
+    }
+
+    private Runnable asking;
+
+    private void stopAsking() {
+        if (asking != null) asking.run();
+        asking = null;
     }
 
     private void setPin() {
@@ -407,51 +568,138 @@ public class WhoActivity extends Activity {
                         People.setPin(this, first);
                         manage();
                         return true;
-                    }));
+                    }, null));
                     return true;
-                });
+                }, null);
         if (People.hasPin(this)) askPin(Ui.tr("PIN atual", "Current PIN"), () -> handler.post(choose));
         else choose.run();
     }
 
+    /** A grown-up's own PIN: set it (twice), or with one already, type it first to change or remove it. */
+    private void ownPin(People.Person p, Runnable back) {
+        Runnable choose = () -> pinPage(p.name, Ui.tr("Quatro números só seus.", "Four numbers that are only yours.", "Cuatro números que son solo tuyos."), first -> {
+            handler.post(() -> pinPage(Ui.tr("Digite de novo", "Type it again"), null, again -> {
+                if (!again.equals(first)) return false;
+                People.setOwnPin(this, p, first);
+                handler.post(back);
+                return true;
+            }, null));
+            return true;
+        }, null);
+        if (!People.hasOwnPin(this, p)) {
+            choose.run();
+            return;
+        }
+        pinPage(Ui.tr("PIN atual", "Current PIN"), p.name, typed -> {
+            if (!People.ownPinIs(this, p, typed)) return false;
+            handler.post(() -> {
+                LinearLayout c = page(p.name, Ui.tr("O que fazer com o seu PIN?", "What would you like to do with your PIN?", "¿Qué quieres hacer con tu PIN?"));
+                LinearLayout r = row(c, 50);
+                Button change = add(r, Ui.tr("Mudar o PIN", "Change my PIN", "Cambiar el PIN"), true, v -> choose.run());
+                add(r, Ui.tr("Tirar o PIN", "Take my PIN off", "Quitar el PIN"), false, v -> {
+                    People.setOwnPin(this, p, "");
+                    back.run();
+                });
+                add(r, Ui.tr("Voltar", "Back"), false, v -> back.run());
+                change.requestFocus();
+            });
+            return true;
+        }, null);
+    }
+
     interface Check { boolean ok(String typed); }
 
-    private void pinPage(String heading, String sub, Check check) {
+    interface Extra { void add(LinearLayout foot); }
+
+    /** What's been typed on the PIN page showing now, or null when it isn't. */
+    private StringBuilder typing;
+    private TextView dots;
+    private Check checking;
+
+    /**
+     * Four dots and a number pad on screen, so the remote's arrows and OK are all it takes. A remote with numbers can
+     * type them straight in. extra adds buttons under the pad (Allow from my phone).
+     */
+    private void pinPage(String heading, String sub, Check check, Extra extra) {
         LinearLayout c = page(heading, sub);
-        EditText digits = new EditText(this);
-        digits.setTypeface(Ui.displaySemibold);
-        digits.setTextSize(TypedValue.COMPLEX_UNIT_PX, 64 * k);
-        digits.setTextColor(0xFFFFFFFF);
-        digits.setGravity(Gravity.CENTER);
-        digits.setLetterSpacing(0.6f);
-        digits.setSingleLine(true);
-        digits.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
-        digits.setFilters(new android.text.InputFilter[] {new android.text.InputFilter.LengthFilter(4)});
-        int pad = Math.round(20 * k);
-        digits.setPadding(pad, pad, pad, pad);
-        digits.setBackground(FeedbackActivity.pill(0x33FFFFFF, 0x5CFFFFFF, 20 * k, 2 * k, Glow.LILAC));
-        LinearLayout.LayoutParams dp = new LinearLayout.LayoutParams(Math.round(420 * k), -2);
-        dp.topMargin = Math.round(50 * k);
+        typing = new StringBuilder();
+        checking = check;
+        dots = FeedbackActivity.text(this, "", Ui.displaySemibold, 64 * k, 0xFFFFFFFF);
+        dots.setLetterSpacing(0.35f);
+        LinearLayout.LayoutParams dp = new LinearLayout.LayoutParams(-2, -2);
+        dp.topMargin = Math.round(34 * k);
         dp.gravity = Gravity.CENTER_HORIZONTAL;
-        c.addView(digits, dp);
-        digits.addTextChangedListener(new android.text.TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int a, int b, int d) {}
-            @Override public void onTextChanged(CharSequence s, int a, int b, int d) {}
-            @Override public void afterTextChanged(android.text.Editable s) {
-                if (s.length() < 4) return;
-                String typed = s.toString();
-                handler.post(() -> {
-                    if (!check.ok(typed)) {
-                        digits.setText("");
-                        note(Ui.tr("Não é esse. Tente de novo.", "That's not it. Try again."));
-                    }
-                });
+        c.addView(dots, dp);
+        paintDots();
+        String[] keys = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "\u232B", "0", ""};
+        Button five = null;
+        for (int r = 0; r < 4; r++) {
+            LinearLayout line = row(c, r == 0 ? 26 : 10);
+            for (int i = 0; i < 3; i++) {
+                String key = keys[r * 3 + i];
+                Button b = FeedbackActivity.button(this, key, k, false);
+                b.setPadding(0, 0, 0, 0);
+                b.setTextSize(TypedValue.COMPLEX_UNIT_PX, 40 * k);
+                LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(Math.round(150 * k), Math.round(84 * k));
+                bp.leftMargin = bp.rightMargin = Math.round(10 * k);
+                line.addView(b, bp);
+                if (key.isEmpty()) {
+                    b.setVisibility(View.INVISIBLE);
+                    continue;
+                }
+                b.setContentDescription("\u232B".equals(key) ? Ui.tr("Apagar", "Delete") : key);
+                b.setOnClickListener(v -> press(key));
+                if ("5".equals(key)) five = b;
             }
-        });
-        digits.requestFocus();
+        }
+        if (extra != null) extra.add(row(c, 26));
+        if (five != null) five.requestFocus();
+    }
+
+    private void paintDots() {
+        if (dots == null || typing == null) return;
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; i < 4; i++) b.append(i < typing.length() ? "\u25CF" : "\u25CB");
+        dots.setText(b);
+    }
+
+    private void press(String key) {
+        if (typing == null) return;
+        if ("\u232B".equals(key)) {
+            if (typing.length() > 0) typing.setLength(typing.length() - 1);
+            paintDots();
+            return;
+        }
+        if (typing.length() >= 4) return;
+        typing.append(key);
+        paintDots();
+        if (typing.length() < 4) return;
+        final StringBuilder mine = typing;
+        final String typed = mine.toString();
+        handler.postDelayed(() -> {
+            if (typing != mine) return;   // already moved on
+            if (!checking.ok(typed) && typing == mine) {
+                mine.setLength(0);
+                paintDots();
+                note(Ui.tr("Não é esse. Tente de novo.", "That's not it. Try again."));
+            }
+        }, 160);
+    }
+
+    @Override public boolean onKeyDown(int keyCode, android.view.KeyEvent event) {
+        if (typing != null && keyCode >= android.view.KeyEvent.KEYCODE_0 && keyCode <= android.view.KeyEvent.KEYCODE_9) {
+            press(String.valueOf(keyCode - android.view.KeyEvent.KEYCODE_0));
+            return true;
+        }
+        if (typing != null && keyCode == android.view.KeyEvent.KEYCODE_DEL) {
+            press("\u232B");
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     @Override protected void onDestroy() {
+        stopAsking();
         handler.removeCallbacksAndMessages(null);
         super.onDestroy();
     }
