@@ -899,6 +899,10 @@ final class Family {
         return out;
     }
 
+    private static String cut(String s, int most) {
+        return s == null ? "" : s.length() <= most ? s : s.substring(0, most);
+    }
+
     /** One of Beyond Family's people, with their face and colour on Beyond TV when they've chosen them. */
     private static People.Person person(JSONObject p, int i) {
         if (p == null || p.optString("id").isEmpty()) return null;
@@ -910,6 +914,23 @@ final class Family {
         person.teen = person.kid && p.optBoolean("teen");
         String stage = p.optString("stage");
         if (person.kid && (WarmNotes.KINDY.equals(stage) || WarmNotes.SCHOOL.equals(stage) || WarmNotes.COLLEGE.equals(stage))) person.stage = stage;
+        // Awards a grown-up gave them (ADR 0072): the newest few, trimmed, for the warm notes and the badge.
+        JSONArray won = person.kid ? p.optJSONArray("awards") : null;
+        if (won != null) {
+            JSONArray keep = new JSONArray();
+            for (int j = 0; j < won.length() && keep.length() < 3; j++) {
+                JSONObject a = won.optJSONObject(j);
+                String title = a == null ? "" : a.optString("title").trim();
+                if (title.isEmpty()) continue;
+                try {
+                    keep.put(new JSONObject().put("title", cut(title, 40)).put("emoji", cut(a.optString("emoji"), 8))
+                            .put("from", cut(a.optString("from"), 30)).put("note", cut(a.optString("note"), 60))
+                            .put("on", a.optString("on").matches("\\d{4}-\\d{2}-\\d{2}") ? a.optString("on") : ""));
+                } catch (Exception ignored) {
+                }
+            }
+            if (keep.length() > 0) person.awards = keep.toString();
+        }
         JSONObject look = p.optJSONObject("profile");
         if (look != null) {
             person.colour = colour(look.optString("colour"), person.colour);

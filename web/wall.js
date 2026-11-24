@@ -64,7 +64,8 @@ var Wall = (function () {
   var WIN_KIND = {
     job: ['Feito', 'Done', 'Hecho', 'Erledigt', 'Сделано'],
     green: ['Lá fora', 'Outside', 'Afuera', 'Draußen', 'На улице'],
-    bonus: ['Sem ninguém pedir', 'Without being asked', 'Sin que nadie lo pida', 'Ungefragt', 'Без просьбы']
+    bonus: ['Sem ninguém pedir', 'Without being asked', 'Sin que nadie lo pida', 'Ungefragt', 'Без просьбы'],
+    award: ['Prêmio', 'Award', 'Premio', 'Auszeichnung', 'Награда']
   };
   var QUICK = [
     ['Te amo!', 'Love you!', '¡Te quiero!', 'Hab dich lieb!', 'Люблю тебя!'],
@@ -154,7 +155,7 @@ var Wall = (function () {
         pic.style.backgroundImage = 'url(' + w.photo + ')';
         UI.el('div', 'shade', c);
       }
-      UI.el('div', 'kind', c, (w.kind === 'green' ? '🌿 ' : w.kind === 'bonus' ? '🌟 ' : '✓ ') + L(WIN_KIND[w.kind] || WIN_KIND.job));
+      UI.el('div', 'kind', c, (w.kind === 'green' ? '🌿 ' : w.kind === 'bonus' ? '🌟 ' : w.kind === 'award' ? '🏅 ' : '✓ ') + L(WIN_KIND[w.kind] || WIN_KIND.job));
       UI.el('div', 'words', c, w.text);
       if (w.name) {
         var who = UI.el('div', 'who', c);
@@ -370,6 +371,6 @@ var Wall = (function () {
   return {open: open, changed: changed, answer: answer, count: count, left: left, saver: saver, homeRow: homeRow, linked: src.linked,
     rules: {member: member, items: items, refresh: refresh, words: function () {
       return [TITLE, SUB, TODOS, ON_WALL, LEFT, ALL, STARS, ONE_STAR, NONE_TODOS, NONE_WALL, STICKY, STICKY_SUB, PUT_UP, PUT, TYPE_SOMETHING, OFFLINE,
-        UNDONE, ALL_CHEER, SPEND, SCOREBOARD, CLOSE, CANCEL, SPACE, TYPE_HERE, WIN_KIND.job, WIN_KIND.green, WIN_KIND.bonus].concat(CHEER, QUICK);
+        UNDONE, ALL_CHEER, SPEND, SCOREBOARD, CLOSE, CANCEL, SPACE, TYPE_HERE, WIN_KIND.job, WIN_KIND.green, WIN_KIND.bonus, WIN_KIND.award].concat(CHEER, QUICK);
     }}};
 })();
