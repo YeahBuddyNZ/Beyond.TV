@@ -46,6 +46,15 @@ final class People {
         java.util.List<String> loves = new ArrayList<>();
         /** Signed in here from another home through Beyond Family. */
         boolean visitor;
+        /** Kindy, school or college (WarmNotes), from their birthday in Beyond Family. A choice on this TV wins. */
+        String stage = "";
+        /** Kept on this TV only, never sent anywhere (ADR 0066): "mum", "dad" or "" for a grown-up, so Mum comes
+         *  first on Who's watching, and the kid's stage chosen here. Beyond Family's syncs leave them be. */
+        String parent = "";
+        String stageHere = "";
+
+        /** Kindy, school, college or nothing: what was chosen on this TV, else what Beyond Family worked out. */
+        String school() { return stageHere != null && !stageHere.isEmpty() ? ("none".equals(stageHere) ? "" : stageHere) : stage == null ? "" : stage; }
 
         boolean together() { return FAMILY.equals(id); }
 
@@ -80,6 +89,7 @@ final class People {
                 JSONArray loves = o.optJSONArray("loves");
                 for (int j = 0; loves != null && j < loves.length(); j++) p.loves.add(loves.optString(j));
                 p.visitor = o.optBoolean("visitor");
+                p.stage = o.optString("stage");
                 out.add(p);
             }
         } catch (Exception ignored) {
@@ -91,7 +101,66 @@ final class People {
             me.colour = COLOURS[0];
             out.add(me);
         }
+        JSONObject extras = extras(c);
+        for (Person p : out) {
+            JSONObject x = extras.optJSONObject(p.id);
+            if (x == null) continue;
+            p.parent = x.optString("parent");
+            p.stageHere = x.optString("stage");
+        }
         return out;
+    }
+
+    // MARK: - What only this TV keeps about each person (ADR 0066)
+
+    private static JSONObject extras(Context c) {
+        try {
+            return new JSONObject(sp(c).getString("extras", "{}"));
+        } catch (Exception e) {
+            return new JSONObject();
+        }
+    }
+
+    /** Sets (or with "" clears) one thing this TV keeps about a person: "parent", "stage" or "pin". */
+    static void setExtra(Context c, String id, String key, String value) {
+        try {
+            JSONObject all = extras(c);
+            JSONObject x = all.optJSONObject(id);
+            if (x == null) x = new JSONObject();
+            if (value == null || value.isEmpty()) x.remove(key);
+            else x.put(key, value);
+            if (x.length() == 0) all.remove(id);
+            else all.put(id, x);
+            sp(c).edit().putString("extras", all.toString()).apply();
+        } catch (Exception ignored) {
+        }
+        Prefs.version++;
+    }
+
+    /** A grown-up's own PIN, kept as a hash with their id mixed in, never the four numbers themselves. */
+    static boolean hasOwnPin(Context c, Person p) {
+        JSONObject x = p == null ? null : extras(c).optJSONObject(p.id);
+        return x != null && !x.optString("pin").isEmpty();
+    }
+
+    static boolean ownPinIs(Context c, Person p, String typed) {
+        JSONObject x = p == null ? null : extras(c).optJSONObject(p.id);
+        return x != null && !typed.isEmpty() && x.optString("pin").equals(pinHash(p.id, typed));
+    }
+
+    static void setOwnPin(Context c, Person p, String pin) {
+        setExtra(c, p.id, "pin", pin == null || pin.isEmpty() ? "" : pinHash(p.id, pin));
+    }
+
+    static String pinHash(String id, String pin) {
+        try {
+            byte[] d = java.security.MessageDigest.getInstance("SHA-256").digest((id + ":" + pin).getBytes("UTF-8"));
+            StringBuilder b = new StringBuilder();
+            for (byte x : d) b.append(String.format(Locale.ROOT, "%02x", x));
+            return b.toString();
+        } catch (Exception e) {
+            return "";
+        }
     }
 
     static void save(Context c, List<Person> people) {
@@ -104,6 +173,7 @@ final class People {
                 if (p.world != null && !p.world.isEmpty()) o.put("world", p.world);
                 if (!p.loves.isEmpty()) o.put("loves", new JSONArray(p.loves));
                 if (p.visitor) o.put("visitor", true);
+                if (p.stage != null && !p.stage.isEmpty()) o.put("stage", p.stage);
                 a.put(o);
             }
             SharedPreferences.Editor e = sp(c).edit().putString("list", a.toString());
@@ -123,7 +193,8 @@ final class People {
             Person a = now.get(i), b = people.get(i);
             if (!a.id.equals(b.id) || !a.name.equals(b.name) || a.colour != b.colour || a.kid != b.kid || a.teen != b.teen
                     || !String.valueOf(a.emoji).equals(String.valueOf(b.emoji)) || a.visitor != b.visitor
-                    || !String.valueOf(a.world).equals(String.valueOf(b.world)) || !a.loves.equals(b.loves)) return false;
+                    || !String.valueOf(a.world).equals(String.valueOf(b.world)) || !a.loves.equals(b.loves)
+                    || !String.valueOf(a.stage).equals(String.valueOf(b.stage))) return false;
         }
         return true;
     }
@@ -136,11 +207,21 @@ final class People {
         return f;
     }
 
-    /** Family, then each person: what "Who's watching?" offers (Family only once there's more than one person). */
+    /**
+     * Family, then each person: what "Who's watching?" offers (Family only once there's more than one person).
+     * Grown-ups come first with Mum leading, then the kids, visitors last (WarmNotes.rank, ADR 0066).
+     */
     static List<Person> choices(Context c) {
-        List<Person> people = list(c);
+        List<Person> people = ordered(list(c));
         if (people.size() > 1) people.add(0, family());
         return people;
+    }
+
+    /** The people in Who's watching order. A stable sort: otherwise as they came. */
+    static List<Person> ordered(List<Person> people) {
+        List<Person> out = new ArrayList<>(people);
+        java.util.Collections.sort(out, (a, b) -> Integer.compare(WarmNotes.rank(a.kid, a.parent, a.visitor), WarmNotes.rank(b.kid, b.parent, b.visitor)));
+        return out;
     }
 
     static Person find(List<Person> people, String id) {

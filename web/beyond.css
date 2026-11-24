@@ -100,6 +100,22 @@
 .bt-face.focus .avatar { box-shadow: 0 0 0 6px #121210, 0 0 0 11px #F7F6F2, 0 28px 60px rgba(0, 0, 0, 0.6); }
 .bt-face.focus .name { color: #FFF; }
 .bt-who-foot { position: absolute; left: 0; right: 0; top: 860px; text-align: center; }
+/* Warm notes (warm.js, ADR 0066): one kind line under the faces, rising in and drifting away. */
+.bt-warm {
+  position: absolute; left: 0; right: 0; text-align: center; white-space: nowrap;
+  font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 46px; font-weight: 600; letter-spacing: -0.01em; color: #FFF;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+  opacity: 0; -webkit-transform: translateY(26px); transform: translateY(26px);
+}
+.bt-warm.in { opacity: 1; -webkit-transform: translateY(0); transform: translateY(0); -webkit-transition: opacity 0.7s, -webkit-transform 0.7s cubic-bezier(0.22, 1, 0.36, 1); transition: opacity 0.7s, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1); }
+.bt-warm.out { opacity: 0; -webkit-transform: translateY(-14px); transform: translateY(-14px); -webkit-transition: opacity 0.5s, -webkit-transform 0.5s; transition: opacity 0.5s, transform 0.5s; }
+.bt-warm .dot { display: inline-block; width: 26px; height: 26px; border-radius: 13px; margin-right: 22px; vertical-align: 2px; box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.18); }
+@-webkit-keyframes bt-hop { 0% { -webkit-transform: translateY(0); } 35% { -webkit-transform: translateY(-16px); } 60% { -webkit-transform: translateY(0); } 80% { -webkit-transform: translateY(-5px); } 100% { -webkit-transform: translateY(0); } }
+@keyframes bt-hop { 0% { transform: translateY(0); } 35% { transform: translateY(-16px); } 60% { transform: translateY(0); } 80% { transform: translateY(-5px); } 100% { transform: translateY(0); } }
+.bt-face .avatar.hop { -webkit-animation: bt-hop 0.75s ease-out; animation: bt-hop 0.75s ease-out; }
+@media (prefers-reduced-motion: reduce) { .bt-warm, .bt-warm.in, .bt-warm.out { -webkit-transition: opacity 0.5s; transition: opacity 0.5s; -webkit-transform: none; transform: none; } .bt-face .avatar.hop { -webkit-animation: none; animation: none; } }
+.bt-pin-extra { margin-top: 36px; text-align: center; }
+.bt-pin-extra .bt-button { margin: 0 12px; }
 .bt-who-note { margin-top: 26px; font-size: 24px; color: rgba(247, 246, 242, 0.55); }
 
 /* The current profile's face among the round buttons. */
@@ -144,6 +160,9 @@
 .bt-emo.on { background: rgba(58, 154, 134, 0.45); }
 .bt-emo.focus { background: #F7F6F2; color: #22221F; -webkit-transform: scale(1.15); transform: scale(1.15); }
 .bt-actions { position: absolute; left: 300px; top: 780px; white-space: nowrap; }
+/* Seven or eight buttons for one person since ADR 0066: they wrap onto a second line rather than off the screen. */
+.bt-edit .bt-actions { top: 740px; width: 1500px; white-space: normal; }
+.bt-edit .bt-actions .bt-button { margin-bottom: 18px; }
 
 /* The on-screen keyboard */
 .bt-keyboard { width: 860px; }

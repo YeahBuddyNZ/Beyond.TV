@@ -13,6 +13,32 @@ final class Russian {
 
     static String text(String english) {
         switch (english) {
+            // Who's watching: warm notes and grown-ups' own PINs (ADR 0066)
+            case "Type your PIN, or allow it from your phone.": return "Введи свой PIN или разреши с телефона.";
+            case "Type your PIN.": return "Введи свой PIN.";
+            case "Allow from my phone": return "Разрешить с телефона";
+            case "Asking your phone…": return "Спрашиваю твой телефон…";
+            case "Look at your phone and tap Allow": return "Посмотри на телефон и нажми «Разрешить»";
+            case "Ask again": return "Спросить ещё раз";
+            case "Your phone said that wasn't you.": return "Телефон ответил, что это был не ты.";
+            case "No answer from your phone. Type your PIN instead.": return "Телефон не ответил. Введи PIN.";
+            case "Couldn't reach your phone. Type your PIN instead.": return "Не удалось связаться с телефоном. Введи PIN.";
+            case "Four numbers that are only yours.": return "Четыре цифры, которые знаешь только ты.";
+            case "What would you like to do with your PIN?": return "Что сделать с твоим PIN?";
+            case "Change my PIN": return "Сменить PIN";
+            case "Take my PIN off": return "Убрать PIN";
+            case "Delete": return "Стереть";
+            case "Who they are: ": return "Кто: ";
+            case "Mum": return "Мама";
+            case "Dad": return "Папа";
+            case "Grown-up": return "Взрослый";
+            case "Their own PIN: ": return "Свой PIN: ";
+            case "At: ": return "Где учится: ";
+            case "kindy": return "садик";
+            case "school": return "школа";
+            case "college": return "старшая школа";
+            case "not set": return "не указано";
+            case "Ask my phone": return "Спросить мой телефон";
             // Find and Bedtime (ADR 0062, ADR 0063)
             case "Find": return "Найти";
             case "Say a game, a channel or a show": return "Назовите игру, канал или передачу";
