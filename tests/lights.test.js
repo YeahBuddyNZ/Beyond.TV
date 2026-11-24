@@ -122,7 +122,7 @@ check('a few slow frames are not enough', !L.tooSlow(slow.slice(0, 10)));
 var calls = 0, trace = [];
 var ctx = {setTransform: function () {}};
 ['beginPath', 'closePath', 'fill', 'stroke'].forEach(function (m) { ctx[m] = function () { calls++; }; });
-['moveTo', 'lineTo', 'arc', 'ellipse', 'fillRect'].forEach(function (m) {
+['moveTo', 'lineTo', 'arc', 'ellipse', 'fillRect', 'fillText'].forEach(function (m) {
   ctx[m] = function () { calls++; trace.push(m + Array.prototype.slice.call(arguments, 0, 4).map(function (v) { return Math.round(v); }).join(',')); };
 });
 
@@ -184,7 +184,28 @@ check('calm lights draw without throwing' + (calmThrew ? ': ' + calmThrew : ''),
 
 check('the looks drew something', calls > 1000);
 check('every look has a name', L.LOOKS.concat([L.CALM]).every(function (l) { return typeof l.name() === 'string' && l.name().length > 0; }));
-check('ten looks', L.LOOKS.length === 10);
+check('eleven looks', L.LOOKS.length === 11);
+
+// ADR 0071. Piano notes: a played note is named right, from the levels and the wave, and silence names nothing.
+function tone(hz) {
+  var lvl = new Float32Array(BINS), wv = new Uint8Array(2048), per = NYQ / BINS;
+  [1, 2, 3].forEach(function (h, n) {
+    var b0 = hz * h / per, k0 = Math.floor(b0);
+    lvl[k0] = Math.max(lvl[k0], (0.9 - n * 0.3) * (1 - (b0 - k0)));
+    lvl[k0 + 1] = Math.max(lvl[k0 + 1], (0.9 - n * 0.3) * (b0 - k0));
+  });
+  for (var j = 0; j < wv.length; j++) {
+    var t = j / (NYQ * 2);
+    wv[j] = Math.round(128 + 70 * Math.sin(2 * Math.PI * hz * t) + 25 * Math.sin(4 * Math.PI * hz * t) + 10 * Math.sin(6 * Math.PI * hz * t));
+  }
+  return {lv: lvl, wave: wv};
+}
+[[440, 69, 9, 4], [261.63, 60, 0, 4], [329.63, 64, 4, 4], [196, 55, 7, 3], [146.83, 50, 2, 3], [880, 81, 9, 5], [466.16, 70, 10, 4]].forEach(function (c) {
+  var tn = tone(c[0]), nt = L.noteOf(L.pitch(tn.lv, BINS, NYQ, tn.wave));
+  check(c[0] + ' Hz is note ' + c[1] + (nt ? ' (got ' + nt.midi + ')' : ''), nt && nt.midi === c[1] && nt.step === c[2] && nt.octave === c[3]);
+});
+check('silence is no note', L.pitch(new Float32Array(BINS), BINS, NYQ, filled(128, 2048)) === 0);
+check('no frequency is no note', L.noteOf(0) === null);
 check('every look has its own id and an icon', L.LOOKS.every(function (l, i) {
   return l.icon && L.LOOKS.filter(function (m) { return m.id === l.id; }).length === 1;
 }));
@@ -194,7 +215,7 @@ var ids = L.LOOKS.map(function (l) { return l.id; });
 check('no favourites: the usual order', L.order([]).join() === ids.map(function (x, n) { return n; }).join());
 var ord = L.order(['galaxy', 'disco']);
 check('favourites come first, in the usual order', L.LOOKS[ord[0]].id === 'disco' && L.LOOKS[ord[1]].id === 'galaxy');
-check('every look is still there once', ord.length === 10 && ord.slice().sort(function (a, b) { return a - b; }).join() === ids.map(function (x, n) { return n; }).join());
+check('every look is still there once', ord.length === L.LOOKS.length && ord.slice().sort(function (a, b) { return a - b; }).join() === ids.map(function (x, n) { return n; }).join());
 var fv = L.toggled([], 'lava');
 check('a heart adds a favourite', fv.length === 1 && fv[0] === 'lava');
 check('again takes it off', L.toggled(fv, 'lava').length === 0);

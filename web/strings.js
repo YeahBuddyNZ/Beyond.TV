@@ -662,6 +662,9 @@ var I18N = (function () {
     "Kaleidoscope": "Kaleidoskop",
     "Lava lamp": "Lavalampe",
     "Galaxy": "Galaxie",
+    "Piano notes": "Klaviernoten",
+    "Middle C": "Das mittlere C",
+    "C,C♯,D,D♯,E,F,F♯,G,G♯,A,A♯,B": "C,C♯,D,D♯,E,F,F♯,G,G♯,A,A♯,H",
     // The arcade (arcade.js)
     "Arcade": "Spielhalle",
     "Let's play": "Los, spielen!",
@@ -1652,6 +1655,9 @@ var I18N = (function () {
     "Kaleidoscope": "Калейдоскоп",
     "Lava lamp": "Лава-лампа",
     "Galaxy": "Галактика",
+    "Piano notes": "Ноты пианино",
+    "Middle C": "До первой октавы",
+    "C,C♯,D,D♯,E,F,F♯,G,G♯,A,A♯,B": "До,До♯,Ре,Ре♯,Ми,Фа,Фа♯,Соль,Соль♯,Ля,Ля♯,Си",
     // The arcade (arcade.js)
     "Arcade": "Аркада",
     "Let's play": "Играем",

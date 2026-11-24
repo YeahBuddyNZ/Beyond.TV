@@ -7,8 +7,8 @@
  * The sound is only read as how loud each pitch is and the shape of the wave, frame by frame, on the TV: never
  * recorded, kept or sent.
  *
- * Ten looks, changed with left and right: Bars, Sound wave, Ring of light, Shooting stars, and since ADR 0070
- * Fireworks, Dance floor, Tunnel, Kaleidoscope, Lava lamp and Galaxy. Up hearts a look for whoever is watching (their
+ * Eleven looks, changed with left and right: Bars, Sound wave, Ring of light, Shooting stars, and since ADR 0070
+ * Fireworks, Dance floor, Tunnel, Kaleidoscope, Lava lamp and Galaxy, and Piano notes (ADR 0071). Up hearts a look for whoever is watching (their
  * favourites come first), down shows every look in a row. OK skips to the next song, Back leaves. A TV that can't keep up drops to the light mode by itself (half the pixels, fewer bars, no glow);
  * Google TV says so up front on its older and 1 GB TVs.
  *
@@ -159,6 +159,51 @@ var Lights = (function () {
     var n = Math.min(s ? s.length : 0, out.length);
     for (var i = 0; i < n; i++) out[i] = s.charCodeAt(i) & 255;
     return n;
+  }
+
+  /**
+   * The note being played (ADR 0071): the strongest pitch from 60 Hz to 2.1 kHz in one gated frame (each bin helped by
+   * its second and third harmonics, so a note isn't taken for its own overtone), made exact from the wave by
+   * autocorrelation. Its frequency in Hz, or 0 when nothing is clear enough to name.
+   */
+  var ACF = new Float32Array(160);
+  function pitch(lv, len, nyq, wave) {
+    var per = nyq / len, lo = Math.max(1, Math.floor(60 / per)), hi = Math.min(len - 2, Math.ceil(2100 / per)), best = 0, at = 0;
+    for (var k = lo; k <= hi; k++) {
+      var v = lv[k];
+      if (v < 0.15) continue;
+      var sc = v + (2 * k < len ? 0.6 * lv[2 * k] : 0) + (3 * k < len ? 0.4 * lv[3 * k] : 0);
+      if (sc > best) { best = sc; at = k; }
+    }
+    if (!at) return 0;
+    var a = lv[at - 1], b = lv[at], c = lv[at + 1], d = a - 2 * b + c;
+    var f = (at + (d ? 0.5 * (a - c) / d : 0)) * per;
+    if (!wave || wave.length < 256) return f;
+    // The wave: the lag of the strongest echo near one cycle of that pitch gives the pitch to a fraction of a semitone.
+    var sr = nyq * 2, n = wave.length, lag0 = sr / f, l0 = Math.max(2, Math.floor(lag0 * 0.94)), l1 = Math.min(n >> 1, Math.ceil(lag0 * 1.06));
+    var bl = 0, bv = -1e18, vals = ACF;
+    for (var lag = l0; lag <= l1; lag++) {
+      var sum = 0;
+      for (var i = 0; i + lag < n; i++) sum += (wave[i] - 128) * (wave[i + lag] - 128);
+      sum /= n - lag;
+      if (lag - l0 < vals.length) vals[lag - l0] = sum;
+      if (sum > bv) { bv = sum; bl = lag; }
+    }
+    if (bv <= 0 || bl === l0 || bl === l1 || bl - l0 + 1 >= vals.length) return f;
+    var j = bl - l0, p0 = vals[j - 1], p1 = vals[j], p2 = vals[j + 1], dd = p0 - 2 * p1 + p2;
+    return sr / (bl + (dd ? 0.5 * (p0 - p2) / dd : 0));
+  }
+
+  /** A frequency as a note: {midi, step (0 is C), octave}, the nearest semitone to A 440. */
+  function noteOf(f) {
+    if (!(f > 0)) return null;
+    var midi = Math.round(69 + 12 * Math.log(f / 440) / Math.LN2);
+    return {midi: midi, step: ((midi % 12) + 12) % 12, octave: Math.floor(midi / 12) - 1};
+  }
+
+  /** The twelve note names in the language on screen (C to B; German says H for B, Portuguese and Spanish Do Re Mi). */
+  function noteNames() {
+    return say('Dó,Dó♯,Ré,Ré♯,Mi,Fá,Fá♯,Sol,Sol♯,Lá,Lá♯,Si', 'C,C♯,D,D♯,E,F,F♯,G,G♯,A,A♯,B', 'Do,Do♯,Re,Re♯,Mi,Fa,Fa♯,Sol,Sol♯,La,La♯,Si').split(',');
   }
 
   /**
@@ -607,7 +652,9 @@ var Lights = (function () {
   var c2 = null, light = false, stars = [], spin = 0, flash = 0;
   // The newer looks: rockets, the tunnel's frames, a shared counter for colours, and how far a look has turned or flown.
   var rockets = [], rings = [], count = 0, twist = 0, gap = 0;
-  function resetLooks() { stars = []; rockets = []; rings = []; twist = 0; gap = 0; }
+  // Piano notes: the note on show, one that may replace it, how long it has held, the fade, the last few, the names.
+  var keyNow = null, keyNext = null, keyHeld = 0, keyFade = 0, keyTrail = [], keyNames = null;
+  function resetLooks() { stars = []; rockets = []; rings = []; twist = 0; gap = 0; keyNow = null; keyNext = null; keyHeld = 0; keyFade = 0; keyTrail = []; keyNames = null; }
 
   // The lava lamp's blobs and the galaxy's stars, laid out once (a fixed seed, so every TV draws the same galaxy).
   var BLOBS = [], GALAXY = [];
@@ -876,6 +923,68 @@ var Lights = (function () {
         if (!light) { c2.globalAlpha = 0.1; disc(x, y, r * 1.9, k.c); c2.globalAlpha = 0.2; disc(x, y, r * 1.35, k.c); }
         c2.globalAlpha = 0.8;
         disc(x, y, r, k.c);
+      }
+      c2.globalAlpha = 1;
+    }},
+    {id: 'piano', icon: '🎹', name: function () { return say('Notas de piano', 'Piano notes', 'Notas de piano'); }, draw: function (f) {
+      clear(1);
+      // The note heard, named big, and lit on a three octave keyboard (C3 to B5; higher and lower notes light the same
+      // key an octave in). A new note shows only once it has held for three frames, so a passing overtone doesn't flash.
+      var nt = noteOf(pitch(f.lv, f.len, f.nyq, f.wave));
+      if (nt && (!keyNow || nt.midi !== keyNow.midi)) {
+        if (keyNext && keyNext.midi === nt.midi) keyHeld++; else { keyNext = nt; keyHeld = 1; }
+        if (keyHeld >= 3) { keyNow = nt; keyFade = 1; keyTrail.push(nt); if (keyTrail.length > 12) keyTrail.shift(); }
+      } else if (nt) keyFade = 1;
+      else if (keyFade > 0) keyFade = Math.max(0, keyFade - 0.02);
+      if (!keyNames) keyNames = noteNames();
+      var left = 150, kw = (W - left * 2) / 21, top = 590, kh = 280, i, x, lit = -1;
+      if (keyNow && keyFade > 0) lit = ((keyNow.midi - 48) % 36 + 36) % 36;
+      var colour = keyNow ? DOTS[keyNow.step % 4] : LILAC;
+      // White keys, then the black ones over them.
+      var white = [0, 2, 4, 5, 7, 9, 11], wi = 0;
+      for (i = 0; i < 36; i++) {
+        if (white.indexOf(i % 12) < 0) continue;
+        x = left + wi * kw;
+        c2.globalAlpha = 1;
+        c2.fillStyle = i === lit ? colour : PAPER;
+        if (i === lit) c2.globalAlpha = 0.4 + 0.6 * keyFade;
+        c2.fillRect(x + 3, top, kw - 6, kh);
+        wi++;
+      }
+      wi = 0;
+      for (i = 0; i < 36; i++) {
+        if (white.indexOf(i % 12) >= 0) { wi++; continue; }
+        x = left + wi * kw - kw * 0.32;
+        c2.globalAlpha = i === lit ? 0.4 + 0.6 * keyFade : 1;
+        c2.fillStyle = i === lit ? colour : '#22221F';
+        c2.fillRect(x, top, kw * 0.64, kh * 0.62);
+      }
+      c2.globalAlpha = 1;
+      // The last notes, small, along the top: a tune shows as it's played.
+      c2.textAlign = 'center';
+      c2.textBaseline = 'middle';
+      c2.font = '600 40px Sora, Inter, Arial, sans-serif';
+      for (i = 0; i < keyTrail.length; i++) {
+        c2.globalAlpha = 0.25 + 0.6 * (i + 1) / keyTrail.length;
+        c2.fillStyle = DOTS[keyTrail[i].step % 4];
+        c2.fillText(keyNames[keyTrail[i].step], W / 2 + (i - keyTrail.length + 1) * 110 + 550, 150);
+      }
+      if (keyNow) {
+        // A soft glow behind the name that breathes with how loud it is.
+        c2.globalAlpha = 0.12 + 0.2 * keyFade;
+        disc(W / 2, 360, 140 + f.b.level * 90, colour);
+        c2.globalAlpha = 0.25 + 0.75 * keyFade;
+        c2.fillStyle = colour;
+        c2.font = '800 240px Sora, Inter, Arial, sans-serif';
+        c2.fillText(keyNames[keyNow.step], W / 2, 370);
+        c2.font = '600 40px Sora, Inter, Arial, sans-serif';
+        c2.fillStyle = PAPER;
+        c2.fillText(keyNow.midi === 60 ? say('Dó central', 'Middle C', 'Do central') : keyNames[keyNow.step] + keyNow.octave, W / 2, 530);
+      } else {
+        c2.globalAlpha = 0.35;
+        c2.fillStyle = PAPER;
+        c2.font = '800 200px Sora, Inter, Arial, sans-serif';
+        c2.fillText('♪', W / 2, 370);
       }
       c2.globalAlpha = 1;
     }},
@@ -1283,7 +1392,7 @@ var Lights = (function () {
 
   return {open: open, answer: answer, cameraAnswer: cameraAnswer, core: {gate: gate, bands: bands, logBands: logBands, barLevels: barLevels, follow: follow,
     beats: beats, quiet: quiet, shuffle: shuffle, tooSlow: tooSlow, unpack: unpack, LOOKS: LOOKS, CALM: CALM,
-    sleepy: sleepy, tapper: tapper, order: order, toggled: toggled, loadFaves: loadFaves, saveFaves: saveFaves, beatFrame: beatFrame, motion: motion, drawRipples: function (f, list) { ripples = list; drawRipples(f); return ripples; },
+    sleepy: sleepy, tapper: tapper, order: order, toggled: toggled, pitch: pitch, noteOf: noteOf, loadFaves: loadFaves, saveFaves: saveFaves, beatFrame: beatFrame, motion: motion, drawRipples: function (f, list) { ripples = list; drawRipples(f); return ripples; },
     // For the tests: a stand-in canvas to draw on, and light mode without one.
     useContext: function (c, lightMode) { c2 = c; light = !!lightMode; resetLooks(); rangeKey = ''; spin = 0; },
     spin: function () { return spin; }}};

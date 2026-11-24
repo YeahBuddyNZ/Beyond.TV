@@ -78,3 +78,4 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0068](0068-ask-for-kids.md) | Ask for kids: questions about the world, checked twice, and a log for their grown-ups |
 | [0069](0069-ask-a-grown-up-and-the-morning-board.md) | Ask a grown-up from the TV for more screen time with one tap to answer, and the Morning board |
 | [0070](0070-more-light-shows-and-favourites.md) | Light show: six more looks, favourites for each person, and every look in a row |
+| [0071](0071-light-show-piano-notes.md) | Light show: Piano notes names the note being played and lights its key |
