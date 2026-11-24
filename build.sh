@@ -69,9 +69,16 @@ EOF
 # The board and card games are the web app's own files, played in TableActivity's WebView (ADR 0024): one set of
 # rules and one robot for every TV. Ask Beyond and the notes from a phone are too (AskActivity, ADR 0025).
 rm -rf out/assets && mkdir -p out/assets && cp -R app/assets/. out/assets/
-for f in table.html table-host.js table.js sfx.js ludo.js chess.js chesscoach.js snap.js laughs.js lunch.js scores.js chores.js guides.js arcade.js rcland.js candy.js builder.js lights.js skydata.js sky.js skylook.js strings.js ui.js home.css beyond.css table.css \
+for f in table.html table-host.js table.js sfx.js ludo.js chess.js chesscoach.js snap.js laughs.js lunch.js scores.js chores.js wall.js morning.js guides.js arcade.js rcland.js candy.js builder.js lights.js skydata.js sky.js skylook.js strings.js ui.js home.css beyond.css table.css \
     ask.html ask-host.js ask.js notes.js find.js; do
   cp "web/$f" out/assets/
+done
+# Every script and style the two pages load must be in the APK: a missing one leaves its screen dead on Google TV
+# while LG and Samsung work (24/11/2026: wall.js and morning.js, so the Family wall and Morning board did nothing).
+for page in table.html ask.html; do
+  for f in $(grep -oE '(src|href)="[^"]+\.(js|css)"' "web/$page" | sed -E 's/^(src|href)="//; s/"$//'); do
+    [ -f "out/assets/$f" ] || { echo "web/$page loads $f, but build.sh doesn't copy it into the APK" >&2; exit 1; }
+  done
 done
 # The Games screen's pictures (tools/game_art.js), shared with LG and Samsung.
 mkdir -p out/assets/games && cp web/games/*.jpg out/assets/games/

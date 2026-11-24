@@ -82,9 +82,11 @@ public class TableActivity extends Activity {
     private MusicRelay relay;
     // The light show's "The TV's sound" (ADR 0044): Android's Visualizer on the TV's output, only while it's on screen.
     private final TvSound tvSound = new TvSound();
-    private boolean tvWasOn, roomWasOn;
     // The light show's "Listen to the room" (ADR 0050): a USB or built-in microphone picked by the app, not the WebView.
     private final RoomSound roomSound = new RoomSound();
+
+    /** Android is asking for the camera or microphone over the page (onRequestPermissionsResult clears it). */
+    private boolean asking;
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     @Override protected void onCreate(Bundle savedInstanceState) {
@@ -254,7 +256,7 @@ public class TableActivity extends Activity {
         @JavascriptInterface public void askCamera() {
             runOnUiThread(() -> {
                 if (cameraAllowed()) cameraAnswer(true);
-                else requestPermissions(new String[]{Manifest.permission.CAMERA}, ASK_CAMERA);
+                else { asking = true; requestPermissions(new String[]{Manifest.permission.CAMERA}, ASK_CAMERA); }
             });
         }
 
@@ -262,7 +264,7 @@ public class TableActivity extends Activity {
         @JavascriptInterface public void ask() {
             runOnUiThread(() -> {
                 if (micAllowed()) answer(true);
-                else requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, ASK_MIC);
+                else { asking = true; requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, ASK_MIC); }
             });
         }
 
@@ -339,6 +341,7 @@ public class TableActivity extends Activity {
     }
 
     @Override public void onRequestPermissionsResult(int code, String[] permissions, int[] results) {
+        asking = false;
         if (code == ASK_MIC) answer(results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED);
         if (code == ASK_CAMERA) cameraAnswer(results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED);
     }
@@ -369,21 +372,28 @@ public class TableActivity extends Activity {
 
     @Override protected void onPause() {
         super.onPause();
-        if (web != null) web.onPause();
-        // Let go of the TV's sound while someone is off changing the song in Spotify; back on when they return.
-        tvWasOn = tvSound.on();
+        // Off to the home screen or another app: the light show ends rather than listening and drawing behind it
+        // (Kyle 24/11/2026: it kept going in the background and the TV hung). Its buttons are there on the way back.
+        // Android's own question about the camera or microphone covers the page for a moment: that isn't leaving.
+        if (asking) return;
+        if (web != null) {
+            web.evaluateJavascript("window.Lights && Lights.away && Lights.away()", null);
+            web.onPause();
+        }
         tvSound.stop();
-        roomWasOn = roomSound.on();
         roomSound.stop();
     }
 
     @Override protected void onResume() {
         super.onResume();
         if (web != null) web.onResume();
-        if (tvWasOn) tvSound.start();
-        tvWasOn = false;
-        if (roomWasOn) roomSound.start(this);
-        roomWasOn = false;
+    }
+
+    @Override protected void onStop() {
+        super.onStop();
+        // Out of sight for good (Home pressed, not a question on top): let go of the page, its canvas and the WebView,
+        // which share the home screen's process. The games keep their progress as they go, so a fresh start finds it.
+        if (!isChangingConfigurations() && !isFinishing() && !asking && web != null) finish();
     }
 
     @Override protected void onDestroy() {

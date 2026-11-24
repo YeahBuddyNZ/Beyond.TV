@@ -80,3 +80,4 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0070](0070-more-light-shows-and-favourites.md) | Light show: six more looks, favourites for each person, and every look in a row |
 | [0071](0071-light-show-piano-notes.md) | Light show: Piano notes names the note being played and lights its key |
 | [0072](0072-warm-notes-shuffled-and-family-awards.md) | Warm notes shuffled with a memory, more lines, Mum's own, and awards from Beyond Family |
+| [0073](0073-leaving-ends-the-light-show-and-games.md) | Leaving ends the light show, the games let go on Home, and every web file gets into the APK |
