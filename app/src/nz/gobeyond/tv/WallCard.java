@@ -13,7 +13,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
- * The family wall on the screensaver (ADR 0066), as web/wall.js draws it there: one sticky or one of the week's wins at
+ * The family wall on the screensaver (ADR 0067), as web/wall.js draws it there: one sticky or one of the week's wins at
  * a time, a card in the top left over the photo or the painting. Drawn once into a bitmap off the UI thread when the
  * photo changes, so the screensaver's frame loop only draws a bitmap. Null when the wall is empty.
  */

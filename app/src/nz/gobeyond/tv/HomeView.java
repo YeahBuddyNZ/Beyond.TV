@@ -582,7 +582,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         if (ElectionActivity.showing()) lightButtons.add(HomeApps.action(HomeApps.ELECTION, "election", Ui.tr("Resultados da eleição", "Election results", "Resultados electorales"), "check"));
         // Bedtime (ADR 0063), at night: a night light that breathes, a calm sound, then the TV turns itself off.
         if (nightTarget) lightButtons.add(HomeApps.action(HomeApps.BEDTIME, "bedtime", Ui.tr("Hora de dormir", "Bedtime", "Hora de dormir"), "bedtime"));
-        // The family wall and everyone's to-dos (ADR 0066), linked to Beyond Family: kids included, they're their jobs.
+        // The family wall and everyone's to-dos (ADR 0067), linked to Beyond Family: kids included, they're their jobs.
         if (Family.linked(getContext())) lightButtons.add(HomeApps.action(HomeApps.WALL, "wall", Ui.tr("Mural da família", "Family wall", "Muro de la familia"), "check"));
         // Notes left from a phone in Beyond Family (ADR 0025): the button is there while any are up, and opens them big.
         notesShown = hasNotes();

@@ -266,7 +266,7 @@ var Chores = (function () {
     return true;
   }
   /**
-   * Stars from somewhere else, the same as a chore: a Beyond Family to-do ticked on the TV (wall.js, ADR 0066) gives
+   * Stars from somewhere else, the same as a chore: a Beyond Family to-do ticked on the TV (wall.js, ADR 0067) gives
    * one and a point on the scoreboard; unticked, it takes them back (never below no stars). Returns the stars now.
    */
   function give(person, n, at) {

@@ -354,6 +354,41 @@ final class Family {
         }, "beyond-family-game").start();
     }
 
+    /**
+     * Tap to allow (ADR 0066): a grown-up with their own PIN can let themselves in from the Beyond Family app instead
+     * of typing it, through Beyond Family's requests (the same as a kid asking for more time). The TV asks, their phone shows "Is this you on the TV?", and a tap on Allow opens their profile.
+     * `update` hears, on the main thread: "asked" (their phone was told), "allowed", "no" (they said it wasn't them),
+     * "late" (two minutes went by) or "failed". Returns something to run to stop asking (the PIN page closed).
+     */
+    static Runnable unlock(Context c, String member, java.util.function.Consumer<String> update) {
+        final Context app = c.getApplicationContext();
+        final java.util.concurrent.atomic.AtomicBoolean stop = new java.util.concurrent.atomic.AtomicBoolean();
+        new Thread(() -> {
+            String end = "failed";
+            try {
+                JSONObject asked = call(app, "POST", "/tv/requests", new JSONObject().put("kind", "unlock").put("memberId", member), 15_000);
+                String id = asked.optString("id");
+                if (id.isEmpty()) throw new IOException("no id");
+                MAIN.post(() -> { if (!stop.get()) update.accept("asked"); });
+                long until = System.currentTimeMillis() + 120_000;
+                end = "late";
+                while (!stop.get() && System.currentTimeMillis() < until) {
+                    Thread.sleep(2000);
+                    if (stop.get()) break;
+                    String status = call(app, "GET", "/tv/requests/" + id, null, 10_000).optString("status");
+                    if ("yes".equals(status)) { end = "allowed"; break; }
+                    if ("no".equals(status)) { end = "no"; break; }
+                    if ("gone".equals(status)) break;
+                }
+            } catch (Throwable t) {
+                end = "failed";
+            }
+            final String e = end;
+            MAIN.post(() -> { if (!stop.get()) update.accept(e); });
+        }, "beyond-family-unlock").start();
+        return () -> stop.set(true);
+    }
+
     /** A song found on the TV goes on the family's list too, so it shows on everybody's phone. Best effort. */
     static void addSong(Context c, String title, String artist) {
         addSong(c, title, artist, null);
@@ -609,7 +644,7 @@ final class Family {
         });
     }
 
-    // MARK: - The family wall and to-dos (web/wall.js in TableActivity, ADR 0066)
+    // MARK: - The family wall and to-dos (web/wall.js in TableActivity, ADR 0067)
 
     /** {stickies, wins} from the sync, or null. */
     private static volatile JSONObject wall;
@@ -769,6 +804,8 @@ final class Family {
         person.colour = colour(p.optString("colour"), People.COLOURS[i % People.COLOURS.length]);
         person.kid = p.optBoolean("kid");
         person.teen = person.kid && p.optBoolean("teen");
+        String stage = p.optString("stage");
+        if (person.kid && (WarmNotes.KINDY.equals(stage) || WarmNotes.SCHOOL.equals(stage) || WarmNotes.COLLEGE.equals(stage))) person.stage = stage;
         JSONObject look = p.optJSONObject("profile");
         if (look != null) {
             person.colour = colour(look.optString("colour"), person.colour);

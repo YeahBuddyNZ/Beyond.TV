@@ -1,4 +1,4 @@
-// The family wall and to-dos (web/wall.js, ADR 0066) without a screen: who a profile is in Beyond Family, stickies
+// The family wall and to-dos (web/wall.js, ADR 0067) without a screen: who a profile is in Beyond Family, stickies
 // before wins, a person's to-dos left, a tick that gives a star and a scoreboard point and an untick that takes them
 // back, the words in five languages with no dashes, and the home screen's line.
 // node tests/wall.test.js

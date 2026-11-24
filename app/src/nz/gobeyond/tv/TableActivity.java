@@ -140,7 +140,7 @@ public class TableActivity extends Activity {
 
         @JavascriptInterface public String language() { return Ui.language; }
 
-        /** The family wall and everyone's to-dos (web/wall.js, ADR 0066): {wall, todos}. */
+        /** The family wall and everyone's to-dos (web/wall.js, ADR 0067): {wall, todos}. */
         @JavascriptInterface public String wall() { return Family.wallJson(); }
 
         /** Ticks a to-do in Beyond Family; the answer comes back as Wall.answer(n, ok). */

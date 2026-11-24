@@ -110,7 +110,7 @@ final class DreamView extends View implements Choreographer.FrameCallback, HomeD
     private final float[] placeA = new float[3], placeB = new float[3];
     private final Paint photoPaint = new Paint(Paint.FILTER_BITMAP_FLAG | Paint.DITHER_FLAG);
     private final Paint black = new Paint();
-    // The family wall, one sticky or win at a time (WallCard, ADR 0066): drawn off the UI thread when the photo changes.
+    // The family wall, one sticky or win at a time (WallCard, ADR 0067): drawn off the UI thread when the photo changes.
     private final Paint wallPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
     private volatile Bitmap wallCard;
     private int wallAt;
@@ -496,7 +496,7 @@ final class DreamView extends View implements Choreographer.FrameCallback, HomeD
             drawPhoto(canvas, incoming, placeB, e);
         }
 
-        // The family wall, top left, over photos and paintings alike (ADR 0066): it's the family's own.
+        // The family wall, top left, over photos and paintings alike (ADR 0067): it's the family's own.
         Bitmap card = wallCard;
         if (card != null && !card.isRecycled()) {
             wallPaint.setAlpha(Math.round(255 * first));
