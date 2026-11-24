@@ -15,7 +15,8 @@ import android.widget.Toast;
 
 /**
  * Screen time is used up for today (ADR 0060): kind words in the kid's own colour, full screen over the app, never a
- * telling-off. OK goes back to the home screen; a grown-up's PIN adds 15 minutes; or someone else can watch.
+ * telling-off. OK goes back to the home screen; a grown-up's PIN adds 15 minutes; Ask a grown-up sends the ask to
+ * their phones in Beyond Family (ADR 0069); or someone else can watch.
  * Same as timeUp in web/screentime.js.
  */
 public class TimeUpActivity extends Activity {
@@ -81,7 +82,14 @@ public class TimeUpActivity extends Activity {
             WhoActivity.open(this, null);
             finish();
         });
-        for (Button b : new Button[] {ok, more, other}) {
+        // Ask a grown-up (ADR 0069): their phones buzz and one tap in Beyond Family says yes. A kid from Beyond Family only.
+        Button ask = null;
+        if (Family.linked(this) && me.id != null && me.id.startsWith("bf-")) {
+            final String member = me.id.substring(3);
+            ask = FeedbackActivity.button(this, "📱  " + Ui.tr("Pedir a um adulto", "Ask a grown-up", "Pedir a un adulto"), k, false);
+            ask.setOnClickListener(v -> askWhat(member));
+        }
+        for (Button b : ask == null ? new Button[] {ok, more, other} : new Button[] {ok, more, ask, other}) {
             LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(-2, Math.round(100 * k));
             bp.leftMargin = bp.rightMargin = Math.round(12 * k);
             row.addView(b, bp);
@@ -89,6 +97,20 @@ public class TimeUpActivity extends Activity {
         column.addView(row, new LinearLayout.LayoutParams(-1, -2));
         setContentView(root);
         ok.requestFocus();
+    }
+
+    /** What would you like to ask for? Then it goes to the grown-ups' phones, and the kid hears who was asked. */
+    private void askWhat(String member) {
+        String[] labels = {Ui.tr("Mais 15 minutos", "15 more minutes", "15 minutos más"), Ui.tr("Mais 30 minutos", "30 more minutes", "30 minutos más"),
+                Ui.tr("Mais um jogo", "One more game", "Un juego más")};
+        new android.app.AlertDialog.Builder(this)
+                .setTitle(Ui.tr("O que você quer pedir?", "What would you like to ask for?", "¿Qué quieres pedir?"))
+                .setItems(labels, (d, which) -> Family.request(this, which == 2 ? "game" : "time", member, which == 1 ? 30 : 15, words -> {
+                    Toast.makeText(getApplicationContext(), words, Toast.LENGTH_LONG).show();
+                    home();
+                }))
+                .setNegativeButton(Ui.tr("Voltar", "Back", "Volver"), null)
+                .show();
     }
 
     /** Back to the home screen, where the apps wait until tomorrow (or a grown-up's minutes). */

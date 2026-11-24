@@ -1,4 +1,4 @@
-# 0069. Light show: six more looks, favourites for each person, and every look in a row
+# 0070. Light show: six more looks, favourites for each person, and every look in a row
 
 Date: 24/11/2026. Status: accepted. Adds to ADR 0041, 0044 and 0050; changes one key in Keep the beat (below).
 

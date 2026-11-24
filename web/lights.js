@@ -7,7 +7,7 @@
  * The sound is only read as how loud each pitch is and the shape of the wave, frame by frame, on the TV: never
  * recorded, kept or sent.
  *
- * Ten looks, changed with left and right: Bars, Sound wave, Ring of light, Shooting stars, and since ADR 0069
+ * Ten looks, changed with left and right: Bars, Sound wave, Ring of light, Shooting stars, and since ADR 0070
  * Fireworks, Dance floor, Tunnel, Kaleidoscope, Lava lamp and Galaxy. Up hearts a look for whoever is watching (their
  * favourites come first), down shows every look in a row. OK skips to the next song, Back leaves. A TV that can't keep up drops to the light mode by itself (half the pixels, fewer bars, no glow);
  * Google TV says so up front on its older and 1 GB TVs.
@@ -751,7 +751,7 @@ var Lights = (function () {
       mark(W / 2, H / 2, 70 + b.bass * 40, b);
     }},
 
-    // ADR 0069: six more, each its own idea, all still in silence like the four above.
+    // ADR 0070: six more, each its own idea, all still in silence like the four above.
     {id: 'fireworks', icon: '🎆', name: function () { return say('Fogos de artifício', 'Fireworks', 'Fuegos artificiales'); }, draw: function (f) {
       clear(light ? 0.45 : 0.2);
       var b = f.b, max = light ? 160 : 420, i, p;
@@ -1021,7 +1021,7 @@ var Lights = (function () {
     hideAt = Date.now() + 5000;
   }
 
-  // MARK: - Favourites and the row of looks (ADR 0069)
+  // MARK: - Favourites and the row of looks (ADR 0070)
 
   var FAVE_KEY = 'bt-lights-faves', faves = [], shelf = null;
 

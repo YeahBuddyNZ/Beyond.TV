@@ -189,7 +189,7 @@ check('every look has its own id and an icon', L.LOOKS.every(function (l, i) {
   return l.icon && L.LOOKS.filter(function (m) { return m.id === l.id; }).length === 1;
 }));
 
-// ADR 0069. Favourites: first in the order, the rest after in the usual order, on and off, only real looks.
+// ADR 0070. Favourites: first in the order, the rest after in the usual order, on and off, only real looks.
 var ids = L.LOOKS.map(function (l) { return l.id; });
 check('no favourites: the usual order', L.order([]).join() === ids.map(function (x, n) { return n; }).join());
 var ord = L.order(['galaxy', 'disco']);
