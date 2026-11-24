@@ -49,7 +49,7 @@ public class AskActivity extends Activity {
         open(c, mode, text, from, "");
     }
 
-    /** asker: {member, kid} as JSON when a phone asked (ADR 0066), so a kid's phone question is a kid's question. */
+    /** asker: {member, kid} as JSON when a phone asked (ADR 0067), so a kid's phone question is a kid's question. */
     static void open(Context c, String mode, String text, String from, String asker) {
         c.startActivity(new Intent(c, AskActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 .putExtra("mode", mode).putExtra("text", text == null ? "" : text).putExtra("from", from == null ? "" : from)
@@ -140,7 +140,7 @@ public class AskActivity extends Activity {
 
         @JavascriptInterface public String from() { return from; }
 
-        /** Whose phone asked, and whether they're a kid (ADR 0066): {member, kid}, or "" when the TV asked. */
+        /** Whose phone asked, and whether they're a kid (ADR 0067): {member, kid}, or "" when the TV asked. */
         @JavascriptInterface public String asker() { return asker; }
 
         @JavascriptInterface public String language() { return Ui.language; }

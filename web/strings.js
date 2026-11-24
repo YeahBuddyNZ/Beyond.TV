@@ -7,6 +7,31 @@ var I18N = (function () {
 
   var lang = 'en';
   var german = {
+    // Who's watching: warm notes and grown-ups' own PINs (warm.js, profiles.js, ADR 0066)
+    "Type your PIN, or allow it from your phone.": "Gib deine PIN ein oder erlaube es am Handy.",
+    "Type your PIN.": "Gib deine PIN ein.",
+    "Allow from my phone": "Am Handy erlauben",
+    "Asking your phone…": "Frage dein Handy…",
+    "Look at your phone and tap Allow": "Schau aufs Handy und tipp auf Erlauben",
+    "Ask again": "Nochmal fragen",
+    "Your phone said that wasn't you.": "Dein Handy sagt, das warst nicht du.",
+    "No answer from your phone. Type your PIN instead.": "Keine Antwort vom Handy. Gib stattdessen deine PIN ein.",
+    "Couldn't reach your phone. Type your PIN instead.": "Dein Handy war nicht erreichbar. Gib stattdessen deine PIN ein.",
+    "Four numbers that are only yours.": "Vier Zahlen, die nur du kennst.",
+    "What would you like to do with your PIN?": "Was möchtest du mit deiner PIN machen?",
+    "Change my PIN": "PIN ändern",
+    "Take my PIN off": "PIN entfernen",
+    "Delete": "Löschen",
+    "Who they are: ": "Wer: ",
+    "Dad": "Papa",
+    "Grown-up": "Erwachsen",
+    "Their own PIN: ": "Eigene PIN: ",
+    "At: ": "In: ",
+    "kindy": "Kindergarten",
+    "school": "Schule",
+    "college": "Oberstufe",
+    "not set": "nicht festgelegt",
+    "Ask my phone": "Mein Handy fragen",
     // Find and Bedtime (find.js, bedtime.js)
     "Channel": "Sender",
     "Shows and movies": "Serien und Filme",
@@ -121,7 +146,7 @@ var I18N = (function () {
     "Try again": "Nochmal versuchen",
     "Type it": "Eintippen",
     "Tell the Beyond™ team something": "Dem Beyond™-Team etwas sagen",
-    // Ask for kids (ask.js, ADR 0066)
+    // Ask for kids (ask.js, ADR 0067)
     "Why is the sky blue?": "Warum ist der Himmel blau?",
     "How big is a blue whale?": "Wie groß ist ein Blauwal?",
     "What do kiwi eat?": "Was fressen Kiwis?",
@@ -933,6 +958,31 @@ var I18N = (function () {
   }
 
   var russian = {
+    // Who's watching: warm notes and grown-ups' own PINs (warm.js, profiles.js, ADR 0066)
+    "Type your PIN, or allow it from your phone.": "Введи свой PIN или разреши с телефона.",
+    "Type your PIN.": "Введи свой PIN.",
+    "Allow from my phone": "Разрешить с телефона",
+    "Asking your phone…": "Спрашиваю твой телефон…",
+    "Look at your phone and tap Allow": "Посмотри на телефон и нажми «Разрешить»",
+    "Ask again": "Спросить ещё раз",
+    "Your phone said that wasn't you.": "Телефон ответил, что это был не ты.",
+    "No answer from your phone. Type your PIN instead.": "Телефон не ответил. Введи PIN.",
+    "Couldn't reach your phone. Type your PIN instead.": "Не удалось связаться с телефоном. Введи PIN.",
+    "Four numbers that are only yours.": "Четыре цифры, которые знаешь только ты.",
+    "What would you like to do with your PIN?": "Что сделать с твоим PIN?",
+    "Change my PIN": "Сменить PIN",
+    "Take my PIN off": "Убрать PIN",
+    "Delete": "Стереть",
+    "Who they are: ": "Кто: ",
+    "Dad": "Папа",
+    "Grown-up": "Взрослый",
+    "Their own PIN: ": "Свой PIN: ",
+    "At: ": "Где учится: ",
+    "kindy": "садик",
+    "school": "школа",
+    "college": "старшая школа",
+    "not set": "не указано",
+    "Ask my phone": "Спросить мой телефон",
     // Find and Bedtime (find.js, bedtime.js)
     "Channel": "Канал",
     "Shows and movies": "Сериалы и фильмы",
@@ -1046,7 +1096,7 @@ var I18N = (function () {
     "Try again": "Попробовать ещё раз",
     "Type it": "Набрать",
     "Tell the Beyond™ team something": "Написать команде Beyond™",
-    // Ask for kids (ask.js, ADR 0066)
+    // Ask for kids (ask.js, ADR 0067)
     "Why is the sky blue?": "Почему небо голубое?",
     "How big is a blue whale?": "Какой величины синий кит?",
     "What do kiwi eat?": "Что едят киви?",

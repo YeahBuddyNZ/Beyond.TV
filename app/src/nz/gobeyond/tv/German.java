@@ -6,6 +6,32 @@ final class German {
 
     static String text(String english) {
         switch (english) {
+            // Who's watching: warm notes and grown-ups' own PINs (ADR 0066)
+            case "Type your PIN, or allow it from your phone.": return "Gib deine PIN ein oder erlaube es am Handy.";
+            case "Type your PIN.": return "Gib deine PIN ein.";
+            case "Allow from my phone": return "Am Handy erlauben";
+            case "Asking your phone…": return "Frage dein Handy…";
+            case "Look at your phone and tap Allow": return "Schau aufs Handy und tipp auf Erlauben";
+            case "Ask again": return "Nochmal fragen";
+            case "Your phone said that wasn't you.": return "Dein Handy sagt, das warst nicht du.";
+            case "No answer from your phone. Type your PIN instead.": return "Keine Antwort vom Handy. Gib stattdessen deine PIN ein.";
+            case "Couldn't reach your phone. Type your PIN instead.": return "Dein Handy war nicht erreichbar. Gib stattdessen deine PIN ein.";
+            case "Four numbers that are only yours.": return "Vier Zahlen, die nur du kennst.";
+            case "What would you like to do with your PIN?": return "Was möchtest du mit deiner PIN machen?";
+            case "Change my PIN": return "PIN ändern";
+            case "Take my PIN off": return "PIN entfernen";
+            case "Delete": return "Löschen";
+            case "Who they are: ": return "Wer: ";
+            case "Mum": return "Mama";
+            case "Dad": return "Papa";
+            case "Grown-up": return "Erwachsen";
+            case "Their own PIN: ": return "Eigene PIN: ";
+            case "At: ": return "In: ";
+            case "kindy": return "Kindergarten";
+            case "school": return "Schule";
+            case "college": return "Oberstufe";
+            case "not set": return "nicht festgelegt";
+            case "Ask my phone": return "Mein Handy fragen";
             // Find and Bedtime (ADR 0062, ADR 0063)
             case "Find": return "Finden";
             case "Say a game, a channel or a show": return "Sag ein Spiel, einen Sender oder eine Sendung";

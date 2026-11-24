@@ -1,4 +1,4 @@
-# 0066. Ask for kids: questions about the world, checked twice, and a log for their grown-ups
+# 0067. Ask for kids: questions about the world, checked twice, and a log for their grown-ups
 
 Date: 24/11/2026. Status: accepted.
 
