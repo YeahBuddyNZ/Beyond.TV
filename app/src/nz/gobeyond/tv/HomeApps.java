@@ -81,6 +81,8 @@ final class HomeApps {
     static final int LIVE = 19;
     /** Find: say a game, a channel, an app or a show (AskActivity's Find, ADR 0062). */
     static final int FIND = 20;
+    /** The family wall and everyone's to-dos, ticked with the remote (web/wall.js in TableActivity, ADR 0067). */
+    static final int WALL = 21;
     /** Image size of each card (16:9; on screen it shows up to ~330 px wide). */
     static final int TILE_W = 384, TILE_H = 216;
 

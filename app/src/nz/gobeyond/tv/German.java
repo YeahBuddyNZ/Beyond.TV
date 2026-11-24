@@ -306,6 +306,12 @@ final class German {
             case "The family's songs": return "Die Lieder der Familie";
             case "Tidy-up race": return "Aufräum-Wettrennen";
             case "Daily chores": return "Tägliche Aufgaben";
+            case "Family wall": return "Familienwand";
+            case "All done today!": return "Heute alles erledigt!";
+            case "On the wall": return "An der Wand";
+            case "ON THE WALL": return "AN DER WAND";
+            case "Outside": return "Draußen";
+            case "Without being asked": return "Ungefragt";
             case "Family scoreboard": return "Familien-Punktetafel";
             case "What are we singing?": return "Was singen wir?";
             case "What shall we do?": return "Was machen wir?";
@@ -614,6 +620,7 @@ final class German {
             case "The TV isn't on your home network right now. Check the Wi-Fi and try again.": return "Der Fernseher ist gerade nicht im Heimnetz. Prüf das WLAN und versuch es noch einmal.";
             case "1. Point your phone's camera at the code.\n2. Pick photos, or the kids' art.\n3. They show on the screensaver.": return "1. Richte die Handykamera auf den Code.\n2. Wähle Fotos oder die Bilder der Kinder.\n3. Sie erscheinen im Bildschirmschoner.";
             default:
+                if (english.endsWith(" to go · to-dos today")) return "Noch " + english.substring(0, english.length() - 21) + " · Aufgaben heute";
                 if (english.startsWith("That's screen time for today, ")) return "Das war die Bildschirmzeit für heute, " + english.substring(30);
                 if (english.startsWith("⏳ ") && english.endsWith(" of screen time left")) return "⏳ noch " + english.substring(2, english.length() - 20) + " Bildschirmzeit";
                 if (english.endsWith(" minutes of screen time left, ") || english.contains(" minutes of screen time left, ")) {

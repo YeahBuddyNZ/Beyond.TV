@@ -74,3 +74,4 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0064](0064-tidy-up-alarms-from-beyond-family.md) | Tidy-up alarms: days and a time away from Beyond Family, and the TV turns back off if nobody comes |
 | [0065](0065-beyond-tv-channels.md) | Beyond TV Channels: one line-up you surf like a real TV, NZ mix channels, turning channels off |
 | [0066](0066-whos-watching-warm-notes-and-own-pins.md) | Who's watching: grown-ups first, warm notes, a grown-up's own PIN with tap to allow |
+| [0067](0067-family-wall-and-to-dos.md) | The family wall and to-dos from Beyond Family, ticked with the remote |

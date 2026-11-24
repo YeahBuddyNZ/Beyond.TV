@@ -54,7 +54,10 @@ var Family = (function () {
     playlists = [];
     widgets = [];
     widgetsSig = '[]';
+    wall = null;
+    todos = {};
     if (window.Notes) Notes.set([]);
+    if (window.Wall) Wall.changed();
     save();
     clearTimeout(loopTimer);
     if (was && why) UI.toast(why);
@@ -63,7 +66,7 @@ var Family = (function () {
 
   // MARK: - The household
 
-  var lastPeople = '';
+  var lastPeople = '', lastWall = '';
   // The house noticeboard (only when the household turned it on): today, for the screensaver. Kept in memory only.
   var board = null;
   // Tiles pinned to the home screen in Beyond Family: apps, shows, the kids' jobs, cameras on the home network.
@@ -74,6 +77,10 @@ var Family = (function () {
   var songs = [];
   /** The family's karaoke playlists: [{id, name, items: [{songId, memberId}]}]. */
   var playlists = [];
+  /** The family wall (wall.js, ADR 0067): {stickies: [{id, text, colour, at}], wins: [{id, kind, text, name, colour, date, photo}]}. */
+  var wall = null;
+  /** Each person's own to-dos for today, by Beyond Family member id: {member: [{id, title, done, points}]}. */
+  var todos = {};
 
   /** One of Beyond Family's people, as a profile here. */
   function person(p, visitor) {
@@ -98,6 +105,15 @@ var Family = (function () {
       board = home.board || null;
       if (window.Notes) Notes.set(home.notes);
       if (window.Tidy) Tidy.set(home.tidy);
+      // The wall and everyone's to-dos: kept apart from the people, so a tick never rebuilds who's watching.
+      var wallSig = JSON.stringify([home.wall || null, (home.people || []).map(function (p) { return [p.id, p.todos || []]; })]);
+      if (wallSig !== lastWall) {
+        lastWall = wallSig;
+        wall = home.wall || null;
+        todos = {};
+        for (var t = 0; t < (home.people || []).length; t++) if (home.people[t].todos) todos[home.people[t].id] = home.people[t].todos;
+        if (window.Wall) setTimeout(Wall.changed, 0);
+      }
       var tilesNow = JSON.stringify(home.widgets || []);
       if (tilesNow !== widgetsSig) {
         widgetsSig = tilesNow;
@@ -113,7 +129,7 @@ var Family = (function () {
     var had = !!state.visiting;
     state.visiting = visitors.length > 0;
     save();
-    var sig = JSON.stringify([home ? home.people : null, visitors]);
+    var sig = JSON.stringify([home && home.people ? home.people.map(function (p) { var q = {}; for (var k in p) if (k !== 'todos') q[k] = p[k]; return q; }) : null, visitors]);
     if (sig === lastPeople) return;
     var guests = visitors.map(function (p) { return person(p, true); });
     if (home) {
@@ -138,6 +154,30 @@ var Family = (function () {
     call('POST', '/tv/people/' + p.family, Profiles.look(p), function (err) {
       if (!err) Profiles.saved(p.id, stamp);
       // Offline or refused: it stays marked, and goes again with the next change from Beyond Family.
+    });
+  }
+
+  // MARK: - The family wall and to-dos (wall.js, ADR 0067)
+
+  /** Ticks one of somebody's to-dos, or unticks it, in Beyond Family. done(ok). Kept here at once so the TV doesn't wait. */
+  function tickTodo(id, member, on, done) {
+    var list = todos[member] || [];
+    for (var i = 0; i < list.length; i++) if (list[i].id === id) list[i].done = on;
+    call('POST', '/tv/todos/' + id + '/tick', {memberId: member, done: on}, function (err) {
+      if (err) for (var j = 0; j < list.length; j++) if (list[j].id === id) list[j].done = !on;
+      done(!err);
+    });
+  }
+
+  /** Puts a sticky on the family wall, signed with the watcher's first name by Beyond Family. done(ok). */
+  function postSticky(text, colour, member, done) {
+    call('POST', '/tv/wall/sticky', {text: String(text).slice(0, 120), colour: colour || undefined, memberId: member || undefined}, function (err, json) {
+      if (!err && json && json.sticky) {
+        wall = wall || {stickies: [], wins: []};
+        wall.stickies = [json.sticky].concat(wall.stickies || []).slice(0, 6);
+        if (window.Wall) setTimeout(Wall.changed, 0);
+      }
+      done(!err);
     });
   }
 
@@ -940,6 +980,10 @@ var Family = (function () {
     now: now,
     ask: askBeyond,
     noteHeart: noteHeart,
-    noteDown: noteDown
+    noteDown: noteDown,
+    wall: function () { return linked() ? wall : null; },
+    todos: function () { return linked() ? todos : {}; },
+    tickTodo: tickTodo,
+    postSticky: postSticky
   };
 })();
