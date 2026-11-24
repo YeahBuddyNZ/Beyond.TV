@@ -32,7 +32,7 @@ var I18N = (function () {
     "college": "Oberstufe",
     "not set": "nicht festgelegt",
     "Ask my phone": "Mein Handy fragen",
-    // Ask a grown-up (screentime.js, ADR 0067)
+    // Ask a grown-up (screentime.js, ADR 0068)
     "Ask a grown-up": "Einen Erwachsenen fragen",
     "What would you like to ask for?": "Worum möchtest du bitten?",
     "The grown-ups' phones will buzz. They answer with one tap.": "Die Handys der Erwachsenen summen. Sie antworten mit einem Tippen.",
@@ -134,6 +134,7 @@ var I18N = (function () {
     " more": " mehr",
     "up the top": "oben",
     "Notes": "Notizen",
+    "Family wall": "Familienwand",
     "From your family": "Von deiner Familie",
     "Send a heart": "Ein Herz schicken",
     "That didn't go. Try again.": "Das hat nicht geklappt. Versuch es nochmal.",
@@ -981,7 +982,7 @@ var I18N = (function () {
     "college": "старшая школа",
     "not set": "не указано",
     "Ask my phone": "Спросить мой телефон",
-    // Ask a grown-up (screentime.js, ADR 0067)
+    // Ask a grown-up (screentime.js, ADR 0068)
     "Ask a grown-up": "Попросить взрослого",
     "What would you like to ask for?": "О чём хочешь попросить?",
     "The grown-ups' phones will buzz. They answer with one tap.": "Телефоны взрослых зазвонят. Они ответят одним нажатием.",
@@ -1082,6 +1083,7 @@ var I18N = (function () {
     " more": " ещё",
     "up the top": "наверху",
     "Notes": "Записки",
+    "Family wall": "Семейная стена",
     "From your family": "От вашей семьи",
     "Send a heart": "Отправить сердечко",
     "That didn't go. Try again.": "Не получилось. Попробуйте ещё раз.",

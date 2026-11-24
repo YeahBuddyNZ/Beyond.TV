@@ -1,6 +1,6 @@
 /*
  * The board and card games on Google TV (TableActivity, ADR 0024): table.html runs the same games as LG and Samsung in
- * a WebView, and this stands in for the home screen around them. Daily chores and the family scoreboard (chores.js, scores.js, ADR 0057) too. The silly games (laughs.js), school lunches (lunch.js), the arcade (arcade.js), Remote Control Land (rcland.js), Candy Land (candy.js), Build it (builder.js), the light show (lights.js), Look around (skylook.js) and How to play (guides.js) run here too. Who's playing comes from the TV's People, the levels
+ * a WebView, and this stands in for the home screen around them. Daily chores and the family scoreboard (chores.js, scores.js, ADR 0057) too, and the family wall and to-dos (wall.js, ADR 0066). The silly games (laughs.js), school lunches (lunch.js), the arcade (arcade.js), Remote Control Land (rcland.js), Candy Land (candy.js), Build it (builder.js), the light show (lights.js), Look around (skylook.js) and How to play (guides.js) run here too. Who's playing comes from the TV's People, the levels
  * are kept in the app's own files (BeyondTable.load and save), and the remote's keys arrive through TableHost.key.
  * Not loaded on LG or Samsung. Plain ES5.
  */
@@ -52,7 +52,7 @@ var TableHost = (function () {
   var first = bridge && bridge.start ? bridge.start() : ((/[?&]start=(\w+)/.exec(location.search) || [])[1] || '');
   // A game for one asks Who's playing? first on the Family profile, so its points reach the scoreboard (ADR 0057).
   if (first === 'road' || first === 'bridge' || first === 'town') Scores.pick(function () { Builder.open(first); });
-  else if (first === 'chores') Chores.open(); else if (first === 'morning') Morning.open(); else if (first === 'scores') Scores.open();
+  else if (first === 'chores') Chores.open(); else if (first === 'wall') Wall.open(); else if (first === 'morning') Morning.open(); else if (first === 'scores') Scores.open();
   else if (first === 'silly') Laughs.open(); else if (first === 'lunch') Lunch.open(); else if (first === 'arcade') Scores.pick(function () { Arcade.open(); }); else if (first === 'rcland') Scores.pick(function () { RCLand.open(); }); else if (first === 'candy') Scores.pick(function () { Candy.open(); }); else if (first === 'sky') SkyLook.open(); else if (first === 'lights') Lights.open(); else if (first === 'guides') Guides.list(); else Table.open();
   return {key: key};
 })();

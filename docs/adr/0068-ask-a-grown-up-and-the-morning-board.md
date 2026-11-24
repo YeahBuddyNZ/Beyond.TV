@@ -1,6 +1,7 @@
-# 0067. Ask a grown-up from the TV, and the Morning board
+# 0068. Ask a grown-up from the TV, and the Morning board
 
-Date: 24/11/2026. Status: accepted. Builds on 0060 (screen time limits) and 0064 (Beyond Family sets things on the TV).
+Date: 24/11/2026. Status: accepted. Builds on 0060 (screen time limits), 0064 (Beyond Family sets things on the TV) and
+0067 (the family wall and to-dos).
 Beyond Family's side is its ADR 0052.
 
 ## Context
@@ -21,8 +22,8 @@ the time-up screen only had a grown-up's PIN, which means getting up and walking
   quietly after 30 minutes.
 - **The Morning board** (the *Today* button on the home screen, linked TVs only): a column for each person, kids first,
   with today's to-dos from Beyond Family to tick off with the remote, then the calendar (birthdays, events, tea) when
-  the house noticeboard is switched on in Beyond Family, and the weather. Until Beyond Family sends to-dos, each
-  kid's jobs show read only. It opens by itself once each morning between 5 and 10 the first time the home screen is
+  the house noticeboard is switched on in Beyond Family, and the weather. They are the family wall's to-dos (0067), ticked
+  through the same call, so a tick on either screen shows on both; a kid with none shows their jobs read only. It opens by itself once each morning between 5 and 10 the first time the home screen is
   up; *Show it each morning* on the board turns that off. Web (`web/morning.js`) and Google TV (`TableActivity`
   through the bridge, `Family.morning`) share the same page.
 

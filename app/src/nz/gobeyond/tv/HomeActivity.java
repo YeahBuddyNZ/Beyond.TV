@@ -76,7 +76,7 @@ public class HomeActivity extends Activity implements Family.Screen {
             Checkin.maybeSend(this);
             FamilyService.start(this);
             Family.screen = this;
-            // The Morning board, first thing each morning (ADR 0067).
+            // The Morning board, first thing each morning (ADR 0068).
             TableActivity.maybeMorning(this);
             // Beyond Family changed who's here, or who's watching: draw again, as coming back from Settings does.
             Family.onChange = () -> {

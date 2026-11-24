@@ -37,13 +37,13 @@ import java.nio.charset.StandardCharsets;
 public class TableActivity extends Activity {
     static void open(Context c) { open(c, null); }
 
-    /** start: "silly" opens the silly games (web/laughs.js), "lunch" school lunches (web/lunch.js), "arcade" the arcade (web/arcade.js), "rcland" Milo's Remote Control Land (web/rcland.js), "candy" London's Candy Land (web/candy.js), "road" Build a road, "bridge" Build a bridge and "town" Plan a town (web/builder.js), "chores" Daily chores (web/chores.js), "scores" the family scoreboard (web/scores.js), "morning" the Morning board (web/morning.js), "sky" Look around (web/skylook.js), "lights" the light show (web/lights.js) and "guides" How to play (web/guides.js), rather than the board and card games. */
+    /** start: "silly" opens the silly games (web/laughs.js), "lunch" school lunches (web/lunch.js), "arcade" the arcade (web/arcade.js), "rcland" Milo's Remote Control Land (web/rcland.js), "candy" London's Candy Land (web/candy.js), "road" Build a road, "bridge" Build a bridge and "town" Plan a town (web/builder.js), "chores" Daily chores (web/chores.js), "wall" the family wall and to-dos (web/wall.js), "morning" the Morning board (web/morning.js), "scores" the family scoreboard (web/scores.js), "sky" Look around (web/skylook.js), "lights" the light show (web/lights.js) and "guides" How to play (web/guides.js), rather than the board and card games. */
     static void open(Context c, String start) {
         c.startActivity(new Intent(c, TableActivity.class).putExtra("start", start).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
 
     /**
-     * The Morning board (web/morning.js, ADR 0067) opens by itself the first time the home screen shows between 5 and
+     * The Morning board (web/morning.js, ADR 0068) opens by itself the first time the home screen shows between 5 and
      * 10 in the morning, once a day, when the TV is linked to Beyond Family and nobody turned it off. Same rule as
      * Morning.rules.due: change one, change both. Called from HomeActivity.onResume.
      */
@@ -132,6 +132,12 @@ public class TableActivity extends Activity {
         if ("sky".equals(getIntent().getStringExtra("start"))) sky = this;
     }
 
+    /** Answers the page's n-th question to Beyond Family (wall.js). On the main thread, where Family calls back. */
+    private void answer(int n, boolean ok) {
+        // The wall and the Morning board each keep their own numbers; only one of them is open at a time.
+        if (web != null) web.evaluateJavascript("window.Wall && Wall.answer(" + n + ", " + ok + "); window.Morning && Morning.answer && Morning.answer(" + n + ", " + ok + ")", null);
+    }
+
     /** What the page asks of the TV. Runs on the WebView's own thread. */
     private final class Bridge {
         @JavascriptInterface public String people() {
@@ -154,6 +160,19 @@ public class TableActivity extends Activity {
 
         @JavascriptInterface public String language() { return Ui.language; }
 
+        /** The family wall and everyone's to-dos (web/wall.js, ADR 0067): {wall, todos}. */
+        @JavascriptInterface public String wall() { return Family.wallJson(); }
+
+        /** Ticks a to-do in Beyond Family; the answer comes back as Wall.answer(n, ok). */
+        @JavascriptInterface public void tick(int n, String id, String member, boolean on) {
+            Family.tickTodo(TableActivity.this, id, member, on, ok -> answer(n, ok));
+        }
+
+        /** Puts a sticky on the family wall; the answer comes back as Wall.answer(n, ok). */
+        @JavascriptInterface public void sticky(int n, String text, String colour, String member) {
+            Family.sticky(TableActivity.this, text, colour, member, ok -> answer(n, ok));
+        }
+
         /** The tidy-up race's places for the family scoreboard (ScoreLog, ADR 0057). */
         @JavascriptInterface public String scores() { return ScoreLog.all(TableActivity.this); }
 
@@ -167,13 +186,8 @@ public class TableActivity extends Activity {
             }
         }
 
-        /** Today for the Morning board (web/morning.js, ADR 0067): to-dos, the noticeboard and the weather. */
+        /** Today for the Morning board (web/morning.js, ADR 0068): to-dos, the noticeboard and the weather. */
         @JavascriptInterface public String morning() { return Family.morning(TableActivity.this).toString(); }
-
-        /** Ticks one of today's to-dos in Beyond Family: "ok" when it took. On this bridge's own thread, never the UI's. */
-        @JavascriptInterface public String tick(String id, String member, boolean on) {
-            return Family.tick(TableActivity.this, id, member, on) ? "ok" : "";
-        }
 
         /** The Morning board's Show it each morning. */
         @JavascriptInterface public void morningAuto(boolean on) { Prefs.setMorningAuto(on); }

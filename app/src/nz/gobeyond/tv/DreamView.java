@@ -110,6 +110,10 @@ final class DreamView extends View implements Choreographer.FrameCallback, HomeD
     private final float[] placeA = new float[3], placeB = new float[3];
     private final Paint photoPaint = new Paint(Paint.FILTER_BITMAP_FLAG | Paint.DITHER_FLAG);
     private final Paint black = new Paint();
+    // The family wall, one sticky or win at a time (WallCard, ADR 0067): drawn off the UI thread when the photo changes.
+    private final Paint wallPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
+    private volatile Bitmap wallCard;
+    private int wallAt;
     private final Paint shadowPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
     private final Paint glassPaint = new Paint();
     private final Set<String> failed = new HashSet<>();     // Recs.key: a movie and a series can have the same ID
@@ -363,6 +367,7 @@ final class DreamView extends View implements Choreographer.FrameCallback, HomeD
             firstAt = up;
             bindPhotos();
             prepareNext();
+            nextWallCard();
             return;
         }
         if (incoming == null && prepared != null && up >= current.startedAt + (artMode ? ART_SHOW_MS : SHOW_MS)) {
@@ -370,6 +375,7 @@ final class DreamView extends View implements Choreographer.FrameCallback, HomeD
             prepared = null;
             incoming.startedAt = up;
             bindPhotos();
+            nextWallCard();
             return;
         }
         if (incoming != null && up >= incoming.startedAt + FADE_MS) {
@@ -387,6 +393,25 @@ final class DreamView extends View implements Choreographer.FrameCallback, HomeD
             }
             prepareNext();
         }
+    }
+
+    /** The next thing on the family wall, drawn in the background; the old card goes once the new one is in. */
+    private void nextWallCard() {
+        final int i = wallAt++;
+        final float scale = k;
+        final int gen = generation;
+        worker.execute(() -> {
+            Bitmap b;
+            try { b = WallCard.render(i, scale); } catch (Throwable t) { b = null; }
+            final Bitmap card = b;
+            handler.post(() -> {
+                if (gen != generation) { if (card != null) card.recycle(); return; }
+                Bitmap old = wallCard;
+                wallCard = card;
+                if (old != null) handler.postDelayed(old::recycle, 1000);
+                invalidate();
+            });
+        });
     }
 
     /** The photos the clock's glass shows (the current one and, during a crossfade, the incoming one). */
@@ -471,6 +496,12 @@ final class DreamView extends View implements Choreographer.FrameCallback, HomeD
             drawPhoto(canvas, incoming, placeB, e);
         }
 
+        // The family wall, top left, over photos and paintings alike (ADR 0067): it's the family's own.
+        Bitmap card = wallCard;
+        if (card != null && !card.isRecycled()) {
+            wallPaint.setAlpha(Math.round(255 * first));
+            canvas.drawBitmap(card, 80 * k, 70 * k, wallPaint);
+        }
         // Art mode is only the painting, family photos only the photo: no clock, no date, no caption. Family
         // messages still come over it.
         if (artMode || familyMode) return;

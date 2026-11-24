@@ -582,7 +582,9 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         if (ElectionActivity.showing()) lightButtons.add(HomeApps.action(HomeApps.ELECTION, "election", Ui.tr("Resultados da eleição", "Election results", "Resultados electorales"), "check"));
         // Bedtime (ADR 0063), at night: a night light that breathes, a calm sound, then the TV turns itself off.
         if (nightTarget) lightButtons.add(HomeApps.action(HomeApps.BEDTIME, "bedtime", Ui.tr("Hora de dormir", "Bedtime", "Hora de dormir"), "bedtime"));
-        // The Morning board (ADR 0067): today's to-dos, calendar and weather for the house. Linked to Beyond Family only.
+        // The family wall and everyone's to-dos (ADR 0067), linked to Beyond Family: kids included, they're their jobs.
+        if (Family.linked(getContext())) lightButtons.add(HomeApps.action(HomeApps.WALL, "wall", Ui.tr("Mural da família", "Family wall", "Muro de la familia"), "check"));
+        // The Morning board (ADR 0068): today's to-dos, calendar and weather for the house. Linked to Beyond Family only.
         if (Family.linked(getContext())) lightButtons.add(HomeApps.action(HomeApps.MORNING, "morning", Ui.tr("Hoje", "Today", "Hoy"), "sunny"));
         // Notes left from a phone in Beyond Family (ADR 0025): the button is there while any are up, and opens them big.
         notesShown = hasNotes();
@@ -2532,6 +2534,10 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             AskActivity.open(activity, AskActivity.ASK, "", "");
             return;
         }
+        if (it.kind == HomeApps.WALL) {
+            TableActivity.open(activity, "wall");
+            return;
+        }
         if (it.kind == HomeApps.NOTES) {
             AskActivity.open(activity, AskActivity.NOTES, "", "");
             return;
@@ -3637,6 +3643,9 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         boolean linked = Family.linked(ctx), kid = watcher != null && watcher.kid;
         List<String[]> rows = new ArrayList<>();
         JSONObject board = linked ? Family.board() : null;
+        // Whoever is watching: their to-dos left today, or the newest sticky (Family.wallRow, as web/wall.js homeRow).
+        String[] wallRow = linked ? Family.wallRow(watcher) : null;
+        if (wallRow != null) rows.add(wallRow);
         if (board != null) boardRows(board, rows);
         HomeData.Weather wx = data.weather;
         if (Prefs.weather() && !Double.isNaN(wx.temp)) {

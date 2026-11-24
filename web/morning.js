@@ -1,12 +1,12 @@
 /*
- * The Morning board (ADR 0067): today for the whole house on one screen. Everyone's to-dos from Beyond Family, ticked
+ * The Morning board (ADR 0068): today for the whole house on one screen. Everyone's to-dos from Beyond Family, ticked
  * off with the remote; what's on the family calendar today, birthdays and tea (the house noticeboard, when the
  * household switched it on); and the weather. It opens from the sun button at the top of the home screen, and by
  * itself the first time the home screen shows between 5 and 10 in the morning (Show it each morning, on the board
  * itself, turns that off). Only when the TV is linked to Beyond Family.
  *
  * Same file on Google TV (TableActivity, start "morning": the data comes from BeyondTable.morning() and a tick goes
- * through BeyondTable.tick()), LG and Samsung (Family and Data). Nothing is kept here but the day it last opened by
+ * through the family wall's BeyondTable.tick()), LG and Samsung (Family and Data). Nothing is kept here but the day it last opened by
  * itself. Words in all five languages, like chores.js. Plain ES5.
  */
 var Morning = (function () {
@@ -143,7 +143,15 @@ var Morning = (function () {
     var F = window.Family, out = {linked: !!(F && F.linked && F.linked())};
     if (!out.linked) return out;
     out.home = F.homeName();
-    out.people = window.Profiles ? Profiles.list() : [];
+    // Each person's to-dos come from the family wall's copy (Family.todos(), by member id), so a tick shows everywhere.
+    var lists = F.todos ? F.todos() : {}, all = window.Profiles ? Profiles.list() : [];
+    out.people = [];
+    for (var a = 0; a < all.length; a++) {
+      var q = {}, p = all[a];
+      for (var key in p) if (p.hasOwnProperty(key)) q[key] = p[key];
+      if (p.family && lists[p.family]) q.todos = lists[p.family];
+      out.people.push(q);
+    }
     out.board = F.board ? F.board() : null;
     var tiles = F.widgets ? F.widgets() : [];
     for (var i = 0; i < tiles.length; i++) if (tiles[i] && tiles[i].kind === 'jobs') out.tile = tiles[i].kids;
@@ -155,18 +163,21 @@ var Morning = (function () {
     return out;
   }
 
-  /** Ticks a to-do in Beyond Family, so the app, the points and every TV agree. done(ok). */
+  /** Ticks a to-do in Beyond Family through the family wall's tick, so the app, the points and every TV agree. done(ok). */
+  var answers = {}, asked = 0;
   function tick(todo, person, on, done) {
     var b = window.BeyondTable;
-    if (b && b.tick) {
-      var ok = false;
-      try { ok = b.tick(todo.id, person.family || '', !!on) === 'ok'; } catch (e) {}
-      done(ok);
+    if (b && b.wall) {
+      // Google TV answers later, as Morning.answer(n, ok).
+      var n = ++asked;
+      answers[n] = done;
+      try { b.tick(n, todo.id, person.family || '', !!on); } catch (e) { delete answers[n]; done(false); }
       return;
     }
-    if (window.Family && Family.tick) Family.tick(todo.id, person.family, on, function (err) { done(!err); });
+    if (window.Family && Family.tickTodo) Family.tickTodo(todo.id, person.family, !!on, done);
     else done(false);
   }
+  function answer(n, ok) { var f = answers[n]; delete answers[n]; if (f) f(!!ok); }
 
   // MARK: - The screen
 
@@ -281,5 +292,5 @@ var Morning = (function () {
     open();
   }
 
-  return {rules: rules, open: open, maybe: maybe};
+  return {rules: rules, open: open, maybe: maybe, answer: answer};
 })();
