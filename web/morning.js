@@ -164,7 +164,7 @@ var Morning = (function () {
   }
 
   /** Ticks a to-do in Beyond Family through the family wall's tick, so the app, the points and every TV agree. done(ok). */
-  var answers = {}, asked = 0;
+  var answers = {}, asked = 100000;   // apart from the wall's own numbers: TableActivity answers both with the same n
   function tick(todo, person, on, done) {
     var b = window.BeyondTable;
     if (b && b.wall) {
