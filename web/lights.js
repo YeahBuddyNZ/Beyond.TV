@@ -7,8 +7,9 @@
  * The sound is only read as how loud each pitch is and the shape of the wave, frame by frame, on the TV: never
  * recorded, kept or sent.
  *
- * Four looks, changed with left and right: Bars, Sound wave, Ring of light and Shooting stars. OK skips to the next
- * song, Back leaves. A TV that can't keep up drops to the light mode by itself (half the pixels, fewer bars, no glow);
+ * Ten looks, changed with left and right: Bars, Sound wave, Ring of light, Shooting stars, and since ADR 0069
+ * Fireworks, Dance floor, Tunnel, Kaleidoscope, Lava lamp and Galaxy. Up hearts a look for whoever is watching (their
+ * favourites come first), down shows every look in a row. OK skips to the next song, Back leaves. A TV that can't keep up drops to the light mode by itself (half the pixels, fewer bars, no glow);
  * Google TV says so up front on its older and 1 GB TVs.
  *
  * LG and Samsung run it on the home screen; Google TV in TableActivity's WebView (start "lights"), where the music
@@ -604,6 +605,19 @@ var Lights = (function () {
   // MARK: - The looks
 
   var c2 = null, light = false, stars = [], spin = 0, flash = 0;
+  // The newer looks: rockets, the tunnel's frames, a shared counter for colours, and how far a look has turned or flown.
+  var rockets = [], rings = [], count = 0, twist = 0, gap = 0;
+  function resetLooks() { stars = []; rockets = []; rings = []; twist = 0; gap = 0; }
+
+  // The lava lamp's blobs and the galaxy's stars, laid out once (a fixed seed, so every TV draws the same galaxy).
+  var BLOBS = [], GALAXY = [];
+  (function () {
+    var seed = 7;
+    function rnd() { seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
+    var cs = [DOTS[0], DOTS[1], DOTS[2], DOTS[3], VIOLET, LILAC];
+    for (var i = 0; i < 6; i++) BLOBS.push({x: 260 + i * 280, sp: 0.6 + rnd() * 0.8, ph: rnd() * 6.28, r: 90 + rnd() * 70, c: cs[i]});
+    for (i = 0; i < 360; i++) GALAXY.push({arm: i % 4, t: rnd(), ja: (rnd() - 0.5) * 0.5, jr: (rnd() - 0.5) * 40});
+  })();
   var val = null, peak = null, target = null, ranges = null, rangeKey = '';
 
   function clear(alpha) {
@@ -641,7 +655,7 @@ var Lights = (function () {
   }
 
   var LOOKS = [
-    {id: 'bars', name: function () { return say('Barras', 'Bars', 'Barras'); }, draw: function (f) {
+    {id: 'bars', icon: '📊', name: function () { return say('Barras', 'Bars', 'Barras'); }, draw: function (f) {
       clear(1);
       var n = light ? 32 : 64, left = 120, slot = (W - left * 2) / n, w = slot * 0.72, mid = H * 0.64, tall = H * 0.52;
       bars(f, n);
@@ -663,7 +677,7 @@ var Lights = (function () {
       }
       c2.globalAlpha = 1;
     }},
-    {id: 'wave', name: function () { return say('Onda sonora', 'Sound wave', 'Onda sonora'); }, draw: function (f) {
+    {id: 'wave', icon: '〰️', name: function () { return say('Onda sonora', 'Sound wave', 'Onda sonora'); }, draw: function (f) {
       clear(light ? 1 : 0.55);
       var wv = f.wave, n = wv.length, span = n >> 1, step = light ? 8 : 4, cy = H / 2, from = 0, i, x, y;
       // Start where the wave rises through the middle, like an oscilloscope, so it holds still instead of jittering.
@@ -693,7 +707,7 @@ var Lights = (function () {
       path();
       c2.stroke();
     }},
-    {id: 'ring', name: function () { return say('Anel de luz', 'Ring of light', 'Anillo de luz'); }, draw: function (f) {
+    {id: 'ring', icon: '⭕', name: function () { return say('Anel de luz', 'Ring of light', 'Anillo de luz'); }, draw: function (f) {
       clear(light ? 1 : 0.32);
       var half = light ? 24 : 48, n = half * 2, cx = W / 2, cy = H / 2, r0 = 200 + f.b.bass * 60, step = Math.PI * 2 / n;
       bars(f, half);
@@ -716,7 +730,7 @@ var Lights = (function () {
       if (f.hit && !light) { c2.strokeStyle = 'rgba(247,246,242,0.5)'; c2.lineWidth = 4; c2.beginPath(); c2.arc(cx, cy, r0 - 20, 0, Math.PI * 2); c2.stroke(); }
       mark(cx, cy, 110, f.b);
     }},
-    {id: 'stars', name: function () { return say('Estrelas cadentes', 'Shooting stars', 'Estrellas fugaces'); }, draw: function (f) {
+    {id: 'stars', icon: '🌠', name: function () { return say('Estrelas cadentes', 'Shooting stars', 'Estrellas fugaces'); }, draw: function (f) {
       clear(light ? 0.5 : 0.18);
       var b = f.b, max = light ? 90 : 260;
       // Stars only come from the music: a burst on each beat, a few more while it's loud.
@@ -735,8 +749,154 @@ var Lights = (function () {
       }
       c2.globalAlpha = 1;
       mark(W / 2, H / 2, 70 + b.bass * 40, b);
+    }},
+
+    // ADR 0069: six more, each its own idea, all still in silence like the four above.
+    {id: 'fireworks', icon: '🎆', name: function () { return say('Fogos de artifício', 'Fireworks', 'Fuegos artificiales'); }, draw: function (f) {
+      clear(light ? 0.45 : 0.2);
+      var b = f.b, max = light ? 160 : 420, i, p;
+      // A rocket goes up on each beat, now and then another while it's loud; none in silence.
+      if ((f.hit || (b.level > 0.4 && Math.random() < b.level * 0.04)) && rockets.length < (light ? 3 : 6)) {
+        rockets.push({x: 260 + Math.random() * (W - 520), y: H + 10, vy: -(16 + Math.random() * 5 + b.bass * 8),
+          top: H * (0.14 + Math.random() * 0.3), c: DOTS[count++ % 4]});
+      }
+      for (i = rockets.length - 1; i >= 0; i--) {
+        p = rockets[i];
+        p.y += p.vy;
+        if (p.y <= p.top) {
+          // The burst: a ring of sparks in the rocket's colour, a few paper ones, wider the louder the music.
+          var n = light ? 22 : 44, pow = 3 + b.level * 5;
+          for (var s = 0; s < n && stars.length < max; s++) {
+            var a = s / n * Math.PI * 2 + Math.random() * 0.2, sp = pow * (0.55 + Math.random() * 0.6);
+            stars.push({x: p.x, y: p.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 1, c: s % 7 ? p.c : PAPER, r: 2.5 + Math.random() * 2});
+          }
+          rockets.splice(i, 1);
+          continue;
+        }
+        c2.globalAlpha = 0.5;
+        c2.strokeStyle = p.c;
+        c2.lineWidth = 4;
+        c2.beginPath();
+        c2.moveTo(p.x, p.y);
+        c2.lineTo(p.x, p.y - p.vy * 3);
+        c2.stroke();
+        c2.globalAlpha = 1;
+        disc(p.x, p.y, 5, PAPER);
+      }
+      for (i = stars.length - 1; i >= 0; i--) {
+        p = stars[i];
+        p.x += p.vx; p.y += p.vy; p.vy += 0.09; p.vx *= 0.985; p.vy *= 0.985; p.life -= 0.013;
+        if (p.life <= 0) { stars.splice(i, 1); continue; }
+        if (!light) { c2.globalAlpha = p.life * 0.2; disc(p.x, p.y, p.r * 3, p.c); }
+        c2.globalAlpha = p.life;
+        disc(p.x, p.y, p.r * (0.5 + p.life), p.c);
+      }
+      c2.globalAlpha = 1;
+    }},
+    {id: 'disco', icon: '💃', name: function () { return say('Pista de dança', 'Dance floor', 'Pista de baile'); }, draw: function (f) {
+      clear(1);
+      // Tiles in columns: the lows in the middle, the highs out to the sides, lit from the floor up. The colours step
+      // round on every beat.
+      var cols = 14, half = cols / 2, rows = 6, left = 90, top = 130, tw = (W - left * 2) / cols, th = (H - top - 180) / rows;
+      bars(f, half);
+      if (f.hit) count++;
+      for (var c = 0; c < cols; c++) {
+        var k = c < half ? half - 1 - c : c - half, v = val[k], lit = v * rows;
+        for (var r = 0; r < rows; r++) {
+          var up = rows - 1 - r, on = up < lit, x = left + c * tw, y = top + r * th;
+          c2.fillStyle = DOTS[(k + up + count) % 4];
+          // A lit tile glows brighter and pops out a little.
+          var glow = on ? Math.min(1, lit - up) : 0, pad = 10 - glow * 6;
+          c2.globalAlpha = on ? 0.45 + 0.55 * glow : 0.07;
+          c2.fillRect(x + pad, y + pad, tw - pad * 2, th - pad * 2);
+          if (on && !light) {
+            c2.globalAlpha = 0.35;
+            c2.fillStyle = PAPER;
+            c2.fillRect(x + 6, y + 6, tw - 12, 6);
+          }
+        }
+      }
+      c2.globalAlpha = 1;
+    }},
+    {id: 'tunnel', icon: '🌀', name: function () { return say('Túnel', 'Tunnel', 'Túnel'); }, draw: function (f) {
+      clear(light ? 1 : 0.35);
+      var b = f.b, sp = b.level * 0.03 + (f.hit ? 0.02 : 0), cx = W / 2, cy = H / 2;
+      if (!rings.length) for (var z0 = 0.1; z0 < 1.1; z0 += 0.12) rings.push({z: z0, c: DOTS[count++ % 4]});
+      // Frames fly out of the middle as fast as the music is loud, turning a little: still in silence.
+      gap += sp;
+      if (gap > 0.12) { gap -= 0.12; rings.push({z: 0, c: DOTS[count++ % 4]}); }
+      twist += b.level * 0.012;
+      c2.lineJoin = 'round';
+      for (var i = rings.length - 1; i >= 0; i--) {
+        var g = rings[i];
+        g.z += sp * (0.4 + g.z * 1.6);
+        if (g.z > 1.15) { rings.splice(i, 1); continue; }
+        var s = g.z * g.z, hw = 30 + s * W * 0.62, hh = hw * 0.5625, a = twist + g.z * 0.7, cs = Math.cos(a), sn = Math.sin(a);
+        c2.globalAlpha = Math.min(1, g.z * 3) * (0.55 + b.level * 0.45);
+        c2.strokeStyle = g.c;
+        c2.lineWidth = 2 + s * (light ? 14 : 22);
+        c2.beginPath();
+        for (var k = 0; k < 5; k++) {
+          var px = (k === 1 || k === 2) ? hw : -hw, py = k >= 2 && k < 4 ? hh : -hh;
+          var x = cx + px * cs - py * sn, y = cy + px * sn + py * cs;
+          if (k) c2.lineTo(x, y); else c2.moveTo(x, y);
+        }
+        c2.stroke();
+      }
+      c2.globalAlpha = 1;
+      mark(cx, cy, 34, b);
+    }},
+    {id: 'kaleido', icon: '🔮', name: function () { return say('Caleidoscópio', 'Kaleidoscope', 'Caleidoscopio'); }, draw: function (f) {
+      clear(light ? 1 : 0.25);
+      var n = light ? 12 : 24, seg = light ? 6 : 8, cx = W / 2, cy = H / 2, step = Math.PI * 2 / seg;
+      bars(f, n);
+      twist += f.b.level * 0.008;
+      // Each pitch a dot at its own distance, mirrored round the middle so the pattern is always even.
+      for (var i = 0; i < n; i++) {
+        var v = val[i], rad = 60 + i / n * 460, off = i * 0.35 + twist * (i % 2 ? 1 : -1), size = 4 + v * 36;
+        c2.globalAlpha = 0.25 + v * 0.75;
+        for (var s = 0; s < seg; s++) {
+          var a = s * step + off, a2 = s * step - off;
+          disc(cx + Math.cos(a) * rad, cy + Math.sin(a) * rad, size, DOTS[i % 4]);
+          disc(cx + Math.cos(a2) * rad, cy + Math.sin(a2) * rad, size, v > 0.85 ? EMBER : (i % 2 ? LILAC : VIOLET));
+        }
+      }
+      c2.globalAlpha = 1;
+      mark(cx, cy, 50, f.b);
+    }},
+    {id: 'lava', icon: '💧', name: function () { return say('Lâmpada de lava', 'Lava lamp', 'Lámpara de lava'); }, draw: function (f) {
+      clear(1);
+      var b = f.b, i, k;
+      // Big soft blobs that drift up and down as the music plays, and swell on the lows.
+      twist += b.level * 0.02 + (f.hit ? 0.01 : 0);
+      for (i = 0; i < BLOBS.length; i++) {
+        k = BLOBS[i];
+        var x = k.x + Math.sin(twist * 0.7 * k.sp + k.ph * 2) * 140, y = H / 2 + Math.sin(twist * k.sp + k.ph) * H * 0.34;
+        var r = k.r * (0.8 + b.bass * 0.5 + (i % 2 ? b.mid : b.high) * 0.3);
+        if (!light) { c2.globalAlpha = 0.1; disc(x, y, r * 1.9, k.c); c2.globalAlpha = 0.2; disc(x, y, r * 1.35, k.c); }
+        c2.globalAlpha = 0.8;
+        disc(x, y, r, k.c);
+      }
+      c2.globalAlpha = 1;
+    }},
+    {id: 'galaxy', icon: '🌌', name: function () { return say('Galáxia', 'Galaxy', 'Galaxia'); }, draw: function (f) {
+      clear(light ? 1 : 0.3);
+      var b = f.b, cx = W / 2, cy = H / 2, by = light ? 3 : 1;
+      bars(f, 16);
+      // Four arms in the four dots' colours, the middle turning faster: the lows light the middle, the highs the edge.
+      twist += b.level * 0.012 + (f.hit ? 0.01 : 0);
+      for (var i = 0; i < GALAXY.length; i += by) {
+        var g = GALAXY[i], v = val[Math.min(15, Math.floor(g.t * 16))], rad = 30 + g.t * 500;
+        var a = g.arm * Math.PI / 2 + g.t * 4.2 + twist * (1.4 - g.t) + g.ja;
+        c2.globalAlpha = 0.3 + v * 0.7;
+        disc(cx + Math.cos(a) * (rad + g.jr) * 1.45, cy + Math.sin(a) * (rad + g.jr) * 0.8, 1.5 + v * 7 + (1 - g.t) * 2, DOTS[g.arm]);
+      }
+      c2.globalAlpha = 0.5;
+      disc(cx, cy, 30 + b.bass * 50, PAPER);
+      c2.globalAlpha = 1;
     }}
   ];
+
 
   /** Calm lights, the one with no sound: the four dots drifting slowly round the middle, about a minute a lap. */
   var CALM = {id: 'calm', name: function () { return say('Luzes calmas', 'Calm lights', 'Luces tranquilas'); }, draw: function (f) {
@@ -813,10 +973,10 @@ var Lights = (function () {
   }
 
   function helpText() {
-    if (kind === 'music') return say('◀ ▶ outro visual  ·  OK próxima música  ·  Voltar para sair', '◀ ▶ another look  ·  OK next song  ·  Back to leave', '◀ ▶ otro efecto  ·  OK siguiente canción  ·  Atrás para salir');
+    if (kind === 'music') return say('◀ ▶ outro visual  ·  ▲ ♥ favorito  ·  ▼ todos  ·  OK próxima música  ·  Voltar para sair', '◀ ▶ another look  ·  ▲ ♥ favourite  ·  ▼ all the looks  ·  OK next song  ·  Back to leave', '◀ ▶ otro efecto  ·  ▲ ♥ favorito  ·  ▼ todos  ·  OK siguiente canción  ·  Atrás para salir');
     if (kind === 'lights') return say('Voltar para sair', 'Back to leave', 'Atrás para salir');
-    if (kind === 'beat') return say('◀ ▶ outro visual  ·  OK no ritmo  ·  ▲ ▼ mais rápido ou devagar  ·  Voltar para sair', '◀ ▶ another look  ·  OK in time with the music  ·  ▲ ▼ faster or slower  ·  Back to leave', '◀ ▶ otro efecto  ·  OK al ritmo  ·  ▲ ▼ más rápido o lento  ·  Atrás para salir');
-    return say('◀ ▶ outro visual  ·  Voltar para sair', '◀ ▶ another look  ·  Back to leave', '◀ ▶ otro efecto  ·  Atrás para salir');
+    if (kind === 'beat') return say('◀ ▶ outro visual  ·  ▲ ♥ favorito  ·  ▼ todos  ·  OK no ritmo  ·  Voltar para sair', '◀ ▶ another look  ·  ▲ ♥ favourite  ·  ▼ all the looks  ·  OK in time with the music  ·  Back to leave', '◀ ▶ otro efecto  ·  ▲ ♥ favorito  ·  ▼ todos  ·  OK al ritmo  ·  Atrás para salir');
+    return say('◀ ▶ outro visual  ·  ▲ ♥ favorito  ·  ▼ todos  ·  Voltar para sair', '◀ ▶ another look  ·  ▲ ♥ favourite  ·  ▼ all the looks  ·  Back to leave', '◀ ▶ otro efecto  ·  ▲ ♥ favorito  ·  ▼ todos  ·  Atrás para salir');
   }
 
   function bpmText() { return bpm + ' ' + say('batidas por minuto', 'beats a minute', 'golpes por minuto'); }
@@ -850,7 +1010,7 @@ var Lights = (function () {
     var s = on ? 0.5 : 1;
     canvas.width = W * s; canvas.height = H * s;
     c2.setTransform(s, 0, 0, s, 0, 0);
-    stars = [];
+    resetLooks();
     times = [];
   }
 
@@ -859,6 +1019,108 @@ var Lights = (function () {
     label.textContent = text;
     UI.setClass(label, 'shown', true);
     hideAt = Date.now() + 5000;
+  }
+
+  // MARK: - Favourites and the row of looks (ADR 0069)
+
+  var FAVE_KEY = 'bt-lights-faves', faves = [], shelf = null;
+
+  /** Who's watching, for their own favourites; the whole family when nobody is picked. */
+  function whoId() {
+    try { var p = window.Profiles && Profiles.current && Profiles.current(); return p && p.id ? String(p.id) : 'together'; } catch (e) { return 'together'; }
+  }
+
+  /** The looks in the order ◀ ▶ and the row go through: favourites first, each group in the usual order. */
+  function order(favs) {
+    var first = [], rest = [];
+    for (var i = 0; i < LOOKS.length; i++) (favs.indexOf(LOOKS[i].id) >= 0 ? first : rest).push(i);
+    return first.concat(rest);
+  }
+
+  /** A favourite on or off: a new list, never more than the looks there are, and only real looks. */
+  function toggled(favs, id) {
+    var out = [];
+    for (var i = 0; i < favs.length; i++) if (favs[i] !== id && known(favs[i])) out.push(favs[i]);
+    if (favs.indexOf(id) < 0 && known(id)) out.push(id);
+    return out;
+  }
+
+  function known(id) { for (var i = 0; i < LOOKS.length; i++) if (LOOKS[i].id === id) return true; return false; }
+
+  /** Everybody's favourites, kept on this TV: {person: [look ids]}. */
+  function allFaves() {
+    try { var v = JSON.parse(window.localStorage.getItem(FAVE_KEY)); return v && typeof v === 'object' ? v : {}; } catch (e) { return {}; }
+  }
+
+  function loadFaves(who) {
+    var list = allFaves()[who], out = [];
+    if (list && list.length) for (var i = 0; i < list.length; i++) if (known(list[i]) && out.indexOf(list[i]) < 0) out.push(list[i]);
+    return out;
+  }
+
+  function saveFaves(who, list) {
+    var all = allFaves();
+    all[who] = list;
+    try { window.localStorage.setItem(FAVE_KEY, JSON.stringify(all)); } catch (e) {}
+  }
+
+  function isFave(i) { return faves.indexOf(LOOKS[i].id) >= 0; }
+  function lookName(i) { return (isFave(i) ? '♥  ' : '') + LOOKS[i].name(); }
+
+  /** ◀ ▶: the next look in the favourites-first order. */
+  function turn(dir) {
+    var ord = order(faves), at2 = ord.indexOf(look), n = ord.length;
+    look = ord[((at2 < 0 ? 0 : at2) + dir + n) % n];
+    resetLooks();
+    clear(1);
+    show(lookName(look));
+    if (shelf) drawShelf();
+  }
+
+  /** ▲: this look in or out of the favourites of whoever is watching. */
+  function favourite() {
+    var id = LOOKS[look].id;
+    faves = toggled(faves, id);
+    saveFaves(whoId(), faves);
+    show(isFave(look)
+      ? '♥  ' + LOOKS[look].name() + '  ·  ' + say('nos seus favoritos', 'in your favourites', 'en tus favoritos')
+      : LOOKS[look].name() + '  ·  ' + say('fora dos favoritos', 'out of your favourites', 'fuera de tus favoritos'));
+    if (shelf) drawShelf();
+  }
+
+  /** ▼: every look in a row along the bottom, favourites first; ◀ ▶ try them, ▲ hearts one, OK or ▼ closes it. */
+  function openShelf() {
+    shelf = UI.el('div', 'li-shelf', layer);
+    drawShelf();
+    UI.setClass(help, 'shown', false);
+    UI.setClass(label, 'shown', false);
+    hideAt = 0;
+  }
+
+  function drawShelf() {
+    while (shelf.firstChild) shelf.removeChild(shelf.firstChild);
+    UI.el('div', 'li-shelf-title', shelf, say('Todos os visuais  ·  ▲ ♥ favorito  ·  OK pronto',
+      'All the looks  ·  ▲ ♥ favourite  ·  OK done', 'Todos los efectos  ·  ▲ ♥ favorito  ·  OK listo'));
+    var row = UI.el('div', 'li-shelf-row', shelf), ord = order(faves);
+    for (var i = 0; i < ord.length; i++) {
+      var j = ord[i], tile = UI.el('div', 'li-tile' + (j === look ? ' focus' : '') + (isFave(j) ? ' fave' : ''), row);
+      UI.el('div', 'li-tile-icon', tile, LOOKS[j].icon || '✨');
+      UI.el('div', 'li-tile-name', tile, LOOKS[j].name());
+      if (isFave(j)) UI.el('div', 'li-tile-heart', tile, '♥');
+    }
+  }
+
+  function closeShelf() {
+    if (shelf && shelf.parentNode) shelf.parentNode.removeChild(shelf);
+    shelf = null;
+    show(lookName(look));
+  }
+
+  function shelfKey(k) {
+    if (k === TV.keys.left || k === TV.keys.right) { turn(k === TV.keys.right ? 1 : -1); return true; }
+    if (k === TV.keys.up) { favourite(); return true; }
+    if (k === TV.keys.ok || k === TV.keys.down) { closeShelf(); return true; }
+    return false;
   }
 
   function run(which) {
@@ -877,11 +1139,9 @@ var Lights = (function () {
         help = UI.el('div', 'li-help shown', l, helpText());
       },
       key: function (k) {
-        if (kind === 'beat' && (k === TV.keys.up || k === TV.keys.down)) {
-          bpm = steady(bpm + (k === TV.keys.up ? 5 : -5));
-          show(bpmText());
-          return true;
-        }
+        if (shelf) return shelfKey(k);
+        if (kind !== 'lights' && k === TV.keys.up) { favourite(); return true; }
+        if (kind !== 'lights' && k === TV.keys.down) { openShelf(); return true; }
         if (kind === 'beat' && k === TV.keys.ok) {
           var now = Date.now(), t = tap(now);
           // The beat lands on each tap, so it locks to the music after one press; the speed from the second.
@@ -891,23 +1151,27 @@ var Lights = (function () {
           return true;
         }
         if ((k === TV.keys.left || k === TV.keys.right) && kind !== 'lights') {
-          look = (look + (k === TV.keys.right ? 1 : LOOKS.length - 1)) % LOOKS.length;
-          stars = [];
-          clear(1);
-          show(LOOKS[look].name());
+          turn(k === TV.keys.right ? 1 : -1);
           return true;
         }
         if (k === TV.keys.ok) {
           if (source === 'music') next();
-          else show(kind === 'lights' ? CALM.name() : LOOKS[look].name());
+          else show(kind === 'lights' ? CALM.name() : lookName(look));
           UI.setClass(help, 'shown', true);
           hideAt = Date.now() + 5000;
           return true;
         }
         return k === TV.keys.up || k === TV.keys.down || k === TV.keys.left || k === TV.keys.right;
       },
+      back: function () {
+        if (!shelf) return false;
+        closeShelf();
+        return true;
+      },
       closed: stop
     });
+    faves = loadFaves(whoId());
+    if (faves.length) look = order(faves)[0];
     var b = window.BeyondTable;
     setLight(!!(b && b.lowPower && b.lowPower()));
     beat = beats();
@@ -923,11 +1187,11 @@ var Lights = (function () {
       onSong = function (s) { show((s.title || '') + (s.artist ? '  ·  ' + s.artist : '')); };
       if (songs.length) onSong(songs[at % songs.length]);
     } else if (which === 'beat') {
-      tell(say('Aperte OK no ritmo da música e as luzes acompanham. ▲ ▼ para mais rápido ou devagar.',
-        'Tap OK in time with the music and the lights will keep the beat. ▲ ▼ for faster or slower.',
-        'Pulsa OK al ritmo de la música y las luces lo seguirán. ▲ ▼ para más rápido o lento.'), 8000);
+      tell(say('Aperte OK no ritmo da música e as luzes acompanham.',
+        'Tap OK in time with the music and the lights will keep the beat.',
+        'Pulsa OK al ritmo de la música y las luces lo seguirán.'), 8000);
       show(bpmText());
-    } else show(which === 'lights' ? CALM.name() : LOOKS[look].name());
+    } else show(which === 'lights' ? CALM.name() : lookName(look));
     if (waveOn) {
       startCamera(function (ok) {
         if (!layer) return;
@@ -945,7 +1209,7 @@ var Lights = (function () {
     silence();
     stopCamera();
     asleep = null; noteAt = 0;
-    c2 = null; canvas = null; layer = null; stars = []; kind = '';
+    c2 = null; canvas = null; layer = null; shelf = null; resetLooks(); kind = '';
     bins = FFT / 2; freq = new Uint8Array(bins); wave = new Uint8Array(FFT); nyq = 22050;
   }
 
@@ -1019,8 +1283,8 @@ var Lights = (function () {
 
   return {open: open, answer: answer, cameraAnswer: cameraAnswer, core: {gate: gate, bands: bands, logBands: logBands, barLevels: barLevels, follow: follow,
     beats: beats, quiet: quiet, shuffle: shuffle, tooSlow: tooSlow, unpack: unpack, LOOKS: LOOKS, CALM: CALM,
-    sleepy: sleepy, tapper: tapper, beatFrame: beatFrame, motion: motion, drawRipples: function (f, list) { ripples = list; drawRipples(f); return ripples; },
+    sleepy: sleepy, tapper: tapper, order: order, toggled: toggled, loadFaves: loadFaves, saveFaves: saveFaves, beatFrame: beatFrame, motion: motion, drawRipples: function (f, list) { ripples = list; drawRipples(f); return ripples; },
     // For the tests: a stand-in canvas to draw on, and light mode without one.
-    useContext: function (c, lightMode) { c2 = c; light = !!lightMode; stars = []; rangeKey = ''; spin = 0; },
+    useContext: function (c, lightMode) { c2 = c; light = !!lightMode; resetLooks(); rangeKey = ''; spin = 0; },
     spin: function () { return spin; }}};
 })();
