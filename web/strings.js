@@ -32,6 +32,17 @@ var I18N = (function () {
     "college": "Oberstufe",
     "not set": "nicht festgelegt",
     "Ask my phone": "Mein Handy fragen",
+    // Ask a grown-up (screentime.js, ADR 0069)
+    "Ask a grown-up": "Einen Erwachsenen fragen",
+    "What would you like to ask for?": "Worum möchtest du bitten?",
+    "The grown-ups' phones will buzz. They answer with one tap.": "Die Handys der Erwachsenen summen. Sie antworten mit einem Tippen.",
+    "30 more minutes": "30 Minuten mehr",
+    "One more game": "Noch ein Spiel",
+    "You've asked a lot already. Try again later.": "Du hast schon oft gefragt. Versuch es später nochmal.",
+    "No grown-ups have the Beyond Family app yet.": "Noch kein Erwachsener hat die Beyond Family App.",
+    "Couldn't ask just now. Go and ask in person!": "Fragen ging gerade nicht. Frag einfach persönlich!",
+    "the grown-ups": "die Erwachsenen",
+    "A grown-up": "Ein Erwachsener",
     // Find and Bedtime (find.js, bedtime.js)
     "Channel": "Sender",
     "Shows and movies": "Serien und Filme",
@@ -939,6 +950,12 @@ var I18N = (function () {
     if (m) return 'Was singt ' + m[1] + '?';
     m = /^(.+)'s up!$/.exec(en);
     if (m) return m[1] + ' ist dran!';
+    m = /^Asked (.+)\. The TV will tell you when they answer\.$/.exec(en);
+    if (m) return 'Gefragt: ' + m[1] + '. Der Fernseher sagt dir, wenn sie antworten.';
+    m = /^(.+) said yes! (\d+) more minutes, (.+)\.$/.exec(en);
+    if (m) return m[1] + ' hat ja gesagt! ' + m[2] + ' Minuten mehr, ' + m[3] + '.';
+    m = /^Not this time, (.+)\. (.+) said maybe tomorrow\.$/.exec(en);
+    if (m) return 'Diesmal nicht, ' + m[1] + '. ' + m[2] + ' sagt: vielleicht morgen.';
     m = /^That's screen time for today, (.+)$/.exec(en);
     if (m) return 'Das war die Bildschirmzeit für heute, ' + m[1];
     m = /^⏳ (.+) of screen time left$/.exec(en);
@@ -984,6 +1001,17 @@ var I18N = (function () {
     "college": "старшая школа",
     "not set": "не указано",
     "Ask my phone": "Спросить мой телефон",
+    // Ask a grown-up (screentime.js, ADR 0069)
+    "Ask a grown-up": "Попросить взрослого",
+    "What would you like to ask for?": "О чём хочешь попросить?",
+    "The grown-ups' phones will buzz. They answer with one tap.": "Телефоны взрослых зазвонят. Они ответят одним нажатием.",
+    "30 more minutes": "Ещё 30 минут",
+    "One more game": "Ещё одна игра",
+    "You've asked a lot already. Try again later.": "Ты уже много раз просил. Попробуй позже.",
+    "No grown-ups have the Beyond Family app yet.": "Пока ни у кого из взрослых нет приложения Beyond Family.",
+    "Couldn't ask just now. Go and ask in person!": "Сейчас не получилось попросить. Спроси сам!",
+    "the grown-ups": "взрослых",
+    "A grown-up": "Взрослый",
     // Find and Bedtime (find.js, bedtime.js)
     "Channel": "Канал",
     "Shows and movies": "Сериалы и фильмы",
@@ -1894,6 +1922,12 @@ var I18N = (function () {
     if (m) return 'Что поёт ' + m[1] + '?';
     m = /^(.+)'s up!$/.exec(en);
     if (m) return 'Очередь: ' + m[1] + '!';
+    m = /^Asked (.+)\. The TV will tell you when they answer\.$/.exec(en);
+    if (m) return 'Попросили: ' + m[1] + '. Телевизор скажет, когда ответят.';
+    m = /^(.+) said yes! (\d+) more minutes, (.+)\.$/.exec(en);
+    if (m) return m[1] + ' разрешил! Ещё ' + m[2] + ' минут, ' + m[3] + '.';
+    m = /^Not this time, (.+)\. (.+) said maybe tomorrow\.$/.exec(en);
+    if (m) return 'Не сейчас, ' + m[1] + '. ' + m[2] + ' говорит: может, завтра.';
     m = /^That's screen time for today, (.+)$/.exec(en);
     if (m) return 'На сегодня экранное время всё, ' + m[1];
     m = /^⏳ (.+) of screen time left$/.exec(en);

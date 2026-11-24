@@ -498,3 +498,25 @@
 .wl-compose .wl-preview .wl-card.blank .words { opacity: 0.45; }
 .wl-compose .wl-cancel { margin-top: 34px; }
 .wl-face .kidtag { display: none; }
+/* The Morning board (morning.js, ADR 0069): everyone's to-dos on the left, today's calendar on the right, the weather up top. */
+.bt-morning .ch-note { right: 640px; }
+.bt-morning .mb-cols { left: 60px; right: auto; width: 1240px; top: 230px; text-align: left; }
+.bt-morning .mb-cols .ch-col { margin: 0 24px 0 0; }
+.bt-morning .ch-tile.mb-todo, .bt-morning .ch-col.many .ch-tile.mb-todo { height: auto; min-height: 70px; padding: 0 64px 0 22px; }
+.bt-morning .mb-todo .name, .bt-morning .ch-col.many .mb-todo .name { padding: 15px 0; font-size: 24px; line-height: 30px; white-space: normal; overflow: visible; }
+.bt-morning .mb-todo .tick { top: 50%; margin-top: -22px; }
+.bt-morning .ch-head .stars { white-space: normal; }
+.mb-weather { position: absolute; right: 120px; top: 58px; height: 120px; padding: 0 34px 0 128px; border-radius: 34px; background: rgba(247, 246, 242, 0.08); }
+.mb-weather .face { position: absolute; left: 26px; top: 14px; font-size: 76px; line-height: 92px; }
+.mb-weather .words { padding-top: 22px; white-space: nowrap; }
+.mb-weather .now { font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 36px; font-weight: 700; }
+.mb-weather .range { margin-top: 4px; font-size: 24px; color: rgba(247, 246, 242, 0.7); }
+.mb-cal { position: absolute; left: 1330px; right: 60px; top: 230px; height: 690px; overflow: hidden; padding: 24px 28px; box-sizing: border-box; border-radius: 34px; background: rgba(247, 246, 242, 0.07); }
+.mb-head { font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 32px; font-weight: 700; margin-bottom: 10px; }
+.mb-empty { margin-top: 16px; font-size: 26px; line-height: 1.4; color: rgba(247, 246, 242, 0.7); }
+.mb-row { position: relative; min-height: 64px; margin-top: 16px; padding-left: 80px; }
+.mb-row .icon { position: absolute; left: 0; top: 0; width: 60px; height: 60px; border-radius: 30px; background: rgba(110, 61, 219, 0.45); text-align: center; font-size: 30px; line-height: 60px; }
+.mb-row .what { font-size: 27px; font-weight: 600; line-height: 1.25; }
+.mb-row .when { margin-top: 4px; font-size: 22px; color: rgba(247, 246, 242, 0.65); }
+.bt-morning .ch-foot { top: 950px; }
+.mb-hint { display: inline-block; vertical-align: middle; margin-right: 24px; font-size: 22px; color: rgba(247, 246, 242, 0.55); }

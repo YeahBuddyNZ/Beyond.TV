@@ -446,6 +446,7 @@ var Family = (function () {
   function run(c) {
     if (c.kind === 'say') { say(c.text, c.tone, c.from); return; }
     // A note arrived or came down: its state came with this sync, this is only the moment, to pop it in (ADR 0025).
+    if (c.kind === 'request-answer') { if (window.ScreenTime) ScreenTime.answered(c); return; }
     if (c.kind === 'note') { if (c.id && window.Notes) Notes.arrived(c.id); return; }
     // A question from a phone: this TV asks it with its own apps, and the answer shows here.
     if (c.kind === 'ask') { hide(); if (window.Ask) Ask.open(c.text, c.from, {member: c.memberId, kid: !!c.kid}); return; }
@@ -950,9 +951,23 @@ var Family = (function () {
     call('POST', '/tv/now', app ? {app: String(app).slice(0, 40), title: title ? String(title).slice(0, 120) : undefined, who: who ? who.name : undefined} : {}, function () {});
   }
 
+  // MARK: - Ask a grown-up and the Morning board (ADR 0069)
+
+  /**
+   * A kid asks the grown-ups' phones for more screen time or one more game (screentime.js). done(err, answer):
+   * answer.asked is who was asked, by first name. The yes or not now comes back as a "request-answer" command.
+   */
+  function request(kind, member, minutes, done) {
+    if (!linked() || !member) { done({status: 0}); return; }
+    var body = {kind: kind, memberId: member};
+    if (kind === 'time') body.minutes = minutes === 30 ? 30 : 15;
+    call('POST', '/tv/requests', body, done);
+  }
+
   if (listening()) start();
 
   return {
+    request: request,
     linked: linked,
     listening: listening,
     homeName: function () { return state.home ? state.home.name : ''; },
