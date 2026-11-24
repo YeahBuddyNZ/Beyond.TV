@@ -243,6 +243,10 @@ sl(0, 0); sl(0.0004, 500);
 check('a quiet room that hisses is awake', !sl(0, 3500));
 sl = L.sleepy();
 check('a TV that can\'t say is never asleep', !sl(-1, 0) && !sl(-1, 5000));
+// Trying the next way to open a USB microphone listens for a second and a half.
+sl = L.sleepy(1500);
+sl(0, 0);
+check('the next way is given up on sooner', !sl(0, 1400) && sl(0, 1600));
 
 // Tap along: the speed of the taps, kept between 60 and 180, starting again after a pause.
 var tp = L.tapper();
