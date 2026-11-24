@@ -232,6 +232,9 @@ public class TableActivity extends Activity {
         /** Starts listening to the room after ask() said yes: "usb", "tv" or "other" for the microphone, or "". */
         @JavascriptInterface public String roomStart() { return micAllowed() ? roomSound.start(TableActivity.this) : ""; }
 
+        /** The microphone gave exact silence: the next way to open it, or "" when none is left (RoomSound.next). */
+        @JavascriptInterface public String roomNext() { return micAllowed() ? roomSound.next(TableActivity.this) : ""; }
+
         @JavascriptInterface public String roomFft() { return roomSound.fft(); }
 
         @JavascriptInterface public String roomWave() { return roomSound.wave(); }

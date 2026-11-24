@@ -211,13 +211,14 @@ var Lights = (function () {
    * real microphone always hisses a little, even in a quiet room; the remote's gives nothing at all unless its button
    * is held. peak is the loudest sample lately, 0 to 1, or below 0 when this TV can't say (then never asleep).
    */
-  function sleepy() {
+  function sleepy(ms) {
     var start = null, heard = false;
+    ms = ms || 3000;
     return function (peak, now) {
       if (heard || peak < 0) return false;
       if (start === null) start = now;
       if (peak > 0.0001) { heard = true; return false; }
-      return now - start >= 3000;
+      return now - start >= ms;
     };
   }
 
@@ -305,7 +306,7 @@ var Lights = (function () {
   // Listen to the room: on Google TV the app reads the microphone itself (roomNative); elsewhere the browser does.
   var roomNative = false, micKind = '', fbuf = null, asleep = null;
   // Keep the beat: how fast, and when its first beat fell.
-  var bpm = 120, beatStart = 0, tap = null;
+  var bpm = 120, beatStart = 0, tap = null, usbMic = false;
   // This frame's sound: raw levels and wave, how many bins, and the top pitch they reach.
   var freq = new Uint8Array(FFT / 2), wave = new Uint8Array(FFT), bins = FFT / 2, nyq = 22050, clean = null;
 
@@ -430,7 +431,7 @@ var Lights = (function () {
         var got = '';
         try { got = b.roomStart() || ''; } catch (e) { got = ''; }
         if (!got) { done(false); return; }
-        micKind = got;
+        micKind = got; usbMic = got === 'usb';
         try { nyq = b.roomNyquist() || 24000; } catch (e) { nyq = 24000; }
         bins = FFT / 2;
         freq = new Uint8Array(bins);
@@ -485,7 +486,7 @@ var Lights = (function () {
     silence();
     bins = FFT / 2; freq = new Uint8Array(bins); wave = new Uint8Array(FFT); nyq = 22050;
     source = 'beat';
-    beatStart = Date.now();
+    beatStart = 0;
     tap = tapper();
   }
 
@@ -510,7 +511,9 @@ var Lights = (function () {
   /** This frame's sound into freq and wave. Nothing to hear gives silence: zeros, and a flat wave. */
   function hear(now) {
     var i;
-    if (source === 'beat') { beatFrame(now - beatStart, bpm, freq, wave, bins, nyq); return; }
+    // Keep the beat lies still until the first OK: no tap, no beat (Kyle 24/11/2026: "There is no sound but it's
+    // showing it moving").
+    if (source === 'beat' && beatStart) { beatFrame(now - beatStart, bpm, freq, wave, bins, nyq); return; }
     if (analyser) {
       analyser.getByteFrequencyData(freq);
       analyser.getByteTimeDomainData(wave);
@@ -1066,7 +1069,22 @@ var Lights = (function () {
     if (now - runAt > 4500) { asleep = null; return; }
     if (!asleep(micPeak(), now)) return;
     asleep = null;
-    var usb = micKind === 'usb';
+    // A USB microphone giving exact silence: some TVs only hand its sound over when it's opened another way, so try
+    // the next way (RoomSound.next) for a second and a half each before giving up on it.
+    var b = window.BeyondTable;
+    if (roomNative && usbMic && b && b.roomNext) {
+      var got = '';
+      try { got = b.roomNext() || ''; } catch (e) { got = ''; }
+      if (got) {
+        micKind = got;
+        try { nyq = b.roomNyquist() || nyq; } catch (e) {}
+        asleep = sleepy(1500);
+        runAt = now;
+        return;
+      }
+      roomNative = false;
+    }
+    var usb = usbMic || micKind === 'usb';
     keepBeat();
     kind = 'beat';
     help.textContent = helpText();

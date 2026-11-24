@@ -68,18 +68,43 @@ final class RoomSound {
         return false;
     }
 
+    /**
+     * The ways to open the chosen microphone, tried in order. Some TVs hand a USB webcam's sound only to one of these
+     * (Kyle's Sony gave exact silence on the first, 24/11/2026), so when the page hears nothing at all it asks for the
+     * next one (`next`). The last opens Android's own default with no microphone picked.
+     */
+    private static final int[][] WAYS = {
+            {MediaRecorder.AudioSource.MIC, 48000}, {MediaRecorder.AudioSource.MIC, 44100}, {MediaRecorder.AudioSource.MIC, 16000},
+            {MediaRecorder.AudioSource.CAMCORDER, 48000}, {MediaRecorder.AudioSource.CAMCORDER, 16000},
+            {MediaRecorder.AudioSource.VOICE_RECOGNITION, 16000}, {MediaRecorder.AudioSource.UNPROCESSED, 48000},
+            {MediaRecorder.AudioSource.DEFAULT, 44100}, {-1, 48000}};
+    private int way;
+
     /** Starts listening; "usb", "tv" or "other" for the microphone it got, or "" when the TV wouldn't let us. */
     synchronized String start(Context c) {
         if (rec != null) return kind;
-        AudioDeviceInfo dev = best(c);
-        int[] rates = {48000, 44100, 16000};
-        for (int r : rates) {
+        way = 0;
+        return open(c);
+    }
+
+    /** The microphone gave exact silence: tries the next way to open it. "" once every way has been tried. */
+    synchronized String next(Context c) {
+        stop();
+        way++;
+        return open(c);
+    }
+
+    private String open(Context c) {
+        AudioDeviceInfo best = best(c);
+        for (; way < WAYS.length; way++) {
+            int source = WAYS[way][0], r = WAYS[way][1];
+            AudioDeviceInfo dev = source < 0 ? null : best;
+            if (source < 0) source = MediaRecorder.AudioSource.MIC;
             int min = AudioRecord.getMinBufferSize(r, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
             if (min <= 0) continue;
             AudioRecord a = null;
             try {
-                a = new AudioRecord(MediaRecorder.AudioSource.MIC, r, AudioFormat.CHANNEL_IN_MONO,
-                        AudioFormat.ENCODING_PCM_16BIT, Math.max(min, N * 4));
+                a = new AudioRecord(source, r, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, Math.max(min, N * 4));
                 if (a.getState() != AudioRecord.STATE_INITIALIZED) { a.release(); continue; }
                 if (dev != null) a.setPreferredDevice(dev);
                 a.startRecording();
@@ -90,7 +115,9 @@ final class RoomSound {
             }
             rec = a;
             rate = r;
-            kind = dev == null ? "other" : dev.getType() == AudioDeviceInfo.TYPE_BUILTIN_MIC ? "tv" : "usb";
+            AudioDeviceInfo got = a.getRoutedDevice() != null ? a.getRoutedDevice() : dev;
+            kind = got == null ? "other" : got.getType() == AudioDeviceInfo.TYPE_BUILTIN_MIC ? "tv"
+                    : got.getType() == AudioDeviceInfo.TYPE_USB_DEVICE || got.getType() == AudioDeviceInfo.TYPE_USB_HEADSET ? "usb" : "other";
             peak = 0;
             ringAt = 0;
             java.util.Arrays.fill(ring, 0);

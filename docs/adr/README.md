@@ -81,3 +81,4 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0071](0071-light-show-piano-notes.md) | Light show: Piano notes names the note being played and lights its key |
 | [0072](0072-warm-notes-shuffled-and-family-awards.md) | Warm notes shuffled with a memory, more lines, Mum's own, and awards from Beyond Family |
 | [0073](0073-leaving-ends-the-light-show-and-games.md) | Leaving ends the light show, the games let go on Home, and every web file gets into the APK |
+| [0074](0074-keep-the-beat-waits-and-usb-mic-tries-again.md) | Keep the beat waits for a tap, and a silent USB microphone is tried other ways |
