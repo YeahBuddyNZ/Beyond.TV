@@ -327,6 +327,15 @@
 /* The camera's picture is never shown: the video only feeds the movement check. */
 .bt-lights .li-cam { position: absolute; left: 0; top: 0; width: 2px; height: 2px; opacity: 0; pointer-events: none; }
 .bt-lights .li-label.shown, .bt-lights .li-help.shown, .bt-lights .li-hint.shown, .bt-lights .li-note.shown { opacity: 1; }
+/* Every look in a row along the bottom (ADR 0069): favourites first, with a heart. No flexbox or grid: older TVs. */
+.bt-lights .li-shelf { position: absolute; left: 0; right: 0; bottom: 0; padding: 30px 0 56px; background: rgba(13, 12, 24, 0.86); text-align: center; }
+.bt-lights .li-shelf-title { font-size: 28px; color: rgba(247, 246, 242, 0.75); margin-bottom: 22px; }
+.bt-lights .li-shelf-row { white-space: nowrap; }
+.bt-lights .li-tile { position: relative; display: inline-block; vertical-align: top; width: 158px; margin: 0 6px; padding: 18px 6px 16px; border-radius: 22px; background: rgba(247, 246, 242, 0.08); color: #F7F6F2; white-space: normal; }
+.bt-lights .li-tile.focus { background: #F7F6F2; color: #22221F; box-shadow: 0 0 0 4px #9E7BFF; }
+.bt-lights .li-tile-icon { font-size: 44px; line-height: 1.1; }
+.bt-lights .li-tile-name { margin-top: 8px; font-size: 22px; font-weight: 700; line-height: 1.2; }
+.bt-lights .li-tile-heart { position: absolute; right: 12px; top: 8px; font-size: 26px; color: #E8A33D; }
 
 /* How to play (guides.js): one guide a page at a time, and the list of every game's guide. */
 .bt-guide .gd-box { position: absolute; left: 0; right: 0; top: 130px; text-align: center; }

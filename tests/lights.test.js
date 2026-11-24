@@ -184,7 +184,34 @@ check('calm lights draw without throwing' + (calmThrew ? ': ' + calmThrew : ''),
 
 check('the looks drew something', calls > 1000);
 check('every look has a name', L.LOOKS.concat([L.CALM]).every(function (l) { return typeof l.name() === 'string' && l.name().length > 0; }));
-check('four looks', L.LOOKS.length === 4);
+check('ten looks', L.LOOKS.length === 10);
+check('every look has its own id and an icon', L.LOOKS.every(function (l, i) {
+  return l.icon && L.LOOKS.filter(function (m) { return m.id === l.id; }).length === 1;
+}));
+
+// ADR 0070. Favourites: first in the order, the rest after in the usual order, on and off, only real looks.
+var ids = L.LOOKS.map(function (l) { return l.id; });
+check('no favourites: the usual order', L.order([]).join() === ids.map(function (x, n) { return n; }).join());
+var ord = L.order(['galaxy', 'disco']);
+check('favourites come first, in the usual order', L.LOOKS[ord[0]].id === 'disco' && L.LOOKS[ord[1]].id === 'galaxy');
+check('every look is still there once', ord.length === 10 && ord.slice().sort(function (a, b) { return a - b; }).join() === ids.map(function (x, n) { return n; }).join());
+var fv = L.toggled([], 'lava');
+check('a heart adds a favourite', fv.length === 1 && fv[0] === 'lava');
+check('again takes it off', L.toggled(fv, 'lava').length === 0);
+check('a made-up look is never kept', L.toggled(['nope'], 'lava').join() === 'lava' && L.toggled([], 'nope').length === 0);
+
+// Each person keeps their own favourites.
+var store = {};
+sandbox.window.localStorage = {getItem: function (k) { return k in store ? store[k] : null; }, setItem: function (k, v) { store[k] = String(v); }};
+L.saveFaves('p1', ['fireworks']);
+L.saveFaves('p2', ['tunnel', 'ring']);
+check('Mum keeps hers', L.loadFaves('p1').join() === 'fireworks');
+check('a kid keeps theirs', L.loadFaves('p2').join() === 'tunnel,ring');
+check('somebody new has none', L.loadFaves('p3').length === 0);
+store['bt-lights-faves'] = '{"p1":["gone","bars","bars"]}';
+check('an old or doubled favourite is dropped', L.loadFaves('p1').join() === 'bars');
+store['bt-lights-faves'] = 'not json';
+check('a broken store is no favourites', L.loadFaves('p1').length === 0);
 
 // ADR 0050. An asleep microphone (the remote's, exact silence) against a quiet room (a real one always hisses).
 var sl = L.sleepy();
