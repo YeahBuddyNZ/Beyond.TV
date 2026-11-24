@@ -736,6 +736,7 @@
       var events = b.events || [];
       for (var e = 0; e < events.length; e++) {
         var ev = events[e];
+        if (!ev || !ev.title) continue;
         rows.push(['📅', ev.title, [ev.time ? Data.time(clockAt(ev.time)) : tr('O dia todo', 'All day', 'Todo el día'), ev.who, ev.where].filter(function (x) { return x; }).join(' · ')]);
       }
       var notes = b.notes || [];

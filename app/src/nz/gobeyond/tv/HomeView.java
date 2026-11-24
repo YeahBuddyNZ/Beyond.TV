@@ -1467,8 +1467,19 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
 
     private void drawInfo(Canvas c) {
         float x = MARGIN * k, base = L_INFO_BASE * k;
+        // A round button's name shows just under it, over this line: the line steps aside while it does.
+        float tip = 0;
+        int n = tabCount();
+        for (int i = 0; i < lightButtons.size() && n + i < topFocus.length; i++) tip = Math.max(tip, Ui.clamp(topFocus[n + i].value));
+        int keepTime = lInfoTime.getAlpha(), keep = lInfo.getAlpha();
+        if (tip > 0.01f) {
+            lInfoTime.setAlpha(Math.round(keepTime * (1 - tip)));
+            lInfo.setAlpha(Math.round(keep * (1 - tip)));
+        }
         if (!infoTime.isEmpty()) c.drawText(infoTime, x, base, lInfoTime);
         c.drawText(infoRest, x + infoTimeW, base, lInfo);
+        lInfoTime.setAlpha(keepTime);
+        lInfo.setAlpha(keep);
     }
 
     /** Coin logo + price in the configured currency: on the tab row, left of Tonight at home; under the clock without tabs. */
@@ -3703,24 +3714,29 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
     private static void boardRows(JSONObject b, List<String[]> rows) {
         JSONArray birthdays = b.optJSONArray("birthdays");
         for (int i = 0; birthdays != null && i < birthdays.length(); i++) {
-            rows.add(new String[] {"🎂", Ui.tr("Feliz aniversário, ", "Happy birthday, ", "¡Feliz cumpleaños, ") + birthdays.optString(i) + "!", "", ""});
+            rows.add(new String[] {"🎂", Ui.tr("Feliz aniversário, ", "Happy birthday, ", "¡Feliz cumpleaños, ") + (birthdays.isNull(i) ? "" : birthdays.optString(i)) + "!", "", ""});
         }
-        String tea = b.optString("tea");
+        String tea = jtext(b, "tea");
         if (!tea.isEmpty()) rows.add(new String[] {"🍲", tea, Ui.tr("Jantar", "Tea tonight", "Cena"), ""});
         JSONArray events = b.optJSONArray("events");
         for (int i = 0; events != null && i < events.length(); i++) {
             JSONObject e = events.optJSONObject(i);
-            if (e == null || e.optString("title").isEmpty()) continue;
-            StringBuilder more = new StringBuilder(e.optString("time").length() >= 5 ? clockText(e.optString("time"))
+            if (e == null || jtext(e, "title").isEmpty()) continue;
+            StringBuilder more = new StringBuilder(jtext(e, "time").length() >= 5 ? clockText(jtext(e, "time"))
                     : Ui.tr("O dia todo", "All day", "Todo el día"));
-            for (String part : new String[] {e.optString("who"), e.optString("where")}) if (!part.isEmpty()) more.append(" · ").append(part);
-            rows.add(new String[] {"📅", e.optString("title"), more.toString(), ""});
+            for (String part : new String[] {jtext(e, "who"), jtext(e, "where")}) if (!part.isEmpty()) more.append(" · ").append(part);
+            rows.add(new String[] {"📅", jtext(e, "title"), more.toString(), ""});
         }
         JSONArray notes = b.optJSONArray("notes");
         for (int i = 0; notes != null && i < notes.length(); i++) {
             JSONObject n = notes.optJSONObject(i);
-            if (n != null && !n.optString("text").isEmpty()) rows.add(new String[] {"💬", n.optString("text"), n.optString("from"), ""});
+            if (n != null && !jtext(n, "text").isEmpty()) rows.add(new String[] {"💬", jtext(n, "text"), jtext(n, "from"), ""});
         }
+    }
+
+    /** A JSON string, or "" when it is missing or null (Android's optString turns a null into the word "null"). */
+    private static String jtext(JSONObject o, String key) {
+        return o.isNull(key) ? "" : o.optString(key, "");
     }
 
     /** "18:30" from the calendar, told the way the rest of the home screen tells the time. */
