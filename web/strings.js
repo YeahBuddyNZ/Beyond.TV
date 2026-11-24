@@ -123,6 +123,7 @@ var I18N = (function () {
     " more": " mehr",
     "up the top": "oben",
     "Notes": "Notizen",
+    "Family wall": "Familienwand",
     "From your family": "Von deiner Familie",
     "Send a heart": "Ein Herz schicken",
     "That didn't go. Try again.": "Das hat nicht geklappt. Versuch es nochmal.",
@@ -146,7 +147,7 @@ var I18N = (function () {
     "Try again": "Nochmal versuchen",
     "Type it": "Eintippen",
     "Tell the Beyond™ team something": "Dem Beyond™-Team etwas sagen",
-    // Ask for kids (ask.js, ADR 0067)
+    // Ask for kids (ask.js, ADR 0068)
     "Why is the sky blue?": "Warum ist der Himmel blau?",
     "How big is a blue whale?": "Wie groß ist ein Blauwal?",
     "What do kiwi eat?": "Was fressen Kiwis?",
@@ -1073,6 +1074,7 @@ var I18N = (function () {
     " more": " ещё",
     "up the top": "наверху",
     "Notes": "Записки",
+    "Family wall": "Семейная стена",
     "From your family": "От вашей семьи",
     "Send a heart": "Отправить сердечко",
     "That didn't go. Try again.": "Не получилось. Попробуйте ещё раз.",
@@ -1096,7 +1098,7 @@ var I18N = (function () {
     "Try again": "Попробовать ещё раз",
     "Type it": "Набрать",
     "Tell the Beyond™ team something": "Написать команде Beyond™",
-    // Ask for kids (ask.js, ADR 0067)
+    // Ask for kids (ask.js, ADR 0068)
     "Why is the sky blue?": "Почему небо голубое?",
     "How big is a blue whale?": "Какой величины синий кит?",
     "What do kiwi eat?": "Что едят киви?",

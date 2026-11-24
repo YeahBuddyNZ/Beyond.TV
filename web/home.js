@@ -261,6 +261,8 @@
     // with Talk to Beyond inside it; without, the dots are feedback, typed on the remote (talkToBeyond).
     if (Family.linked()) list.push({dots: true, label: tr('Pergunte à Beyond', 'Ask Beyond', 'Pregúntale a Beyond'), run: function () { Ask.open(); }});
     else if (!kid) list.push({dots: true, label: tr('Fale com a Beyond', 'Talk to Beyond', 'Habla con Beyond'), run: talkToBeyond});
+    // The family wall and everyone's to-dos, ticked with the remote (wall.js, ADR 0067). Kids included: it's their jobs.
+    if (Family.linked()) list.push({emoji: '\uD83D\uDCCC', label: tr('Mural da família', 'Family wall', 'Muro de la familia'), run: function () { Wall.open(); }});
     // Notes from the family, when there are any up: opens them big (notes.js).
     if (Notes.count()) list.push({emoji: '\uD83D\uDCDD', label: tr('Bilhetes', 'Notes', 'Notas'), run: function () { Notes.open(); }});
     // NZ election results, live (ADR 0039): on New Zealand TVs until 27/11/2026, then gone. Opens Beyond's results
@@ -723,6 +725,9 @@
     }
     el('div', 'head', box, night ? tr('Hoje à noite em casa', 'Tonight at home', 'Esta noche en casa') : tr('Hoje em casa', 'Today at home', 'Hoy en casa'));
     var rows = [], b = Family.board ? Family.board() : null;
+    // Whoever is watching: their to-dos left today, or the newest sticky on the wall (wall.js, ADR 0067).
+    var wallRow = linked && window.Wall ? Wall.homeRow(Profiles.current()) : null;
+    if (wallRow) rows.push(wallRow);
     if (b) {
       for (var i = 0; i < (b.birthdays || []).length; i++) rows.push(['🎂', tr('Feliz aniversário, ', 'Happy birthday, ', '¡Feliz cumpleaños, ') + b.birthdays[i] + '!', '']);
       if (b.tea) rows.push(['🍲', b.tea, tr('Jantar', 'Tea tonight', 'Cena')]);
@@ -1421,6 +1426,8 @@
       kupu.appendChild(document.createTextNode('  ' + k.say + ' · ' + k.meaning));
     }
     var notice = el('div', 'board', s);
+    // The family wall, one sticky or win at a time (wall.js, ADR 0067).
+    var wallBox = el('div', 'wallcard', s), wallAt = 0;
     var front = a;
     function next() {
       if (!saverOn) return;
@@ -1463,6 +1470,8 @@
       }
       tickSaverClock(clock);
       if (!art) paintBoard(notice);
+      // Over art too: the wall is the family's own, and it waits quietly in a corner (ADR 0067).
+      if (window.Wall) Wall.saver(wallBox, wallAt++);
       // A painting stays up long enough to look at; photos keep moving.
       saverTimer = setTimeout(next, art ? 60000 : 12000);
     }

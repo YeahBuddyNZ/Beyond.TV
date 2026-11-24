@@ -265,13 +265,26 @@ var Chores = (function () {
     store(s);
     return true;
   }
+  /**
+   * Stars from somewhere else, the same as a chore: a Beyond Family to-do ticked on the TV (wall.js, ADR 0067) gives
+   * one and a point on the scoreboard; unticked, it takes them back (never below no stars). Returns the stars now.
+   */
+  function give(person, n, at) {
+    if (!person || !person.id || person.together || !n) return 0;
+    var s = load(), had = starsFor(s, person.id);
+    s.stars[person.id] = Math.max(0, had + n);
+    store(s);
+    if (window.Scores) Scores.add(person, 'chores', n, at);
+    return s.stars[person.id];
+  }
+
   /** Everyone who could spend stars, with how many: [{person, stars}]. */
   function wallets() {
     var s = load();
     return people().filter(function (p) { return !p.together; }).map(function (p) { return {person: p, stars: starsFor(s, p.id)}; });
   }
 
-  return {open: open, stars: stars, spend: spend, wallets: wallets,
+  return {open: open, stars: stars, spend: spend, give: give, wallets: wallets,
     rules: {LIST: LIST, DEFAULT: DEFAULT, BONUS: BONUS, load: load, store: store, toggle: toggle, allDone: allDone, today: today, fromTidy: fromTidy,
       words: function () { return [TITLE, SUB, STARS, ONE_STAR, LEFT_TODAY, DONE_TODAY, ALL_DONE, UNDONE, SPEND, CHANGE, CHANGE_SUB, SCOREBOARD, DONE, CLOSE, KEEP_ONE, FAMILY].concat(CHEER); }}};
 })();

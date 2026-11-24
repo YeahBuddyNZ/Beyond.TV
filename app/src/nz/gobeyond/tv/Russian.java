@@ -304,6 +304,12 @@ final class Russian {
             case "The family's songs": return "Песни семьи";
             case "Tidy-up race": return "Гонка уборки";
             case "Daily chores": return "Дела на день";
+            case "Family wall": return "Семейная стена";
+            case "All done today!": return "На сегодня всё!";
+            case "On the wall": return "На стене";
+            case "ON THE WALL": return "НА СТЕНЕ";
+            case "Outside": return "На улице";
+            case "Without being asked": return "Без просьбы";
             case "Family scoreboard": return "Семейная таблица очков";
             case "What are we singing?": return "Что поём?";
             case "What shall we do?": return "Чем займёмся?";
@@ -656,6 +662,7 @@ final class Russian {
             case "The TV isn't on your home network right now. Check the Wi-Fi and try again.": return "Телевизор сейчас не в домашней сети. Проверьте Wi-Fi и попробуйте ещё раз.";
             case "1. Point your phone's camera at the code.\n2. Pick photos, or the kids' art.\n3. They show on the screensaver.": return "1. Наведите камеру телефона на код.\n2. Выберите фото или детские рисунки.\n3. Они появятся на заставке.";
             default:
+                if (english.endsWith(" to go · to-dos today")) return "Осталось: " + english.substring(0, english.length() - 21) + " · дела на сегодня";
                 if (english.startsWith("That's screen time for today, ")) return "На сегодня экранное время всё, " + english.substring(30);
                 if (english.startsWith("⏳ ") && english.endsWith(" of screen time left")) return "⏳ осталось экранного времени: " + english.substring(2, english.length() - 20);
                 if (english.contains(" minutes of screen time left, ")) {

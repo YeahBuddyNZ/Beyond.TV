@@ -42,7 +42,7 @@ var AskHost = (function () {
   window.Family = {
     linked: function () { return bridge ? bridge.linked() : false; },
     ask: function (text, apps, together, done, who) {
-      // who (ask.js): a kid asking (ADR 0067), checked and logged for their grown-ups; or whose phone sent it.
+      // who (ask.js): a kid asking (ADR 0068), checked and logged for their grown-ups; or whose phone sent it.
       who = who || {};
       call('POST', '/tv/ask', {ask: String(text).slice(0, 200), apps: (apps || []).slice(0, 40), memberId: who.member || me.member || undefined,
         together: together || undefined, kid: who.kid || undefined, teen: who.teen || undefined, name: who.name || undefined}, done);

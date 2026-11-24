@@ -2,7 +2,7 @@
  * Ask Beyond (ADR 0025): the TV's assistant. An orb of light that listens, thinks and answers. Pick a starter or type
  * with the remote, or ask from a phone in Beyond Family and the question turns up here; Beyond Family asks Claude with
  * this TV's apps and the answer comes back as a line and up to four cards, which open the app with OK. A kid watching
- * gets Ask for kids (ADR 0067): questions about the world, answered for their age, every question and answer checked
+ * gets Ask for kids (ADR 0068): questions about the world, answered for their age, every question and answer checked
  * by Beyond Family before it shows, and logged there for the household's grown-ups, who are told when one is stopped.
  * The kid is told all that the first time, and the line at the bottom says it every time. A grown-up's question is
  * never kept, here or there. Needs Beyond Family linked, because that's who answers.
@@ -14,7 +14,7 @@ var Ask = (function () {
   // The same starters as Beyond Family's ASK_STARTERS (shared/tvNotes.ts): keep the two in step.
   var STARTERS = ['Rom-coms for date night', 'Something funny, under 90 minutes', "A family movie we'll all like",
     'A show to binge this week', 'Something Kiwi', 'Surprise me'];
-  // A kid's Ask is mostly about the world (ADR 0067), with one way back to something to watch.
+  // A kid's Ask is mostly about the world (ADR 0068), with one way back to something to watch.
   var KID_STARTERS = ['Why is the sky blue?', 'How big is a blue whale?', 'What do kiwi eat?', 'How far away is the Moon?',
     'How do volcanoes work?', 'Something funny to watch'];
   var LESSON_KEY = 'bt.askKidLesson';
@@ -141,7 +141,7 @@ var Ask = (function () {
       var more = UI.el('div', 'bt-buttons bt-ask-more', layer);
       a.add(UI.button(more, tr('Escrever', 'Type it', 'Escribir'), 'sparkles'), function () { mode = 'typing'; a.rebuild(); });
       if (!kid() && window.BeyondTV && BeyondTV.talk) a.add(UI.button(more, tr('Falar com a equipe Beyond™', 'Tell the Beyond™ team something', 'Decirle algo al equipo de Beyond™')), function () { a.close(); BeyondTV.talk(); });
-      // Honest about who sees what: a kid's questions go to their grown-ups (ADR 0067), a grown-up's go nowhere.
+      // Honest about who sees what: a kid's questions go to their grown-ups (ADR 0068), a grown-up's go nowhere.
       UI.el('div', 'bt-ask-small', layer, kid() ? tr(
         'Seus responsáveis podem ver o que você pergunta aqui, no Beyond Family. Se não for coisa de criança, eu paro e conto para eles.',
         "Your grown-ups can see what you ask here, in Beyond Family. If it isn't for kids, I'll stop and tell them.",
@@ -179,7 +179,7 @@ var Ask = (function () {
   }
 
   /**
-   * The first time a kid opens Ask on this TV: what it's for, and that it's watched over (ADR 0067). Short, friendly,
+   * The first time a kid opens Ask on this TV: what it's for, and that it's watched over (ADR 0068). Short, friendly,
    * three lines and one button, read from a couch. Shown again only on a new TV or for a new face.
    */
   function lesson(layer, stage, a) {
