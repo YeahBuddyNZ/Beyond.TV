@@ -1,4 +1,4 @@
-// The Morning board (web/morning.js, ADR 0066) without a screen: when it opens by itself, who shows and with which
+// The Morning board (web/morning.js, ADR 0067) without a screen: when it opens by itself, who shows and with which
 // to-dos, and what's on today. TableActivity.maybeMorning follows the same opening rule.
 // node tests/morning.test.js
 'use strict';

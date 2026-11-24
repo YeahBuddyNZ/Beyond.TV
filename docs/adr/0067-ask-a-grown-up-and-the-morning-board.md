@@ -1,4 +1,4 @@
-# 0066. Ask a grown-up from the TV, and the Morning board
+# 0067. Ask a grown-up from the TV, and the Morning board
 
 Date: 24/11/2026. Status: accepted. Builds on 0060 (screen time limits) and 0064 (Beyond Family sets things on the TV).
 Beyond Family's side is its ADR 0052.

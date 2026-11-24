@@ -436,7 +436,7 @@
 .ch-change .ch-grid { position: absolute; left: 260px; right: 260px; top: 300px; }
 .ch-change .ch-grid .ch-tile { display: inline-block; vertical-align: top; width: 640px; margin: 0 20px 20px 0; box-sizing: border-box; text-align: left; }
 
-/* The Morning board (morning.js, ADR 0066): everyone's to-dos on the left, today's calendar on the right, the weather up top. */
+/* The Morning board (morning.js, ADR 0067): everyone's to-dos on the left, today's calendar on the right, the weather up top. */
 .bt-morning .ch-note { right: 640px; }
 .bt-morning .mb-cols { left: 60px; right: auto; width: 1240px; top: 230px; text-align: left; }
 .bt-morning .mb-cols .ch-col { margin: 0 24px 0 0; }

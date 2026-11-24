@@ -2,7 +2,7 @@
  * Screen time (ADR 0060). A grown-up gives each kid a daily limit in their profile (Manage people, behind the PIN):
  * no limit, 30 minutes, or 1 to 3 hours. The TV counts the kid's time in other apps and in Plex, shows what's left
  * beside the greeting, says so kindly with 5 minutes to go, and once it's used up shows a gentle "that's screen time
- * for today" in place of the app. A grown-up's PIN adds 15 minutes, or a kid asks the grown-ups' phones (ADR 0066:
+ * for today" in place of the app. A grown-up's PIN adds 15 minutes, or a kid asks the grown-ups' phones (ADR 0067:
  * 15 or 30 more minutes, or one more game) and one tap in Beyond Family says yes. A new day starts fresh at midnight.
  * Kept on this TV only (localStorage), never sent anywhere. ScreenTime.java is the same on Google TV: change one,
  * change both. The sums are in ScreenTime.rules (tests/screentime.test.js). Plain ES5.
@@ -160,7 +160,7 @@ var ScreenTime = (function () {
             a.close();
           });
         });
-        // Ask a grown-up (ADR 0066): their phones buzz, one tap says yes. Only a kid from Beyond Family can ask.
+        // Ask a grown-up (ADR 0067): their phones buzz, one tap says yes. Only a kid from Beyond Family can ask.
         if (window.Family && Family.linked() && me.family) {
           a.add(UI.button(row, '📱  ' + tr('Pedir a um adulto', 'Ask a grown-up', 'Pedir a un adulto')), function () { ask(me); });
         }
@@ -173,7 +173,7 @@ var ScreenTime = (function () {
     });
   }
 
-  // MARK: - Ask a grown-up (ADR 0066)
+  // MARK: - Ask a grown-up (ADR 0067)
 
   /** The three things a kid can ask for. The minutes a game gives come from Beyond Family (20). */
   var ASKS = [{kind: 'time', minutes: 15}, {kind: 'time', minutes: 30}, {kind: 'game'}];

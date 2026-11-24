@@ -43,7 +43,7 @@ public class TableActivity extends Activity {
     }
 
     /**
-     * The Morning board (web/morning.js, ADR 0066) opens by itself the first time the home screen shows between 5 and
+     * The Morning board (web/morning.js, ADR 0067) opens by itself the first time the home screen shows between 5 and
      * 10 in the morning, once a day, when the TV is linked to Beyond Family and nobody turned it off. Same rule as
      * Morning.rules.due: change one, change both. Called from HomeActivity.onResume.
      */
@@ -167,7 +167,7 @@ public class TableActivity extends Activity {
             }
         }
 
-        /** Today for the Morning board (web/morning.js, ADR 0066): to-dos, the noticeboard and the weather. */
+        /** Today for the Morning board (web/morning.js, ADR 0067): to-dos, the noticeboard and the weather. */
         @JavascriptInterface public String morning() { return Family.morning(TableActivity.this).toString(); }
 
         /** Ticks one of today's to-dos in Beyond Family: "ok" when it took. On this bridge's own thread, never the UI's. */
