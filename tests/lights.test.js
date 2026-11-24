@@ -298,5 +298,10 @@ check('ripples spread faster with music', rp[0].r > rq[0].r);
 for (i = 0; i < 100; i++) L.drawRipples(quietF, rq);
 check('and fade away', rq.length === 0);
 
+// Leaving the TV for Home or another app ends the show (TableActivity.onPause, a hidden page): nothing runs behind.
+check('away is there for the TV to call', typeof sandbox.Lights.away === 'function' && typeof sandbox.Lights.running === 'function');
+sandbox.Lights.away();
+check('away with no show open does nothing', sandbox.Lights.running() === false);
+
 console.log(passed + ' passed, ' + failed + ' failed');
 process.exit(failed ? 1 : 0);

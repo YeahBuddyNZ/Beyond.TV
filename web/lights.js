@@ -1023,7 +1023,7 @@ var Lights = (function () {
 
   // MARK: - The screen
 
-  var raf = null, look = 0, layer = null, label = null, help = null, hint = null, canvas = null, times = [], prev = 0, hideAt = 0;
+  var raf = null, show$ = null, look = 0, layer = null, label = null, help = null, hint = null, canvas = null, times = [], prev = 0, hideAt = 0;
   var kind = '', hushed = false, deafSince = 0, toldDeaf = false, note = null, noteAt = 0, runAt = 0;
   var frameData = {lv: null, len: 0, nyq: 22050, wave: null, b: null, t: 0, hit: false, quiet: false};
 
@@ -1234,7 +1234,7 @@ var Lights = (function () {
 
   function run(which) {
     kind = which;
-    UI.open({
+    show$ = UI.open({
       cls: 'bt-lights',
       build: function (l) {
         layer = l;
@@ -1318,9 +1318,17 @@ var Lights = (function () {
     silence();
     stopCamera();
     asleep = null; noteAt = 0;
-    c2 = null; canvas = null; layer = null; shelf = null; resetLooks(); kind = '';
+    c2 = null; canvas = null; layer = null; shelf = null; show$ = null; resetLooks(); kind = '';
     bins = FFT / 2; freq = new Uint8Array(bins); wave = new Uint8Array(FFT); nyq = 22050;
   }
+
+  /**
+   * The TV went somewhere else (Home, another app, the screen went off): the show ends, so nothing listens, watches
+   * or draws behind it. Google TV calls this from TableActivity.onPause; LG and Samsung when the page is hidden.
+   * Coming back finds the light show's own buttons, one OK from starting again.
+   */
+  function away() { if (show$) show$.close(); }
+  if (typeof document !== 'undefined' && document.addEventListener) document.addEventListener('visibilitychange', function () { if (document.hidden) away(); });
 
   function start(which, pick) {
     if (which === 'lights') { pick.close(); run('lights'); return; }
@@ -1390,7 +1398,7 @@ var Lights = (function () {
     });
   }
 
-  return {open: open, answer: answer, cameraAnswer: cameraAnswer, core: {gate: gate, bands: bands, logBands: logBands, barLevels: barLevels, follow: follow,
+  return {open: open, away: away, running: function () { return !!show$; }, answer: answer, cameraAnswer: cameraAnswer, core: {gate: gate, bands: bands, logBands: logBands, barLevels: barLevels, follow: follow,
     beats: beats, quiet: quiet, shuffle: shuffle, tooSlow: tooSlow, unpack: unpack, LOOKS: LOOKS, CALM: CALM,
     sleepy: sleepy, tapper: tapper, order: order, toggled: toggled, pitch: pitch, noteOf: noteOf, loadFaves: loadFaves, saveFaves: saveFaves, beatFrame: beatFrame, motion: motion, drawRipples: function (f, list) { ripples = list; drawRipples(f); return ripples; },
     // For the tests: a stand-in canvas to draw on, and light mode without one.
