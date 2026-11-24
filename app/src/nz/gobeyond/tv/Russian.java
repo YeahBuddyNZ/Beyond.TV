@@ -310,6 +310,7 @@ final class Russian {
             case "ON THE WALL": return "НА СТЕНЕ";
             case "Outside": return "На улице";
             case "Without being asked": return "Без просьбы";
+            case "Award": return "Награда";
             case "Family scoreboard": return "Семейная таблица очков";
             case "What are we singing?": return "Что поём?";
             case "What shall we do?": return "Чем займёмся?";

@@ -46,7 +46,8 @@ final class WallCard {
             ink = 0xFFF7F6F2;
             String kind = item.optString("kind");
             label = "green".equals(kind) ? Ui.tr("Lá fora", "Outside", "Afuera")
-                    : "bonus".equals(kind) ? Ui.tr("Sem ninguém pedir", "Without being asked", "Sin que nadie lo pida") : Ui.tr("Feito", "Done", "Hecho");
+                    : "bonus".equals(kind) ? Ui.tr("Sem ninguém pedir", "Without being asked", "Sin que nadie lo pida")
+                    : "award".equals(kind) ? Ui.tr("Prêmio", "Award", "Premio") : Ui.tr("Feito", "Done", "Hecho");
         }
         String words = item.optString("text");
         String who = sticky ? "" : item.optString("name");

@@ -1,4 +1,4 @@
-# 0072. Leaving ends the light show, and the games let go when you go Home
+# 0073. Leaving ends the light show, and the games let go when you go Home
 
 Date: 24/11/2026. Status: accepted. Changes ADR 0041 (the light show kept the TV's sound for when you came back) and
 ADR 0024 (games in TableActivity's WebView).

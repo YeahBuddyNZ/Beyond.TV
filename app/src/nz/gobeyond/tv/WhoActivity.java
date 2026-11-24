@@ -172,7 +172,8 @@ public class WhoActivity extends Activity {
         java.util.List<Face> notedFaces = new java.util.ArrayList<>();
         for (int i = 0; i < n; i++) {
             People.Person p = choices.get(i);
-            Face f = face(rows[i / perRow(n)], p, p.together() ? Ui.tr("Todos juntos", "Everyone together") : null, v -> choose(p), big);
+            // Under the name: Everyone together for Family, a kid's newest award for a fortnight (ADR 0072).
+            Face f = face(rows[i / perRow(n)], p, p.together() ? Ui.tr("Todos juntos", "Everyone together") : badge(p), v -> choose(p), big);
             if (p.id.equals(now.id)) first = f;
             if (!p.together() && !p.visitor) {
                 noted.add(p);
@@ -206,7 +207,8 @@ public class WhoActivity extends Activity {
     // MARK: - Warm notes (ADR 0066)
 
     private TextView warm;
-    private int warmStep;
+    private WarmNotes.Memory warmMemory;
+    private final java.util.Random dice = new java.util.Random();
     private final Runnable warmNext = this::showWarm;
     private java.util.List<People.Person> warmPeople;
     private java.util.List<Face> warmFaces;
@@ -218,32 +220,30 @@ public class WhoActivity extends Activity {
         warmFaces = faces;
         warm = FeedbackActivity.text(this, "", Ui.displaySemibold, 46 * k, 0xFFFFFFFF);
         warm.setSingleLine(true);
+        warm.setEllipsize(android.text.TextUtils.TruncateAt.END);
         warm.setShadowLayer(18 * k, 0, 4 * k, 0x66000000);
         warm.setAlpha(0f);
         LinearLayout.LayoutParams wp = new LinearLayout.LayoutParams(-1, Math.round(110 * k));
         wp.topMargin = Math.round(18 * k);
         c.addView(warm, wp);
         if (people.isEmpty()) return;
-        // A different start each time the screen opens, so the same person isn't always first.
-        warmStep = (int) ((System.currentTimeMillis() / 1000) % (people.size() * 7));
+        // Shuffled (ADR 0072) and remembered between visits, so opening the screen again carries on.
+        warmMemory = loadWarm();
         handler.postDelayed(warmNext, 900);
     }
 
     private void showWarm() {
         if (warm == null || warmPeople == null || warmPeople.isEmpty()) return;
         int n = warmPeople.size();
-        String[] names = new String[n], stage = new String[n];
-        boolean[] kid = new boolean[n];
+        WarmNotes.Who[] cast = new WarmNotes.Who[n];
         for (int i = 0; i < n; i++) {
             People.Person p = warmPeople.get(i);
-            names[i] = p.name;
-            kid[i] = p.kid;
-            stage[i] = p.school();
+            cast[i] = new WarmNotes.Who(p.name, p.kid, p.school(), p.kid ? awards(p) : null, p.parent);
         }
-        int day = (int) ((System.currentTimeMillis() + java.util.TimeZone.getDefault().getOffset(System.currentTimeMillis())) / 86_400_000L);
         String lang = Ui.de ? "de" : Ui.ru ? "ru" : Ui.es ? "es" : Ui.en ? "en" : "pt";
-        WarmNotes.Note note = WarmNotes.next(names, kid, stage, warmStep++, day, lang);
+        WarmNotes.Note note = WarmNotes.next(cast, warmMemory, dice::nextDouble, lang);
         if (note == null) return;
+        saveWarm(warmMemory);
         People.Person who = warmPeople.get(note.who);
         // A dot in their colour, so it's clear whose note it is, then the words.
         android.text.SpannableString line = new android.text.SpannableString("\u25CF  " + note.text);
@@ -261,6 +261,57 @@ public class WhoActivity extends Activity {
         }
         handler.postDelayed(() -> { if (warm != null) warm.animate().alpha(0f).translationY(-14 * k).setDuration(500).start(); }, 5600);
         handler.postDelayed(warmNext, 6400);
+    }
+
+    /** A kid's awards as the notes want them: {title, from, note}, newest first. */
+    private static String[][] awards(People.Person p) {
+        try {
+            org.json.JSONArray a = new org.json.JSONArray(p.awards == null || p.awards.isEmpty() ? "[]" : p.awards);
+            String[][] out = new String[a.length()][];
+            for (int i = 0; i < a.length(); i++) {
+                org.json.JSONObject o = a.getJSONObject(i);
+                out[i] = new String[] {o.optString("title"), o.optString("from"), o.optString("note")};
+            }
+            return out;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /** The newest award under a kid's name, for a fortnight (ADR 0072), or null. */
+    private static String badge(People.Person p) {
+        if (!p.kid || p.awards == null || p.awards.isEmpty()) return null;
+        try {
+            org.json.JSONObject a = new org.json.JSONArray(p.awards).getJSONObject(0);
+            String today = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.ROOT).format(new java.util.Date());
+            String b = WarmNotes.badge(a.optString("title"), a.optString("emoji"), a.optString("on"), today);
+            return b.isEmpty() ? null : b;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private WarmNotes.Memory loadWarm() {
+        WarmNotes.Memory m = new WarmNotes.Memory();
+        try {
+            org.json.JSONObject o = new org.json.JSONObject(getSharedPreferences("people", MODE_PRIVATE).getString("warm", "{}"));
+            org.json.JSONArray bag = o.optJSONArray("bag"), recent = o.optJSONArray("recent");
+            for (int i = 0; bag != null && i < bag.length(); i++) m.bag.add(bag.optString(i));
+            for (int i = 0; recent != null && i < recent.length(); i++) m.recent.add(recent.optString(i));
+            m.last = o.optString("last");
+            m.tone = o.optString("tone");
+        } catch (Exception ignored) {
+        }
+        return m;
+    }
+
+    private void saveWarm(WarmNotes.Memory m) {
+        try {
+            String o = new org.json.JSONObject().put("bag", new org.json.JSONArray(m.bag)).put("recent", new org.json.JSONArray(m.recent))
+                    .put("last", m.last).put("tone", m.tone).toString();
+            getSharedPreferences("people", MODE_PRIVATE).edit().putString("warm", o).apply();
+        } catch (Exception ignored) {
+        }
     }
 
     private void stopWarm() {
@@ -769,7 +820,8 @@ public class WhoActivity extends Activity {
             String name = "+".equals(p.id) ? "" : p.name;
             c.drawText(name, cx, cy + r + 60 * k, ink);
             if (under != null) {
-                ink.setColor(0x99FFFFFF);
+                // Family's line in grey; a kid's award in ember, because it was earned.
+                ink.setColor(p.together() ? 0x99FFFFFF : 0xFFE8A33D);
                 ink.setTypeface(Ui.regular);
                 ink.setTextSize(24 * k);
                 c.drawText(under, cx, cy + r + (name.isEmpty() ? 60 : 96) * k, ink);

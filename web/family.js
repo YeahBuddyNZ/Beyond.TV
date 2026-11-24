@@ -91,7 +91,23 @@ var Family = (function () {
     // stage: kindy, school or college, worked out from their birthday (only the word comes here), for the warm notes.
     var stage = p.kid && /^(kindy|school|college)$/.test(p.stage || '') ? p.stage : undefined;
     return {id: 'bf-' + p.id, name: p.name, colour: p.colour || '#2F7D6D', kid: !!p.kid, teen: !!(p.kid && p.teen), family: p.id, jobs: p.jobs,
-      likes: p.likes, profile: p.profile, visitor: visitor || undefined, stage: stage};
+      likes: p.likes, profile: p.profile, visitor: visitor || undefined, stage: stage, awards: awardsOf(p)};
+  }
+
+  /**
+   * Awards a grown-up gave this kid in Beyond Family (ADR 0072), newest first: [{title, emoji, from, note, on}]. Only
+   * the last few weeks' come, for the warm notes and the badge under their name on Who's watching.
+   */
+  function awardsOf(p) {
+    if (!p.kid || !p.awards || !p.awards.length) return undefined;
+    var out = [];
+    for (var i = 0; i < p.awards.length && out.length < 3; i++) {
+      var a = p.awards[i] || {};
+      if (typeof a.title !== 'string' || !a.title) continue;
+      out.push({title: a.title.slice(0, 40), emoji: typeof a.emoji === 'string' ? a.emoji.slice(0, 8) : '', from: typeof a.from === 'string' ? a.from.slice(0, 30) : '',
+        note: typeof a.note === 'string' ? a.note.slice(0, 60) : '', on: /^\d{4}-\d{2}-\d{2}$/.test(a.on || '') ? a.on : ''});
+    }
+    return out.length ? out : undefined;
   }
 
   /**

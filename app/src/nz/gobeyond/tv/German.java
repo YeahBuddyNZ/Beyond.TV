@@ -312,6 +312,7 @@ final class German {
             case "ON THE WALL": return "AN DER WAND";
             case "Outside": return "Draußen";
             case "Without being asked": return "Ungefragt";
+            case "Award": return "Auszeichnung";
             case "Family scoreboard": return "Familien-Punktetafel";
             case "What are we singing?": return "Was singen wir?";
             case "What shall we do?": return "Was machen wir?";
