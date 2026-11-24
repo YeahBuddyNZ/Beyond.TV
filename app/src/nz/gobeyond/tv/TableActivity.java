@@ -37,9 +37,28 @@ import java.nio.charset.StandardCharsets;
 public class TableActivity extends Activity {
     static void open(Context c) { open(c, null); }
 
-    /** start: "silly" opens the silly games (web/laughs.js), "lunch" school lunches (web/lunch.js), "arcade" the arcade (web/arcade.js), "rcland" Milo's Remote Control Land (web/rcland.js), "candy" London's Candy Land (web/candy.js), "road" Build a road, "bridge" Build a bridge and "town" Plan a town (web/builder.js), "chores" Daily chores (web/chores.js), "scores" the family scoreboard (web/scores.js), "sky" Look around (web/skylook.js), "lights" the light show (web/lights.js) and "guides" How to play (web/guides.js), rather than the board and card games. */
+    /** start: "silly" opens the silly games (web/laughs.js), "lunch" school lunches (web/lunch.js), "arcade" the arcade (web/arcade.js), "rcland" Milo's Remote Control Land (web/rcland.js), "candy" London's Candy Land (web/candy.js), "road" Build a road, "bridge" Build a bridge and "town" Plan a town (web/builder.js), "chores" Daily chores (web/chores.js), "scores" the family scoreboard (web/scores.js), "morning" the Morning board (web/morning.js), "sky" Look around (web/skylook.js), "lights" the light show (web/lights.js) and "guides" How to play (web/guides.js), rather than the board and card games. */
     static void open(Context c, String start) {
         c.startActivity(new Intent(c, TableActivity.class).putExtra("start", start).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+    }
+
+    /**
+     * The Morning board (web/morning.js, ADR 0066) opens by itself the first time the home screen shows between 5 and
+     * 10 in the morning, once a day, when the TV is linked to Beyond Family and nobody turned it off. Same rule as
+     * Morning.rules.due: change one, change both. Called from HomeActivity.onResume.
+     */
+    static void maybeMorning(Activity home) {
+        java.util.Calendar now = java.util.Calendar.getInstance();
+        int h = now.get(java.util.Calendar.HOUR_OF_DAY);
+        String today = String.format(java.util.Locale.ROOT, "%04d-%02d-%02d", now.get(java.util.Calendar.YEAR),
+                now.get(java.util.Calendar.MONTH) + 1, now.get(java.util.Calendar.DAY_OF_MONTH));
+        if (h < 5 || h >= 10 || !Prefs.morningAuto() || today.equals(Prefs.morningShown()) || !Family.linked(home)) return;
+        // A moment later, and only if the home screen is still in front: Who's watching or the pets come first.
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+            if (!ScreenTimeService.homeInFront || home.isFinishing() || today.equals(Prefs.morningShown())) return;
+            Prefs.setMorningShown(today);
+            open(home, "morning");
+        }, 1500);
     }
 
     /** The screen showing Look around, if there is one: a phone's compass (Family, ADR 0040) turns its view. */
@@ -147,6 +166,17 @@ public class TableActivity extends Activity {
                 return "";
             }
         }
+
+        /** Today for the Morning board (web/morning.js, ADR 0066): to-dos, the noticeboard and the weather. */
+        @JavascriptInterface public String morning() { return Family.morning(TableActivity.this).toString(); }
+
+        /** Ticks one of today's to-dos in Beyond Family: "ok" when it took. On this bridge's own thread, never the UI's. */
+        @JavascriptInterface public String tick(String id, String member, boolean on) {
+            return Family.tick(TableActivity.this, id, member, on) ? "ok" : "";
+        }
+
+        /** The Morning board's Show it each morning. */
+        @JavascriptInterface public void morningAuto(boolean on) { Prefs.setMorningAuto(on); }
 
         /** Which games to open: "silly" for the silly games, "arcade" for the arcade, otherwise the board and card games. */
         @JavascriptInterface public String start() {

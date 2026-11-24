@@ -52,7 +52,7 @@ var TableHost = (function () {
   var first = bridge && bridge.start ? bridge.start() : ((/[?&]start=(\w+)/.exec(location.search) || [])[1] || '');
   // A game for one asks Who's playing? first on the Family profile, so its points reach the scoreboard (ADR 0057).
   if (first === 'road' || first === 'bridge' || first === 'town') Scores.pick(function () { Builder.open(first); });
-  else if (first === 'chores') Chores.open(); else if (first === 'scores') Scores.open();
+  else if (first === 'chores') Chores.open(); else if (first === 'morning') Morning.open(); else if (first === 'scores') Scores.open();
   else if (first === 'silly') Laughs.open(); else if (first === 'lunch') Lunch.open(); else if (first === 'arcade') Scores.pick(function () { Arcade.open(); }); else if (first === 'rcland') Scores.pick(function () { RCLand.open(); }); else if (first === 'candy') Scores.pick(function () { Candy.open(); }); else if (first === 'sky') SkyLook.open(); else if (first === 'lights') Lights.open(); else if (first === 'guides') Guides.list(); else Table.open();
   return {key: key};
 })();

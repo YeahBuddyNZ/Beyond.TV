@@ -578,6 +578,18 @@ final class German {
             case "1 more waiting": return "1 weiteres wartet";
             case "nobody else waiting yet": return "noch wartet sonst keiner";
             case "no limit": return "keine Grenze";
+            case "Ask a grown-up": return "Einen Erwachsenen fragen";
+            case "What would you like to ask for?": return "Worum möchtest du bitten?";
+            case "The grown-ups' phones will buzz. They answer with one tap.": return "Die Handys der Erwachsenen summen. Sie antworten mit einem Tippen.";
+            case "30 more minutes": return "30 Minuten mehr";
+            case "One more game": return "Noch ein Spiel";
+            case "You've asked a lot already. Try again later.": return "Du hast schon oft gefragt. Versuch es später nochmal.";
+            case "No grown-ups have the Beyond Family app yet.": return "Noch kein Erwachsener hat die Beyond Family App.";
+            case "Couldn't ask just now. Go and ask in person!": return "Fragen ging gerade nicht. Frag einfach persönlich!";
+            case "the grown-ups": return "die Erwachsenen";
+            case "A grown-up": return "Ein Erwachsener";
+            case "Today": return "Heute";
+            case "15 more minutes": return "15 Minuten mehr";
             case "screen time done for today": return "Bildschirmzeit für heute vorbei";
             case "1 photo on the screensaver.": return "1 Foto im Bildschirmschoner.";
             case " photos on the screensaver.": return " Fotos im Bildschirmschoner.";
@@ -588,6 +600,16 @@ final class German {
             case "The TV isn't on your home network right now. Check the Wi-Fi and try again.": return "Der Fernseher ist gerade nicht im Heimnetz. Prüf das WLAN und versuch es noch einmal.";
             case "1. Point your phone's camera at the code.\n2. Pick photos, or the kids' art.\n3. They show on the screensaver.": return "1. Richte die Handykamera auf den Code.\n2. Wähle Fotos oder die Bilder der Kinder.\n3. Sie erscheinen im Bildschirmschoner.";
             default:
+                if (english.startsWith("Asked ") && english.endsWith(". The TV will tell you when they answer."))
+                    return "Gefragt: " + english.substring(6, english.length() - 40) + ". Der Fernseher sagt dir, wenn sie antworten.";
+                if (english.matches(".+ said yes! \\d+ more minutes, .+\\.")) {
+                    String[] a = english.substring(0, english.length() - 1).split(" said yes! | more minutes, ");
+                    if (a.length == 3) return a[0] + " hat ja gesagt! " + a[1] + " Minuten mehr, " + a[2] + ".";
+                }
+                if (english.startsWith("Not this time, ") && english.endsWith(" said maybe tomorrow.")) {
+                    String[] a = english.substring(15, english.length() - 21).split("\\. ", 2);
+                    if (a.length == 2) return "Diesmal nicht, " + a[0] + ". " + a[1] + " sagt: vielleicht morgen.";
+                }
                 if (english.startsWith("That's screen time for today, ")) return "Das war die Bildschirmzeit für heute, " + english.substring(30);
                 if (english.startsWith("⏳ ") && english.endsWith(" of screen time left")) return "⏳ noch " + english.substring(2, english.length() - 20) + " Bildschirmzeit";
                 if (english.endsWith(" minutes of screen time left, ") || english.contains(" minutes of screen time left, ")) {

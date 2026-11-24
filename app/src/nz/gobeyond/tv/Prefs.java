@@ -146,6 +146,13 @@ final class Prefs {
     }
     static void setKupu(boolean on) { put("kupu", on); }
 
+    /** The Morning board opens by itself the first time each morning (ADR 0066); its own button turns that off. */
+    static boolean morningAuto() { return sp().getBoolean("morningAuto", true); }
+    static void setMorningAuto(boolean on) { put("morningAuto", on); }
+    /** The day (YYYY-MM-DD) the Morning board last opened by itself. */
+    static String morningShown() { return sp().getString("morningShown", ""); }
+    static void setMorningShown(String day) { put("morningShown", day); }
+
     static boolean coin(int i) { return sp().getBoolean("coin" + i, true); }
     static void setCoin(int i, boolean on) { put("coin" + i, on); }
 

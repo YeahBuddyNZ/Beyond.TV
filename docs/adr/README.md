@@ -73,3 +73,4 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0063](0063-bedtime-mode.md) | Bedtime mode: calm sounds, then the TV turns itself off |
 | [0064](0064-tidy-up-alarms-from-beyond-family.md) | Tidy-up alarms: days and a time away from Beyond Family, and the TV turns back off if nobody comes |
 | [0065](0065-beyond-tv-channels.md) | Beyond TV Channels: one line-up you surf like a real TV, NZ mix channels, turning channels off |
+| [0066](0066-ask-a-grown-up-and-the-morning-board.md) | Ask a grown-up from the TV for more screen time with one tap to answer, and the Morning board |

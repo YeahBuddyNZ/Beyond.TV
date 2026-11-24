@@ -81,7 +81,8 @@ var Family = (function () {
     // likes: what a grown-up said a kid is into, which picks their shows (kidpicks.js).
     // teen: a kid of 13 or more, worked out by Beyond Family from their birthday (only the yes or no comes here).
     // profile: their face, colour, world, loves and shelf, kept with them in Beyond Family.
-    return {id: 'bf-' + p.id, name: p.name, colour: p.colour || '#2F7D6D', kid: !!p.kid, teen: !!(p.kid && p.teen), family: p.id, jobs: p.jobs,
+    // todos: today's to-dos for everyone, grown-ups too (the Morning board, morning.js), when Beyond Family sends them.
+    return {id: 'bf-' + p.id, name: p.name, colour: p.colour || '#2F7D6D', kid: !!p.kid, teen: !!(p.kid && p.teen), family: p.id, jobs: p.jobs, todos: p.todos,
       likes: p.likes, profile: p.profile, visitor: visitor || undefined};
   }
 
@@ -374,6 +375,7 @@ var Family = (function () {
   function run(c) {
     if (c.kind === 'say') { say(c.text, c.tone, c.from); return; }
     // A note arrived or came down: its state came with this sync, this is only the moment, to pop it in (ADR 0025).
+    if (c.kind === 'request-answer') { if (window.ScreenTime) ScreenTime.answered(c); return; }
     if (c.kind === 'note') { if (c.id && window.Notes) Notes.arrived(c.id); return; }
     // A question from a phone: this TV asks it with its own apps, and the answer shows here.
     if (c.kind === 'ask') { hide(); if (window.Ask) Ask.open(c.text, c.from); return; }
@@ -875,9 +877,39 @@ var Family = (function () {
     call('POST', '/tv/now', app ? {app: String(app).slice(0, 40), title: title ? String(title).slice(0, 120) : undefined, who: who ? who.name : undefined} : {}, function () {});
   }
 
+  // MARK: - Ask a grown-up and the Morning board (ADR 0066)
+
+  /**
+   * A kid asks the grown-ups' phones for more screen time or one more game (screentime.js). done(err, answer):
+   * answer.asked is who was asked, by first name. The yes or not now comes back as a "request-answer" command.
+   */
+  function request(kind, member, minutes, done) {
+    if (!linked() || !member) { done({status: 0}); return; }
+    var body = {kind: kind, memberId: member};
+    if (kind === 'time') body.minutes = minutes === 30 ? 30 : 15;
+    call('POST', '/tv/requests', body, done);
+  }
+
+  /** Ticks one of today's to-dos in Beyond Family, then on this TV's copy so the board shows it straight away. */
+  function tick(id, member, on, done) {
+    if (!linked() || !id) { done({status: 0}); return; }
+    call('POST', '/tv/todos/' + encodeURIComponent(id) + '/tick', {memberId: member || undefined, done: !!on}, function (err) {
+      if (!err) {
+        var all = window.Profiles ? Profiles.list() : [];
+        for (var i = 0; i < all.length; i++) {
+          var list = all[i].todos || [];
+          for (var j = 0; j < list.length; j++) if (list[j] && list[j].id === id) list[j].done = !!on;
+        }
+      }
+      done(err);
+    });
+  }
+
   if (listening()) start();
 
   return {
+    request: request,
+    tick: tick,
     linked: linked,
     homeName: function () { return state.home ? state.home.name : ''; },
     link: link,

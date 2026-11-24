@@ -539,6 +539,145 @@ final class Family {
         }, "beyond-family-pets").start();
     }
 
+    // MARK: - Ask a grown-up and the Morning board (ADR 0066)
+
+    /** The household as the last sync had it, for the Morning board's to-dos. Kept in memory only. */
+    private static volatile JSONObject lastHome;
+
+    /**
+     * A kid asks the grown-ups' phones for more screen time ("time", 15 or 30 minutes) or one more game ("game").
+     * Calls `done` on the main thread with words for the kid: who was asked, or what went wrong. The yes or not now
+     * comes back as a "request-answer" command.
+     */
+    static void request(Context c, String kind, String member, int minutes, java.util.function.Consumer<String> done) {
+        final Context app = c.getApplicationContext();
+        new Thread(() -> {
+            String words;
+            try {
+                JSONObject body = new JSONObject().put("kind", kind).put("memberId", member);
+                if ("time".equals(kind)) body.put("minutes", minutes == 30 ? 30 : 15);
+                JSONObject out = call(app, "POST", "/tv/requests", body, 15_000);
+                String who = names(out.optJSONArray("asked"));
+                words = Ui.tr("Pedido enviado para " + who + ". A TV avisa quando responderem.",
+                        "Asked " + who + ". The TV will tell you when they answer.",
+                        "Pedido enviado a " + who + ". La TV te avisa cuando respondan.");
+            } catch (Fail f) {
+                words = f.status == 429 ? Ui.tr("Você já pediu bastante. Tente mais tarde.", "You've asked a lot already. Try again later.",
+                        "Ya pediste bastante. Inténtalo más tarde.")
+                        : f.status == 409 ? Ui.tr("Nenhum adulto tem o app Beyond Family ainda.", "No grown-ups have the Beyond Family app yet.",
+                        "Ningún adulto tiene la app Beyond Family todavía.")
+                        : Ui.tr("Não deu para pedir agora. Peça pessoalmente!", "Couldn't ask just now. Go and ask in person!",
+                        "No se pudo pedir ahora. ¡Pídelo en persona!");
+            } catch (Throwable t) {
+                words = Ui.tr("Não deu para pedir agora. Peça pessoalmente!", "Couldn't ask just now. Go and ask in person!",
+                        "No se pudo pedir ahora. ¡Pídelo en persona!");
+            }
+            final String w = words;
+            if (done != null) MAIN.post(() -> done.accept(w));
+        }, "beyond-family-ask").start();
+    }
+
+    /** "Mum and Dad", "Mum, Dad and Nana", or the grown-ups. */
+    static String names(JSONArray list) {
+        List<String> n = new ArrayList<>();
+        for (int i = 0; list != null && i < list.length(); i++) if (!list.optString(i).isEmpty()) n.add(list.optString(i));
+        if (n.isEmpty()) return Ui.tr("os adultos", "the grown-ups", "los adultos");
+        if (n.size() == 1) return n.get(0);
+        return android.text.TextUtils.join(", ", n.subList(0, n.size() - 1)) + Ui.tr(" e ", " and ", " y ") + n.get(n.size() - 1);
+    }
+
+    /**
+     * Ticks one of today's to-dos in Beyond Family (the wall's POST /tv/todos/:id/tick), then on this TV's copy so the
+     * board shows it straight away. Runs on the caller's thread (the WebView's bridge thread): true when it took.
+     */
+    static boolean tick(Context c, String id, String member, boolean on) {
+        if (id == null || id.isEmpty() || !linked(c)) return false;
+        try {
+            JSONObject body = new JSONObject().put("done", on);
+            if (member != null && !member.isEmpty()) body.put("memberId", member);
+            call(c.getApplicationContext(), "POST", "/tv/todos/" + java.net.URLEncoder.encode(id, "UTF-8") + "/tick", body, 10_000);
+        } catch (Throwable t) {
+            return false;
+        }
+        JSONObject home = lastHome;
+        JSONArray people = home == null ? null : home.optJSONArray("people");
+        for (int i = 0; people != null && i < people.length(); i++) {
+            JSONArray todos = people.optJSONObject(i) == null ? null : people.optJSONObject(i).optJSONArray("todos");
+            for (int j = 0; todos != null && j < todos.length(); j++) {
+                JSONObject t = todos.optJSONObject(j);
+                if (t != null && id.equals(t.optString("id"))) {
+                    try { t.put("done", on); } catch (JSONException ignored) { }
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Today for the Morning board (web/morning.js through TableActivity): the household's name, its people with their
+     * to-dos, the jobs tile, the noticeboard and the weather, in the shape morning.js reads.
+     */
+    static JSONObject morning(Context c) {
+        JSONObject out = new JSONObject();
+        try {
+            boolean on = linked(c);
+            out.put("linked", on);
+            if (!on) return out;
+            out.put("home", homeName(c));
+            JSONObject home = lastHome;
+            java.util.Map<String, JSONArray> todos = new java.util.HashMap<>();
+            JSONArray from = home == null ? null : home.optJSONArray("people");
+            for (int i = 0; from != null && i < from.length(); i++) {
+                JSONObject p = from.optJSONObject(i);
+                if (p != null && p.optJSONArray("todos") != null) todos.put("bf-" + p.optString("id"), p.optJSONArray("todos"));
+            }
+            JSONArray people = new JSONArray();
+            for (People.Person p : People.list(c)) {
+                if (p.id == null || p.visitor || p.together()) continue;
+                JSONObject o = new JSONObject().put("id", p.id).put("name", p.name == null ? "" : p.name).put("kid", p.kid)
+                        .put("emoji", p.emoji == null ? "" : p.emoji).put("colour", String.format("#%06X", p.colour & 0xFFFFFF));
+                if (p.id.startsWith("bf-")) o.put("family", p.id.substring(3));
+                if (todos.containsKey(p.id)) o.put("todos", todos.get(p.id));
+                people.put(o);
+            }
+            out.put("people", people);
+            if (board != null) out.put("board", board);
+            JSONArray tiles = widgets;
+            for (int i = 0; tiles != null && i < tiles.length(); i++) {
+                JSONObject t = tiles.optJSONObject(i);
+                if (t != null && "jobs".equals(t.optString("kind"))) out.put("tile", t.optJSONArray("kids"));
+            }
+            HomeData.Weather w = HomeData.get(c).weather;
+            if (w != null && !Double.isNaN(w.temp) && Prefs.weather()) {
+                out.put("weather", new JSONObject().put("temp", HomeData.degrees(w.temp)).put("max", HomeData.degrees(w.max))
+                        .put("min", HomeData.degrees(w.min)).put("code", w.code).put("day", w.isDay)
+                        .put("cond", HomeData.condition(w.code, w.isDay)).put("city", Prefs.city()));
+            }
+        } catch (JSONException ignored) {
+        }
+        return out;
+    }
+
+    /** A grown-up answered a kid's ask from their phone: the minutes on a yes, kind words either way. */
+    private static void answered(Context app, JSONObject cmd) {
+        if ("unlock".equals(cmd.optString("ask"))) return;
+        String who = cmd.optString("who"), by = cmd.optString("by");
+        if (by.isEmpty()) by = Ui.tr("Um adulto", "A grown-up", "Un adulto");
+        int minutes = cmd.optInt("minutes");
+        String words;
+        if (cmd.optBoolean("yes") && minutes > 0 && !cmd.optString("member").isEmpty()) {
+            ScreenTimeService.more(app, "bf-" + cmd.optString("member"), minutes);
+            words = Ui.tr(by + " disse sim! Mais " + minutes + " minutos, " + who + ".", by + " said yes! " + minutes + " more minutes, " + who + ".",
+                    "¡" + by + " dijo que sí! " + minutes + " minutos más, " + who + ".");
+        } else if (!cmd.optBoolean("yes")) {
+            words = Ui.tr("Agora não, " + who + ". " + by + " disse que fica para amanhã.", "Not this time, " + who + ". " + by + " said maybe tomorrow.",
+                    "Ahora no, " + who + ". " + by + " dijo que mañana.");
+        } else {
+            return;
+        }
+        android.widget.Toast.makeText(app, words, android.widget.Toast.LENGTH_LONG).show();
+    }
+
     static void apply(Context c, JSONObject home) { apply(c, home, null); }
 
     /**
@@ -548,6 +687,7 @@ final class Family {
      */
     static void apply(Context c, JSONObject home, JSONArray visitorsIn) {
         final JSONArray visitors = visitorsIn == null ? new JSONArray() : visitorsIn;
+        lastHome = home;
         board = home == null ? null : home.optJSONObject("board");
         Tidy.apply(c, home == null ? null : home.optJSONObject("tidy"));
         widgets = home == null ? null : home.optJSONArray("widgets");
@@ -721,6 +861,10 @@ final class Family {
                     wake(app);
                     if (!openAfter.isEmpty()) launch(app, openAfter);
                 });
+                break;
+            case "request-answer":
+                // A grown-up's yes or not now to a kid's ask (ADR 0066).
+                MAIN.post(() -> answered(app, cmd));
                 break;
             case "sky":
                 // Look around (ADR 0036), opened from a phone's Point the sky (ADR 0040).

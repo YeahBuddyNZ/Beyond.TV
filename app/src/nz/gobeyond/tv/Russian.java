@@ -620,6 +620,18 @@ final class Russian {
             case "1 more waiting": return "Ждёт ещё 1";
             case "nobody else waiting yet": return "больше никто не ждёт";
             case "no limit": return "без ограничений";
+            case "Ask a grown-up": return "Попросить взрослого";
+            case "What would you like to ask for?": return "О чём хочешь попросить?";
+            case "The grown-ups' phones will buzz. They answer with one tap.": return "Телефоны взрослых зазвонят. Они ответят одним нажатием.";
+            case "30 more minutes": return "Ещё 30 минут";
+            case "One more game": return "Ещё одна игра";
+            case "You've asked a lot already. Try again later.": return "Ты уже много раз просил. Попробуй позже.";
+            case "No grown-ups have the Beyond Family app yet.": return "Пока ни у кого из взрослых нет приложения Beyond Family.";
+            case "Couldn't ask just now. Go and ask in person!": return "Сейчас не получилось попросить. Спроси сам!";
+            case "the grown-ups": return "взрослых";
+            case "A grown-up": return "Взрослый";
+            case "Today": return "Сегодня";
+            case "15 more minutes": return "Ещё 15 минут";
             case "screen time done for today": return "экранное время на сегодня закончилось";
             case "1 photo on the screensaver.": return "1 фото на заставке.";
             case " photos on the screensaver.": return " фото на заставке.";
@@ -630,6 +642,16 @@ final class Russian {
             case "The TV isn't on your home network right now. Check the Wi-Fi and try again.": return "Телевизор сейчас не в домашней сети. Проверьте Wi-Fi и попробуйте ещё раз.";
             case "1. Point your phone's camera at the code.\n2. Pick photos, or the kids' art.\n3. They show on the screensaver.": return "1. Наведите камеру телефона на код.\n2. Выберите фото или детские рисунки.\n3. Они появятся на заставке.";
             default:
+                if (english.startsWith("Asked ") && english.endsWith(". The TV will tell you when they answer."))
+                    return "Попросили: " + english.substring(6, english.length() - 40) + ". Телевизор скажет, когда ответят.";
+                if (english.matches(".+ said yes! \\d+ more minutes, .+\\.")) {
+                    String[] a = english.substring(0, english.length() - 1).split(" said yes! | more minutes, ");
+                    if (a.length == 3) return a[0] + " разрешил! Ещё " + a[1] + " минут, " + a[2] + ".";
+                }
+                if (english.startsWith("Not this time, ") && english.endsWith(" said maybe tomorrow.")) {
+                    String[] a = english.substring(15, english.length() - 21).split("\\. ", 2);
+                    if (a.length == 2) return "Не сейчас, " + a[0] + ". " + a[1] + " говорит: может, завтра.";
+                }
                 if (english.startsWith("That's screen time for today, ")) return "На сегодня экранное время всё, " + english.substring(30);
                 if (english.startsWith("⏳ ") && english.endsWith(" of screen time left")) return "⏳ осталось экранного времени: " + english.substring(2, english.length() - 20);
                 if (english.contains(" minutes of screen time left, ")) {

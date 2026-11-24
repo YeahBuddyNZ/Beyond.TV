@@ -261,6 +261,8 @@
     // with Talk to Beyond inside it; without, the dots are feedback, typed on the remote (talkToBeyond).
     if (Family.linked()) list.push({dots: true, label: tr('Pergunte à Beyond', 'Ask Beyond', 'Pregúntale a Beyond'), run: function () { Ask.open(); }});
     else if (!kid) list.push({dots: true, label: tr('Fale com a Beyond', 'Talk to Beyond', 'Habla con Beyond'), run: talkToBeyond});
+    // The Morning board (morning.js, ADR 0066): today's to-dos, calendar and weather for the house. Linked only.
+    if (Family.linked()) list.push({icon: 'sunny', label: tr('Hoje', 'Today', 'Hoy'), run: function () { Morning.open(); }});
     // Notes from the family, when there are any up: opens them big (notes.js).
     if (Notes.count()) list.push({emoji: '\uD83D\uDCDD', label: tr('Bilhetes', 'Notes', 'Notas'), run: function () { Notes.open(); }});
     // NZ election results, live (ADR 0039): on New Zealand TVs until 27/11/2026, then gone. Opens Beyond's results
@@ -1668,6 +1670,8 @@
     var me = Profiles.current();
     if (me.kid && !me.look && !me.offered) setTimeout(makeItYours, 450);
     else if (me.kid) setTimeout(Pets.ask, 600);   // and have the pets been fed today?
+    // The Morning board, first thing each morning (morning.js, ADR 0066). It waits while another question is up.
+    setTimeout(Morning.maybe, 900);
     pickShelf();
     cards = [];
     continueFirst();
@@ -1753,6 +1757,7 @@
     hiddenAt = 0;
     if (longAway) Chime.play();
     if (longAway && Profiles.count() > 1) setTimeout(function () { Profiles.pick(false, profileChosen); }, 300);
+    else setTimeout(Morning.maybe, 600);
     idleAt = Date.now();
     // Back from an app: what was just opened leads Keep watching. Back after hours away: the home screen opens on Continue.
     st.tab = 0;
@@ -1780,6 +1785,7 @@
     renderAll();
     Data.refresh();
     if (Profiles.count() > 1) Profiles.pick(false, profileChosen);
+    else setTimeout(Morning.maybe, 1500);   // the Morning board, first thing (morning.js, ADR 0066)
   });
   Checkin.start();
   if (window.HomeHub) HomeHub.start(homeChanged);
