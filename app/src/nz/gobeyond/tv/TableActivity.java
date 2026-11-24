@@ -37,7 +37,7 @@ import java.nio.charset.StandardCharsets;
 public class TableActivity extends Activity {
     static void open(Context c) { open(c, null); }
 
-    /** start: "silly" opens the silly games (web/laughs.js), "lunch" school lunches (web/lunch.js), "arcade" the arcade (web/arcade.js), "rcland" Milo's Remote Control Land (web/rcland.js), "candy" London's Candy Land (web/candy.js), "road" Build a road, "bridge" Build a bridge and "town" Plan a town (web/builder.js), "chores" Daily chores (web/chores.js), "scores" the family scoreboard (web/scores.js), "sky" Look around (web/skylook.js), "lights" the light show (web/lights.js) and "guides" How to play (web/guides.js), rather than the board and card games. */
+    /** start: "silly" opens the silly games (web/laughs.js), "lunch" school lunches (web/lunch.js), "arcade" the arcade (web/arcade.js), "rcland" Milo's Remote Control Land (web/rcland.js), "candy" London's Candy Land (web/candy.js), "road" Build a road, "bridge" Build a bridge and "town" Plan a town (web/builder.js), "chores" Daily chores (web/chores.js), "wall" the family wall and to-dos (web/wall.js), "scores" the family scoreboard (web/scores.js), "sky" Look around (web/skylook.js), "lights" the light show (web/lights.js) and "guides" How to play (web/guides.js), rather than the board and card games. */
     static void open(Context c, String start) {
         c.startActivity(new Intent(c, TableActivity.class).putExtra("start", start).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
@@ -113,6 +113,11 @@ public class TableActivity extends Activity {
         if ("sky".equals(getIntent().getStringExtra("start"))) sky = this;
     }
 
+    /** Answers the page's n-th question to Beyond Family (wall.js). On the main thread, where Family calls back. */
+    private void answer(int n, boolean ok) {
+        if (web != null) web.evaluateJavascript("window.Wall && Wall.answer(" + n + ", " + ok + ")", null);
+    }
+
     /** What the page asks of the TV. Runs on the WebView's own thread. */
     private final class Bridge {
         @JavascriptInterface public String people() {
@@ -134,6 +139,19 @@ public class TableActivity extends Activity {
         }
 
         @JavascriptInterface public String language() { return Ui.language; }
+
+        /** The family wall and everyone's to-dos (web/wall.js, ADR 0066): {wall, todos}. */
+        @JavascriptInterface public String wall() { return Family.wallJson(); }
+
+        /** Ticks a to-do in Beyond Family; the answer comes back as Wall.answer(n, ok). */
+        @JavascriptInterface public void tick(int n, String id, String member, boolean on) {
+            Family.tickTodo(TableActivity.this, id, member, on, ok -> answer(n, ok));
+        }
+
+        /** Puts a sticky on the family wall; the answer comes back as Wall.answer(n, ok). */
+        @JavascriptInterface public void sticky(int n, String text, String colour, String member) {
+            Family.sticky(TableActivity.this, text, colour, member, ok -> answer(n, ok));
+        }
 
         /** The tidy-up race's places for the family scoreboard (ScoreLog, ADR 0057). */
         @JavascriptInterface public String scores() { return ScoreLog.all(TableActivity.this); }
