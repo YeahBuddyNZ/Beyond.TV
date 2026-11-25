@@ -54,7 +54,7 @@ public class TidyActivity extends Activity {
     /** Waiting for anybody to press a button, else the TV turns off. */
     private boolean waiting;
     private LinearLayout faces;
-    private Button close, go;
+    private Button close, go, how;
     private ToneGenerator tone;
     private final List<Racer> racers = new ArrayList<>();
     private final List<Racer> order = new ArrayList<>();
@@ -112,6 +112,14 @@ public class TidyActivity extends Activity {
         go.setOnClickListener(v -> go());
         go.setVisibility(picking ? View.VISIBLE : View.GONE);
         column.addView(go, gp);
+
+        // Kea the coach's guide (web/guides.js, ADR 0075), there while picking who races.
+        how = FeedbackActivity.button(this, Ui.emoji("📖") + "  " + Ui.tr("Como jogar", "How to play", "Cómo jugar"), k, false);
+        how.setOnClickListener(v -> GamesActivity.howToPlay(this, "tidy"));
+        how.setVisibility(picking ? View.VISIBLE : View.GONE);
+        LinearLayout.LayoutParams hp = new LinearLayout.LayoutParams(-2, Math.round(84 * k));
+        hp.topMargin = Math.round(24 * k);
+        column.addView(how, hp);
 
         close = FeedbackActivity.button(this, Ui.tr("Fechar", "Close", "Cerrar"), k, false);
         close.setOnClickListener(v -> finish());
@@ -179,6 +187,7 @@ public class TidyActivity extends Activity {
                 "Ready, set, go! When you're done, press OK on your face.", "¡Preparados, listos, ya! Cuando termines, pulsa OK en tu cara."));
         clock.setAlpha(1f);
         go.setVisibility(View.GONE);
+        how.setVisibility(View.GONE);
         racers.get(0).face.requestFocus();
         started = SystemClock.uptimeMillis();
         Chime.play();

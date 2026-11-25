@@ -191,6 +191,8 @@ public class KaraokePickActivity extends Activity {
             });
         }
         if (linked) add("＋  " + Ui.tr("Nova playlist", "New playlist", "Nueva lista"), false, v -> nameList());
+        // Kea the coach's guide (web/guides.js, ADR 0075), one press away.
+        add(Ui.emoji("📖") + "  " + Ui.tr("Como jogar", "How to play", "Cómo jugar"), false, v -> GamesActivity.howToPlay(this, "karaoke"));
         first.requestFocus();
     }
 

@@ -82,4 +82,5 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0072](0072-warm-notes-shuffled-and-family-awards.md) | Warm notes shuffled with a memory, more lines, Mum's own, and awards from Beyond Family |
 | [0073](0073-leaving-ends-the-light-show-and-games.md) | Leaving ends the light show, the games let go on Home, and every web file gets into the APK |
 | [0074](0074-keep-the-beat-waits-and-usb-mic-tries-again.md) | Keep the beat waits for a tap, and a silent USB microphone is tried other ways |
-| [0075](0075-getting-started-on-a-new-tv.md) | Getting started on a new TV: three big-button questions, then the Drop Sky check |
+| [0075](0075-kea-the-coach-beside-every-game.md) | Kea the coach beside every game: the guide the first time, a tip after, and How to play inside each game |
+| [0076](0076-getting-started-on-a-new-tv.md) | Getting started on a new TV: three big-button questions, then the Drop Sky check |

@@ -17,7 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 /**
- * Getting started (ADR 0075): the first time the home screen comes up on a new TV, three big-button questions with
+ * Getting started (ADR 0076): the first time the home screen comes up on a new TV, three big-button questions with
  * the remote (where you live, who watches, the te reo word of the day), then the Drop Sky check as a code to scan
  * with a phone. Nothing technical, nothing typed, and every answer can be changed later in Home Settings.
  * Same steps as web/setup.js.

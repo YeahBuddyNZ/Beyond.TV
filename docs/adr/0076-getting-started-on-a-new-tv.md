@@ -1,4 +1,4 @@
-# 0075. Getting started on a new TV: three big-button questions, then the Drop Sky check
+# 0076. Getting started on a new TV: three big-button questions, then the Drop Sky check
 
 Date: 26/11/2026. Status: accepted.
 

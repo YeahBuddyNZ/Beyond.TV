@@ -472,6 +472,7 @@ var Karaoke = (function () {
           a.add(lead, function () { building = false; queueing = false; to('who', a); }, {first: true});
           var waitingNow = Turns.list().length;
           a.add(UI.button(row0, '🔁  ' + tr('Revezar', 'Take turns', 'Por turnos') + (waitingNow ? '  ·  ' + waitingNow : '')), function () { to('turns', a); });
+          if (window.Guides) Guides.button(a, row0, 'karaoke');
           var lists = hasLists ? Family.playlists() : [];
           for (i = 0; i < lists.length; i++) (function (p) {
             a.add(UI.button(row0, '🎶  ' + p.name + '  ·  ' + p.items.length), function () {

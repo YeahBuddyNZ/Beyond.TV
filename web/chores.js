@@ -209,6 +209,7 @@ var Chores = (function () {
           guard(L(CHANGE), function () { change(function () { api.rebuild(); }); });
         });
         if (window.Scores) api.add(UI.button(foot, L(SCOREBOARD)), function () { api.close(); Scores.open(); });
+        if (window.Guides) Guides.button(api, foot, 'chores');
         api.add(UI.button(foot, L(CLOSE), null, 'close'), function () { api.close(); });
       }
     });

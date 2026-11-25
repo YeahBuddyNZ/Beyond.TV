@@ -1794,7 +1794,7 @@
     continueFirst();
     renderAll();
     Data.refresh();
-    // A new TV: Getting started first (setup.js, ADR 0075), once. A new town reloads, so the weather and sky follow it.
+    // A new TV: Getting started first (setup.js, ADR 0076), once. A new town reloads, so the weather and sky follow it.
     if (Setup.due()) Setup.start(function (moved) { if (moved) location.reload(); });
     else if (Setup.people()) Profiles.pick(true, profileChosen);
     else if (Profiles.count() > 1) Profiles.pick(false, profileChosen);

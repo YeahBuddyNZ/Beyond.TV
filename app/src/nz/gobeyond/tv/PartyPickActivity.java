@@ -77,6 +77,13 @@ public class PartyPickActivity extends Activity {
             inRow++;
         }
 
+        // Kea the coach's guide (web/guides.js, ADR 0075), one press away.
+        Button how = FeedbackActivity.button(this, Ui.emoji("📖") + "  " + Ui.tr("Como jogar", "How to play", "Cómo jugar"), k, false);
+        how.setOnClickListener(v -> GamesActivity.howToPlay(this, "party"));
+        LinearLayout.LayoutParams hp = new LinearLayout.LayoutParams(-2, Math.round(84 * k));
+        hp.topMargin = Math.round(48 * k);
+        column.addView(how, hp);
+
         setContentView(root);
         disco.requestFocus();
     }

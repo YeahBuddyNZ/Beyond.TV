@@ -99,7 +99,7 @@ public class HomeActivity extends Activity implements Family.Screen {
             handler.postDelayed(quiet, 15_000);
             if (on) Chime.play();   // hello: the TV just came on
             if (on) home.startOnContinue();   // and opens on Continue: the last thing this person was watching (ADR 0058)
-            // A new TV: Getting started first (ADR 0075), once.
+            // A new TV: Getting started first (ADR 0076), once.
             if (SetupActivity.due(this)) {
                 SetupActivity.open(this);
                 return;
