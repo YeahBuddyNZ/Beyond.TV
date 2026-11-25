@@ -2,6 +2,15 @@
   "about": "What's new on Beyond TV, newest first. The TV reads this from GitHub Pages (ADR 0076): the newest line shows in Today at home until someone opens What's new, for three weeks at most. Add a line here with every feature people can see, in all five languages, short and plain, no em dashes. tests/whatsnew.test.js checks it.",
   "items": [
     {
+      "id": "getting-started",
+      "date": "2026-11-25",
+      "en": ["Getting started, with the remote", "A new TV asks three easy questions, then shows a code for the Drop Sky check"],
+      "pt": ["Primeiros passos, com o controle", "Uma TV nova faz três perguntas fáceis e mostra um código para largar a Sky"],
+      "es": ["Primeros pasos, con el mando", "Una tele nueva hace tres preguntas fáciles y muestra un código para dejar Sky"],
+      "de": ["Erste Schritte, mit der Fernbedienung", "Ein neuer Fernseher stellt drei leichte Fragen und zeigt einen Code zum Sky-Check"],
+      "ru": ["Первые шаги, с пультом", "Новый телевизор задаст три простых вопроса и покажет код для проверки Sky"]
+    },
+    {
       "id": "our-week",
       "date": "2026-11-25",
       "en": ["Our week, every Sunday", "Sunday night: everyone's points, chore stars, photos and a thank you for Mum"],

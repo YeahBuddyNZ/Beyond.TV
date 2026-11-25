@@ -423,6 +423,17 @@
             android:theme="@style/BeyondTV.Home" />
 
         <!-- Screen time is used up for today (ADR 0060): kind words over the app, OK goes home. -->
+        <!-- Getting started: the first time the home screen comes up on a new TV (ADR 0075). -->
+        <activity
+            android:name=".SetupActivity"
+            android:process=":home"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTop"
+            android:screenOrientation="landscape"
+            android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|density|fontScale|locale|layoutDirection"
+            android:theme="@style/BeyondTV.Home" />
+
         <activity
             android:name=".TimeUpActivity"
             android:process=":home"

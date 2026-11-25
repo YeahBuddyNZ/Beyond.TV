@@ -13,6 +13,30 @@ final class Russian {
 
     static String text(String english) {
         switch (english) {
+            // Getting started (ADR 0078)
+            case "Kia ora! Let's get your TV ready.": return "Kia ora! Давайте настроим телевизор.";
+            case "Three quick questions. Just use the arrows and OK on your remote.": return "Три коротких вопроса. Просто используйте стрелки и OK на пульте.";
+            case "Let's go": return "Начнём";
+            case "Where do you live?": return "Где вы живёте?";
+            case "For your weather and tonight's sky. Pick the closest one.": return "Для погоды и ночного неба. Выберите ближайший город.";
+            case "Somewhere else": return "В другом месте";
+            case "No worries: pick it later in Beyond™ TV, Home Settings, City.": return "Ничего страшного: выберите позже в Beyond™ TV, Настройки главного экрана, Город.";
+            case "Who watches this TV?": return "Кто смотрит этот телевизор?";
+            case "With kids, everyone gets their own home screen, and kids only see apps for their age.": return "С детьми у каждого свой главный экран, а дети видят только приложения для своего возраста.";
+            case "Just grown-ups": return "Только взрослые";
+            case "Grown-ups and kids": return "Взрослые и дети";
+            case "A te reo Māori word each day?": return "Слово на те рео маори каждый день?";
+            case "A new word on the home screen every day, the same on every TV in the house.": return "Каждый день новое слово на главном экране, одно и то же на всех телевизорах в доме.";
+            case "Yes please": return "Да, пожалуйста";
+            case "No thanks": return "Нет, спасибо";
+            case "All set! Now, could you drop Sky?": return "Готово! А можно ли отказаться от Sky?";
+            case "Point your phone's camera at the code. In two minutes you'll see which of your shows are free or cheaper without Sky.": return "Наведите камеру телефона на код. За две минуты вы увидите, какие ваши передачи бесплатны или дешевле без Sky.";
+            case "Add the family": return "Добавить семью";
+            case "Show my home screen": return "На главный экран";
+            case "Question 1 of 3": return "Вопрос 1 из 3";
+            case "Question 2 of 3": return "Вопрос 2 из 3";
+            case "Question 3 of 3": return "Вопрос 3 из 3";
+            case "No worries. It's all in Beyond™ TV, Home Settings, whenever you like.": return "Ничего страшного. Всё это есть в Beyond™ TV, Настройки главного экрана.";
             // Who's watching: warm notes and grown-ups' own PINs (ADR 0066)
             case "Type your PIN, or allow it from your phone.": return "Введи свой PIN или разреши с телефона.";
             case "Type your PIN.": return "Введи свой PIN.";

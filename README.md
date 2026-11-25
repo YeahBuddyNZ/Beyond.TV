@@ -143,8 +143,10 @@ Free and open source, built in Aotearoa by [Beyond](https://gobeyond.co.nz). One
 69. Kea the coach beside every game: done on Google TV, LG and Samsung. The first time anyone starts a game on the TV, Kea (the chess coach's robot) asks *First time playing ...?* and offers the game's guide with *Show me how*, or *Let's play*. After that Kea says one of the game's top tips as it starts, once a day. Karaoke, the party, the tidy-up race, bedtime, Daily chores, the scoreboard, quiz night and the dinner question have *How to play* on their own screens too. Kept on the TV only. ADR 0075.
 70. What's new: done on Google TV, LG and Samsung. The newest feature shows as *New: ...* in Today at home until someone opens *What's new* (Shortcuts, at the bottom of the home screen), for three weeks at most; that screen lists the last six with their dates. The list lives on our website (`docs/whats-new.json`), so it's read, never sent. ADR 0076.
 71. Our week, the Sunday family recap: done on Google TV, LG and Samsung. Points, chore stars, the week's wins and photos, and a thank you card for Mum signed by the kids (the grown-ups together when no Mum is set). By itself on Sunday evenings, once a week; the star button on Sundays and Monday mornings. ADR 0077.
+72. Getting started: done on Google TV, LG and Samsung. The first time Beyond™ TV's home screen comes up on a new TV, three big-button questions with the remote: which New Zealand town you're in (for the weather and tonight's sky), whether kids watch too (then it opens on adding the family), and the te reo word of the day. Then the Drop Sky setup check as a code to scan with a phone. *Not now* skips it for good, and every answer can be changed later in Settings. A TV that had Beyond™ TV before never sees it. ADR 0078.
 
 Ideas welcome: press the four dots on the TV (*Talk to Beyond*, or *Ask Beyond* when it's linked to Beyond Family).
+
 
 ## Install
 

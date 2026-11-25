@@ -64,6 +64,7 @@ jobs:
           node tests/warm.test.js
           node tests/whatsnew.test.js
           node tests/week.test.js
+          node tests/setup.test.js
       - name: Signing key
         env:
           KEYSTORE: ${{ secrets.ANDROID_KEYSTORE }}

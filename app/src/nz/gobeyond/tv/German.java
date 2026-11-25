@@ -6,6 +6,30 @@ final class German {
 
     static String text(String english) {
         switch (english) {
+            // Getting started (ADR 0078)
+            case "Kia ora! Let's get your TV ready.": return "Kia ora! Machen wir deinen Fernseher startklar.";
+            case "Three quick questions. Just use the arrows and OK on your remote.": return "Drei kurze Fragen. Nimm einfach die Pfeile und OK auf der Fernbedienung.";
+            case "Let's go": return "Los geht's";
+            case "Where do you live?": return "Wo wohnst du?";
+            case "For your weather and tonight's sky. Pick the closest one.": return "Für dein Wetter und den Himmel heute Nacht. Wähl den nächsten Ort.";
+            case "Somewhere else": return "Woanders";
+            case "No worries: pick it later in Beyond™ TV, Home Settings, City.": return "Kein Problem: Wähl ihn später in Beyond™ TV, Startbildschirm-Einstellungen, Stadt.";
+            case "Who watches this TV?": return "Wer schaut auf diesem Fernseher?";
+            case "With kids, everyone gets their own home screen, and kids only see apps for their age.": return "Mit Kindern bekommt jeder seinen eigenen Startbildschirm, und Kinder sehen nur Apps für ihr Alter.";
+            case "Just grown-ups": return "Nur Erwachsene";
+            case "Grown-ups and kids": return "Erwachsene und Kinder";
+            case "A te reo Māori word each day?": return "Jeden Tag ein Wort auf Te Reo Māori?";
+            case "A new word on the home screen every day, the same on every TV in the house.": return "Jeden Tag ein neues Wort auf dem Startbildschirm, auf jedem Fernseher im Haus dasselbe.";
+            case "Yes please": return "Ja, gern";
+            case "No thanks": return "Nein, danke";
+            case "All set! Now, could you drop Sky?": return "Fertig! Und könntest du Sky kündigen?";
+            case "Point your phone's camera at the code. In two minutes you'll see which of your shows are free or cheaper without Sky.": return "Richte die Handykamera auf den Code. In zwei Minuten siehst du, welche deiner Sendungen ohne Sky gratis oder günstiger sind.";
+            case "Add the family": return "Familie hinzufügen";
+            case "Show my home screen": return "Zum Startbildschirm";
+            case "Question 1 of 3": return "Frage 1 von 3";
+            case "Question 2 of 3": return "Frage 2 von 3";
+            case "Question 3 of 3": return "Frage 3 von 3";
+            case "No worries. It's all in Beyond™ TV, Home Settings, whenever you like.": return "Kein Problem. Alles findest du jederzeit in Beyond™ TV, Startbildschirm-Einstellungen.";
             // Who's watching: warm notes and grown-ups' own PINs (ADR 0066)
             case "Type your PIN, or allow it from your phone.": return "Gib deine PIN ein oder erlaube es am Handy.";
             case "Type your PIN.": return "Gib deine PIN ein.";
