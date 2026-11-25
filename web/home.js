@@ -742,6 +742,9 @@
       var notes = b.notes || [];
       for (var n = 0; n < notes.length; n++) rows.push(['💬', notes[n].text, notes[n].from]);
     }
+    // The newest thing on Beyond TV, until someone opens What's new (whatsnew.js, ADR 0075).
+    var news = window.WhatsNew ? WhatsNew.row() : null;
+    if (news) rows.push(news);
     var w = Data.weather;
     if (w && Prefs.weather()) {
       rows.push([null, Data.degrees(w.temp) + ', ' + Data.condition(w.code, w.isDay).toLowerCase(),
@@ -828,6 +831,7 @@
     drawerInputs = drawerItems.length;
     drawerItems.push({label: tr('Todos os Apps', 'All Apps', 'Todas las apps'), symbol: 'apps', run: openApps});
     drawerItems.push({label: tr('Timer de desligar', 'Sleep Timer', 'Temporizador'), symbol: 'bedtime', run: function () { toast(Sleep.press()); }});
+    drawerItems.push({label: tr('Novidades', "What's new", 'Novedades'), symbol: 'sparkles', run: function () { WhatsNew.open(renderTonight); }});
     if (!kid) drawerItems.push({label: tr('Ajustes do Beyond™ TV', 'Beyond™ TV Settings', 'Ajustes de Beyond™ TV'), symbol: 'settings', run: openSettings});
     if (!kid) drawerItems.push({label: tr('Ajustes da TV', 'TV Settings', 'Ajustes del TV'), symbol: 'tv_settings', run: tvSettings});
     var n = drawerItems.length, gap = 18, groupGap = 56, groups = drawerInputs > 0 && drawerInputs < n ? 2 : 1;
@@ -1804,6 +1808,9 @@
   function hearBeyond() { Checkin.hear(function (text) { toast('Beyond: ' + text); }); }
   hearBeyond();
   setInterval(hearBeyond, 10 * 60 * 1000 + 5000);
+  // What's new: the list from GitHub Pages, at most twice a day (whatsnew.js, ADR 0075).
+  WhatsNew.load(renderTonight);
+  setInterval(function () { WhatsNew.load(renderTonight); }, 3600000 + 7000);
   Profiles.onChange(function () { renderTop(); paintWorld(); renderCards(); renderTonight(); updateFocus(); jobsChanged(); });
   setInterval(function () {
     renderClock();

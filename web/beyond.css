@@ -578,3 +578,12 @@
 .bt-pick.focus { -webkit-transform: translateY(-8px) scale(1.06); transform: translateY(-8px) scale(1.06); }
 .bt-pick.focus .img { box-shadow: 0 0 0 5px #F7F6F2, 0 24px 50px rgba(0, 0, 0, 0.6); }
 .bt-pick.focus .why { display: block; }
+
+/* What's new (web/whatsnew.js, ADR 0075): the last few things, newest first, one button to close. */
+.bt-news .box { position: absolute; left: 200px; top: 110px; width: 1520px; }
+.bt-news .list { margin: 44px 0 40px; }
+.bt-news .item { position: relative; padding: 18px 0 20px 190px; border-top: 1px solid rgba(247, 246, 242, 0.12); }
+.bt-news .when { position: absolute; left: 0; margin-top: 6px; font-size: 24px; font-weight: 600; color: #9E7BFF; }
+.bt-news .what { font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 34px; font-weight: 600; }
+.bt-news .more { margin-top: 6px; font-size: 26px; color: rgba(247, 246, 242, 0.7); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bt-news .empty { font-size: 30px; color: rgba(247, 246, 242, 0.7); }
