@@ -7,6 +7,30 @@ var I18N = (function () {
 
   var lang = 'en';
   var german = {
+    // Getting started (setup.js, ADR 0075)
+    "Kia ora! Let's get your TV ready.": "Kia ora! Machen wir deinen Fernseher startklar.",
+    "Three quick questions. Just use the arrows and OK on your remote.": "Drei kurze Fragen. Nimm einfach die Pfeile und OK auf der Fernbedienung.",
+    "Let's go": "Los geht's",
+    "Where do you live?": "Wo wohnst du?",
+    "For your weather and tonight's sky. Pick the closest one.": "Für dein Wetter und den Himmel heute Nacht. Wähl den nächsten Ort.",
+    "Somewhere else": "Woanders",
+    "No worries: we'll go by the TV's time zone.": "Kein Problem: Wir richten uns nach der Zeitzone des Fernsehers.",
+    "Who watches this TV?": "Wer schaut auf diesem Fernseher?",
+    "With kids, everyone gets their own home screen, and kids only see apps for their age.": "Mit Kindern bekommt jeder seinen eigenen Startbildschirm, und Kinder sehen nur Apps für ihr Alter.",
+    "Just grown-ups": "Nur Erwachsene",
+    "Grown-ups and kids": "Erwachsene und Kinder",
+    "A te reo Māori word each day?": "Jeden Tag ein Wort auf Te Reo Māori?",
+    "A new word on the home screen every day, the same on every TV in the house.": "Jeden Tag ein neues Wort auf dem Startbildschirm, auf jedem Fernseher im Haus dasselbe.",
+    "Yes please": "Ja, gern",
+    "All set! Now, could you drop Sky?": "Fertig! Und könntest du Sky kündigen?",
+    "Point your phone's camera at the code. In two minutes you'll see which of your shows are free or cheaper without Sky.": "Richte die Handykamera auf den Code. In zwei Minuten siehst du, welche deiner Sendungen ohne Sky gratis oder günstiger sind.",
+    "Or open ": "Oder öffne ",
+    "Add the family": "Familie hinzufügen",
+    "Show my home screen": "Zum Startbildschirm",
+    "Question 1 of 3": "Frage 1 von 3",
+    "Question 2 of 3": "Frage 2 von 3",
+    "Question 3 of 3": "Frage 3 von 3",
+    "No worries. It's all in Beyond™ TV Settings, whenever you like.": "Kein Problem. Alles findest du jederzeit in den Beyond™ TV Einstellungen.",
     // Who's watching: warm notes and grown-ups' own PINs (warm.js, profiles.js, ADR 0066)
     "Type your PIN, or allow it from your phone.": "Gib deine PIN ein oder erlaube es am Handy.",
     "Type your PIN.": "Gib deine PIN ein.",
@@ -992,6 +1016,30 @@ var I18N = (function () {
   }
 
   var russian = {
+    // Getting started (setup.js, ADR 0075)
+    "Kia ora! Let's get your TV ready.": "Kia ora! Давайте настроим телевизор.",
+    "Three quick questions. Just use the arrows and OK on your remote.": "Три коротких вопроса. Просто используйте стрелки и OK на пульте.",
+    "Let's go": "Начнём",
+    "Where do you live?": "Где вы живёте?",
+    "For your weather and tonight's sky. Pick the closest one.": "Для погоды и ночного неба. Выберите ближайший город.",
+    "Somewhere else": "В другом месте",
+    "No worries: we'll go by the TV's time zone.": "Ничего страшного: город определим по часовому поясу телевизора.",
+    "Who watches this TV?": "Кто смотрит этот телевизор?",
+    "With kids, everyone gets their own home screen, and kids only see apps for their age.": "С детьми у каждого свой главный экран, а дети видят только приложения для своего возраста.",
+    "Just grown-ups": "Только взрослые",
+    "Grown-ups and kids": "Взрослые и дети",
+    "A te reo Māori word each day?": "Слово на те рео маори каждый день?",
+    "A new word on the home screen every day, the same on every TV in the house.": "Каждый день новое слово на главном экране, одно и то же на всех телевизорах в доме.",
+    "Yes please": "Да, пожалуйста",
+    "All set! Now, could you drop Sky?": "Готово! А можно ли отказаться от Sky?",
+    "Point your phone's camera at the code. In two minutes you'll see which of your shows are free or cheaper without Sky.": "Наведите камеру телефона на код. За две минуты вы увидите, какие ваши передачи бесплатны или дешевле без Sky.",
+    "Or open ": "Или откройте ",
+    "Add the family": "Добавить семью",
+    "Show my home screen": "На главный экран",
+    "Question 1 of 3": "Вопрос 1 из 3",
+    "Question 2 of 3": "Вопрос 2 из 3",
+    "Question 3 of 3": "Вопрос 3 из 3",
+    "No worries. It's all in Beyond™ TV Settings, whenever you like.": "Ничего страшного. Всё это есть в настройках Beyond™ TV.",
     // Who's watching: warm notes and grown-ups' own PINs (warm.js, profiles.js, ADR 0066)
     "Type your PIN, or allow it from your phone.": "Введи свой PIN или разреши с телефона.",
     "Type your PIN.": "Введи свой PIN.",

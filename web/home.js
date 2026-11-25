@@ -1794,7 +1794,10 @@
     continueFirst();
     renderAll();
     Data.refresh();
-    if (Profiles.count() > 1) Profiles.pick(false, profileChosen);
+    // A new TV: Getting started first (setup.js, ADR 0075), once. A new town reloads, so the weather and sky follow it.
+    if (Setup.due()) Setup.start(function (moved) { if (moved) location.reload(); });
+    else if (Setup.people()) Profiles.pick(true, profileChosen);
+    else if (Profiles.count() > 1) Profiles.pick(false, profileChosen);
     else setTimeout(Morning.maybe, 1500);   // the Morning board, first thing (morning.js, ADR 0069)
   });
   Checkin.start();

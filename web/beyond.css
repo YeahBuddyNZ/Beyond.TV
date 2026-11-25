@@ -578,3 +578,20 @@
 .bt-pick.focus { -webkit-transform: translateY(-8px) scale(1.06); transform: translateY(-8px) scale(1.06); }
 .bt-pick.focus .img { box-shadow: 0 0 0 5px #F7F6F2, 0 24px 50px rgba(0, 0, 0, 0.6); }
 .bt-pick.focus .why { display: block; }
+
+/* MARK: - Getting started (setup.js, ADR 0075): big buttons that read from the couch */
+
+.bt-setup .bt-setup-box { position: absolute; left: 140px; right: 140px; top: 80px; text-align: center; }
+.bt-setup-icon { font-size: 104px; line-height: 1.1; }
+.bt-setup-of { margin-top: 14px; font-size: 28px; font-weight: 600; color: rgba(247, 246, 242, 0.6); }
+.bt-setup-title { margin-top: 14px; font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 68px; font-weight: 700; letter-spacing: -0.015em; }
+.bt-setup-sub { margin: 22px auto 44px; max-width: 1400px; font-size: 36px; line-height: 1.35; color: rgba(247, 246, 242, 0.86); }
+.bt-setup .bt-button.big { height: 116px; line-height: 116px; padding: 0 56px; border-radius: 58px; font-size: 40px; margin: 0 14px; }
+.bt-setup-towns { width: 1640px; margin: -18px auto 14px; }
+.bt-setup .bt-button.town { width: 376px; height: 92px; line-height: 92px; border-radius: 46px; margin: 8px 10px; padding: 0; font-size: 33px; text-align: center; overflow: hidden; }
+.bt-setup-sky { display: -webkit-box; display: -webkit-flex; display: flex; -webkit-box-align: center; -webkit-align-items: center; align-items: center; margin-top: 90px; text-align: left; }
+.bt-setup-words { -webkit-box-flex: 1; -webkit-flex: 1; flex: 1; }
+.bt-setup-sky .bt-setup-sub { margin: 28px 0 0; }
+.bt-setup-address { margin: 24px 0 48px; font-size: 32px; font-weight: 500; color: rgba(247, 246, 242, 0.65); }
+.bt-setup-sky .bt-button.big { margin: 0; }
+.bt-setup-qr { width: 460px; height: 460px; margin-left: 80px; border-radius: 20px; }

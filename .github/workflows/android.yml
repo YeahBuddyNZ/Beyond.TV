@@ -60,6 +60,7 @@ jobs:
           java -cp out/family-test nz.gobeyond.tv.TidyDaysTest
           java -cp out/family-test nz.gobeyond.tv.WarmNotesTest
           node tests/warm.test.js
+          node tests/setup.test.js
       - name: Signing key
         env:
           KEYSTORE: ${{ secrets.ANDROID_KEYSTORE }}
