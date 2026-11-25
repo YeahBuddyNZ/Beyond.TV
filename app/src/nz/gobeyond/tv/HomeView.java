@@ -586,6 +586,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         if (Family.linked(getContext())) lightButtons.add(HomeApps.action(HomeApps.WALL, "wall", Ui.tr("Mural da família", "Family wall", "Muro de la familia"), "check"));
         // The Morning board (ADR 0069): today's to-dos, calendar and weather for the house. Linked to Beyond Family only.
         if (Family.linked(getContext())) lightButtons.add(HomeApps.action(HomeApps.MORNING, "morning", Ui.tr("Hoje", "Today", "Hoy"), "sunny"));
+        // Our week, the Sunday family recap (ADR 0077): on Sundays, and Monday mornings for the week just gone.
+        if (WeekRecap.button(java.util.Calendar.getInstance())) lightButtons.add(HomeApps.action(HomeApps.WEEK, "week", Ui.tr("Nossa semana", "Our week", "Nuestra semana"), "star"));
         // Notes left from a phone in Beyond Family (ADR 0025): the button is there while any are up, and opens them big.
         notesShown = hasNotes();
         if (notesShown) lightButtons.add(HomeApps.action(HomeApps.NOTES, "notes", Ui.tr("Bilhetes", "Notes", "Notas"), "bell"));
@@ -2580,6 +2582,10 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         }
         if (it.kind == HomeApps.MORNING) {
             TableActivity.open(activity, "morning");
+            return;
+        }
+        if (it.kind == HomeApps.WEEK) {
+            TableActivity.open(activity, "week");
             return;
         }
         if (it.kind == HomeApps.GAMES) {

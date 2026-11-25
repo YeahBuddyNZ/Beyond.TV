@@ -423,6 +423,7 @@ final class Russian {
             case "Movie night": return "Вечер кино";
             case "TV and sound on, lights down": return "Телевизор и звук включены, свет приглушён";
             case "Morning": return "Утро";
+            case "Our week": return "Наша неделя";
             case "Lights up": return "Свет включён";
             case "Bedtime": return "Пора спать";
             case "Screens and lights off": return "Экраны и свет выключены";
