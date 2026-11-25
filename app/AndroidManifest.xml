@@ -433,7 +433,7 @@
             android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|density|fontScale|locale|layoutDirection"
             android:theme="@style/BeyondTV.Home" />
 
-        <!-- What's new (ADR 0075): the last few things on Beyond TV, from Shortcuts in the drawer. -->
+        <!-- What's new (ADR 0076): the last few things on Beyond TV, from Shortcuts in the drawer. -->
         <activity
             android:name=".WhatsNewActivity"
             android:process=":home"

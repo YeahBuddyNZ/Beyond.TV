@@ -375,6 +375,7 @@ var Guides = (function () {
 
   /** One guide, a page at a time. done() runs when it closes. */
   function show(id, done) {
+    id = guideOf(id);
     var guide = GUIDES[id];
     if (!guide) { if (done) done(); return; }
     var at = 0, next = null;
@@ -432,7 +433,101 @@ var Guides = (function () {
     });
   }
 
-  return {show: show, list: list, has: function (id) { return !!GUIDES[id]; }, name: nameOf,
+  /*
+   * Kea the coach (ADR 0075): the chess coach's robot, now beside every game. The first time a game starts on this TV,
+   * Kea offers its guide before the game (Show me how, or Let's play). After that, at most once a day per game, Kea
+   * says one of the guide's top tips as the game starts. Which games Kea has met is kept on the TV only: on Google TV
+   * in the app's settings (BeyondTable.coached, so the native games know too), elsewhere in localStorage.
+   */
+  var KEA = ['Kea, o treinador', 'Kea the coach', 'Kea, el entrenador', 'Kea, der Trainer', 'Кеа, тренер'];
+  var FIRST = ['Primeira vez jogando %s?', 'First time playing %s?', '¿Primera vez jugando a %s?', 'Zum ersten Mal %s?', 'Впервые играете в «%s»?'];
+  var OFFER = ['Eu mostro como se joga em mais ou menos um minuto, com o controle.', 'I can show you how it works in about a minute, with the remote.', 'Te enseño cómo se juega en más o menos un minuto, con el mando.', 'Ich zeige dir in etwa einer Minute, wie es geht, mit der Fernbedienung.', 'Покажу, как играть, примерно за минуту, с пультом.'];
+  var SHOW_ME = ['Mostre como', 'Show me how', 'Enséñame', 'Zeig es mir', 'Покажи как'];
+  var PLAY = ['Vamos jogar', 'Let\'s play', 'A jugar', 'Los geht\'s', 'Играем'];
+  var LATER = ['Está sempre em Jogos › Como jogar, e no próprio jogo.', 'It\'s always under Games › How to play, and in the game itself.', 'Siempre está en Juegos › Cómo jugar, y en el propio juego.', 'Du findest es immer unter Spiele › Wie man spielt und im Spiel selbst.', 'Это всегда есть в «Игры › Как играть» и в самой игре.'];
+  var TIP = ['Dica do Kea: ', 'Kea\'s tip: ', 'Consejo de Kea: ', 'Keas Tipp: ', 'Совет Кеа: '];
+
+  /** The guide behind a Games tile: most share the id, the dinner question's guide is "question". */
+  var ALIAS = {dinner: 'question'};
+  function guideOf(id) { id = ALIAS[id] || id; return GUIDES[id] ? id : ''; }
+
+  var bridge = window.BeyondTable && window.BeyondTable.coached ? window.BeyondTable : null;
+  function store() {
+    try { return JSON.parse(window.localStorage.getItem('bt.coach') || '{}') || {}; } catch (e) { return {}; }
+  }
+  function save(s) { try { window.localStorage.setItem('bt.coach', JSON.stringify(s)); } catch (e) { /* private mode */ } }
+  function met(id) {
+    if (bridge) return bridge.coached(id);
+    return !!store()[id];
+  }
+  function meet(id) {
+    if (bridge) { bridge.setCoached(id); return; }
+    var s = store(); s[id] = s[id] || today(); save(s);
+  }
+  function today() { var d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
+
+  /** The tips Kea picks from: the guide's Top tips page, else its last page. */
+  function tips(id) {
+    var g = GUIDES[guideOf(id)];
+    if (!g) return [];
+    for (var i = 0; i < g.pages.length; i++) if (g.pages[i].title === TIPS) return g.pages[i].lines;
+    return g.pages[g.pages.length - 1].lines;
+  }
+  /** One tip in the TV's language, a different one each day (n picks it, for the tests). */
+  function tip(id, n) {
+    var t = tips(id);
+    if (!t.length) return '';
+    if (n === undefined) { var d = new Date(); n = d.getFullYear() * 372 + d.getMonth() * 31 + d.getDate(); }
+    return L(TIP) + L(t[n % t.length]);
+  }
+
+  /** Kea's first-time card. go() starts the game; Back leaves without playing. */
+  function offer(id, go) {
+    var gid = guideOf(id), guide = GUIDES[gid], chosen = null;
+    UI.open({
+      cls: 'bt-guide bt-coach',
+      build: function (layer, a) {
+        var box = UI.el('div', 'gd-box', layer);
+        UI.el('div', 'sun', box, '🦜');
+        UI.el('div', 'gd-game', box, L(KEA));
+        UI.heading(box, L(FIRST).replace('%s', L(guide.name)), L(OFFER));
+        var row = UI.el('div', 'bt-buttons', box);
+        a.add(UI.button(row, '📖  ' + L(SHOW_ME), null, 'primary'), function () { chosen = 'show'; a.close(); }, {first: true});
+        a.add(UI.button(row, '▶  ' + L(PLAY)), function () { chosen = 'play'; a.close(); });
+        UI.el('div', 'gd-help', box, L(LATER));
+      },
+      closed: function () {
+        if (!chosen) return;
+        meet(gid);
+        if (chosen === 'show') show(gid, go); else go();
+      }
+    });
+  }
+
+  /**
+   * Starts a game with Kea beside it: the first time, the offer; after that, today's tip (once a day per game).
+   * Games without a guide just start.
+   */
+  function coach(id, go) {
+    var gid = guideOf(id);
+    if (!gid) { go(); return; }
+    if (!met(gid)) { offer(gid, go); return; }
+    go();
+    var s = store(), key = 'tip:' + gid;
+    if (s[key] === today()) return;
+    s[key] = today(); save(s);
+    var t = tip(gid);
+    if (t) UI.toast(t);
+  }
+
+  /** A How to play button in a game's own screen (a = the screen's api, row = where it goes). */
+  function button(a, row, id) {
+    var gid = guideOf(id);
+    if (!gid) return null;
+    return a.add(UI.button(row, '📖  ' + L(['Como jogar', 'How to play', 'Cómo jugar', 'Wie man spielt', 'Как играть'])), function () { show(gid); });
+  }
+
+  return {show: show, list: list, has: function (id) { return !!guideOf(id); }, name: nameOf, coach: coach, tip: tip, button: button,
     // For the tests.
-    all: GUIDES, order: ORDER};
+    all: GUIDES, order: ORDER, guideOf: guideOf, met: met};
 })();

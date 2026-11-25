@@ -15,7 +15,7 @@ import android.widget.TextView;
 import java.util.List;
 
 /**
- * What's new (ADR 0075): the last six things on Beyond TV, newest first, each with its date. From Shortcuts in the
+ * What's new (ADR 0076): the last six things on Beyond TV, newest first, each with its date. From Shortcuts in the
  * drawer. Got it or Back closes it; opening it counts as seen, so the "New: ..." line leaves Today at home.
  * Same screen as open() in web/whatsnew.js.
  */

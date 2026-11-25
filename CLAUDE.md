@@ -161,10 +161,12 @@ Moved to `docs/history/sections.md` (section "Adapting it to another TV"). Read 
   Only art we made or own: free downloads from other studios are usually personal use only (Small Lily Studio's are).
 - How to play (`web/guides.js`, ADR 0043): every game has a guide (the aim, the remote, the rules, tips) in all five
   languages. A new game adds its guide and its id in `ORDER` in the same change; `tests/learn.test.js` checks.
+  Kea the coach (ADR 0075) offers it the first time a game starts (`Guides.coach`, in `played` in games.js,
+  table-host.js and `GamesActivity.coachFirst` for native games) and a tip a day after; a new game gets both.
 - Screen time (`ScreenTime.java`, `ScreenTimeService`, `web/screentime.js`, ADR 0060) and karaoke Take turns
   (`KaraokeTurns.java`, `web/karaoke.js`, ADR 0059) are twins: change one, change both. Family photos (`PhotoDrop`,
   `FamilyPhotos`, `PhotosActivity`, ADR 0061) are Android only; the TV listens only while that screen is open.
-- What's new (`docs/whats-new.json` on GitHub Pages, `web/whatsnew.js`, `WhatsNew.java`, ADR 0075): every feature people
+- What's new (`docs/whats-new.json` on GitHub Pages, `web/whatsnew.js`, `WhatsNew.java`, ADR 0076): every feature people
   can see adds a line there (newest first, all five languages) in the same PR; `tests/whatsnew.test.js` checks it.
 - Te reo word of the day: `web/kupu.js` and `Kupu.java` hold the same list and pick by the same local day, so every
   TV in a house shows the same kupu. Change one, change both. On Android it leads the quotes row (`HomeView.kupuFor`,

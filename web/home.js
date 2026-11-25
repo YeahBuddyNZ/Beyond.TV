@@ -742,7 +742,7 @@
       var notes = b.notes || [];
       for (var n = 0; n < notes.length; n++) rows.push(['💬', notes[n].text, notes[n].from]);
     }
-    // The newest thing on Beyond TV, until someone opens What's new (whatsnew.js, ADR 0075).
+    // The newest thing on Beyond TV, until someone opens What's new (whatsnew.js, ADR 0076).
     var news = window.WhatsNew ? WhatsNew.row() : null;
     if (news) rows.push(news);
     var w = Data.weather;
@@ -1808,7 +1808,7 @@
   function hearBeyond() { Checkin.hear(function (text) { toast('Beyond: ' + text); }); }
   hearBeyond();
   setInterval(hearBeyond, 10 * 60 * 1000 + 5000);
-  // What's new: the list from GitHub Pages, at most twice a day (whatsnew.js, ADR 0075).
+  // What's new: the list from GitHub Pages, at most twice a day (whatsnew.js, ADR 0076).
   WhatsNew.load(renderTonight);
   setInterval(function () { WhatsNew.load(renderTonight); }, 3600000 + 7000);
   Profiles.onChange(function () { renderTop(); paintWorld(); renderCards(); renderTonight(); updateFocus(); jobsChanged(); });

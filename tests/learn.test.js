@@ -117,5 +117,57 @@ var russian = strings.slice(strings.indexOf('var russian'));
   }
 });
 
+// Kea the coach (ADR 0075): every game on the Games screen (web and Google TV) has a guide, or is a shelf of games
+// with its own How to play inside.
+var SHELVES = ['table', 'silly', 'arcade', 'guides'];
+var gamesJs = fs.readFileSync(path.join(__dirname, '..', 'web', 'games.js'), 'utf8');
+var gamesJava = fs.readFileSync(path.join(__dirname, '..', 'app', 'src', 'nz', 'gobeyond', 'tv', 'GamesActivity.java'), 'utf8');
+var tiles = [], tm, tre = /\[\s*'(\w+)', tr\(/g;
+while ((tm = tre.exec(gamesJs))) tiles.push(tm[1]);
+var jre = /\{"(\w+)", Ui\.tr\(/g;
+while ((tm = jre.exec(gamesJava))) if (tiles.indexOf(tm[1]) < 0) tiles.push(tm[1]);
+check('found the Games tiles', tiles.length >= 19);
+tiles.forEach(function (id) { check('Kea has a guide for ' + id, SHELVES.indexOf(id) >= 0 || Guides.has(id)); });
+var native = /NATIVE = [^(]*\(java\.util\.Arrays\.asList\(([^)]*)\)/.exec(gamesJava)[1].match(/"(\w+)"/g).map(function (q) { return q.slice(1, -1); });
+native.forEach(function (id) { check('native ' + id + ' has a guide', Guides.has(id)); });
+check('the dinner question uses the question guide', Guides.guideOf('dinner') === 'question');
+
+// Every guide has tips for Kea, and today's tip changes with the day.
+Object.keys(Guides.all).forEach(function (id) {
+  check(id + ' has a tip', /^Kea's tip: ./.test(Guides.tip(id, 0)));
+});
+check('tips turn over', Guides.tip('ludo', 0) !== Guides.tip('ludo', 1));
+
+// First time: Kea offers the guide and the game waits; Let's play starts it; after that it starts at once, with
+// one tip a day.
+var opened = [], toasts = [];
+sandbox.UI.open = function (o) {
+  var adds = [], api = {add: function (n, fn) { adds.push(fn); return n; }, close: function () { if (o.closed) o.closed(); }, rebuild: function () {}, focusNode: function () {}};
+  o.build({}, api);
+  opened.push({cls: o.cls, adds: adds, api: api});
+  return api;
+};
+sandbox.UI.el = function () { return {style: {}}; };
+sandbox.UI.heading = function () {};
+sandbox.UI.button = function () { return {}; };
+sandbox.UI.toast = function (t) { toasts.push(t); };
+var played = 0;
+Guides.coach('tidy', function () { played++; });
+check('first time, Kea asks before the game', played === 0 && opened.length === 1 && /bt-coach/.test(opened[0].cls));
+opened[0].adds[1]();
+check("Let's play starts the game", played === 1 && Guides.met('tidy'));
+Guides.coach('tidy', function () { played++; });
+check('second time it starts at once', played === 2 && opened.length === 1);
+check('a tip the first day back', toasts.length === 1 && /^Kea's tip: /.test(toasts[0]));
+Guides.coach('tidy', function () { played++; });
+check('only one tip a day', played === 3 && toasts.length === 1);
+Guides.coach('dinner', function () { played++; });
+opened[1].adds[0]();
+check('Show me how opens the guide, then the game', opened.length === 3 && /bt-guide/.test(opened[2].cls) && played === 3);
+opened[2].api.close();
+check('the game starts after the guide', played === 4 && Guides.met('question'));
+Guides.coach('table', function () { played++; });
+check('a shelf of games starts at once', played === 5);
+
 console.log(passed + ' passed, ' + failed + ' failed');
 process.exit(failed ? 1 : 0);

@@ -147,6 +147,15 @@ final class Prefs {
     static void setKupu(boolean on) { put("kupu", on); }
 
     /** The Morning board opens by itself the first time each morning (ADR 0069); its own button turns that off. */
+    /** Kea the coach (web/guides.js, ADR 0075): whether this TV has already offered a game's guide, by guide id. */
+    static boolean coached(String id) { return ("," + sp().getString("coached", "") + ",").contains("," + id + ","); }
+    static void setCoached(String id) {
+        if (id == null || id.isEmpty() || id.contains(",") || coached(id)) return;
+        String was = sp().getString("coached", "");
+        // Not put(): this mustn't bump version and rebuild the home screen.
+        sp().edit().putString("coached", was.isEmpty() ? id : was + "," + id).apply();
+    }
+
     static boolean morningAuto() { return sp().getBoolean("morningAuto", true); }
     static void setMorningAuto(boolean on) { put("morningAuto", on); }
     /** The day (YYYY-MM-DD) the Morning board last opened by itself. */

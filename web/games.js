@@ -68,7 +68,8 @@ var Games = (function () {
               var pic = UI.el('div', 'gh-pic', tile);
               pic.style.backgroundImage = 'url(games/' + game[0] + '.jpg)';
               UI.el('div', 'gh-label', tile, game[1]);
-              var run = typeof game[2] === 'string' ? function () { family(game[2], a); } : played(game);
+              // Kea the coach comes first: the guide the first time, a tip after that (guides.js, ADR 0075).
+              var run = typeof game[2] === 'string' ? function () { coached(game[0], function () { family(game[2], a); }); } : played(game);
               a.add(tile, run, {first: first});
               first = false;
             })(all[g].games[i]);
@@ -97,8 +98,14 @@ var Games = (function () {
   function played(game) {
     return function () {
       if (game[0] !== 'guides' && window.Watched) Watched.add({app: 'beyond:game:' + game[0], name: game[1]});
-      game[2]();
+      coached(game[0], game[2]);
     };
+  }
+
+  /** Starts a game with Kea the coach beside it (Guides.coach); quiz night and the dinner question only once linked. */
+  function coached(id, go) {
+    if ((id === 'quiz' || id === 'dinner') && !linked()) { go(); return; }
+    if (window.Guides && Guides.coach) Guides.coach(id, go); else go();
   }
 
   /** Continue on the home screen: the Games screen, with that game open on top of it. False if there's no such game. */

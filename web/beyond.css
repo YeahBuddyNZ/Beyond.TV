@@ -579,7 +579,7 @@
 .bt-pick.focus .img { box-shadow: 0 0 0 5px #F7F6F2, 0 24px 50px rgba(0, 0, 0, 0.6); }
 .bt-pick.focus .why { display: block; }
 
-/* What's new (web/whatsnew.js, ADR 0075): the last few things, newest first, one button to close. */
+/* What's new (web/whatsnew.js, ADR 0076): the last few things, newest first, one button to close. */
 .bt-news .box { position: absolute; left: 200px; top: 64px; width: 1520px; }
 .bt-news .list { margin: 30px 0 30px; }
 .bt-news .item { position: relative; padding: 12px 0 14px 190px; border-top: 1px solid rgba(247, 246, 242, 0.12); }

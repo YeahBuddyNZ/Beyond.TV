@@ -115,7 +115,7 @@ var I18N = (function () {
     "Paid, only from Sky": "Kostenpflichtig, nur bei Sky",
     "For sport without a Sky box: Sky Sport Now.": "Für Sport ohne Sky-Box: Sky Sport Now.",
     "Got it": "Verstanden",
-    // What's new (whatsnew.js, ADR 0075)
+    // What's new (whatsnew.js, ADR 0076)
     "New": "Neu",
     "What's new": "Was gibt's Neues",
     "The newest things on your TV.": "Das Neueste auf deinem Fernseher.",
@@ -1104,7 +1104,7 @@ var I18N = (function () {
     "Paid, only from Sky": "Платно, только у Sky",
     "For sport without a Sky box: Sky Sport Now.": "Спорт без приставки Sky: Sky Sport Now.",
     "Got it": "Понятно",
-    // What's new (whatsnew.js, ADR 0075)
+    // What's new (whatsnew.js, ADR 0076)
     "New": "Новое",
     "What's new": "Что нового",
     "The newest things on your TV.": "Самое новое на вашем телевизоре.",

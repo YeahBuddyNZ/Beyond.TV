@@ -11,7 +11,7 @@ import java.util.Calendar;
 import java.util.List;
 
 /**
- * What's new (ADR 0075): docs/whats-new.json on GitHub Pages, the newest thing first. The home screen says the newest
+ * What's new (ADR 0076): docs/whats-new.json on GitHub Pages, the newest thing first. The home screen says the newest
  * one in Today at home until someone opens What's new (WhatsNewActivity, in the drawer's shortcuts), for three weeks
  * at most. Fetched at most twice a day, off the UI thread, and kept for when the internet is down. Nothing is sent.
  * Same rules as web/whatsnew.js (tests/whatsnew.test.js).

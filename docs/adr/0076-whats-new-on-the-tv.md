@@ -1,4 +1,4 @@
-# 0075. What's new: the newest feature on the home screen, from one list on the website
+# 0076. What's new: the newest feature on the home screen, from one list on the website
 
 Date: 25/11/2026. Status: accepted.
 

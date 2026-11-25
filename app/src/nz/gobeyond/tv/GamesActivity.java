@@ -95,7 +95,10 @@ public class GamesActivity extends Activity {
                 final boolean keep = !"guides".equals(id) && !"quiz".equals(id) && !"dinner".equals(id);
                 final Runnable run = () -> {
                     if (keep) Watched.add(this, "beyond:game:" + id, label, "", "", "");
-                    game.run();
+                    // Kea the coach (ADR 0075): the first time, a native game's guide is offered first (the
+                    // WebView ones get Kea in table-host.js).
+                    if (coachFirst(this, id)) TableActivity.open(this, "coach:" + id);
+                    else game.run();
                 };
                 tile.setOnClickListener(v -> run.run());
                 if (keep && id.equals(want)) resume = run;
@@ -179,6 +182,21 @@ public class GamesActivity extends Activity {
                         {"bedtime", Ui.tr("Hora de dormir", "Bedtime", "Hora de dormir"), (Runnable) () -> BedtimeActivity.open(a, 0)}},
         };
     }
+
+    /** The games drawn natively rather than in TableActivity's WebView: Kea the coach's offer goes in front of these here. */
+    static final java.util.Set<String> NATIVE = new java.util.HashSet<>(java.util.Arrays.asList("karaoke", "party", "quiz", "dinner", "tidy", "bedtime"));
+
+    /** The guide for a game in web/guides.js: the dinner question's is "question", the rest share the id. */
+    static String guideOf(String id) { return "dinner".equals(id) ? "question" : id; }
+
+    /** True the first time a native game starts on this TV (quiz night and the dinner question only once linked). */
+    static boolean coachFirst(Context c, String id) {
+        if (!NATIVE.contains(id) || Prefs.coached(guideOf(id))) return false;
+        return !("quiz".equals(id) || "dinner".equals(id)) || Family.linked(c);
+    }
+
+    /** Opens a native game's How to play (web/guides.js) from its own screen. */
+    static void howToPlay(Context c, String id) { TableActivity.open(c, "guide:" + guideOf(id)); }
 
     /** Opens one game by its id from `a`; false when there's no such game. */
     static boolean start(Activity a, String id) {

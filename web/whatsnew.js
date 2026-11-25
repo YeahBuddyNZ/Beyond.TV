@@ -1,5 +1,5 @@
 /*
- * What's new (ADR 0075): the newest thing on Beyond TV, said once on the home screen, and a short list of the last few.
+ * What's new (ADR 0076): the newest thing on Beyond TV, said once on the home screen, and a short list of the last few.
  *
  * The list is docs/whats-new.json on GitHub Pages, newest first, the same list the website's feature check keeps up
  * to date, so a new feature reaches every TV without an update. It is fetched at most twice a day and kept on the TV

@@ -1,4 +1,4 @@
-// What's new (web/whatsnew.js, WhatsNew.java, ADR 0075) without a screen: the list in docs/whats-new.json and the
+// What's new (web/whatsnew.js, WhatsNew.java, ADR 0076) without a screen: the list in docs/whats-new.json and the
 // rule for when the home screen says "New: ...".
 // node tests/whatsnew.test.js
 'use strict';

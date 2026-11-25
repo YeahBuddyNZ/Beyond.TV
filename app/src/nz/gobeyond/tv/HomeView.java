@@ -3662,7 +3662,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         String[] wallRow = linked ? Family.wallRow(watcher) : null;
         if (wallRow != null) rows.add(wallRow);
         if (board != null) boardRows(board, rows);
-        // The newest thing on Beyond TV, until someone opens What's new (WhatsNew, ADR 0075). Fetched off the UI thread.
+        // The newest thing on Beyond TV, until someone opens What's new (WhatsNew, ADR 0076). Fetched off the UI thread.
         WhatsNew.refresh(ctx);
         String[] news = WhatsNew.row(ctx);
         if (news != null) rows.add(news);

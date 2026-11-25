@@ -764,6 +764,7 @@ var Family = (function () {
           a.add(UI.button(row, tr('Terminar', 'Finish', 'Terminar')), function () { play('question', 'end'); }, {first: first});
           first = false;
         }
+        if (window.Guides) Guides.button(a, row, 'question');
         a.add(UI.button(row, tr('Fechar', 'Close', 'Cerrar')), function () { a.close(); }, {first: first});
       },
       closed: function () { askApi = null; }
@@ -846,6 +847,7 @@ var Family = (function () {
             function () { step(game.answer < 0 ? 'reveal' : 'next'); }, {first: true});
           a.add(UI.button(row, tr('Terminar o quiz', 'Finish the quiz', 'Terminar el quiz')), function () { step('end'); });
         }
+        if (window.Guides) Guides.button(a, row, 'quiz');
         a.add(UI.button(row, tr('Fechar', 'Close', 'Cerrar')), function () { a.close(); }, {first: !on});
       },
       closed: function () { gameApi = null; if (game && game.done) game = null; }
