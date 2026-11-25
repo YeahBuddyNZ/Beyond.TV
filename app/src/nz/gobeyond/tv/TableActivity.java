@@ -37,7 +37,7 @@ import java.nio.charset.StandardCharsets;
 public class TableActivity extends Activity {
     static void open(Context c) { open(c, null); }
 
-    /** start: "silly" opens the silly games (web/laughs.js), "lunch" school lunches (web/lunch.js), "arcade" the arcade (web/arcade.js), "rcland" Milo's Remote Control Land (web/rcland.js), "candy" London's Candy Land (web/candy.js), "road" Build a road, "bridge" Build a bridge and "town" Plan a town (web/builder.js), "chores" Daily chores (web/chores.js), "wall" the family wall and to-dos (web/wall.js), "morning" the Morning board (web/morning.js), "scores" the family scoreboard (web/scores.js), "sky" Look around (web/skylook.js), "lights" the light show (web/lights.js) and "guides" How to play (web/guides.js), rather than the board and card games. */
+    /** start: "silly" opens the silly games (web/laughs.js), "lunch" school lunches (web/lunch.js), "arcade" the arcade (web/arcade.js), "rcland" Milo's Remote Control Land (web/rcland.js), "candy" London's Candy Land (web/candy.js), "road" Build a road, "bridge" Build a bridge and "town" Plan a town (web/builder.js), "chores" Daily chores (web/chores.js), "wall" the family wall and to-dos (web/wall.js), "morning" the Morning board (web/morning.js), "week" Our week, the Sunday family recap (web/week.js), "scores" the family scoreboard (web/scores.js), "sky" Look around (web/skylook.js), "lights" the light show (web/lights.js) and "guides" How to play (web/guides.js), rather than the board and card games. */
     static void open(Context c, String start) {
         c.startActivity(new Intent(c, TableActivity.class).putExtra("start", start).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
@@ -59,6 +59,24 @@ public class TableActivity extends Activity {
             Prefs.setMorningShown(today);
             open(home, "morning");
         }, 1500);
+    }
+
+    /**
+     * Our week (web/week.js, ADR 0075) opens by itself the first time the home screen shows on a Sunday between 4 and 9
+     * at night, once a week, when there's a family here (more than one person, or Beyond Family) and nobody turned it
+     * off. WeekRecap holds the rule, the twin of Week.rules.due. Called from HomeActivity.onResume.
+     */
+    static void maybeWeek(Activity home) {
+        java.util.Calendar now = java.util.Calendar.getInstance();
+        boolean family = People.list(home).size() > 1 || Family.linked(home);
+        if (!WeekRecap.due(now, Prefs.weekAuto(), Prefs.weekShown(), family)) return;
+        String week = WeekRecap.weekOf(now);
+        // A moment later, and only if the home screen is still in front: Who's watching comes first.
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+            if (!ScreenTimeService.homeInFront || home.isFinishing() || week.equals(Prefs.weekShown())) return;
+            Prefs.setWeekShown(week);
+            open(home, "week");
+        }, 1800);
     }
 
     /** The screen showing Look around, if there is one: a phone's compass (Family, ADR 0040) turns its view. */
@@ -148,7 +166,7 @@ public class TableActivity extends Activity {
                 try {
                     out.put(new JSONObject().put("id", p.id).put("name", p.name == null ? "" : p.name)
                             .put("emoji", p.emoji == null ? "" : p.emoji).put("colour", String.format("#%06X", p.colour & 0xFFFFFF))
-                            .put("kid", p.kid).put("teen", p.teen));
+                            .put("kid", p.kid).put("teen", p.teen).put("parent", p.parent == null ? "" : p.parent));
                 } catch (JSONException ignored) {
                 }
             }
@@ -193,6 +211,23 @@ public class TableActivity extends Activity {
 
         /** The Morning board's Show it each morning. */
         @JavascriptInterface public void morningAuto(boolean on) { Prefs.setMorningAuto(on); }
+
+        /**
+         * Our week (web/week.js, ADR 0075): the household's name and up to four of the family's own photos that came
+         * in since the week began, small, as data the page shows. They never leave the TV.
+         */
+        @JavascriptInterface public String week(double since) {
+            JSONObject out = new JSONObject();
+            try {
+                out.put("home", Family.linked(TableActivity.this) ? Family.homeName(TableActivity.this) : "");
+                out.put("photos", FamilyPhotos.since(TableActivity.this, (long) since, 4));
+            } catch (JSONException ignored) {
+            }
+            return out.toString();
+        }
+
+        /** Our week's Show it on Sundays. */
+        @JavascriptInterface public void weekAuto(boolean on) { Prefs.setWeekAuto(on); }
 
         /** Which games to open: "silly" for the silly games, "arcade" for the arcade, otherwise the board and card games. */
         @JavascriptInterface public String start() {

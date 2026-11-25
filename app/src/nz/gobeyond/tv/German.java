@@ -425,6 +425,7 @@ final class German {
             case "Movie night": return "Filmabend";
             case "TV and sound on, lights down": return "Fernseher und Ton an, Licht gedimmt";
             case "Morning": return "Morgen";
+            case "Our week": return "Unsere Woche";
             case "Lights up": return "Licht an";
             case "Bedtime": return "Schlafenszeit";
             case "Screens and lights off": return "Bildschirme und Licht aus";

@@ -76,6 +76,41 @@ final class FamilyPhotos {
         return out;
     }
 
+    /**
+     * The newest photos (not the drawings) that came in since a moment, at most n, each as a small JPEG data address
+     * for Our week (web/week.js, ADR 0075). Read here on the TV for the page on the TV; nothing is sent.
+     */
+    static org.json.JSONArray since(Context c, long since, int n) {
+        org.json.JSONArray out = new org.json.JSONArray();
+        File[] all = files(c);
+        for (int i = all.length - 1; i >= 0 && out.length() < n; i--) {
+            String name = all[i].getName();
+            if (!name.startsWith("p-")) continue;
+            long at;
+            try {
+                at = Long.parseLong(name.substring(2, name.length() - 4));
+            } catch (NumberFormatException e) {
+                continue;
+            }
+            if (at < since) break;
+            BitmapFactory.Options o = new BitmapFactory.Options();
+            o.inSampleSize = 4;   // 2112 x 1188 down to 528 x 297
+            Bitmap b = null;
+            try {
+                b = BitmapFactory.decodeFile(all[i].getAbsolutePath(), o);
+                if (b == null) continue;
+                java.io.ByteArrayOutputStream bytes = new java.io.ByteArrayOutputStream();
+                b.compress(Bitmap.CompressFormat.JPEG, 80, bytes);
+                out.put("data:image/jpeg;base64," + android.util.Base64.encodeToString(bytes.toByteArray(), android.util.Base64.NO_WRAP));
+            } catch (OutOfMemoryError e) {
+                break;
+            } finally {
+                if (b != null) b.recycle();
+            }
+        }
+        return out;
+    }
+
     static File readyImage(Recs.Pick p) {
         if (p.backdrop == null) return null;
         File f = new File(p.backdrop);

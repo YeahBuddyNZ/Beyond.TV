@@ -265,6 +265,8 @@
     if (Family.linked()) list.push({emoji: '\uD83D\uDCCC', label: tr('Mural da família', 'Family wall', 'Muro de la familia'), run: function () { Wall.open(); }});
     // The Morning board (morning.js, ADR 0069): today's to-dos, calendar and weather for the house. Linked only.
     if (Family.linked()) list.push({icon: 'sunny', label: tr('Hoje', 'Today', 'Hoy'), run: function () { Morning.open(); }});
+    // Our week, the Sunday family recap (week.js, ADR 0075): on Sundays, and Monday mornings for the week just gone.
+    if (Week.rules.button(Date.now())) list.push({icon: 'star', label: tr('Nossa semana', 'Our week', 'Nuestra semana'), run: function () { Week.open(); }});
     // Notes from the family, when there are any up: opens them big (notes.js).
     if (Notes.count()) list.push({emoji: '\uD83D\uDCDD', label: tr('Bilhetes', 'Notes', 'Notas'), run: function () { Notes.open(); }});
     // NZ election results, live (ADR 0039): on New Zealand TVs until 27/11/2026, then gone. Opens Beyond's results
@@ -1682,6 +1684,8 @@
     else if (me.kid) setTimeout(Pets.ask, 600);   // and have the pets been fed today?
     // The Morning board, first thing each morning (morning.js, ADR 0069). It waits while another question is up.
     setTimeout(Morning.maybe, 900);
+    // Our week, on a Sunday evening (week.js, ADR 0075).
+    setTimeout(Week.maybe, 1000);
     pickShelf();
     cards = [];
     continueFirst();
@@ -1767,7 +1771,7 @@
     hiddenAt = 0;
     if (longAway) Chime.play();
     if (longAway && Profiles.count() > 1) setTimeout(function () { Profiles.pick(false, profileChosen); }, 300);
-    else setTimeout(Morning.maybe, 600);
+    else { setTimeout(Morning.maybe, 600); setTimeout(Week.maybe, 700); }
     idleAt = Date.now();
     // Back from an app: what was just opened leads Keep watching. Back after hours away: the home screen opens on Continue.
     st.tab = 0;
@@ -1795,7 +1799,7 @@
     renderAll();
     Data.refresh();
     if (Profiles.count() > 1) Profiles.pick(false, profileChosen);
-    else setTimeout(Morning.maybe, 1500);   // the Morning board, first thing (morning.js, ADR 0069)
+    else { setTimeout(Morning.maybe, 1500); setTimeout(Week.maybe, 1600); }   // the Morning board (ADR 0069), Our week on Sundays (ADR 0075)
   });
   Checkin.start();
   if (window.HomeHub) HomeHub.start(homeChanged);
