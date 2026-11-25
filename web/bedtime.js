@@ -149,6 +149,7 @@ var Bedtime = (function () {
           a.close();
           start(pick.minutes, pick.sound);
         }, {first: true});
+        if (window.Guides) Guides.button(a, row, 'bedtime');
       },
       closed: function () {
         clearTimeout(previewEnd);
