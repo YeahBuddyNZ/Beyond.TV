@@ -7,7 +7,7 @@ var I18N = (function () {
 
   var lang = 'en';
   var german = {
-    // Getting started (setup.js, ADR 0077)
+    // Getting started (setup.js, ADR 0078)
     "Kia ora! Let's get your TV ready.": "Kia ora! Machen wir deinen Fernseher startklar.",
     "Three quick questions. Just use the arrows and OK on your remote.": "Drei kurze Fragen. Nimm einfach die Pfeile und OK auf der Fernbedienung.",
     "Let's go": "Los geht's",
@@ -328,6 +328,7 @@ var I18N = (function () {
     "Movie night": "Filmabend",
     "TV and sound on, lights down": "Fernseher und Ton an, Licht gedimmt",
     "Morning": "Morgen",
+    "Our week": "Unsere Woche",
     "Lights up": "Licht an",
     "Bedtime": "Schlafenszeit",
     "Screens and lights off": "Bildschirme und Licht aus",
@@ -1021,7 +1022,7 @@ var I18N = (function () {
   }
 
   var russian = {
-    // Getting started (setup.js, ADR 0077)
+    // Getting started (setup.js, ADR 0078)
     "Kia ora! Let's get your TV ready.": "Kia ora! Давайте настроим телевизор.",
     "Three quick questions. Just use the arrows and OK on your remote.": "Три коротких вопроса. Просто используйте стрелки и OK на пульте.",
     "Let's go": "Начнём",
@@ -1341,6 +1342,7 @@ var I18N = (function () {
     "Movie night": "Вечер кино",
     "TV and sound on, lights down": "Телевизор и звук включены, свет приглушён",
     "Morning": "Утро",
+    "Our week": "Наша неделя",
     "Lights up": "Свет включён",
     "Bedtime": "Пора спать",
     "Screens and lights off": "Экраны и свет выключены",

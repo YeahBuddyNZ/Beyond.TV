@@ -13,7 +13,7 @@ final class Russian {
 
     static String text(String english) {
         switch (english) {
-            // Getting started (ADR 0077)
+            // Getting started (ADR 0078)
             case "Kia ora! Let's get your TV ready.": return "Kia ora! Давайте настроим телевизор.";
             case "Three quick questions. Just use the arrows and OK on your remote.": return "Три коротких вопроса. Просто используйте стрелки и OK на пульте.";
             case "Let's go": return "Начнём";
@@ -447,6 +447,7 @@ final class Russian {
             case "Movie night": return "Вечер кино";
             case "TV and sound on, lights down": return "Телевизор и звук включены, свет приглушён";
             case "Morning": return "Утро";
+            case "Our week": return "Наша неделя";
             case "Lights up": return "Свет включён";
             case "Bedtime": return "Пора спать";
             case "Screens and lights off": return "Экраны и свет выключены";

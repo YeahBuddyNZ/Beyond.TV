@@ -587,7 +587,7 @@
 .bt-news .what { font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 34px; font-weight: 600; }
 .bt-news .more { margin-top: 6px; font-size: 26px; color: rgba(247, 246, 242, 0.7); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bt-news .empty { font-size: 30px; color: rgba(247, 246, 242, 0.7); }
-/* MARK: - Getting started (setup.js, ADR 0077): big buttons that read from the couch */
+/* MARK: - Getting started (setup.js, ADR 0078): big buttons that read from the couch */
 
 .bt-setup .bt-setup-box { position: absolute; left: 140px; right: 140px; top: 80px; text-align: center; }
 .bt-setup-icon { font-size: 104px; line-height: 1.1; }

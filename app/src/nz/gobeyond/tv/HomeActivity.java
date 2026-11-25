@@ -78,6 +78,8 @@ public class HomeActivity extends Activity implements Family.Screen {
             Family.screen = this;
             // The Morning board, first thing each morning (ADR 0069).
             TableActivity.maybeMorning(this);
+            // Our week, on a Sunday evening (ADR 0077).
+            TableActivity.maybeWeek(this);
             // Beyond Family changed who's here, or who's watching: draw again, as coming back from Settings does.
             Family.onChange = () -> {
                 if (prefsVersion != Prefs.version) {
@@ -99,7 +101,7 @@ public class HomeActivity extends Activity implements Family.Screen {
             handler.postDelayed(quiet, 15_000);
             if (on) Chime.play();   // hello: the TV just came on
             if (on) home.startOnContinue();   // and opens on Continue: the last thing this person was watching (ADR 0058)
-            // A new TV: Getting started first (ADR 0077), once.
+            // A new TV: Getting started first (ADR 0078), once.
             if (SetupActivity.due(this)) {
                 SetupActivity.open(this);
                 return;

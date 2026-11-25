@@ -84,4 +84,5 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0074](0074-keep-the-beat-waits-and-usb-mic-tries-again.md) | Keep the beat waits for a tap, and a silent USB microphone is tried other ways |
 | [0075](0075-kea-the-coach-beside-every-game.md) | Kea the coach beside every game: the guide the first time, a tip after, and How to play inside each game |
 | [0076](0076-whats-new-on-the-tv.md) | What's new: the newest feature on the home screen, from one list on the website |
-| [0077](0077-getting-started-on-a-new-tv.md) | Getting started on a new TV: three big-button questions, then the Drop Sky check |
+| [0077](0077-our-week-sunday-family-recap.md) | Our week: the Sunday family recap, with a thank you for Mum |
+| [0078](0078-getting-started-on-a-new-tv.md) | Getting started on a new TV: three big-button questions, then the Drop Sky check |

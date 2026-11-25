@@ -59,7 +59,7 @@ var TableHost = (function () {
   function coached(go) { Guides.coach(first, go); }
   // A game for one asks Who's playing? first on the Family profile, so its points reach the scoreboard (ADR 0057).
   if (first === 'road' || first === 'bridge' || first === 'town') coached(function () { Scores.pick(function () { Builder.open(first); }); });
-  else if (first === 'chores') coached(function () { Chores.open(); }); else if (first === 'wall') Wall.open(); else if (first === 'morning') Morning.open(); else if (first === 'scores') coached(function () { Scores.open(); });
+  else if (first === 'chores') coached(function () { Chores.open(); }); else if (first === 'wall') Wall.open(); else if (first === 'morning') Morning.open(); else if (first === 'week') Week.open(); else if (first === 'scores') coached(function () { Scores.open(); });
   else if (first === 'silly') Laughs.open(); else if (first === 'lunch') coached(function () { Lunch.open(); }); else if (first === 'arcade') Scores.pick(function () { Arcade.open(); }); else if (first === 'rcland') coached(function () { Scores.pick(function () { RCLand.open(); }); }); else if (first === 'candy') coached(function () { Scores.pick(function () { Candy.open(); }); }); else if (first === 'sky') SkyLook.open(); else if (first === 'lights') coached(function () { Lights.open(); }); else if (first === 'guides') Guides.list(); else Table.open();
   return {key: key};
 })();

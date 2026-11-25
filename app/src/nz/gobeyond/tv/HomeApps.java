@@ -87,6 +87,8 @@ final class HomeApps {
     static final int MORNING = 22;
     /** What's new: the last few things on Beyond TV (WhatsNewActivity, ADR 0076). */
     static final int WHATS_NEW = 23;
+    /** Our week, the Sunday family recap: points, chores, the week's photos and a thank you for Mum (web/week.js in TableActivity, ADR 0077). */
+    static final int WEEK = 24;
     /** Image size of each card (16:9; on screen it shows up to ~330 px wide). */
     static final int TILE_W = 384, TILE_H = 216;
 

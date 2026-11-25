@@ -23,7 +23,7 @@ var Place = (function () {
 
   var tz = zone(TV.zone()), set = CONFIG.latitude !== '' && CONFIG.latitude !== undefined;
   var country = (CONFIG.tmdbRegion || (tz ? tz.country : '') || 'NZ').toUpperCase();
-  // The town picked in Getting started (setup.js, ADR 0077) wins over the build's and the time zone's.
+  // The town picked in Getting started (setup.js, ADR 0078) wins over the build's and the time zone's.
   var picked = null;
   try { picked = (JSON.parse(localStorage.getItem('btv.prefs')) || {}).place || null; } catch (e) {}
   if (picked && picked.lat && picked.lon) return {lat: picked.lat, lon: picked.lon, city: picked.city || '', country: country,

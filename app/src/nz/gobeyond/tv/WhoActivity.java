@@ -34,7 +34,7 @@ public class WhoActivity extends Activity {
     static final String THEN_SETTINGS = "settings", THEN_TV_SETTINGS = "tv-settings";
     /** After the PIN: 15 more minutes of screen time for the kid watching (TimeUpActivity, ADR 0060). */
     static final String THEN_MORE_TIME = "more-time";
-    /** Straight to adding people: the end of Getting started, for a house with kids (SetupActivity, ADR 0077). */
+    /** Straight to adding people: the end of Getting started, for a house with kids (SetupActivity, ADR 0078). */
     static final String THEN_PEOPLE = "people";
 
     private FrameLayout root;

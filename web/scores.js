@@ -71,6 +71,7 @@ var Scores = (function () {
   var CHORES = ['Tarefas do dia', 'Daily chores', 'Tareas del día', 'Tägliche Aufgaben', 'Дела на день'];
   var WHO = ['Quem vai jogar?', 'Who\'s playing?', '¿Quién juega?', 'Wer spielt?', 'Кто играет?'];
   var WHO_SUB = ['Para os seus pontos irem para o placar da família.', 'So your points go on the family scoreboard.', 'Para que tus puntos vayan al marcador familiar.', 'Damit deine Punkte auf die Familien-Punktetafel kommen.', 'Чтобы очки попали в семейную таблицу.'];
+  var OUR_WEEK = ['Nossa semana', 'Our week', 'Nuestra semana', 'Unsere Woche', 'Наша неделя'];
   var JUST_PLAY = ['Só jogar', 'Just play', 'Solo jugar', 'Einfach spielen', 'Просто играть'];
 
   // MARK: - Weeks
@@ -220,6 +221,12 @@ var Scores = (function () {
   }
 
   function board(week) { var s = withNative(load()); return awards(tally(s.log, week)); }
+  /** A week's board with each person's chore points as well, for Our week (week.js, ADR 0077). */
+  function weekBoard(week) {
+    var t = tally(withNative(load()).log, week), a = awards(t);
+    for (var i = 0; i < a.length; i++) a[i].chores = t[i].games.chores || 0;
+    return a;
+  }
 
   // MARK: - The screen
 
@@ -273,6 +280,8 @@ var Scores = (function () {
         UI.el('div', 'sc-how', foot, L(HOW));
         if (window.Chores) api.add(UI.button(foot, L(CHORES)), function () { api.close(); Chores.open(); });
         if (window.Guides) Guides.button(api, foot, 'scores');
+        // Our week (week.js, ADR 0077): the Sunday family recap, any day.
+        if (window.Week) api.add(UI.button(foot, L(OUR_WEEK)), function () { api.close(); Week.open(tab === 'last' ? last : week); });
         api.add(UI.button(foot, L(CLOSE), null, 'close'), function () { api.close(); });
       }
     });
@@ -280,6 +289,6 @@ var Scores = (function () {
 
   return {open: open, add: add, solo: solo, pick: pick, who: who, setPlayer: setPlayer, people: people,
     rules: {GAMES: GAMES, GROUP: GROUP, tally: tally, awards: awards, weekOf: weekOf, weekBefore: weekBefore, daysLeft: daysLeft, dayKey: dayKey, load: load,
-      words: function () { return [TITLE, THIS_WEEK, LAST_WEEK, DAYS_LEFT, LAST_DAY, WINNERS, EVERYONE, CHAMPION, LEADING, POINTS, ONE_POINT, EMPTY, EMPTY_HOW, EMPTY_LAST, HOW, BEST_AT, CLOSE, CHORES, WHO, WHO_SUB, JUST_PLAY]; }},
-    board: board};
+      words: function () { return [TITLE, THIS_WEEK, LAST_WEEK, DAYS_LEFT, LAST_DAY, WINNERS, EVERYONE, CHAMPION, LEADING, POINTS, ONE_POINT, EMPTY, EMPTY_HOW, EMPTY_LAST, HOW, BEST_AT, CLOSE, CHORES, WHO, WHO_SUB, JUST_PLAY, OUR_WEEK]; }},
+    board: board, week: weekBoard};
 })();
