@@ -128,6 +128,7 @@ var Tidy = (function () {
         }
         if (picking) {
           a.add(UI.button(buttons, tr('Vai!', 'Go!', '¡Ya!'), null, 'primary'), go);
+          if (window.Guides) Guides.button(a, buttons, 'tidy');
         } else {
           close = UI.button(buttons, tr('Fechar', 'Close', 'Cerrar'), null, 'close');
           a.add(close, function () { a.close(); });

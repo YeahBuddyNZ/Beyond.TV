@@ -37,7 +37,7 @@ import java.nio.charset.StandardCharsets;
 public class TableActivity extends Activity {
     static void open(Context c) { open(c, null); }
 
-    /** start: "silly" opens the silly games (web/laughs.js), "lunch" school lunches (web/lunch.js), "arcade" the arcade (web/arcade.js), "rcland" Milo's Remote Control Land (web/rcland.js), "candy" London's Candy Land (web/candy.js), "road" Build a road, "bridge" Build a bridge and "town" Plan a town (web/builder.js), "chores" Daily chores (web/chores.js), "wall" the family wall and to-dos (web/wall.js), "morning" the Morning board (web/morning.js), "week" Our week, the Sunday family recap (web/week.js), "scores" the family scoreboard (web/scores.js), "sky" Look around (web/skylook.js), "lights" the light show (web/lights.js) and "guides" How to play (web/guides.js), rather than the board and card games. */
+    /** start: "silly" opens the silly games (web/laughs.js), "lunch" school lunches (web/lunch.js), "arcade" the arcade (web/arcade.js), "rcland" Milo's Remote Control Land (web/rcland.js), "candy" London's Candy Land (web/candy.js), "road" Build a road, "bridge" Build a bridge and "town" Plan a town (web/builder.js), "chores" Daily chores (web/chores.js), "wall" the family wall and to-dos (web/wall.js), "morning" the Morning board (web/morning.js), "week" Our week, the Sunday family recap (web/week.js), "scores" the family scoreboard (web/scores.js), "sky" Look around (web/skylook.js), "lights" the light show (web/lights.js) and "guides" How to play (web/guides.js), rather than the board and card games. "coach:<game>" is Kea the coach's first-time offer for a native game, which then starts it, and "guide:<game>" one game's How to play (ADR 0075). */
     static void open(Context c, String start) {
         c.startActivity(new Intent(c, TableActivity.class).putExtra("start", start).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
@@ -360,6 +360,19 @@ public class TableActivity extends Activity {
         }
 
         @JavascriptInterface public void close() { runOnUiThread(TableActivity.this::finish); }
+
+        /** Kea the coach (web/guides.js, ADR 0075): whether this TV has offered a game's guide yet, kept in Prefs so GamesActivity knows too. */
+        @JavascriptInterface public boolean coached(String id) { return Prefs.coached(id); }
+
+        @JavascriptInterface public void setCoached(String id) { Prefs.setCoached(id); }
+
+        /** After Kea's first-time offer ("coach:karaoke"), starts that native game and closes this screen. */
+        @JavascriptInterface public void play(String id) {
+            runOnUiThread(() -> {
+                if (GamesActivity.NATIVE.contains(id)) GamesActivity.start(TableActivity.this, id);
+                finish();
+            });
+        }
     }
 
     private boolean micAllowed() {

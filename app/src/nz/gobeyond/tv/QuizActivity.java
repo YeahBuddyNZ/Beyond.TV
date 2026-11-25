@@ -158,7 +158,10 @@ public class QuizActivity extends Activity {
         end.setOnClickListener(v -> step("end"));
         Button ok = FeedbackActivity.button(this, Ui.tr("Fechar", "Close", "Cerrar"), k, false);
         ok.setOnClickListener(v -> finish());
-        for (Button b : new Button[] {act, end, ok}) {
+        // Kea the coach's guide (web/guides.js, ADR 0075), one press away.
+        Button how = FeedbackActivity.button(this, Ui.emoji("📖") + "  " + Ui.tr("Como jogar", "How to play", "Cómo jugar"), k, false);
+        how.setOnClickListener(v -> GamesActivity.howToPlay(this, "quiz"));
+        for (Button b : new Button[] {act, end, ok, how}) {
             LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(-2, Math.round(80 * k));
             bp.leftMargin = bp.rightMargin = Math.round(10 * k);
             buttons.addView(b, bp);

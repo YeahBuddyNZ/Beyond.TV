@@ -235,6 +235,7 @@ var Party = (function () {
           a.close();
           start({style: 'disco', minutes: 30});
         }, {first: true});
+        if (window.Guides) Guides.button(a, row, 'party');
         var people = Profiles.list(), names = [];
         for (var i = 0; i < people.length; i++) if (people[i].name && !people[i].together) names.push(people[i].name);
         if (!names.length) return;

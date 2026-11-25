@@ -279,6 +279,7 @@ var Scores = (function () {
         var foot = UI.el('div', 'sc-foot', layer);
         UI.el('div', 'sc-how', foot, L(HOW));
         if (window.Chores) api.add(UI.button(foot, L(CHORES)), function () { api.close(); Chores.open(); });
+        if (window.Guides) Guides.button(api, foot, 'scores');
         // Our week (week.js, ADR 0077): the Sunday family recap, any day.
         if (window.Week) api.add(UI.button(foot, L(OUR_WEEK)), function () { api.close(); Week.open(tab === 'last' ? last : week); });
         api.add(UI.button(foot, L(CLOSE), null, 'close'), function () { api.close(); });

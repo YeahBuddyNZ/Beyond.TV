@@ -569,3 +569,11 @@
 .bt-layer.bt-week-photo::before { display: none; }
 .bt-week-photo .pic { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; background-size: contain; background-repeat: no-repeat; background-position: center; }
 .bt-week-photo .cap { position: absolute; left: 0; right: 0; bottom: 60px; text-align: center; font-family: 'Sora', 'Inter', Arial, sans-serif; font-size: 34px; font-weight: 700; text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8); }
+
+/* Kea the coach's first-time offer (guides.js, ADR 0075). */
+.bt-coach .gd-box { top: 190px; }
+.bt-coach .sun { font-size: 96px; line-height: 1; margin-bottom: 18px; }
+.bt-coach .bt-sub { max-width: 1100px; margin: 18px auto 0; }
+.bt-coach .bt-buttons { margin-top: 64px; }
+.bt-coach .bt-button { margin: 0 12px; }
+.bt-coach .gd-help { margin-top: 48px; font-size: 26px; color: rgba(247, 246, 242, 0.6); }
