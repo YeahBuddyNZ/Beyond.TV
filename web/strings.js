@@ -7,7 +7,7 @@ var I18N = (function () {
 
   var lang = 'en';
   var german = {
-    // Getting started (setup.js, ADR 0076)
+    // Getting started (setup.js, ADR 0077)
     "Kia ora! Let's get your TV ready.": "Kia ora! Machen wir deinen Fernseher startklar.",
     "Three quick questions. Just use the arrows and OK on your remote.": "Drei kurze Fragen. Nimm einfach die Pfeile und OK auf der Fernbedienung.",
     "Let's go": "Los geht's",
@@ -139,6 +139,11 @@ var I18N = (function () {
     "Paid, only from Sky": "Kostenpflichtig, nur bei Sky",
     "For sport without a Sky box: Sky Sport Now.": "Für Sport ohne Sky-Box: Sky Sport Now.",
     "Got it": "Verstanden",
+    // What's new (whatsnew.js, ADR 0076)
+    "New": "Neu",
+    "What's new": "Was gibt's Neues",
+    "The newest things on your TV.": "Das Neueste auf deinem Fernseher.",
+    "Nothing new just now. Have another look later.": "Gerade nichts Neues. Schau später nochmal.",
     "▲ ▼ to change channel": "▲ ▼ wechselt den Sender",
     // Now and next, favourites, Continue (ADR 0058)
     "Your favourites": "Deine Favoriten",
@@ -1016,7 +1021,7 @@ var I18N = (function () {
   }
 
   var russian = {
-    // Getting started (setup.js, ADR 0076)
+    // Getting started (setup.js, ADR 0077)
     "Kia ora! Let's get your TV ready.": "Kia ora! Давайте настроим телевизор.",
     "Three quick questions. Just use the arrows and OK on your remote.": "Три коротких вопроса. Просто используйте стрелки и OK на пульте.",
     "Let's go": "Начнём",
@@ -1147,6 +1152,11 @@ var I18N = (function () {
     "Paid, only from Sky": "Платно, только у Sky",
     "For sport without a Sky box: Sky Sport Now.": "Спорт без приставки Sky: Sky Sport Now.",
     "Got it": "Понятно",
+    // What's new (whatsnew.js, ADR 0076)
+    "New": "Новое",
+    "What's new": "Что нового",
+    "The newest things on your TV.": "Самое новое на вашем телевизоре.",
+    "Nothing new just now. Have another look later.": "Пока ничего нового. Загляните позже.",
     "▲ ▼ to change channel": "▲ ▼ переключают канал",
     // Now and next, favourites, Continue (ADR 0058)
     "Your favourites": "Избранное",

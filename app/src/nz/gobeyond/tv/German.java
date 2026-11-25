@@ -6,7 +6,7 @@ final class German {
 
     static String text(String english) {
         switch (english) {
-            // Getting started (ADR 0076)
+            // Getting started (ADR 0077)
             case "Kia ora! Let's get your TV ready.": return "Kia ora! Machen wir deinen Fernseher startklar.";
             case "Three quick questions. Just use the arrows and OK on your remote.": return "Drei kurze Fragen. Nimm einfach die Pfeile und OK auf der Fernbedienung.";
             case "Let's go": return "Los geht's";

@@ -1,4 +1,4 @@
-// Getting started (web/setup.js and SetupActivity.java, ADR 0076) without a screen: the same towns on both, a new TV
+// Getting started (web/setup.js and SetupActivity.java, ADR 0077) without a screen: the same towns on both, a new TV
 // gets it once, a TV that had Beyond TV before never does, and a house with kids lands on the people editor.
 // node tests/setup.test.js
 'use strict';
