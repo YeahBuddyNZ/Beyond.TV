@@ -12,9 +12,9 @@ name: Android APK
 
 on:
   push:
-    paths: ["app/**", "tests/**", "build.sh", "config.example.properties", ".github/workflows/android.yml"]
+    paths: ["app/**", "tests/**", "build.sh", "config.example.properties", ".github/workflows/android.yml", "docs/whats-new.json", "web/whatsnew.js"]
   pull_request:
-    paths: ["app/**", "tests/**", "build.sh", "config.example.properties", ".github/workflows/android.yml"]
+    paths: ["app/**", "tests/**", "build.sh", "config.example.properties", ".github/workflows/android.yml", "docs/whats-new.json", "web/whatsnew.js"]
   workflow_dispatch:
 
 permissions:
@@ -62,6 +62,7 @@ jobs:
           java -cp out/family-test nz.gobeyond.tv.WarmNotesTest
           java -cp out/family-test nz.gobeyond.tv.WeekRecapTest
           node tests/warm.test.js
+          node tests/whatsnew.test.js
           node tests/week.test.js
       - name: Signing key
         env:

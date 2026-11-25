@@ -1,0 +1,77 @@
+{
+  "about": "What's new on Beyond TV, newest first. The TV reads this from GitHub Pages (ADR 0076): the newest line shows in Today at home until someone opens What's new, for three weeks at most. Add a line here with every feature people can see, in all five languages, short and plain, no em dashes. tests/whatsnew.test.js checks it.",
+  "items": [
+    {
+      "id": "our-week",
+      "date": "2026-11-25",
+      "en": ["Our week, every Sunday", "Sunday night: everyone's points, chore stars, photos and a thank you for Mum"],
+      "pt": ["Nossa semana, todo domingo", "Domingo à noite: pontos, estrelas das tarefas, fotos e um obrigado para a mãe"],
+      "es": ["Nuestra semana, cada domingo", "El domingo por la noche: puntos, estrellas, fotos y un gracias para mamá"],
+      "de": ["Unsere Woche, jeden Sonntag", "Sonntagabend: Punkte, Aufgabensterne, Fotos und ein Danke für Mama"],
+      "ru": ["Наша неделя, каждое воскресенье", "В воскресенье вечером: очки, звёзды за дела, фото и спасибо маме"]
+    },
+    {
+      "id": "kea-coach",
+      "date": "2026-11-25",
+      "en": ["Kea the coach", "The first time you play a game, Kea offers to show you how, then shares a tip"],
+      "pt": ["Kea, o treinador", "Na primeira vez que você joga, o Kea se oferece para ensinar e depois dá uma dica"],
+      "es": ["Kea, el entrenador", "La primera vez que juegas, Kea se ofrece a enseñarte y luego te da un consejo"],
+      "de": ["Kea, der Trainer", "Beim ersten Spiel zeigt dir Kea, wie es geht, und gibt danach einen Tipp"],
+      "ru": ["Тренер Кеа", "В первый раз Кеа предложит показать, как играть, а потом подскажет совет"]
+    },
+    {
+      "id": "morning-board",
+      "date": "2026-11-24",
+      "en": ["The Morning board", "Press Today at the top: everyone's jobs for the morning, ticked off with the remote"],
+      "pt": ["O quadro da manhã", "Aperte Hoje lá em cima: as tarefas da manhã de todos, marcadas com o controle"],
+      "es": ["El tablero de la mañana", "Pulsa Hoy arriba: las tareas de la mañana de todos, marcadas con el control"],
+      "de": ["Die Morgentafel", "Oben Heute drücken: die Aufgaben aller für den Morgen, abgehakt mit der Fernbedienung"],
+      "ru": ["Утренняя доска", "Нажмите «Сегодня» вверху: утренние дела всей семьи, отмечайте пультом"]
+    },
+    {
+      "id": "light-show-looks",
+      "date": "2026-11-24",
+      "en": ["Six new light shows", "Fireworks, Dance floor, Lava lamp and more. Press ▲ to heart your favourite"],
+      "pt": ["Seis shows de luz novos", "Fogos, Pista de dança, Lâmpada de lava e mais. Aperte ▲ para favoritar"],
+      "es": ["Seis espectáculos de luz nuevos", "Fuegos artificiales, Pista de baile, Lámpara de lava y más. Pulsa ▲ para tu favorito"],
+      "de": ["Sechs neue Lichtshows", "Feuerwerk, Tanzfläche, Lavalampe und mehr. Mit ▲ markierst du deinen Liebling"],
+      "ru": ["Шесть новых световых шоу", "Фейерверк, Танцпол, Лава-лампа и другие. Нажмите ▲, чтобы добавить в любимые"]
+    },
+    {
+      "id": "family-wall",
+      "date": "2026-11-24",
+      "en": ["The family wall", "To-dos and stickies from Beyond Family. Press OK to tick one off"],
+      "pt": ["O mural da família", "Tarefas e recados do Beyond Family. Aperte OK para marcar uma"],
+      "es": ["El muro de la familia", "Tareas y notas de Beyond Family. Pulsa OK para marcar una"],
+      "de": ["Die Familienwand", "Aufgaben und Zettel aus Beyond Family. Mit OK hakst du eine ab"],
+      "ru": ["Семейная стена", "Дела и заметки из Beyond Family. Нажмите OK, чтобы отметить"]
+    },
+    {
+      "id": "awards",
+      "date": "2026-11-24",
+      "en": ["Awards on Who's watching", "Give a kid an award in Beyond Family and the TV cheers them on"],
+      "pt": ["Prêmios em Quem está assistindo", "Dê um prêmio a uma criança no Beyond Family e a TV comemora"],
+      "es": ["Premios en Quién está viendo", "Da un premio a un niño en Beyond Family y la tele lo celebra"],
+      "de": ["Auszeichnungen bei Wer schaut zu", "Gib einem Kind in Beyond Family eine Auszeichnung, und der Fernseher feiert es"],
+      "ru": ["Награды в «Кто смотрит»", "Наградите ребёнка в Beyond Family, и телевизор его поздравит"]
+    },
+    {
+      "id": "bedtime",
+      "date": "2026-11-23",
+      "en": ["Bedtime sounds", "Rain, waves or a fan, then the TV turns itself off. The moon button at night"],
+      "pt": ["Sons para dormir", "Chuva, ondas ou ventilador, e depois a TV se desliga. O botão da lua à noite"],
+      "es": ["Sonidos para dormir", "Lluvia, olas o un ventilador, y luego la tele se apaga. El botón de la luna por la noche"],
+      "de": ["Klänge zum Einschlafen", "Regen, Wellen oder ein Ventilator, dann geht der Fernseher aus. Abends der Mondknopf"],
+      "ru": ["Звуки для сна", "Дождь, волны или вентилятор, а потом телевизор выключится сам. Кнопка с луной вечером"]
+    },
+    {
+      "id": "find",
+      "date": "2026-11-23",
+      "en": ["Find", "Press the microphone at the top and say a game, a channel or an app"],
+      "pt": ["Encontrar", "Aperte o microfone lá em cima e diga um jogo, um canal ou um app"],
+      "es": ["Buscar", "Pulsa el micrófono arriba y di un juego, un canal o una app"],
+      "de": ["Finden", "Oben das Mikrofon drücken und ein Spiel, einen Sender oder eine App sagen"],
+      "ru": ["Поиск", "Нажмите микрофон вверху и назовите игру, канал или приложение"]
+    }
+  ]
+}

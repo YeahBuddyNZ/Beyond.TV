@@ -166,6 +166,8 @@ Moved to `docs/history/sections.md` (section "Adapting it to another TV"). Read 
 - Screen time (`ScreenTime.java`, `ScreenTimeService`, `web/screentime.js`, ADR 0060) and karaoke Take turns
   (`KaraokeTurns.java`, `web/karaoke.js`, ADR 0059) are twins: change one, change both. Family photos (`PhotoDrop`,
   `FamilyPhotos`, `PhotosActivity`, ADR 0061) are Android only; the TV listens only while that screen is open.
+- What's new (`docs/whats-new.json` on GitHub Pages, `web/whatsnew.js`, `WhatsNew.java`, ADR 0076): every feature people
+  can see adds a line there (newest first, all five languages) in the same PR; `tests/whatsnew.test.js` checks it.
 - Te reo word of the day: `web/kupu.js` and `Kupu.java` hold the same list and pick by the same local day, so every
   TV in a house shows the same kupu. Change one, change both. On Android it leads the quotes row (`HomeView.kupuFor`,
   measured once a day, never in the frame loop); *Te reo word of the day* in Home Settings turns it off.

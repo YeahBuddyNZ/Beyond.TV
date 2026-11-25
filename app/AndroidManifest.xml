@@ -433,6 +433,16 @@
             android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|density|fontScale|locale|layoutDirection"
             android:theme="@style/BeyondTV.Home" />
 
+        <!-- What's new (ADR 0076): the last few things on Beyond TV, from Shortcuts in the drawer. -->
+        <activity
+            android:name=".WhatsNewActivity"
+            android:process=":home"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:screenOrientation="landscape"
+            android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|density|fontScale|locale|layoutDirection"
+            android:theme="@style/BeyondTV.Home" />
+
         <!-- Family photos (ADR 0061): a QR code for a phone to send photos and the kids' art for the screensaver. -->
         <activity
             android:name=".PhotosActivity"

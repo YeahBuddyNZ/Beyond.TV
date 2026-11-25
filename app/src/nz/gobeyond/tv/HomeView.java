@@ -2555,6 +2555,10 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             AskActivity.open(activity, AskActivity.NOTES, "", "");
             return;
         }
+        if (it.kind == HomeApps.WHATS_NEW) {
+            WhatsNewActivity.open(activity);
+            return;
+        }
         if (it.kind == HomeApps.SLEEP) {
             Context ctx = getContext();
             showToast(Sleep.set(ctx, Sleep.next(ctx)));
@@ -3664,6 +3668,10 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         String[] wallRow = linked ? Family.wallRow(watcher) : null;
         if (wallRow != null) rows.add(wallRow);
         if (board != null) boardRows(board, rows);
+        // The newest thing on Beyond TV, until someone opens What's new (WhatsNew, ADR 0076). Fetched off the UI thread.
+        WhatsNew.refresh(ctx);
+        String[] news = WhatsNew.row(ctx);
+        if (news != null) rows.add(news);
         HomeData.Weather wx = data.weather;
         if (Prefs.weather() && !Double.isNaN(wx.temp)) {
             String more = Ui.en ? "High " + HomeData.degrees(wx.max) + ", low " + HomeData.degrees(wx.min)
