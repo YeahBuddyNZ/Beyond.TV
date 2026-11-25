@@ -153,6 +153,12 @@ public class BedtimeActivity extends Activity {
         LinearLayout.LayoutParams gp = new LinearLayout.LayoutParams(-2, Math.round(88 * k));
         gp.topMargin = Math.round(60 * k);
         column.addView(go, gp);
+        // Kea the coach's guide (web/guides.js, ADR 0075), one press away.
+        Button how = FeedbackActivity.button(this, Ui.emoji("📖") + "  " + Ui.tr("Como jogar", "How to play", "Cómo jugar"), k, false);
+        how.setOnClickListener(v -> GamesActivity.howToPlay(this, "bedtime"));
+        LinearLayout.LayoutParams hp = new LinearLayout.LayoutParams(-2, Math.round(80 * k));
+        hp.topMargin = Math.round(24 * k);
+        column.addView(how, hp);
         setContentView(root);
         (want != null ? want : go).requestFocus();
     }
