@@ -85,6 +85,8 @@ final class HomeApps {
     static final int WALL = 21;
     /** The Morning board: today's to-dos, calendar and weather for the house (web/morning.js in TableActivity, ADR 0069). */
     static final int MORNING = 22;
+    /** What's new: the last few things on Beyond TV (WhatsNewActivity, ADR 0076). */
+    static final int WHATS_NEW = 23;
     /** Image size of each card (16:9; on screen it shows up to ~330 px wide). */
     static final int TILE_W = 384, TILE_H = 216;
 
@@ -258,6 +260,7 @@ final class HomeApps {
         List<Item> items = new ArrayList<>();
         items.add(shortcut(ALL_APPS, "all", Ui.tr("Todos os Apps", "All Apps"), "apps"));
         items.add(shortcut(SLEEP, "sleep", Ui.tr("Timer de desligar", "Sleep Timer"), "bedtime"));
+        items.add(shortcut(WHATS_NEW, "whats-new", Ui.tr("Novidades", "What's new", "Novedades"), "sparkles"));
         items.add(shortcut(SETTINGS, "settings", Ui.tr("Ajustes do Beyond™ TV", "Beyond™ TV Settings"), "settings"));
         items.add(shortcut(ANDROID_SETTINGS, "tv-settings", Ui.tr("Ajustes da TV", "TV Settings"), "tv_settings"));
         return items;

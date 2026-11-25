@@ -70,6 +70,7 @@ Free and open source, built in Aotearoa by [Beyond](https://gobeyond.co.nz). One
 - **Weather one press away.** Hour by hour, with sunrise and sunset.
 - **Light by day, dark by night.** It follows your city's real sunset.
 - **Keeps itself up to date.** New versions arrive by themselves, and one OK puts them on.
+- **What's new.** The newest thing on Beyond™ TV shows in *Today at home* until you've seen it, and *What's new* in Shortcuts at the bottom lists the last few, with their dates. New features reach every TV this way without waiting for an update.
 - **Beyond's look.** The four dots, Beyond's purple and Sora headings, the same family as [Beyond Family](https://beyondfamily.app).
 - **Safe.** No root. Nothing is uninstalled. One button brings back the factory home screen.
 
@@ -139,6 +140,7 @@ Free and open source, built in Aotearoa by [Beyond](https://gobeyond.co.nz). One
 67. Ask a grown-up and the Morning board: done on Google TV, LG and Samsung with Beyond Family linked. When screen time is used up, *Ask a grown-up* asks for 15 or 30 more minutes or one more game (20 minutes); every grown-up gets a push and a Yes / Not now card in Beyond Family, and the TV adds the time the moment someone says yes. The PIN still works as before. *Today* on the home screen opens the Morning board: each person's to-dos to tick with the remote, the calendar and the weather, by itself once each morning between 5 and 10. ADR 0069.
 68. Warm notes, shuffled, and family awards: done on Google TV, LG and Samsung, with Beyond Family. The kind notes on Who's watching come in a new order each time, never the same person or the same line twice in a row, and carry on where they left off next time. More of them, Mum gets her own ("Queen of the house"), and a grown-up can give a kid an award in Beyond Family (Family › Awards: Reading star, Kind helper, Great at school or your own, with a few words). It shows under the kid's name on Who's watching for a fortnight, in their warm notes for a month ("Mum gave you the Reading star award, Aroha"), and on the family wall for the week. ADR 0072.
 69. Kea the coach beside every game: done on Google TV, LG and Samsung. The first time anyone starts a game on the TV, Kea (the chess coach's robot) asks *First time playing ...?* and offers the game's guide with *Show me how*, or *Let's play*. After that Kea says one of the game's top tips as it starts, once a day. Karaoke, the party, the tidy-up race, bedtime, Daily chores, the scoreboard, quiz night and the dinner question have *How to play* on their own screens too. Kept on the TV only. ADR 0075.
+70. What's new: done on Google TV, LG and Samsung. The newest feature shows as *New: ...* in Today at home until someone opens *What's new* (Shortcuts, at the bottom of the home screen), for three weeks at most; that screen lists the last six with their dates. The list lives on our website (`docs/whats-new.json`), so it's read, never sent. ADR 0076.
 
 Ideas welcome: press the four dots on the TV (*Talk to Beyond*, or *Ask Beyond* when it's linked to Beyond Family).
 
