@@ -530,7 +530,7 @@
 .bt-morning .ch-foot { top: 950px; }
 .mb-hint { display: inline-block; vertical-align: middle; margin-right: 24px; font-size: 22px; color: rgba(247, 246, 242, 0.55); }
 
-/* Our week, the Sunday family recap (week.js, ADR 0075): points and chores on the left, the thank you and the week's moments on the right. */
+/* Our week, the Sunday family recap (week.js, ADR 0077): points and chores on the left, the thank you and the week's moments on the right. */
 .bt-week .wk-top { position: absolute; left: 120px; right: 120px; top: 60px; }
 .bt-week .wk-panel { position: absolute; padding: 26px 30px; box-sizing: border-box; border-radius: 34px; background: rgba(247, 246, 242, 0.07); overflow: hidden; }
 .bt-week .wk-scores { left: 90px; width: 900px; top: 230px; height: 690px; }

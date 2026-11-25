@@ -221,7 +221,7 @@ var Scores = (function () {
   }
 
   function board(week) { var s = withNative(load()); return awards(tally(s.log, week)); }
-  /** A week's board with each person's chore points as well, for Our week (week.js, ADR 0075). */
+  /** A week's board with each person's chore points as well, for Our week (week.js, ADR 0077). */
   function weekBoard(week) {
     var t = tally(withNative(load()).log, week), a = awards(t);
     for (var i = 0; i < a.length; i++) a[i].chores = t[i].games.chores || 0;
@@ -279,7 +279,7 @@ var Scores = (function () {
         var foot = UI.el('div', 'sc-foot', layer);
         UI.el('div', 'sc-how', foot, L(HOW));
         if (window.Chores) api.add(UI.button(foot, L(CHORES)), function () { api.close(); Chores.open(); });
-        // Our week (week.js, ADR 0075): the Sunday family recap, any day.
+        // Our week (week.js, ADR 0077): the Sunday family recap, any day.
         if (window.Week) api.add(UI.button(foot, L(OUR_WEEK)), function () { api.close(); Week.open(tab === 'last' ? last : week); });
         api.add(UI.button(foot, L(CLOSE), null, 'close'), function () { api.close(); });
       }

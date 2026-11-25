@@ -1,4 +1,4 @@
-# 0075. Our week: the Sunday family recap
+# 0077. Our week: the Sunday family recap
 
 Date: 25/11/2026. Status: accepted. Builds on 0057 (the family scoreboard and Daily chores), 0061 (family photos on the
 screensaver), 0066 and 0072 (warm notes, Mum first) and 0067 (the family wall and to-dos).

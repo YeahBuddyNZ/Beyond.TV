@@ -4,7 +4,7 @@ import java.util.Calendar;
 import java.util.Locale;
 
 /**
- * When Our week, the Sunday family recap (web/week.js in TableActivity, ADR 0075), shows: its star button on the home
+ * When Our week, the Sunday family recap (web/week.js in TableActivity, ADR 0077), shows: its star button on the home
  * screen on Sundays and Monday mornings, and opening by itself the first time the home screen shows on a Sunday
  * between 4 and 9 at night, once a week. The twin of Week.rules.button and Week.rules.due: change one, change both.
  * Plain Java, so the tests run it off a TV.

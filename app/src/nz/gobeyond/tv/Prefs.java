@@ -153,7 +153,7 @@ final class Prefs {
     static String morningShown() { return sp().getString("morningShown", ""); }
     static void setMorningShown(String day) { put("morningShown", day); }
 
-    /** Our week opens by itself on a Sunday evening (ADR 0075); its own button turns that off. */
+    /** Our week opens by itself on a Sunday evening (ADR 0077); its own button turns that off. */
     static boolean weekAuto() { return sp().getBoolean("weekAuto", true); }
     static void setWeekAuto(boolean on) { put("weekAuto", on); }
     /** The week (its Monday, YYYY-MM-DD) Our week last opened by itself. */

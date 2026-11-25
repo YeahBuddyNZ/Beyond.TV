@@ -265,7 +265,7 @@
     if (Family.linked()) list.push({emoji: '\uD83D\uDCCC', label: tr('Mural da família', 'Family wall', 'Muro de la familia'), run: function () { Wall.open(); }});
     // The Morning board (morning.js, ADR 0069): today's to-dos, calendar and weather for the house. Linked only.
     if (Family.linked()) list.push({icon: 'sunny', label: tr('Hoje', 'Today', 'Hoy'), run: function () { Morning.open(); }});
-    // Our week, the Sunday family recap (week.js, ADR 0075): on Sundays, and Monday mornings for the week just gone.
+    // Our week, the Sunday family recap (week.js, ADR 0077): on Sundays, and Monday mornings for the week just gone.
     if (Week.rules.button(Date.now())) list.push({icon: 'star', label: tr('Nossa semana', 'Our week', 'Nuestra semana'), run: function () { Week.open(); }});
     // Notes from the family, when there are any up: opens them big (notes.js).
     if (Notes.count()) list.push({emoji: '\uD83D\uDCDD', label: tr('Bilhetes', 'Notes', 'Notas'), run: function () { Notes.open(); }});
@@ -1684,7 +1684,7 @@
     else if (me.kid) setTimeout(Pets.ask, 600);   // and have the pets been fed today?
     // The Morning board, first thing each morning (morning.js, ADR 0069). It waits while another question is up.
     setTimeout(Morning.maybe, 900);
-    // Our week, on a Sunday evening (week.js, ADR 0075).
+    // Our week, on a Sunday evening (week.js, ADR 0077).
     setTimeout(Week.maybe, 1000);
     pickShelf();
     cards = [];
@@ -1799,7 +1799,7 @@
     renderAll();
     Data.refresh();
     if (Profiles.count() > 1) Profiles.pick(false, profileChosen);
-    else { setTimeout(Morning.maybe, 1500); setTimeout(Week.maybe, 1600); }   // the Morning board (ADR 0069), Our week on Sundays (ADR 0075)
+    else { setTimeout(Morning.maybe, 1500); setTimeout(Week.maybe, 1600); }   // the Morning board (ADR 0069), Our week on Sundays (ADR 0077)
   });
   Checkin.start();
   if (window.HomeHub) HomeHub.start(homeChanged);

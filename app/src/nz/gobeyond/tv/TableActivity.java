@@ -62,7 +62,7 @@ public class TableActivity extends Activity {
     }
 
     /**
-     * Our week (web/week.js, ADR 0075) opens by itself the first time the home screen shows on a Sunday between 4 and 9
+     * Our week (web/week.js, ADR 0077) opens by itself the first time the home screen shows on a Sunday between 4 and 9
      * at night, once a week, when there's a family here (more than one person, or Beyond Family) and nobody turned it
      * off. WeekRecap holds the rule, the twin of Week.rules.due. Called from HomeActivity.onResume.
      */
@@ -213,7 +213,7 @@ public class TableActivity extends Activity {
         @JavascriptInterface public void morningAuto(boolean on) { Prefs.setMorningAuto(on); }
 
         /**
-         * Our week (web/week.js, ADR 0075): the household's name and up to four of the family's own photos that came
+         * Our week (web/week.js, ADR 0077): the household's name and up to four of the family's own photos that came
          * in since the week began, small, as data the page shows. They never leave the TV.
          */
         @JavascriptInterface public String week(double since) {

@@ -2,7 +2,7 @@ package nz.gobeyond.tv;
 
 import java.util.Calendar;
 
-/** When Our week shows (WeekRecap, ADR 0075): the same cases as tests/week.test.js, so the twins agree. */
+/** When Our week shows (WeekRecap, ADR 0077): the same cases as tests/week.test.js, so the twins agree. */
 public class WeekRecapTest {
     static int failed, passed;
 
