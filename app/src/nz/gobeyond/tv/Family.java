@@ -1070,6 +1070,15 @@ final class Family {
                 final int code = keyCode(cmd.optString("key"));
                 if (code != 0) adb().post(() -> press(app, code));
                 break;
+            case "pad":
+                // A phone as a game controller (ADR 0080): straight into the games screen when it's in front, otherwise
+                // the same key as the phone's remote, A for OK and B for Back.
+                final String button = cmd.optString("button");
+                if (!TableActivity.pad(button, cmd.optString("memberId"), cmd.optString("name"), cmd.optString("colour"))) {
+                    final int padCode = keyCode("a".equals(button) ? "ok" : "b".equals(button) ? "back" : button);
+                    if (padCode != 0 && padCode != KeyEvent.KEYCODE_HOME && padCode != KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE) adb().post(() -> press(app, padCode));
+                }
+                break;
             case "launch":
                 final String id = cmd.optString("app");
                 adb().post(() -> launch(app, id));

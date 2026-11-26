@@ -93,6 +93,31 @@ public class TableActivity extends Activity {
         a.runOnUiThread(() -> { if (a.web != null) a.web.evaluateJavascript(js, null); });
     }
 
+    /** The games screen while it is in front: a phone controller's presses go straight into its page (ADR 0080). */
+    private static volatile TableActivity front;
+
+    /**
+     * One press from a phone controller, into the page in front, as {button, memberId, name, colour}. False when no
+     * games screen is in front, so Family presses the key through the TV's own ADB instead, like the phone's remote.
+     */
+    static boolean pad(String button, String memberId, String name, String colour) {
+        TableActivity a = front;
+        if (a == null) return false;
+        org.json.JSONObject o = new org.json.JSONObject();
+        try {
+            o.put("button", button);
+            o.put("memberId", memberId);
+            o.put("name", name);
+            o.put("colour", colour);
+        } catch (org.json.JSONException e) {
+            return false;
+        }
+        // U+2028 and U+2029 are fine in JSON but end a line in JavaScript.
+        final String js = "window.TableHost && TableHost.pad && TableHost.pad(" + o.toString().replace("\u2028", "\\u2028").replace("\u2029", "\\u2029") + ")";
+        a.runOnUiThread(() -> { if (a.web != null) a.web.evaluateJavascript(js, null); });
+        return true;
+    }
+
     private static final String FILE = "table.json";
     private static final int ASK_MIC = 41, ASK_CAMERA = 42;
     private WebView web;
@@ -433,6 +458,7 @@ public class TableActivity extends Activity {
 
     @Override protected void onPause() {
         super.onPause();
+        if (front == this) front = null;
         // Off to the home screen or another app: the light show ends rather than listening and drawing behind it
         // (Kyle 24/11/2026: it kept going in the background and the TV hung). Its buttons are there on the way back.
         // Android's own question about the camera or microphone covers the page for a moment: that isn't leaving.
@@ -447,6 +473,7 @@ public class TableActivity extends Activity {
 
     @Override protected void onResume() {
         super.onResume();
+        front = this;
         if (web != null) web.onResume();
     }
 
@@ -459,6 +486,7 @@ public class TableActivity extends Activity {
 
     @Override protected void onDestroy() {
         if (sky == this) sky = null;
+        if (front == this) front = null;
         tvSound.stop();
         roomSound.stop();
         synchronized (this) {

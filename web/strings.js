@@ -7,6 +7,14 @@ var I18N = (function () {
 
   var lang = 'en';
   var german = {
+    // Phone controllers (pads.js, arcade.js, ADR 0080)
+    " picked up a controller": " hat einen Controller genommen",
+    "🏓 Two players! ": "🏓 Zwei Spieler! ",
+    " takes the robot's paddle": " übernimmt den Schläger des Roboters",
+    " won! OK to play again.": " hat gewonnen! OK für noch eine Runde.",
+    "Two players": "Zwei Spieler",
+    "Remote": "Fernbedienung",
+    "Player": "Spieler",
     // Getting started (setup.js, ADR 0078)
     "Kia ora! Let's get your TV ready.": "Kia ora! Machen wir deinen Fernseher startklar.",
     "Three quick questions. Just use the arrows and OK on your remote.": "Drei kurze Fragen. Nimm einfach die Pfeile und OK auf der Fernbedienung.",
@@ -1022,6 +1030,14 @@ var I18N = (function () {
   }
 
   var russian = {
+    // Phone controllers (pads.js, arcade.js, ADR 0080)
+    " picked up a controller": " взял джойстик",
+    "🏓 Two players! ": "🏓 Два игрока! ",
+    " takes the robot's paddle": " берёт ракетку робота",
+    " won! OK to play again.": " победил! OK, чтобы сыграть ещё.",
+    "Two players": "Два игрока",
+    "Remote": "Пульт",
+    "Player": "Игрок",
     // Getting started (setup.js, ADR 0078)
     "Kia ora! Let's get your TV ready.": "Kia ora! Давайте настроим телевизор.",
     "Three quick questions. Just use the arrows and OK on your remote.": "Три коротких вопроса. Просто используйте стрелки и OK на пульте.",

@@ -45,6 +45,11 @@ var TableHost = (function () {
     if (!UI.active() && bridge) bridge.close();
   }
 
+  // A phone's controller presses come the same way as the remote's (pads.js, ADR 0080): TableActivity hands them to pad().
+  Pads.to(key);
+  /** One press from a phone controller, {button, memberId, name, colour}, from TableActivity. */
+  function pad(c) { Pads.press(c); }
+
   // A keyboard on a computer, when table.html is opened in a browser to try it.
   if (!bridge) document.addEventListener('keydown', function (e) { key(e.keyCode === 27 ? 4 : e.keyCode); e.preventDefault(); });
 
@@ -53,13 +58,13 @@ var TableHost = (function () {
   // Kea the coach (guides.js, ADR 0075): "coach:karaoke" offers a native game's guide the first time, then the app
   // starts the game itself (bridge.play); "guide:tidy" is a native game's How to play button.
   var kind = first.split(':')[0], what = first.split(':')[1] || '';
-  if (kind === 'coach') { Guides.coach(what, function () { if (bridge && bridge.play) bridge.play(what); }); return {key: key}; }
-  if (kind === 'guide') { Guides.show(what); return {key: key}; }
+  if (kind === 'coach') { Guides.coach(what, function () { if (bridge && bridge.play) bridge.play(what); }); return {key: key, pad: pad}; }
+  if (kind === 'guide') { Guides.show(what); return {key: key, pad: pad}; }
   /** A game opened here starts with Kea beside it: the guide the first time, a tip after that. */
   function coached(go) { Guides.coach(first, go); }
   // A game for one asks Who's playing? first on the Family profile, so its points reach the scoreboard (ADR 0057).
   if (first === 'road' || first === 'bridge' || first === 'town') coached(function () { Scores.pick(function () { Builder.open(first); }); });
   else if (first === 'chores') coached(function () { Chores.open(); }); else if (first === 'wall') Wall.open(); else if (first === 'morning') Morning.open(); else if (first === 'week') Week.open(); else if (first === 'scores') coached(function () { Scores.open(); });
   else if (first === 'silly') Laughs.open(); else if (first === 'lunch') coached(function () { Lunch.open(); }); else if (first === 'arcade') Scores.pick(function () { Arcade.open(); }); else if (first === 'rcland') coached(function () { Scores.pick(function () { RCLand.open(); }); }); else if (first === 'candy') coached(function () { Scores.pick(function () { Candy.open(); }); }); else if (first === 'sky') SkyLook.open(); else if (first === 'lights') coached(function () { Lights.open(); }); else if (first === 'guides') Guides.list(); else Table.open();
-  return {key: key};
+  return {key: key, pad: pad};
 })();

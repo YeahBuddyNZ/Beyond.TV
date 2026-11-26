@@ -1591,6 +1591,8 @@
   document.addEventListener('keydown', function (e) {
     if (key(TV.code(e.keyCode))) e.preventDefault();
   });
+  // A phone's controller presses go the same way as the remote's (pads.js, ADR 0080).
+  if (window.Pads) Pads.to(key);
 
   /** Opens a shelf app by its key ("netflix", "plex"), for Beyond Family's remote. False if this TV hasn't got it. */
   function openShelf(name) {
