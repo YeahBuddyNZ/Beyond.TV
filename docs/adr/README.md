@@ -86,3 +86,4 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0076](0076-whats-new-on-the-tv.md) | What's new: the newest feature on the home screen, from one list on the website |
 | [0077](0077-our-week-sunday-family-recap.md) | Our week: the Sunday family recap, with a thank you for Mum |
 | [0078](0078-getting-started-on-a-new-tv.md) | Getting started on a new TV: three big-button questions, then the Drop Sky check |
+| [0079](0079-family-hq-on-the-tv.md) | The Family wall looks like Family HQ: lists, menu, notes, this week and the month, ticked and added to with the remote |

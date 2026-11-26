@@ -197,6 +197,42 @@ var Family = (function () {
     });
   }
 
+  // MARK: - Family HQ on the TV (wall.js, ADR 0079)
+
+  function hqList(kind) { return wall && wall.hq && wall.hq.lists ? wall.hq.lists[kind] || [] : []; }
+  function hqItem(id) {
+    var kinds = ['todo', 'wishlist', 'broken'];
+    for (var k = 0; k < kinds.length; k++) {
+      var list = hqList(kinds[k]);
+      for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i];
+    }
+    return null;
+  }
+
+  /** Ticks an item on one of the household's lists (To do, Would love, This is broken), or unticks it. done(ok). */
+  function tickList(id, on, done) {
+    var item = hqItem(id);
+    if (item) item.done = on;
+    call('POST', '/tv/hq/' + id + '/tick', {done: on}, function (err) {
+      if (err && item) item.done = !on;
+      done(!err);
+    });
+  }
+
+  /** Adds something to one of the household's lists from the remote. done(ok). */
+  function addToList(kind, text, done) {
+    call('POST', '/tv/hq/lists', {kind: kind, text: String(text).slice(0, 80)}, function (err, json) {
+      if (!err && json && json.item && wall && wall.hq && wall.hq.lists) {
+        var list = wall.hq.lists[kind] || (wall.hq.lists[kind] = []);
+        var open = 0;
+        while (open < list.length && !list[open].done) open++;
+        list.splice(open, 0, json.item);
+        if (window.Wall) setTimeout(Wall.changed, 0);
+      }
+      done(!err);
+    });
+  }
+
   /**
    * Tap to allow (ADR 0066): a grown-up with their own PIN lets themselves in from the Beyond Family app. The TV asks,
    * their phone shows "Is this you on the TV?", and a tap on Allow opens their profile. update(state) hears "asked",
@@ -1020,6 +1056,8 @@ var Family = (function () {
     wall: function () { return linked() ? wall : null; },
     todos: function () { return linked() ? todos : {}; },
     tickTodo: tickTodo,
-    postSticky: postSticky
+    postSticky: postSticky,
+    tickList: tickList,
+    addToList: addToList
   };
 })();

@@ -2,6 +2,15 @@
   "about": "What's new on Beyond TV, newest first. The TV reads this from GitHub Pages (ADR 0076): the newest line shows in Today at home until someone opens What's new, for three weeks at most. Add a line here with every feature people can see, in all five languages, short and plain, no em dashes. tests/whatsnew.test.js checks it.",
   "items": [
     {
+      "id": "family-hq",
+      "date": "2026-11-26",
+      "en": ["Family HQ on the TV", "The Family wall looks like Beyond Family's HQ: lists, menu, notes, this week and the month"],
+      "pt": ["A central da família na TV", "O mural da família fica como a central do Beyond Family: listas, cardápio, notas, a semana e o mês"],
+      "es": ["La central familiar en la tele", "El muro de la familia es como la central de Beyond Family: listas, menú, notas, la semana y el mes"],
+      "de": ["Familienzentrale auf dem Fernseher", "Die Familienwand wie die Zentrale in Beyond Family: Listen, Essen, Notizen, Woche, Monat"],
+      "ru": ["Семейный штаб на телевизоре", "Семейная стена как штаб в Beyond Family: списки, меню, заметки, неделя и месяц"]
+    },
+    {
       "id": "getting-started",
       "date": "2026-11-25",
       "en": ["Getting started, with the remote", "A new TV asks three easy questions, then shows a code for the Drop Sky check"],

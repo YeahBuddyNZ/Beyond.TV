@@ -16,6 +16,12 @@
   src: url('fonts/SoraVariable.ttf') format('truetype');
   font-weight: 100 800;
 }
+/* Caveat: Beyond Family's handwriting, for the Family wall's notes, calendar and month (as on Family HQ). */
+@font-face {
+  font-family: 'Caveat';
+  src: url('fonts/CaveatVariable.ttf') format('truetype');
+  font-weight: 400 700;
+}
 .display { font-family: 'Sora', 'Inter', 'LG Smart UI', 'Helvetica Neue', Arial, sans-serif; }
 
 html, body {

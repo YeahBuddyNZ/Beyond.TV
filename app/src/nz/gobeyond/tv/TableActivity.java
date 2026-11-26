@@ -193,6 +193,16 @@ public class TableActivity extends Activity {
             Family.sticky(TableActivity.this, text, colour, member, ok -> answer(n, ok));
         }
 
+        /** Ticks an item on the household's HQ lists; the answer comes back as Wall.answer(n, ok). */
+        @JavascriptInterface public void listTick(int n, String id, boolean on) {
+            Family.tickList(TableActivity.this, id, on, ok -> answer(n, ok));
+        }
+
+        /** Adds to one of the household's HQ lists; the answer comes back as Wall.answer(n, ok). */
+        @JavascriptInterface public void listAdd(int n, String kind, String text) {
+            Family.addToList(TableActivity.this, kind, text, ok -> answer(n, ok));
+        }
+
         /** The tidy-up race's places for the family scoreboard (ScoreLog, ADR 0057). */
         @JavascriptInterface public String scores() { return ScoreLog.all(TableActivity.this); }
 

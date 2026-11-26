@@ -70,5 +70,11 @@ check('an untick takes it back', Chores.give(people[0], -1) === before);
 check('never below no stars', Chores.give(people[0], -5) === 0);
 check('Family never gets stars', Chores.give(people[3], 1) === 0);
 
+// Family HQ on the TV (ADR 0079): the same cards and weeks as Beyond Family's /family/hq.
+check('HQ cards in the HQ page\'s default order', W.layout.map(function (w) { return w.key; }).join() === 'activities,todo,calendar,wishlist,menu,broken,notes');
+check('weeks start on Monday', W.mondayOf('2026-11-26') === '2026-11-23' && W.mondayOf('2026-11-23') === '2026-11-23' && W.mondayOf('2026-11-29') === '2026-11-23');
+check('days roll over months', W.addDays('2026-10-26', 41) === '2026-12-06' && W.addDays('2026-12-31', 1) === '2027-01-01');
+check('a colour, see-through', W.tint('#2F7D6D', 0.12) === 'rgba(47, 125, 109, 0.12)' && W.tint(null, 0.1) === 'rgba(34, 34, 31, 0.1)');
+
 console.log(passed + ' passed, ' + failed + ' failed');
 process.exit(failed ? 1 : 0);
