@@ -94,6 +94,27 @@ var KEYS = [37, 38, 39, 40, 13];
   check('losing does not make the robot quicker', (JSON.parse(store['btv.arcade'] || '{}').paddle || 1) === 1);
 })();
 
+// Paddle for two (ADR 0080): the first controller takes the left paddle, a second one the robot's, scores start again,
+// and beating a person never makes the robot quicker.
+(function () {
+  var g = A.make('paddle');
+  var aroha = {id: 'm1', name: 'Aroha', colour: '#D85A30'}, nikau = {id: 'm2', name: 'Nikau', colour: '#378ADD'};
+  g.keyFrom(aroha, 38);
+  check('one player plays the robot', !g.sides().right && g.sides().left.id === 'm1');
+  g.keyFrom(null, 40);
+  check('the remote takes the robot\'s paddle', g.sides().right && g.sides().right.id === 'remote');
+  g.keyFrom(nikau, 38);
+  check('a third controller waits', g.sides().right.id === 'remote' && g.sides().left.id === 'm1');
+  g.keyFrom(aroha, 13); g.keyFrom(null, 13);
+  for (var t = 0; t < 20000 && !g.over; t++) g.update();
+  check('two still paddles still finish a game', g.over);
+  check('the end names the winner', /won!/.test(g.endText()));
+  check('a two player win leaves the robot alone', (JSON.parse(store['btv.arcade'] || '{}').paddle || 1) === 1);
+  var next = A.make('paddle');
+  next.keep(g.sides());
+  check('the next game keeps both players', next.sides().right.id === 'remote');
+})();
+
 // Launch Crew: four scams and four real messages, each with words; the gauge, the stars and the lanes.
 (function () {
   var m = A.crewMessages();

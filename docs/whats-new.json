@@ -2,6 +2,15 @@
   "about": "What's new on Beyond TV, newest first. The TV reads this from GitHub Pages (ADR 0076): the newest line shows in Today at home until someone opens What's new, for three weeks at most. Add a line here with every feature people can see, in all five languages, short and plain, no em dashes. tests/whatsnew.test.js checks it.",
   "items": [
     {
+      "id": "phone-controllers",
+      "date": "2026-11-27",
+      "en": ["Phones as game controllers", "Pick up a controller in Beyond Family and play any game, or two of you in Paddle"],
+      "pt": ["Celulares viram controles", "Pegue um controle no Beyond Family e jogue qualquer jogo, ou a dois na Raquete"],
+      "es": ["Móviles como mandos", "Toma un mando en Beyond Family y juega a cualquier juego, o entre dos en Pala"],
+      "de": ["Handys als Controller", "Nimm in Beyond Family einen Controller und spiel jedes Spiel, oder zu zweit Schläger"],
+      "ru": ["Телефон как джойстик", "Возьмите джойстик в Beyond Family и играйте в любую игру, или вдвоём в Ракетку"]
+    },
+    {
       "id": "family-hq",
       "date": "2026-11-26",
       "en": ["Family HQ on the TV", "The Family wall looks like Beyond Family's HQ: lists, menu, notes, this week and the month"],

@@ -182,6 +182,9 @@ var Arcade = (function () {
     var g = {id: 'paddle', score: 0, over: false};
     var me = {y: H / 2 - PH / 2, v: 0}, robot = {y: H / 2 - PH / 2, miss: 0};
     var ball = {x: W / 2, y: H / 2, vx: 0, vy: 0}, mine = 0, theirs = 0, wait = 30, toward = 1, robotSpeed;
+    // Two players (ADR 0080): the first controller to press takes the left paddle, the remote or a phone, and a second
+    // one takes the robot's. Each is 'remote' or a phone's player from pads.js.
+    var left = null, right = null;
 
     function serve() {
       ball.x = W / 2; ball.y = H / 2;
@@ -192,17 +195,41 @@ var Arcade = (function () {
     g.how = say('Cima e baixo movem a raquete, e ela continua. OK para. O primeiro a 7 ganha, e o robô fica mais rápido toda vez que você vence.',
       'Up and down move your paddle and it keeps going. OK stops it. First to 7 wins, and the robot gets quicker each time you win.',
       'Arriba y abajo mueven la pala y sigue sola. OK la para. Gana el primero en llegar a 7, y el robot es más rápido cada vez que ganas.');
-    g.key = function (k) {
-      if (k === UP) me.v = -SPEED; else if (k === DOWN) me.v = SPEED; else if (k === OK) me.v = 0;
+    function steer(paddle, k) {
+      if (k === UP) paddle.v = -SPEED; else if (k === DOWN) paddle.v = SPEED; else if (k === OK) paddle.v = 0;
+    }
+    g.key = function (k) { g.keyFrom(null, k); };
+    /** A key from someone: null for the remote, or a phone's player {id, name, colour}. */
+    g.keyFrom = function (p, k) {
+      var id = p ? p.id : 'remote';
+      if (!left) left = {id: id, p: p};
+      else if (left.id !== id && !right && !g.over) {
+        // A second player: they take the robot's paddle and it starts again from 0 : 0.
+        right = {id: id, p: p};
+        robot.v = 0; mine = 0; theirs = 0; toward = 1; wait = 40; ball.vx = 0; ball.vy = 0; ball.x = W / 2; ball.y = H / 2;
+        sfx('point');
+        if (window.UI && UI.toast) UI.toast(say('🏓 Dois jogadores! ', '🏓 Two players! ', '🏓 ¡Dos jugadores! ') + nameOf(right) + say(' pegou a raquete do robô', " takes the robot's paddle", ' toma la pala del robot'));
+      }
+      if (left.id === id) steer(me, k);
+      else if (right && right.id === id) steer(robot, k);
     };
+    function nameOf(side) {
+      if (side && side.p && side.p.name) return side.p.name;
+      return side && side.id === 'remote' ? say('Controle', 'Remote', 'Mando') : say('Jogador', 'Player', 'Jugador');
+    }
     g.update = function () {
       var dt = TICK / 1000;
       me.y = Math.max(0, Math.min(H - PH, me.y + me.v * dt));
       if (me.y === 0 || me.y === H - PH) me.v = 0;
-      // The robot follows the ball when it is coming, and drifts back to the middle when it isn't.
-      var aim = ball.vx > 0 ? ball.y + robot.miss - PH / 2 : H / 2 - PH / 2, d = aim - robot.y, step = robotSpeed * dt;
-      robot.y += Math.max(-step, Math.min(step, d));
-      robot.y = Math.max(0, Math.min(H - PH, robot.y));
+      if (right) {
+        robot.y = Math.max(0, Math.min(H - PH, robot.y + (robot.v || 0) * dt));
+        if (robot.y === 0 || robot.y === H - PH) robot.v = 0;
+      } else {
+        // The robot follows the ball when it is coming, and drifts back to the middle when it isn't.
+        var aim = ball.vx > 0 ? ball.y + robot.miss - PH / 2 : H / 2 - PH / 2, d = aim - robot.y, step = robotSpeed * dt;
+        robot.y += Math.max(-step, Math.min(step, d));
+        robot.y = Math.max(0, Math.min(H - PH, robot.y));
+      }
       if (wait > 0) { wait--; if (wait === 0) serve(); return; }
       ball.x += ball.vx * dt; ball.y += ball.vy * dt;
       if (ball.y < R) { ball.y = R; ball.vy = Math.abs(ball.vy); sfx('hop'); }
@@ -219,7 +246,8 @@ var Arcade = (function () {
       if (mine >= TARGET || theirs >= TARGET) {
         g.over = true;
         g.won = mine > theirs;
-        if (g.won) { level++; saveBest('paddle', level); }
+        // Beating a person doesn't make the robot quicker.
+        if (g.won && !right) { level++; saveBest('paddle', level); }
       }
     };
     g.draw = function () {
@@ -228,16 +256,24 @@ var Arcade = (function () {
       for (var y = 10; y < H; y += 40) c2.fillRect(W / 2 - 3, y, 6, 22);
       text(String(mine), W / 2 - 110, 70, 80, 'rgba(247,246,242,0.35)', 'center', '800');
       text(String(theirs), W / 2 + 110, 70, 80, 'rgba(247,246,242,0.35)', 'center', '800');
-      c2.fillStyle = MOSS; rr(40, me.y, PW, PH, 8); c2.fill();
-      c2.fillStyle = CORAL; rr(W - 40 - PW, robot.y, PW, PH, 8); c2.fill();
+      if (right) {
+        text(nameOf(left), W / 2 - 110, 112, 28, 'rgba(247,246,242,0.55)', 'center', '700');
+        text(nameOf(right), W / 2 + 110, 112, 28, 'rgba(247,246,242,0.55)', 'center', '700');
+      }
+      c2.fillStyle = left && left.p ? left.p.colour : MOSS; rr(40, me.y, PW, PH, 8); c2.fill();
+      c2.fillStyle = right && right.p ? right.p.colour : CORAL; rr(W - 40 - PW, robot.y, PW, PH, 8); c2.fill();
       disc(ball.x, ball.y, R, EMBER);
     };
     g.endText = function () {
+      if (right) return (g.won ? nameOf(left) : nameOf(right)) + say(' ganhou! OK para jogar de novo.', ' won! OK to play again.', ' ganó. OK para jugar otra vez.');
       return g.won ? say('Você ganhou! O robô vai ficar mais rápido.', 'You won! The robot will be quicker next time.', '¡Ganaste! El robot será más rápido la próxima vez.')
         : say('O robô ganhou. Tente de novo!', 'The robot won. Have another go!', 'Ganó el robot. ¡Otra vez!');
     };
     g.scoreText = function () { return mine + ' : ' + theirs; };
-    g.bestText = function () { return say('Nível do robô ', 'Robot level ', 'Nivel del robot ') + level; };
+    g.bestText = function () { return right ? say('Dois jogadores', 'Two players', 'Dos jugadores') : say('Nível do robô ', 'Robot level ', 'Nivel del robot ') + level; };
+    /** Who plays carries over to the next game, so OK after a two player game is another two player game. */
+    g.sides = function () { return {left: left, right: right}; };
+    g.keep = function (sides) { if (sides) { left = sides.left; right = sides.right; } };
     return g;
   }
 
@@ -913,9 +949,14 @@ var Arcade = (function () {
           else if (k === DOWN && window.Guides) Guides.show(spec.id);
           return true;
         }
-        if (state === 'over') { if (k === OK) { begin(spec); state = 'play'; } return true; }
+        if (state === 'over') {
+          if (k === OK) { var sides = g.sides ? g.sides() : null; begin(spec); if (g.keep) g.keep(sides); state = 'play'; }
+          return true;
+        }
         if (k === OK && g.okPauses) { state = 'paused'; return true; }
-        g.key(k);
+        // Who pressed: a phone controller (pads.js, ADR 0080) or the remote.
+        if (g.keyFrom) g.keyFrom(window.Pads ? Pads.from() : null, k);
+        else g.key(k);
         return true;
       },
       back: function () {

@@ -513,6 +513,8 @@ var Family = (function () {
     if (c.kind === 'karaoke-set') { hide(); Party.stop(); Karaoke.play(c.turns || [], {name: c.playlist}); return; }
     if (c.kind && c.kind.indexOf('question') === 0) { dinner(c); return; }
     if (c.kind && c.kind.indexOf('quiz') === 0) { quiz(c); return; }
+    // A phone as a game controller (pads.js, ADR 0080): the same as the remote's key, and the game can tell who pressed.
+    if (c.kind === 'pad') { if (window.Pads) Pads.press(c); return; }
     if (c.kind === 'key' && shown) { if (c.key === 'ok') hide(); return; }  // a message waits for OK, from the phone too
     if (c.kind === 'key') {
       if (c.key === 'home') { UI.closeAll(); BeyondTV.home(); return; }
