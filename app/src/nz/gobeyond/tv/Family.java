@@ -755,9 +755,12 @@ final class Family {
     /** Each person's to-dos for today by member id: {member: [{id, title, done, points}]}. */
     private static volatile JSONObject todos = new JSONObject();
     private static volatile String wallSeen = "";
+    /** The household's name, for the top of the Family wall (as on Family HQ). */
+    private static volatile String wallName = "";
 
     private static void wallFrom(JSONObject home) {
         JSONObject w = home == null ? null : home.optJSONObject("wall");
+        wallName = home == null ? "" : home.optString("name", "");
         JSONObject t = new JSONObject();
         JSONArray people = home == null ? null : home.optJSONArray("people");
         for (int i = 0; people != null && i < people.length(); i++) {
@@ -778,7 +781,7 @@ final class Family {
     /** Whether the wall has anything up, or anybody has to-dos: the home screen's wall button shows then. */
     static boolean hasWall() {
         JSONObject w = wall;
-        return todos.length() > 0 || (w != null && (w.optJSONArray("stickies") != null && w.optJSONArray("stickies").length() > 0
+        return todos.length() > 0 || (w != null && (w.optJSONObject("hq") != null || w.optJSONArray("stickies") != null && w.optJSONArray("stickies").length() > 0
                 || w.optJSONArray("wins") != null && w.optJSONArray("wins").length() > 0));
     }
 
@@ -801,10 +804,10 @@ final class Family {
         return null;
     }
 
-    /** What web/wall.js reads in TableActivity: {wall, todos}. */
+    /** What web/wall.js reads in TableActivity: {wall, todos, name}. */
     static String wallJson() {
         try {
-            return new JSONObject().put("wall", wall == null ? JSONObject.NULL : wall).put("todos", todos).toString();
+            return new JSONObject().put("wall", wall == null ? JSONObject.NULL : wall).put("todos", todos).put("name", wallName).toString();
         } catch (JSONException e) {
             return "{}";
         }
@@ -866,6 +869,63 @@ final class Family {
             final boolean went = ok;
             if (done != null) MAIN.post(() -> done.accept(went));
         }, "beyond-family-sticky").start();
+    }
+
+    // MARK: - Family HQ on the TV (web/wall.js, ADR 0079)
+
+    /** Ticks an item on one of the household's HQ lists, or unticks it. `done` on the main thread with whether it went. */
+    static void tickList(Context c, String id, boolean on, java.util.function.Consumer<Boolean> done) {
+        final Context app = c.getApplicationContext();
+        new Thread(() -> {
+            boolean ok;
+            try {
+                call(app, "POST", "/tv/hq/" + android.net.Uri.encode(id) + "/tick", new JSONObject().put("done", on), 15_000);
+                ok = true;
+                // Kept here too, so the wall opened again before the next sync shows the tick.
+                JSONObject w = wall, hq = w == null ? null : w.optJSONObject("hq"), lists = hq == null ? null : hq.optJSONObject("lists");
+                for (String kind : new String[] {"todo", "wishlist", "broken"}) {
+                    JSONArray list = lists == null ? null : lists.optJSONArray(kind);
+                    for (int i = 0; list != null && i < list.length(); i++) {
+                        JSONObject item = list.optJSONObject(i);
+                        if (item != null && id.equals(item.optString("id"))) item.put("done", on);
+                    }
+                }
+            } catch (Throwable t) {
+                ok = false;
+            }
+            final boolean went = ok;
+            if (done != null) MAIN.post(() -> done.accept(went));
+        }, "beyond-family-list-tick").start();
+    }
+
+    /** Adds something to one of the household's HQ lists from the remote. `done` on the main thread with whether it went. */
+    static void addToList(Context c, String kind, String text, java.util.function.Consumer<Boolean> done) {
+        final Context app = c.getApplicationContext();
+        new Thread(() -> {
+            boolean ok;
+            try {
+                JSONObject res = call(app, "POST", "/tv/hq/lists", new JSONObject().put("kind", kind).put("text", text.length() > 80 ? text.substring(0, 80) : text), 15_000);
+                ok = true;
+                // Up on the list straight away, after the ones still to do, rather than at the next sync.
+                JSONObject item = res == null ? null : res.optJSONObject("item");
+                JSONObject w = wall, hq = w == null ? null : w.optJSONObject("hq"), lists = hq == null ? null : hq.optJSONObject("lists");
+                if (item != null && lists != null) {
+                    JSONArray list = lists.optJSONArray(kind), out = new JSONArray();
+                    boolean put = false;
+                    for (int i = 0; list != null && i < list.length(); i++) {
+                        JSONObject x = list.optJSONObject(i);
+                        if (!put && x != null && x.optBoolean("done")) { out.put(item); put = true; }
+                        out.put(x);
+                    }
+                    if (!put) out.put(item);
+                    lists.put(kind, out);
+                }
+            } catch (Throwable t) {
+                ok = false;
+            }
+            final boolean went = ok;
+            if (done != null) MAIN.post(() -> done.accept(went));
+        }, "beyond-family-list-add").start();
     }
 
     private static java.util.Map<String, List<String>> likesOf(JSONArray people) {
