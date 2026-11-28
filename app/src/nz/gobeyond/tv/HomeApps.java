@@ -444,14 +444,24 @@ final class HomeApps {
             return true;
         } catch (ActivityNotFoundException | SecurityException e) {
             AppLog.here("couldn't open " + it.label + ": " + e.getMessage());
-            if (plain == null || plain == intent) return false;
-            plain.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            try {
-                a.startActivity(plain);
-                return true;
-            } catch (ActivityNotFoundException | SecurityException e2) {
-                return false;
+            AppLog.w("open: " + e.getClass().getSimpleName());
+            // The title's page wouldn't open: the app's home. The app's TV entry wouldn't: its phone one (ADR 0081).
+            List<Intent> next = new ArrayList<>();
+            if (plain != null && plain != intent) next.add(plain);
+            if (it.kind == APP && it.pkg != null) {
+                Intent phone = a.getPackageManager().getLaunchIntentForPackage(it.pkg);
+                if (phone != null) next.add(phone);
             }
+            for (Intent again : next) {
+                again.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                try {
+                    a.startActivity(again);
+                    return true;
+                } catch (ActivityNotFoundException | SecurityException e2) {
+                    AppLog.w("open again: " + e2.getClass().getSimpleName());
+                }
+            }
+            return false;
         }
     }
 
@@ -542,7 +552,30 @@ final class HomeApps {
 
     static Intent launchIntent(PackageManager pm, String pkg) {
         Intent intent = pm.getLeanbackLaunchIntentForPackage(pkg);
-        return intent != null ? intent : pm.getLaunchIntentForPackage(pkg);
+        if (intent == null) intent = pm.getLaunchIntentForPackage(pkg);
+        return intent != null ? intent : anyLaunch(pm, pkg);
+    }
+
+    /**
+     * The app's own TV or phone entry, found by asking for it (ADR 0081). Some builds of the big streaming apps on
+     * older Android TVs answer neither shortcut above, and their card then vanished from the shelf.
+     */
+    private static Intent anyLaunch(PackageManager pm, String pkg) {
+        for (String category : new String[] {Intent.CATEGORY_LEANBACK_LAUNCHER, Intent.CATEGORY_LAUNCHER}) {
+            Intent ask = new Intent(Intent.ACTION_MAIN).addCategory(category).setPackage(pkg);
+            List<ResolveInfo> found;
+            try {
+                found = pm.queryIntentActivities(ask, 0);
+            } catch (RuntimeException e) {
+                continue;
+            }
+            for (ResolveInfo ri : found) {
+                if (ri.activityInfo == null || !ri.activityInfo.exported || !ri.activityInfo.enabled) continue;
+                return new Intent(Intent.ACTION_MAIN).addCategory(category)
+                        .setComponent(new ComponentName(ri.activityInfo.packageName, ri.activityInfo.name));
+            }
+        }
+        return null;
     }
 
     // MARK: - Colored logos (shelf)
