@@ -88,3 +88,4 @@ Each file is one decision: what we chose, why, and what it rules out. Short, pla
 | [0078](0078-getting-started-on-a-new-tv.md) | Getting started on a new TV: three big-button questions, then the Drop Sky check |
 | [0079](0079-family-hq-on-the-tv.md) | The Family wall looks like Family HQ: lists, menu, notes, this week and the month, ticked and added to with the remote |
 | [0080](0080-phone-game-controllers.md) | Phones as game controllers beside the remote: A is OK, B is Back, and Paddle for two |
+| [0081](0081-streaming-apps-always-open.md) | Netflix, Disney+ and the other streaming apps always open: Sony's app buttons open them, and a missing launcher is looked for |

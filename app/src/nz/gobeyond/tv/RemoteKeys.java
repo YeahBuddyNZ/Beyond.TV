@@ -48,7 +48,10 @@ final class RemoteKeys {
                 || (source & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK) return false;
         int keyCode = e.getKeyCode() == KEY_YOUTUBE_TCL ? Prefs.KEY_YOUTUBE : e.getKeyCode();
         // Sony sends BUTTON_9 for five app buttons (BUTTON_4 for Netflix): only the scan code tells them apart.
-        if (SONY && (keyCode == KeyEvent.KEYCODE_BUTTON_4 || keyCode == KeyEvent.KEYCODE_BUTTON_9)) {
+        // BUTTON_4 is only ever Netflix, so older remotes with another scan code for it still count (ADR 0081).
+        if (SONY && keyCode == KeyEvent.KEYCODE_BUTTON_4) {
+            keyCode = Prefs.KEY_SONY_NETFLIX;
+        } else if (SONY && keyCode == KeyEvent.KEYCODE_BUTTON_9) {
             keyCode = Prefs.SONY_KEY + e.getScanCode();
         }
         boolean ours = false;
@@ -56,10 +59,16 @@ final class RemoteKeys {
         if (!ours) return false;
         String pkg = Prefs.keyApp(keyCode);
         if (pkg.isEmpty()) return false;   // "Nothing": the key goes on as if we weren't here
+        Intent intent = launchIntent(c.getPackageManager(), pkg);
+        // Not on this TV: the key goes on to the TV, as if we weren't here, rather than doing nothing.
+        if (intent == null) return false;
         if (e.getAction() == KeyEvent.ACTION_DOWN && e.getRepeatCount() == 0) {
-            Intent intent = launchIntent(c.getPackageManager(), pkg);
-            AppLog.here("remote key " + e.getKeyCode() + " -> " + pkg + (intent == null ? " (not installed)" : ""));
-            if (intent != null) c.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            AppLog.here("remote key " + e.getKeyCode() + " -> " + pkg);
+            try {
+                c.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            } catch (RuntimeException ex) {
+                AppLog.w("remote key: " + ex.getClass().getSimpleName());
+            }
         }
         return true;
     }

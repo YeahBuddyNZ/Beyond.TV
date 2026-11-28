@@ -197,6 +197,12 @@ final class Prefs {
             case KEY_YOUTUBE: return "com.google.android.youtube.tv";
             case KEY_PRIME: return "com.amazon.amazonvideo.livingroom";
             case KEY_TCL_CHANNEL: return "";
+            // Sony (ADR 0081): with the TV's own home screen off, some BRAVIAs (2015, Android 8) leave these buttons
+            // with nobody to answer them, so we open the app ourselves. "Sony default" still hands a key back.
+            case KEY_SONY_NETFLIX: return "com.netflix.ninja";
+            case KEY_SONY_DISNEY: return "com.disney.disneyplus";
+            case KEY_SONY_PRIME: return "com.amazon.amazonvideo.livingroom";
+            case KEY_SONY_YOUTUBE: return "com.google.android.youtube.tv";
             default: return "";
         }
     }
